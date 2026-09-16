@@ -25,12 +25,12 @@
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen pb-12">
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen pb-12" style="background: linear-gradient(rgba(2, 6, 23, 0.92), rgba(2, 6, 23, 0.96)), url('VISION.png') center/cover fixed no-repeat;">
 
     <!-- BANNIÈRE INSTALLATION PWA -->
     <div id="pwa-install-banner" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-slate-900 border border-emerald-500/50 text-slate-100 p-3 rounded-2xl shadow-2xl flex items-center gap-3 z-[100] w-[90%] max-w-sm hidden no-print">
         <div class="w-10 h-10 rounded-xl overflow-hidden shadow-md flex items-center justify-center bg-slate-950 flex-shrink-0">
-            <img src="logo%20192x192.png" alt="Logo" class="w-full h-full object-cover scale-[2.2]">
+            <img src="logo%20192x192.png" alt="Logo" class="w-full h-full object-cover" style="transform: scale(3.5); transform-origin: center;">
         </div>
         <div class="flex-1">
             <p class="text-[11px] font-black text-emerald-400">Installer TransVision</p>
@@ -41,7 +41,7 @@
     </div>
 
     <!-- SELECTEUR D'ÉTATS POUR TESTS (Masqué à l'impression) -->
-    <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-4 max-w-md mx-auto no-print">
+    <div class="bg-slate-900/90 backdrop-blur border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-4 max-w-md mx-auto no-print">
         <span class="text-[10px] font-bold text-emerald-400">🛠️ DEV CONTROL :</span>
         <div class="flex gap-1.5 font-mono">
             <button onclick="naviguerVers('page-auth')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[9px] px-2 py-1 rounded-lg">Déco</button>
@@ -50,8 +50,8 @@
         </div>
     </div>
 
-    <!-- MAQUETTE MOBILE PRINCIPALE -->
-    <div class="max-w-md mx-auto bg-slate-900 min-h-[850px] shadow-2xl relative overflow-hidden flex flex-col border-x border-slate-800 pb-16 print:border-none print:shadow-none print:bg-white" id="zone-flotte">
+    <!-- MAQUETTE MOBILE PRINCIPALE AVEC FOND VISION.PNG -->
+    <div class="max-w-md mx-auto min-h-[850px] shadow-2xl relative overflow-hidden flex flex-col border-x border-slate-800 pb-16 print:border-none print:shadow-none" id="zone-flotte" style="background: linear-gradient(rgba(15, 23, 42, 0.88), rgba(2, 6, 23, 0.94)), url('VISION.png') center/cover no-repeat;">
         
         <!-- ÉCRAN DE BLOCAGE -->
         <div id="ecran-bloque" class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden no-print">
@@ -67,17 +67,17 @@
         <div id="page-auth" class="p-6 space-y-5 flex-1 flex flex-col justify-between no-print overflow-y-auto">
             <div class="space-y-4 mt-1">
                 <div class="text-center">
-                    <!-- LOGO QUI COUVRE ENTIÈREMENT SA ZONE SANS BORDURES BLANCHES -->
-                    <div class="w-20 h-20 mx-auto mb-3 rounded-2xl overflow-hidden shadow-xl shadow-emerald-500/25 border border-emerald-500/30 flex items-center justify-center bg-slate-950">
-                        <img src="logo%20192x192.png" alt="Logo TransVision" class="w-full h-full object-cover scale-[2.2]">
+                    <!-- LOGO CADRÉ À 100% SANS BORDURES BLANCHES GAUCHE/DROITE -->
+                    <div class="w-20 h-20 mx-auto mb-3 rounded-2xl overflow-hidden shadow-2xl shadow-emerald-500/25 border border-emerald-500/40 flex items-center justify-center bg-slate-950">
+                        <img src="logo%20192x192.png" alt="Logo TransVision" class="w-full h-full object-cover" style="transform: scale(3.5); transform-origin: center;">
                     </div>
                     <h2 class="text-xl font-black tracking-wide">TransVision</h2>
                     <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">by Global Tech Solutions</p>
-                    <p class="text-[9px] text-slate-400 mt-0.5 italic">La clarté sur vos recettes.</p>
+                    <p class="text-[9px] text-slate-300 mt-0.5 italic">La clarté sur vos recettes.</p>
                 </div>
 
                 <!-- BASCULE CONNEXION / INSCRIPTION -->
-                <div class="grid grid-cols-2 gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                <div class="grid grid-cols-2 gap-1 bg-slate-950/80 backdrop-blur p-1 rounded-xl border border-slate-800">
                     <button id="tab-btn-login" onclick="basculerVueAuth('login')" class="py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950">
                         <i class="fa-solid fa-right-to-bracket mr-1"></i> Connexion
                     </button>
@@ -87,19 +87,19 @@
                 </div>
 
                 <!-- VUE CONNEXION -->
-                <div id="form-connexion" class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-4 shadow-xl">
+                <div id="form-connexion" class="bg-slate-950/90 backdrop-blur p-5 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
                     <div class="border-b border-slate-800 pb-2">
                         <h3 class="text-xs font-extrabold text-slate-200 uppercase tracking-wider">Accès Espace Partenaire</h3>
-                        <p class="text-[10px] text-slate-500">Renseignez votre numéro pour retrouver vos véhicules.</p>
+                        <p class="text-[10px] text-slate-400">Renseignez votre numéro pour retrouver vos véhicules.</p>
                     </div>
 
                     <div>
-                        <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Téléphone Enregistré</label>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Téléphone Enregistré</label>
                         <input type="tel" id="login-tel" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-mono font-bold" placeholder="+243..." value="+243812345678">
                     </div>
 
                     <div>
-                        <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Code PIN Sécurité</label>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Code PIN Sécurité</label>
                         <input type="password" id="login-pin" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-mono" placeholder="4 chiffres (optionnel)">
                     </div>
 
@@ -109,7 +109,7 @@
                 </div>
 
                 <!-- VUE INSCRIPTION -->
-                <div id="form-inscription" class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-3 shadow-xl hidden">
+                <div id="form-inscription" class="bg-slate-950/90 backdrop-blur p-4 rounded-2xl border border-slate-800 space-y-3 shadow-xl hidden">
                     <h3 class="text-xs font-extrabold text-emerald-400 uppercase tracking-widest">Type d'Usage</h3>
                     <div>
                         <select id="ins-projet" onchange="adapterFormulaireInscription()" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-bold">
@@ -120,23 +120,23 @@
 
                     <h3 class="text-xs font-extrabold text-slate-300 uppercase tracking-widest mt-3 pt-3 border-t border-slate-800">Profil Propriétaire</h3>
                     <div>
-                        <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nom Complet</label>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nom Complet</label>
                         <input type="text" id="ins-nom" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-2.5 text-xs text-slate-200" placeholder="Ex: Jean Mukendi" value="Jean Mukendi">
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Téléphone RDC</label>
+                            <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Téléphone RDC</label>
                             <input type="tel" id="ins-tel" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-2.5 text-xs text-slate-200" value="+243812345678">
                         </div>
                         <div>
-                            <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Commune</label>
+                            <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Commune</label>
                             <select id="ins-commune" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-2.5 text-xs text-slate-200 font-bold conteneur-communes"></select>
                         </div>
                     </div>
                     
                     <!-- COMMISSION FORFAITAIRE JOURNALIÈRE OU MENSUELLE -->
                     <div id="bloc-facturation">
-                        <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1 mt-2">Commission Forfaitaire</label>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 mt-2">Commission Forfaitaire</label>
                         <select id="ins-type-facturation" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-2.5 text-xs text-slate-200 font-bold">
                             <option value="jour">Forfait Journalier (Par jour d'activité)</option>
                             <option value="mois">Forfait Mensuel (Par mois)</option>
@@ -147,21 +147,21 @@
                         Créer mon Compte
                     </button>
 
-                    <p class="text-[10px] text-slate-500 text-center mt-2">
+                    <p class="text-[10px] text-slate-400 text-center mt-2">
                         En créant un compte, vous acceptez nos 
                         <button type="button" onclick="ouvrirModalCGU()" class="text-emerald-400 font-bold underline hover:text-emerald-300">CGU & Conditions</button>.
                     </p>
                 </div>
             </div>
             
-            <div class="text-center py-2 text-[9px] font-mono text-slate-600 border-t border-slate-850/50">
-                TransVision v14.1 — by <span class="text-slate-400 font-bold">Global Tech Solutions</span>
+            <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
+                TransVision v14.1 — by <span class="text-slate-200 font-bold">Global Tech Solutions</span>
             </div>
         </div>
 
         <!-- 2. APPLICATION MOBILE PRINCIPALE (CONNECTÉE) -->
         <div id="app-proprietaire" class="flex-1 flex flex-col hidden relative">
-            <header class="p-5 border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-20 no-print">
+            <header class="p-5 border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-20 no-print">
                 <div class="flex justify-between items-center mb-4">
                     <div>
                         <div class="flex items-center gap-1.5">
@@ -170,19 +170,19 @@
                         </div>
                         <div class="flex items-center gap-1.5 mt-0.5">
                             <span id="badge-projet" class="text-[9px] bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider inline-block">TransVision</span>
-                            <span class="text-[8px] text-slate-500 font-mono">by Global Tech Solutions</span>
+                            <span class="text-[8px] text-slate-400 font-mono">by Global Tech Solutions</span>
                         </div>
                     </div>
-                    <!-- LOGO HEADER CADRÉ SANS MARGES BLANCHES -->
+                    <!-- LOGO HEADER CADRÉ -->
                     <div class="w-9 h-9 rounded-xl overflow-hidden border border-slate-700 shadow-md flex items-center justify-center bg-slate-950 flex-shrink-0">
-                        <img src="logo%20192x192.png" alt="Logo" class="w-full h-full object-cover scale-[2.2]">
+                        <img src="logo%20192x192.png" alt="Logo" class="w-full h-full object-cover" style="transform: scale(3.5); transform-origin: center;">
                     </div>
                 </div>
 
-                <div id="bloc-header-finance" class="bg-slate-950 p-4 rounded-2xl border border-slate-850 shadow-inner">
+                <div id="bloc-header-finance" class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800 shadow-inner">
                     <div class="flex justify-between items-end">
                         <div>
-                            <p class="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">Portefeuille Unique</p>
+                            <p class="text-[9px] text-slate-400 uppercase font-black tracking-widest mb-1">Portefeuille Unique</p>
                             <span id="lbl-solde-valeur" class="text-2xl font-black text-slate-100">32 500 <span class="text-emerald-400 text-sm">CDF</span></span>
                         </div>
                         <button onclick="ouvrirModalGestion()" class="bg-emerald-500 text-slate-950 font-black text-[11px] px-4 py-2.5 rounded-xl flex items-center gap-1 shadow-lg shadow-emerald-500/10">
@@ -196,23 +196,23 @@
             <div id="onglet-flotte" class="p-4 space-y-4 blur-transition class-onglet no-print pb-32">
                 <div class="flex justify-between items-center">
                     <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ma Flotte (<span id="txt-compteur-vehicules">0</span>)</h2>
-                    <span class="text-[10px] text-slate-500"><i class="fa-solid fa-signal mr-1"></i>SinoTrack Live</span>
+                    <span class="text-[10px] text-slate-400"><i class="fa-solid fa-signal mr-1 text-emerald-400 animate-pulse"></i>SinoTrack Live</span>
                 </div>
                 <div id="conteneur-vehicules-actifs" class="space-y-4"></div>
             </div>
 
             <!-- ONGLET AJOUT VÉHICULE -->
             <div id="onglet-ajouter" class="p-5 space-y-4 class-onglet hidden no-print pb-32">
-                <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-4 shadow-xl">
+                <div class="bg-slate-950/90 backdrop-blur p-5 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
                     <h3 class="text-sm font-black text-slate-200 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-square-plus text-emerald-400"></i> Enregistrer un Véhicule</h3>
                     <div class="space-y-3">
                         <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Plaque</label>
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Plaque</label>
                                 <input type="text" id="add-plaque" class="w-full bg-slate-900 border border-slate-800 focus:outline-none focus:border-emerald-500 rounded-xl p-2.5 text-xs text-slate-200" placeholder="Ex: KIN 4082AE">
                             </div>
                             <div>
-                                <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Type</label>
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Type</label>
                                 <select id="add-type" class="w-full bg-slate-900 border border-slate-800 focus:outline-none focus:border-emerald-500 rounded-xl p-2.5 text-xs text-slate-200">
                                     <option value="Mini-bus Mercedes 207">Mercedes 207</option>
                                     <option value="Taxi Classique Ketch">Taxi Ketch</option>
@@ -225,13 +225,13 @@
 
                         <div id="bloc-form-itineraire" class="grid grid-cols-2 gap-2 p-2 border border-slate-800 rounded-xl bg-slate-900/50">
                             <div>
-                                <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Point d'Origine</label>
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Point d'Origine</label>
                                 <select id="add-origine" class="w-full bg-slate-900 border border-slate-800 focus:outline-none focus:border-emerald-500 rounded-xl p-2.5 text-[10px] text-slate-200 font-bold text-emerald-400">
                                     <option value="Global">Détection (Global) 🌐</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Point de Destination</label>
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Point de Destination</label>
                                 <select id="add-destination" class="w-full bg-slate-900 border border-slate-800 focus:outline-none focus:border-emerald-500 rounded-xl p-2.5 text-[10px] text-slate-200 font-bold text-emerald-400">
                                     <option value="Global">Détection (Global) 🌐</option>
                                 </select>
@@ -240,11 +240,11 @@
 
                         <div class="grid grid-cols-2 gap-2">
                             <div id="bloc-form-places">
-                                <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Places Assises</label>
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Places Assises</label>
                                 <input type="number" id="add-places" class="w-full bg-slate-900 border border-slate-850 focus:outline-none focus:border-emerald-500 rounded-xl p-2.5 text-xs text-slate-200" placeholder="Ex: 18" value="18">
                             </div>
                             <div class="col-span-2">
-                                <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Numéro IMEI SinoTrack</label>
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Numéro IMEI SinoTrack</label>
                                 <input type="text" id="add-imei" class="w-full bg-slate-900 border border-slate-800 focus:outline-none focus:border-emerald-500 rounded-xl p-3 text-xs text-slate-200 font-mono" placeholder="Ex: 865241092837401">
                             </div>
                         </div>
@@ -260,16 +260,16 @@
                     <div id="badge-filtre-analyse" class="text-[9px] bg-slate-800 text-slate-400 font-bold px-2 py-0.5 rounded flex items-center gap-1"><span>Vue Globale Flotte</span></div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-1">
-                        <span class="text-[9px] text-slate-500 uppercase font-black">Recettes Target</span>
+                    <div class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800 space-y-1">
+                        <span class="text-[9px] text-slate-400 uppercase font-black">Recettes Target</span>
                         <p id="an-recettes" class="text-lg font-black text-emerald-400">0 CDF</p>
                     </div>
-                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-1">
-                        <span class="text-[9px] text-slate-500 uppercase font-black">Trajets Validés</span>
+                    <div class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800 space-y-1">
+                        <span class="text-[9px] text-slate-400 uppercase font-black">Trajets Validés</span>
                         <p id="an-rotations" class="text-lg font-black text-slate-100">0 rot.</p>
                     </div>
                 </div>
-                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-3">
+                <div class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800 space-y-3">
                     <div class="flex justify-between items-center">
                         <h4 class="text-xs font-black uppercase text-slate-200">Rendement Flotte</h4>
                     </div>
@@ -283,9 +283,9 @@
                     <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rapport de Mouvements</h2>
                     <button onclick="window.print()" class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded flex items-center gap-1 hover:bg-emerald-500/20"><i class="fa-solid fa-print"></i> PDF</button>
                 </div>
-                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-2.5 print-clean">
+                <div class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800 space-y-2.5 print-clean">
                     <h3 class="text-xs font-black uppercase text-slate-200 flex items-center gap-1.5 print-text"><i class="fa-solid fa-satellite-dish text-indigo-400 no-print"></i> Diagnostic Matériel</h3>
-                    <div class="grid grid-cols-2 gap-2 text-[10px] font-mono text-slate-400 bg-slate-900 p-3 rounded-xl border border-slate-850 print-clean print-text">
+                    <div class="grid grid-cols-2 gap-2 text-[10px] font-mono text-slate-400 bg-slate-900/80 p-3 rounded-xl border border-slate-800 print-clean print-text">
                         <div class="space-y-1">
                             <p>🔌 Traceur : <span class="text-emerald-500 font-bold">En Ligne</span></p>
                             <p>🔋 Batterie : <span class="text-emerald-500 font-bold">12.6V</span></p>
@@ -306,7 +306,7 @@
                     <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mon Profil & Sécurité</h2>
                     <span class="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-mono font-bold">ID: #TV-9021</span>
                 </div>
-                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-3 shadow-xl">
+                <div class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800 space-y-3 shadow-xl">
                     <button onclick="ouvrirModalCGU()" class="w-full bg-slate-900 border border-slate-800 hover:border-emerald-500/50 text-slate-300 font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2">
                         <i class="fa-solid fa-file-contract text-emerald-400"></i> Consulter les CGU
                     </button>
@@ -315,12 +315,12 @@
             </div>
 
             <!-- FOOTER MENTION PRO -->
-            <div class="text-center py-3 text-[9px] font-mono text-slate-600 border-t border-slate-850/50 mt-4 no-print">
-                TransVision v14.1 — by <span class="text-slate-400 font-bold">Global Tech Solutions</span>
+            <div class="text-center py-3 text-[9px] font-mono text-slate-400 border-t border-slate-800/80 mt-4 no-print">
+                TransVision v14.1 — by <span class="text-slate-200 font-bold">Global Tech Solutions</span>
             </div>
 
             <!-- BARRE DE NAVIGATION BASSE -->
-            <nav class="absolute bottom-0 inset-x-0 bg-slate-950 border-t border-slate-800 h-16 flex justify-around items-center z-40 no-print px-1">
+            <nav class="absolute bottom-0 inset-x-0 bg-slate-950/95 backdrop-blur border-t border-slate-800 h-16 flex justify-around items-center z-40 no-print px-1">
                 <button onclick="changerOnglet('onglet-flotte', this)" class="flex flex-col items-center justify-center gap-1 text-emerald-400 btn-nav flex-1">
                     <i class="fa-solid fa-bus text-sm"></i><span class="text-[7px] font-bold whitespace-nowrap">Flotte</span>
                 </button>
@@ -427,7 +427,7 @@
             tel: "+243812345678",
             commune: "Gombe",
             projet: "transvision",
-            mode: "jour", // 'jour' ou 'mois'
+            mode: "jour",
             solde: 32500,
             vehicules: [
                 { plaque: "KIN 4082AE", type: "Mini-bus Mercedes 207", places: 18, imei: "865241092837401", rotations: 12, itineraire: "GARE CENTRALE — UPN", moteurCoupe: false }
@@ -583,7 +583,7 @@
                 }
 
                 const carteHtml = `
-                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850">
+                    <div class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800">
                         <div>
                             <span class="text-[9px] font-black bg-slate-800 text-slate-300 px-2 py-0.5 rounded uppercase">${v.type}</span>
                             <h3 class="text-base font-black mt-1 text-slate-100">${v.plaque}</h3>
