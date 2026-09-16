@@ -2,8 +2,15 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TransVision / CarVision — Espace Propriétaire (V14)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TransVision by Global Tech Solutions — Espace Partenaire</title>
+    
+    <!-- PWA & Métadonnées -->
+    <link rel="icon" type="image/png" href="logo%20192x192.png">
+    <link rel="apple-touch-icon" href="logo%20192x192.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#020617">
+
     <!-- Tailwind CSS & FontAwesome -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -19,6 +26,17 @@
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans min-h-screen pb-12">
+
+    <!-- BANNIÈRE INSTALLATION PWA -->
+    <div id="pwa-install-banner" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-slate-900 border border-emerald-500/50 text-slate-100 p-3 rounded-2xl shadow-2xl flex items-center gap-3 z-[100] w-[90%] max-w-sm hidden no-print">
+        <img src="logo%20192x192.png" alt="Logo" class="w-10 h-10 rounded-xl shadow-md">
+        <div class="flex-1">
+            <p class="text-[11px] font-black text-emerald-400">Installer TransVision</p>
+            <p class="text-[9px] text-slate-400">by Global Tech Solutions</p>
+        </div>
+        <button id="btn-install-pwa" class="bg-emerald-500 text-slate-950 font-black text-[10px] px-3 py-2 rounded-xl">Installer</button>
+        <button onclick="document.getElementById('pwa-install-banner').classList.add('hidden')" class="text-slate-500 px-2"><i class="fa-solid fa-xmark"></i></button>
+    </div>
 
     <!-- SELECTEUR D'ÉTATS POUR TESTS (Masqué à l'impression) -->
     <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-4 max-w-md mx-auto no-print">
@@ -39,19 +57,18 @@
                 <i class="fa-solid fa-triangle-exclamation text-4xl text-rose-500 mb-2"></i>
                 <h2 class="text-lg font-black text-slate-100">Accès Suspendu</h2>
                 <p class="text-xs text-slate-400">Votre compte partenaire présente des irrégularités.</p>
-                <button onclick="contacterWhatsApp()" class="mt-4 bg-rose-500/20 text-rose-400 border border-rose-500/30 px-4 py-2 rounded-xl text-xs font-bold"><i class="fa-brands fa-whatsapp mr-2"></i>Support</button>
+                <button onclick="alert('Contact support')" class="mt-4 bg-rose-500/20 text-rose-400 border border-rose-500/30 px-4 py-2 rounded-xl text-xs font-bold"><i class="fa-brands fa-whatsapp mr-2"></i>Support</button>
             </div>
         </div>
 
-        <!-- ========================================================= -->
-        <!-- 1. ÉCRAN D'INSCRIPTION COMPLÈTE                           -->
-        <!-- ========================================================= -->
+        <!-- 1. ÉCRAN D'INSCRIPTION -->
         <div id="page-inscription" class="p-6 space-y-5 flex-1 flex flex-col justify-between no-print overflow-y-auto">
             <div class="space-y-4 mt-2">
                 <div class="text-center">
-                    <span class="bg-emerald-500 text-slate-950 w-12 h-12 rounded-2xl flex items-center justify-center font-black text-xl mx-auto mb-2 shadow-lg shadow-emerald-500/20">TV</span>
-                    <h2 class="text-xl font-black tracking-wide">Créer un Compte</h2>
-                    <p class="text-[10px] text-slate-400">Enregistrez-vous sur le réseau global.</p>
+                    <img src="logo%20192x192.png" alt="Logo TransVision" class="w-16 h-16 rounded-2xl mx-auto mb-2 shadow-lg shadow-emerald-500/20">
+                    <h2 class="text-xl font-black tracking-wide">TransVision</h2>
+                    <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">by Global Tech Solutions</p>
+                    <p class="text-[9px] text-slate-400 mt-1 italic">La clarté sur vos recettes.</p>
                 </div>
 
                 <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-3 shadow-xl">
@@ -91,12 +108,8 @@
             <button onclick="finaliserInscription()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3.5 rounded-xl text-xs tracking-wider uppercase mt-4 shadow-lg shadow-emerald-500/10">S'enregistrer</button>
         </div>
 
-        <!-- ========================================================= -->
-        <!-- 2. APPLICATION MOBILE PRINCIPALE (CONNECTÉE)               -->
-        <!-- ========================================================= -->
+        <!-- 2. APPLICATION MOBILE CONNECTÉE -->
         <div id="app-proprietaire" class="flex-1 flex flex-col hidden relative">
-            
-            <!-- HEADER -->
             <header class="p-5 border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-20 no-print">
                 <div class="flex justify-between items-center mb-4">
                     <div>
@@ -104,14 +117,14 @@
                             <h1 id="lbl-nom-partenaire" class="text-sm font-black text-slate-100">Jean Mukendi</h1>
                             <span id="lbl-commune-badge" class="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-bold">Gombe</span>
                         </div>
-                        <span id="badge-projet" class="text-[9px] bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider mt-1 inline-block">TransVision</span>
+                        <div class="flex items-center gap-1.5 mt-0.5">
+                            <span id="badge-projet" class="text-[9px] bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider inline-block">TransVision</span>
+                            <span class="text-[8px] text-slate-500 font-mono">by Global Tech Solutions</span>
+                        </div>
                     </div>
-                    <span class="flex items-center gap-1.5 bg-emerald-500/10 text-emerald-400 text-[10px] px-2.5 py-1 rounded-full font-black">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> CONNECTÉ
-                    </span>
+                    <img src="logo%20192x192.png" alt="Logo" class="w-8 h-8 rounded-lg shadow-md">
                 </div>
 
-                <!-- PORTFOLIO FINANCIER (Masqué si CarVision) -->
                 <div id="bloc-header-finance" class="bg-slate-950 p-4 rounded-2xl border border-slate-850 shadow-inner">
                     <div class="flex justify-between items-end">
                         <div>
@@ -134,18 +147,18 @@
                 <div id="conteneur-vehicules-actifs" class="space-y-4"></div>
             </div>
 
-            <!-- ONGLET B : AJOUTER UN VÉHICULE (NOUVELLE VERSION AVEC ORIGINE/DESTINATION) -->
+            <!-- ONGLET B : AJOUTER UN VÉHICULE -->
             <div id="onglet-ajouter" class="p-5 space-y-4 class-onglet hidden no-print pb-32">
                 <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-4 shadow-xl">
                     <h3 class="text-sm font-black text-slate-200 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-square-plus text-emerald-400"></i> Enregistrer un Véhicule</h3>
                     <div class="space-y-3">
                         <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Plaque d'immatriculation</label>
+                                <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Plaque</label>
                                 <input type="text" id="add-plaque" class="w-full bg-slate-900 border border-slate-800 focus:outline-none focus:border-emerald-500 rounded-xl p-2.5 text-xs text-slate-200" placeholder="Ex: KIN 4082AE">
                             </div>
                             <div>
-                                <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Type de véhicule</label>
+                                <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Type</label>
                                 <select id="add-type" class="w-full bg-slate-900 border border-slate-800 focus:outline-none focus:border-emerald-500 rounded-xl p-2.5 text-xs text-slate-200">
                                     <option value="Mini-bus Mercedes 207">Mercedes 207</option>
                                     <option value="Taxi Classique Ketch">Taxi Ketch</option>
@@ -156,7 +169,6 @@
                             </div>
                         </div>
 
-                        <!-- SÉLECTEURS ORIGINE ET DESTINATION -->
                         <div id="bloc-form-itineraire" class="grid grid-cols-2 gap-2 p-2 border border-slate-800 rounded-xl bg-slate-900/50">
                             <div>
                                 <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Point d'Origine</label>
@@ -187,7 +199,7 @@
                 </div>
             </div>
 
-            <!-- ONGLET C : ANALYSE DES PERFORMANCES (Réservé TransVision) -->
+            <!-- ONGLET C : ANALYSES -->
             <div id="onglet-analyses" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
                 <div class="flex justify-between items-center">
                     <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Performances & Audits</h2>
@@ -206,28 +218,27 @@
                 <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-3">
                     <div class="flex justify-between items-center">
                         <h4 class="text-xs font-black uppercase text-slate-200">Rendement Flotte</h4>
-                        <button id="btn-reset-analyse" onclick="reinitialiserFiltreAnalyse()" class="text-[9px] text-amber-400 font-bold hidden hover:underline"><i class="fa-solid fa-arrow-rotate-left mr-1"></i>Voir Tout</button>
                     </div>
                     <div id="an-liste-progress" class="space-y-3"></div>
                 </div>
             </div>
 
-            <!-- ONGLET D : RAPPORT DE MOUVEMENTS -->
+            <!-- ONGLET D : RAPPORT -->
             <div id="onglet-maintenance" class="p-4 space-y-4 class-onglet hidden overflow-y-auto max-h-[620px] pb-32 print:pb-0 print:overflow-visible">
                 <div class="flex justify-between items-center no-print">
                     <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rapport de Mouvements</h2>
                     <button onclick="window.print()" class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded flex items-center gap-1 hover:bg-emerald-500/20"><i class="fa-solid fa-print"></i> PDF</button>
                 </div>
                 <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-2.5 print-clean">
-                    <h3 class="text-xs font-black uppercase text-slate-200 flex items-center gap-1.5 print-text"><i class="fa-solid fa-satellite-dish text-indigo-400 no-print"></i> Audit Diagnostic Matériel</h3>
+                    <h3 class="text-xs font-black uppercase text-slate-200 flex items-center gap-1.5 print-text"><i class="fa-solid fa-satellite-dish text-indigo-400 no-print"></i> Diagnostic Matériel</h3>
                     <div class="grid grid-cols-2 gap-2 text-[10px] font-mono text-slate-400 bg-slate-900 p-3 rounded-xl border border-slate-850 print-clean print-text">
                         <div class="space-y-1">
                             <p>🔌 Traceur : <span class="text-emerald-500 font-bold">En Ligne</span></p>
-                            <p>🔋 Batterie : <span class="text-emerald-500 font-bold">12.6V (OK)</span></p>
-                            <p>📡 Signal GPS : <span class="text-emerald-500 font-bold">Excellent</span></p>
+                            <p>🔋 Batterie : <span class="text-emerald-500 font-bold">12.6V</span></p>
+                            <p>📡 Signal : <span class="text-emerald-500 font-bold">Excellent</span></p>
                         </div>
                         <div class="space-y-1">
-                            <p>📶 Réseau : <span class="text-emerald-500 font-bold">Vodacom 4G</span></p>
+                            <p>📶 Réseau : <span class="text-emerald-500 font-bold">Airtel 4G</span></p>
                             <p>⚡ Sabotage : <span class="text-emerald-500 font-bold">Zéro Alerte</span></p>
                             <p>🚗 Compteur : <span class="text-emerald-500 font-bold">142 km</span></p>
                         </div>
@@ -242,9 +253,13 @@
                     <span class="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-mono font-bold">ID: #TV-9021</span>
                 </div>
                 <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-3 shadow-xl">
-                    <h3 class="text-xs font-black uppercase text-slate-200 flex items-center gap-1.5"><i class="fa-solid fa-user-gear text-indigo-400"></i> Informations Personnelles</h3>
                     <button onclick="declencherDeconnexion()" class="w-full bg-rose-500/10 border border-rose-500/20 text-rose-400 font-black py-3 rounded-xl text-xs uppercase flex items-center justify-center gap-2 mt-4"><i class="fa-solid fa-power-off"></i> Se Déconnecter</button>
                 </div>
+            </div>
+
+            <!-- FOOTER MENTION PRO -->
+            <div class="text-center py-3 text-[9px] font-mono text-slate-600 border-t border-slate-850/50 mt-4 no-print">
+                TransVision v14.1 — by <span class="text-slate-400 font-bold">Global Tech Solutions</span>
             </div>
 
             <!-- BARRE DE NAVIGATION BASSE -->
@@ -267,7 +282,7 @@
             </nav>
         </div>
 
-        <!-- MODAL DE RECHARGE -->
+        <!-- MODAL RECHARGE -->
         <div id="modal-gestion" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
             <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl p-5 space-y-4">
                 <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -281,9 +296,28 @@
         </div>
     </div>
 
-    <!-- CODE JAVASCRIPT -->
+    <!-- CODE JS -->
     <script>
-        // --- 1. BASE DE DONNÉES DYNAMIQUE DES ITINÉRAIRES (Extrait représentatif) ---
+        // Installation PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('PWA SW:', err));
+            });
+        }
+        let promptInstall;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            promptInstall = e;
+            document.getElementById('pwa-install-banner').classList.remove('hidden');
+        });
+        document.getElementById('btn-install-pwa').addEventListener('click', async () => {
+            document.getElementById('pwa-install-banner').classList.add('hidden');
+            if (promptInstall) {
+                promptInstall.prompt();
+                promptInstall = null;
+            }
+        });
+
         const referentielItineraires = {
             "KINGASANI PASCAL — ROUTE MOKALI PONT MANGO": { tarif: 1500, distance: 4.5, distanceDeviee: 5.3 },
             "KINGASANI PASCAL — MIKONDO BOSAWA": { tarif: 500, distance: 3.0, distanceDeviee: 3.6 },
@@ -304,7 +338,7 @@
             nom: "Jean Mukendi",
             tel: "+243 812 345 678",
             commune: "Gombe",
-            projet: "transvision", // 'transvision' ou 'carvision'
+            projet: "transvision",
             mode: "rotation",
             solde: 32500,
             vehicules: [
@@ -312,7 +346,6 @@
             ]
         };
 
-        // --- FONCTIONS INITIALISATION ---
         function initialiserCommunes() {
             const conteneurs = document.querySelectorAll('.conteneur-communes');
             conteneurs.forEach(select => {
@@ -331,7 +364,6 @@
 
             const originesSet = new Set();
             const destinationsSet = new Set();
-
             Object.keys(referentielItineraires).forEach(trajet => {
                 const parts = trajet.split(' — ');
                 if(parts.length === 2) {
@@ -339,15 +371,10 @@
                     destinationsSet.add(parts[1]);
                 }
             });
-
-            const originesTriees = Array.from(originesSet).sort();
-            const destinationsTriees = Array.from(destinationsSet).sort();
-
-            originesTriees.forEach(org => selectOrigine.insertAdjacentHTML('beforeend', `<option value="${org}">${org}</option>`));
-            destinationsTriees.forEach(dest => selectDestination.insertAdjacentHTML('beforeend', `<option value="${dest}">${dest}</option>`));
+            Array.from(originesSet).sort().forEach(org => selectOrigine.insertAdjacentHTML('beforeend', `<option value="${org}">${org}</option>`));
+            Array.from(destinationsSet).sort().forEach(dest => selectDestination.insertAdjacentHTML('beforeend', `<option value="${dest}">${dest}</option>`));
         }
 
-        // --- GESTION NAVIGATION & UI ---
         function naviguerVers(id) {
             document.getElementById('page-inscription').classList.add('hidden');
             document.getElementById('app-proprietaire').classList.add('hidden');
@@ -355,19 +382,16 @@
         }
 
         function changerOnglet(idOnglet, boutonActif) {
-            const onglets = document.querySelectorAll('.class-onglet');
-            onglets.forEach(ong => ong.classList.add('hidden'));
+            document.querySelectorAll('.class-onglet').forEach(ong => ong.classList.add('hidden'));
             document.getElementById(idOnglet).classList.remove('hidden');
-            const boutons = document.querySelectorAll('.btn-nav');
-            boutons.forEach(btn => { btn.classList.remove('text-emerald-400'); btn.classList.add('text-slate-500'); });
+            document.querySelectorAll('.btn-nav').forEach(btn => { btn.classList.remove('text-emerald-400'); btn.classList.add('text-slate-500'); });
             boutonActif.classList.remove('text-slate-500'); boutonActif.classList.add('text-emerald-400');
         }
 
         function adapterFormulaireInscription() {
             const projet = document.getElementById('ins-projet').value;
             const blocFacturation = document.getElementById('bloc-facturation');
-            if (projet === 'carvision') { blocFacturation.classList.add('hidden'); } 
-            else { blocFacturation.classList.remove('hidden'); }
+            if (projet === 'carvision') { blocFacturation.classList.add('hidden'); } else { blocFacturation.classList.remove('hidden'); }
         }
 
         function finaliserInscription() {
@@ -391,17 +415,15 @@
             const blocFormPlaces = document.getElementById('bloc-form-places');
 
             if (client.projet === 'carvision') {
-                // UI CarVision (Personnel)
                 badgeProjet.textContent = "🚗 CarVision";
-                badgeProjet.className = "text-[9px] bg-rose-500/15 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider mt-1 inline-block";
-                navAnalyses.classList.add('hidden'); // Masquer l'onglet d'analyse
-                blocHeaderFinance.classList.add('hidden'); // Masquer le solde
-                blocFormItineraire.classList.add('hidden'); // Masquer choix de l'origine/destination
+                badgeProjet.className = "text-[9px] bg-rose-500/15 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider inline-block";
+                navAnalyses.classList.add('hidden');
+                blocHeaderFinance.classList.add('hidden');
+                blocFormItineraire.classList.add('hidden');
                 blocFormPlaces.classList.add('hidden');
             } else {
-                // UI TransVision (Commercial)
                 badgeProjet.textContent = client.mode === "rotation" ? "🚌 TransVision (Rot.)" : "🚌 TransVision (Forfait)";
-                badgeProjet.className = "text-[9px] bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider mt-1 inline-block";
+                badgeProjet.className = "text-[9px] bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider inline-block";
                 navAnalyses.classList.remove('hidden');
                 blocHeaderFinance.classList.remove('hidden');
                 blocFormItineraire.classList.remove('hidden');
@@ -412,7 +434,6 @@
             if(client.projet === 'transvision') genererAnalysesFlotte();
         }
 
-        // --- GÉNÉRATION DYNAMIQUE DES VÉHICULES ---
         function calculerRecette(itineraire, rotations, places) {
             const donneesTrajet = referentielItineraires[itineraire];
             const tarifUnitaire = donneesTrajet ? donneesTrajet.tarif : 500;
@@ -423,11 +444,8 @@
             const conteneur = document.getElementById('conteneur-vehicules-actifs');
             conteneur.innerHTML = "";
             client.vehicules.forEach((v, index) => {
-                
                 let contenuSpecifique = "";
-
                 if (client.projet === 'transvision') {
-                    // AFFICHAGE COMMERCIAL (Recettes)
                     const gainEstime = calculerRecette(v.itineraire, v.rotations, v.places);
                     contenuSpecifique = `
                         <p class="text-[10px] text-slate-400 mt-1 font-bold"><i class="fa-solid fa-route text-emerald-400"></i> Mode : ${v.itineraire}</p>
@@ -437,7 +455,6 @@
                             <div><span class="text-[9px] text-slate-500 block">Recette</span><span class="font-black text-emerald-400">${gainEstime.toLocaleString()} CDF</span></div>
                         </div>`;
                 } else {
-                    // AFFICHAGE PERSONNEL (CarVision - Coupure Moteur)
                     const btnMoteur = v.moteurCoupe 
                         ? `<button onclick="restaurerMoteur(${index})" class="w-full bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 font-black py-3 rounded-xl text-xs uppercase flex items-center justify-center gap-2 mt-4"><i class="fa-solid fa-unlock"></i> Restaurer Moteur</button>`
                         : `<button onclick="arreterMoteur(${index})" class="w-full bg-rose-500/20 border border-rose-500/50 text-rose-400 font-black py-3 rounded-xl text-xs uppercase flex items-center justify-center gap-2 mt-4"><i class="fa-solid fa-lock"></i> Arrêt Moteur (Urgence)</button>`;
@@ -462,7 +479,6 @@
             });
         }
 
-        // --- COMMANDES SINOTRACK (CARVISION) ---
         function arreterMoteur(index) {
             if(confirm("🚨 DANGER : Couper l'alimentation carburant du véhicule ?")) {
                 client.vehicules[index].moteurCoupe = true;
@@ -477,12 +493,10 @@
             genererCartesVehicules();
         }
 
-        // --- AJOUT DE VÉHICULE (Combiner Origine et Destination) ---
         function validerAjoutVehicule() {
             const plaque = document.getElementById('add-plaque').value;
             const type = document.getElementById('add-type').value;
             const imei = document.getElementById('add-imei').value;
-            
             let itineraire = "Usage Personnel";
             let places = 0;
 
@@ -494,17 +508,14 @@
             }
 
             if(!plaque || !imei) { alert("Saisie incomplète (Plaque ou IMEI manquant)."); return; }
-            
             client.vehicules.push({ plaque: plaque, type: type, places: places, imei: imei, rotations: 0, itineraire: itineraire, moteurCoupe: false });
             appliquerConfigurationDom();
-            
             document.getElementById('add-plaque').value = ""; document.getElementById('add-imei').value = "";
-            alert(`✅ Véhicule ${plaque} enregistré avec succès.`);
+            alert(`✅ Véhicule ${plaque} enregistré.`);
             changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
         }
 
         function genererAnalysesFlotte() {
-            // (Logique conservée pour le modèle commercial)
             let totalGains = 0; let totalRotations = 0;
             const conteneurProgress = document.getElementById('an-liste-progress');
             conteneurProgress.innerHTML = "";
@@ -522,7 +533,6 @@
         function ouvrirModalGestion() { document.getElementById('modal-gestion').classList.remove('hidden'); }
         function fermerModalGestion() { document.getElementById('modal-gestion').classList.add('hidden'); }
 
-        // --- INIT ---
         initialiserCommunes();
         initialiserOriginesDestinations();
         adapterFormulaireInscription();
