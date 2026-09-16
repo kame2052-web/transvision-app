@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TransVision by Global Tech Solutions — Console Super Admin</title>
     <link rel="icon" type="image/png" href="logo%20192x192.png">
-    <!-- Tailwind CSS & FontAwesome -->
+    <!-- Tailwind CSS, FontAwesome & Chart.js -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .page-fade { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -33,11 +34,11 @@
         <div class="space-y-4 text-xs">
             <div>
                 <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Identifiant (Email)</label>
-                <input type="email" id="login-email-admin" class="w-full bg-slate-950 border border-slate-800 focus:outline-none focus:border-indigo-500 rounded-xl p-3 text-slate-200 font-mono font-bold" placeholder="admin@transvision.cd" value="admin@transvision.cd">
+                <input type="email" id="login-email-admin" class="w-full bg-slate-950 border border-slate-800 focus:outline-none focus:border-indigo-500 rounded-xl p-3 text-slate-200 font-mono font-bold" value="admin@transvision.cd">
             </div>
             <div>
                 <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Code Secret d'Accès</label>
-                <input type="password" id="login-pass-admin" class="w-full bg-slate-950 border border-slate-800 focus:outline-none focus:border-indigo-500 rounded-xl p-3 text-slate-200 font-mono text-lg" placeholder="••••••••" value="123456">
+                <input type="password" id="login-pass-admin" class="w-full bg-slate-950 border border-slate-800 focus:outline-none focus:border-indigo-500 rounded-xl p-3 text-slate-200 font-mono text-lg" value="123456">
             </div>
             <button onclick="authentifierSessionAdmin()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-3.5 rounded-xl uppercase text-xs transition-all shadow-lg shadow-indigo-500/10">
                 Se Connecter au Central
@@ -51,7 +52,7 @@
             <span class="text-xs font-bold text-indigo-400">Central Control Panel v14.1 — Global Tech Solutions :</span>
             <div class="flex gap-2 text-[10px] font-mono">
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Supabase Engine : <span class="text-emerald-400 font-bold">En Ligne</span></span>
-                <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">PostGIS System : <span class="text-emerald-400 font-bold">Actif</span></span>
+                <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Chart Engine : <span class="text-emerald-400 font-bold">Actif</span></span>
             </div>
         </div>
 
@@ -60,7 +61,7 @@
             <aside class="w-64 bg-slate-900 border-r border-slate-800 p-5 flex flex-col justify-between h-[calc(100vh-53px)] sticky top-[53px] no-print">
                 <div class="space-y-5">
                     <div class="flex items-center gap-2.5 px-1">
-                        <img src="logo%20192x192.png" alt="Logo TV" class="w-8 h-8 rounded-lg shadow">
+                        <img src="logo%20192x192.png" alt="Logo TV" class="w-8 h-8 rounded-lg shadow object-contain">
                         <div>
                             <h2 class="text-xs font-black tracking-wider uppercase text-slate-200">TransVision</h2>
                             <p class="text-[9px] font-mono text-indigo-400">by Global Tech Solutions</p>
@@ -80,19 +81,15 @@
                         <button onclick="changerPageAdmin('page-itineraires', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin">
                             <i class="fa-solid fa-route text-sm text-teal-400"></i> Gestion des Itinéraires
                         </button>
-                        <button onclick="changerPageAdmin('page-observations', this)" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin">
-                            <span class="flex items-center gap-3"><i class="fa-solid fa-triangle-exclamation text-sm text-rose-400 animate-pulse"></i> Observations dyn.</span>
-                            <span class="bg-rose-500/20 text-rose-400 font-mono text-[9px] px-1.5 py-0.5 rounded-full font-bold">1</span>
-                        </button>
                         <button onclick="changerPageAdmin('page-tresorerie', this)" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin">
                             <span class="flex items-center gap-3"><i class="fa-solid fa-wallet text-sm text-amber-500"></i> Trésorerie</span>
                             <span id="badge-compteur-req" class="bg-amber-500 text-slate-950 font-black text-[9px] px-1.5 py-0.5 rounded-full">1</span>
                         </button>
                         <button onclick="changerPageAdmin('page-stats-croisees', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin">
-                            <i class="fa-solid fa-chart-line text-sm text-fuchsia-400"></i> Statistiques Croisées
+                            <i class="fa-solid fa-chart-pie text-sm text-fuchsia-400"></i> Statistiques & Graphiques
                         </button>
                         <button onclick="changerPageAdmin('page-parametres', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin">
-                            <i class="fa-solid fa-sliders text-sm text-slate-400"></i> Paramètres
+                            <i class="fa-solid fa-sliders text-sm text-slate-400"></i> Paramètres & CGU
                         </button>
                     </nav>
                 </div>
@@ -127,10 +124,13 @@
                     </div>
                 </div>
 
-                <!-- PARTENAIRES -->
+                <!-- GESTION PARTENAIRES AVEC JOUVENCE DE RECHARGE FLEXIBLE -->
                 <div id="page-partenaires" class="space-y-4 page-fade class-page-admin hidden print:block">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 no-print">
-                        <div><h2 class="text-xl font-black text-slate-100">👤 Base de Données des Partenaires</h2></div>
+                        <div>
+                            <h2 class="text-xl font-black text-slate-100">👤 Partenaires & Forfaits Flexibles</h2>
+                            <p class="text-xs text-slate-400">Fixez librement les jours d'accès et créditez les comptes.</p>
+                        </div>
                         <div class="flex bg-slate-950 p-1.5 rounded-xl border border-slate-850 text-[10px] font-bold">
                             <button onclick="filtrerPartenairesContrat('tous')" class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-200">Tous</button>
                             <button onclick="filtrerPartenairesContrat('commercial')" class="px-3 py-1.5 rounded-lg text-indigo-400 hover:bg-slate-900"><i class="fa-solid fa-bus mr-1"></i> Commercial</button>
@@ -142,32 +142,45 @@
                         <table class="w-full text-left">
                             <thead>
                                 <tr class="border-b border-slate-800 text-slate-500 font-black uppercase text-[9px] tracking-wider print:border-slate-300">
-                                    <th class="py-3">Nom Propriétaire</th>
-                                    <th class="py-3">Type & Usage</th>
+                                    <th class="py-3">Nom Partenaire</th>
+                                    <th class="py-3">Type Contrat</th>
                                     <th class="py-3 text-center">Véhicules</th>
-                                    <th class="py-3 text-right">Portefeuille / Jours</th>
-                                    <th class="py-3">Identifiants Sécurité</th>
-                                    <th class="py-3 text-center no-print">Action Décision</th>
+                                    <th class="py-3 text-right">Solde Actif</th>
+                                    <th class="py-3 text-center">Validité Restante</th>
+                                    <th class="py-3 text-center no-print">Action Recharge</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-850 text-slate-300 print-text">
                                 <tr class="item-partenaire-row" data-contrat="commercial">
-                                    <td class="py-3 font-black text-slate-200 print-text">Jean Mukendi<br><span class="text-[9px] font-normal text-slate-500">Commune : Gombe</span></td>
+                                    <td class="py-3 font-black text-slate-200 print-text">Jean Mukendi<br><span class="text-[9px] font-normal text-slate-500">+243 812 345 678</span></td>
                                     <td class="py-3">
-                                        <span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-1 rounded font-black text-[10px] uppercase flex items-center gap-1.5 w-max">
-                                            <i class="fa-solid fa-bus text-sm"></i> Commercial (Rotation)
-                                        </span>
+                                        <span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-black text-[10px] uppercase inline-block">Commercial</span>
                                     </td>
                                     <td class="py-3 text-center font-bold font-mono text-indigo-400">1 Bus</td>
                                     <td class="py-3 text-right font-black font-mono text-emerald-400" id="solde-jean-mukendi">32 500 CDF</td>
-                                    <td class="py-3 font-mono text-[10px]"><p>📱 Login : <span class="text-slate-100 font-bold print-text">+243 812 345 678</span></p></td>
+                                    <td class="py-3 text-center font-mono">
+                                        <span id="jours-jean-mukendi" class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-lg font-black text-xs">26 Jours</span>
+                                    </td>
                                     <td class="py-3 text-center no-print">
-                                        <select onchange="executerActionPartenaire('Jean Mukendi', this)" class="bg-slate-900 border border-slate-800 rounded px-2 py-1 text-[11px] font-bold text-slate-300 focus:outline-none focus:border-indigo-500">
-                                            <option value="">-- Actions --</option>
-                                            <option value="recharger" class="text-emerald-400 font-bold">💸 Recharger</option>
-                                            <option value="activer">🟢 Activer</option>
-                                            <option value="desactiver" class="text-rose-400">🔴 Bloquer</option>
-                                        </select>
+                                        <button onclick="ouvrirModalRechargeFlexible('Jean Mukendi', 'solde-jean-mukendi', 'jours-jean-mukendi')" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black px-3 py-1.5 rounded-xl text-[10px] uppercase shadow-md flex items-center gap-1.5 mx-auto">
+                                            <i class="fa-solid fa-clock-rotate-left"></i> Fixer Jours / Solde
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="item-partenaire-row" data-contrat="personnel">
+                                    <td class="py-3 font-black text-slate-200 print-text">Marc Kabeya<br><span class="text-[9px] font-normal text-slate-500">+243 998 765 432</span></td>
+                                    <td class="py-3">
+                                        <span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded font-black text-[10px] uppercase inline-block">Personnel</span>
+                                    </td>
+                                    <td class="py-3 text-center font-bold font-mono text-rose-400">1 Jeep</td>
+                                    <td class="py-3 text-right font-black font-mono text-slate-400" id="solde-marc-kabeya">0 CDF</td>
+                                    <td class="py-3 text-center font-mono">
+                                        <span id="jours-marc-kabeya" class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2.5 py-1 rounded-lg font-black text-xs">14 Jours</span>
+                                    </td>
+                                    <td class="py-3 text-center no-print">
+                                        <button onclick="ouvrirModalRechargeFlexible('Marc Kabeya', 'solde-marc-kabeya', 'jours-marc-kabeya')" class="bg-rose-500 hover:bg-rose-600 text-slate-950 font-black px-3 py-1.5 rounded-xl text-[10px] uppercase shadow-md flex items-center gap-1.5 mx-auto">
+                                            <i class="fa-solid fa-clock-rotate-left"></i> Fixer Jours / Solde
+                                        </button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -199,12 +212,6 @@
                     </div>
                 </div>
 
-                <!-- OBSERVATIONS -->
-                <div id="page-observations" class="space-y-4 page-fade class-page-admin hidden">
-                    <h2 class="text-xl font-black text-slate-100">🚨 Observations Dynamiques</h2>
-                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 text-xs text-amber-400 font-mono">⚠️ Bus KIN 4082AE : Déviation signalée zone Ma Campagne.</div>
-                </div>
-
                 <!-- TRÉSORERIE -->
                 <div id="page-tresorerie" class="space-y-5 page-fade class-page-admin hidden">
                     <h2 class="text-xl font-black text-slate-100">💸 Trésorerie & Sortie de Fonds</h2>
@@ -225,47 +232,52 @@
                     </div>
                 </div>
 
-                <!-- STATISTIQUES CROISÉES -->
+                <!-- STATISTIQUES CROISÉES AVEC GRAPHIQUES CHART.JS -->
                 <div id="page-stats-croisees" class="space-y-5 page-fade class-page-admin hidden">
-                    <h2 class="text-xl font-black text-slate-100">📊 Croisement Analytique</h2>
-                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 text-xs font-mono">
-                        <p class="text-emerald-400 font-bold">Rendement opérationnel optimal sur l'axe Gombe — UPN.</p>
+                    <div>
+                        <h2 class="text-xl font-black text-slate-100">📊 Tableaux de Bord Analytiques & Graphiques</h2>
+                        <p class="text-xs text-slate-400">Suivi visuel des encaissements, des commissions et de la répartition spatiale.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- GRAPHIQUE 1 : ÉVOLUTION RECETTES -->
+                        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
+                            <h3 class="text-xs font-black uppercase text-indigo-400 flex items-center gap-2">
+                                <i class="fa-solid fa-chart-line"></i> Évolution des Recettes & Commissions (7 Jours)
+                            </h3>
+                            <div class="h-64 relative">
+                                <canvas id="chart-recettes-admin"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- GRAPHIQUE 2 : DENSITÉ FLOTTE -->
+                        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
+                            <h3 class="text-xs font-black uppercase text-emerald-400 flex items-center gap-2">
+                                <i class="fa-solid fa-chart-pie"></i> Répartition de la Flotte par Commune
+                            </h3>
+                            <div class="h-64 relative flex items-center justify-center">
+                                <canvas id="chart-communes-admin"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- PARAMETRES & EDITEUR CGU -->
+                <!-- PARAMETRES & CGU -->
                 <div id="page-parametres" class="space-y-5 page-fade class-page-admin hidden">
-                    <h2 class="text-xl font-black text-slate-100">⚙️ Configuration Système Back-Office</h2>
+                    <h2 class="text-xl font-black text-slate-100">⚙️ Configuration Système & CGU</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
-                        <!-- PASSERELLES -->
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
                             <h3 class="font-bold text-indigo-400 uppercase tracking-wider text-[10px]">Passerelles Kinshasa</h3>
                             <input type="text" id="cfg-mpesa" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono" value="+243 812 000 000">
                             <button onclick="alert('Sauvegardé')" class="w-full bg-indigo-500 text-slate-950 font-black py-2 rounded-xl uppercase">Mettre à jour</button>
                         </div>
-
-                        <!-- MODIFIER ACCÈS ADMIN -->
-                        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
-                            <h3 class="font-bold text-sky-400 uppercase tracking-wider text-[10px]">Accès Super Admin</h3>
-                            <input type="email" id="cfg-admin-email" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 font-mono" value="admin@transvision.cd">
-                            <input type="password" id="cfg-admin-pass" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 font-mono" placeholder="Nouveau mot de passe">
-                            <button onclick="modifierAccesPropresAdmin()" class="w-full bg-sky-500 text-slate-950 font-black py-1.5 rounded-xl text-[10px] uppercase">Appliquer</button>
-                        </div>
-
-                        <!-- ÉDITEUR DES CGU -->
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3 md:col-span-2">
                             <div class="flex justify-between items-center">
-                                <h3 class="font-bold text-emerald-400 uppercase tracking-wider text-[10px] flex items-center gap-1">
-                                    <i class="fa-solid fa-file-contract"></i> Rédaction des CGU & Conditions Partenaires
-                                </h3>
+                                <h3 class="font-bold text-emerald-400 uppercase tracking-wider text-[10px]">Rédaction des CGU TransVision</h3>
                                 <span class="text-[9px] text-slate-500 font-mono">Synchronisé en temps réel</span>
                             </div>
-                            <textarea id="cfg-cgu-texte" rows="6" class="w-full bg-slate-900 border border-slate-850 focus:border-indigo-500 focus:outline-none rounded-xl p-3 text-xs text-slate-300 font-mono leading-relaxed" placeholder="Rédigez les conditions générales d'utilisation..."></textarea>
-                            <div class="flex justify-end">
-                                <button onclick="sauvegarderCGUAdmin()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-2 px-5 rounded-xl uppercase text-xs transition-all shadow-lg shadow-emerald-500/10">
-                                    Publier les CGU
-                                </button>
-                            </div>
+                            <textarea id="cfg-cgu-texte" rows="6" class="w-full bg-slate-900 border border-slate-850 focus:border-indigo-500 focus:outline-none rounded-xl p-3 text-xs text-slate-300 font-mono leading-relaxed"></textarea>
+                            <button onclick="sauvegarderCGUAdmin()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-2 px-5 rounded-xl uppercase text-xs">Publier les CGU</button>
                         </div>
                     </div>
                 </div>
@@ -273,28 +285,56 @@
         </div>
     </div>
 
-    <!-- JS ADMIN -->
+    <!-- MODAL DE GESTION FLEXIBLE DES JOURS ET DU SOLDE -->
+    <div id="modal-recharge-flexible" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="font-black text-sm text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-days text-emerald-400"></i> Ajuster Forfait Partenaire
+                </h3>
+                <button onclick="fermerModalRechargeFlexible()" class="text-slate-500 hover:text-slate-300"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <p class="text-xs text-slate-300 font-bold">Partenaire : <span id="nom-partenaire-cible" class="text-emerald-400">Jean Mukendi</span></p>
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nombre de Jours d'Accès à Fixer</label>
+                    <div class="flex gap-2">
+                        <input type="number" id="input-jours-fixer" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-center font-black text-lg text-emerald-400" placeholder="Ex: 30" value="30">
+                        <span class="flex items-center text-slate-400 font-bold px-2">Jours</span>
+                    </div>
+                    <div class="flex gap-1.5 mt-2">
+                        <button onclick="document.getElementById('input-jours-fixer').value=1" class="flex-1 bg-slate-800 hover:bg-slate-700 text-[10px] py-1 rounded font-bold">1j</button>
+                        <button onclick="document.getElementById('input-jours-fixer').value=7" class="flex-1 bg-slate-800 hover:bg-slate-700 text-[10px] py-1 rounded font-bold">7j</button>
+                        <button onclick="document.getElementById('input-jours-fixer').value=15" class="flex-1 bg-slate-800 hover:bg-slate-700 text-[10px] py-1 rounded font-bold">15j</button>
+                        <button onclick="document.getElementById('input-jours-fixer').value=30" class="flex-1 bg-slate-800 hover:bg-slate-700 text-[10px] py-1 rounded font-bold">30j</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Ajout de Crédit Solde (CDF)</label>
+                    <input type="number" id="input-credit-fixer" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 font-black text-emerald-400" placeholder="0 CDF" value="0">
+                </div>
+            </div>
+
+            <button onclick="appliquerRechargeFlexible()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs shadow-lg shadow-emerald-500/10">
+                Enregistrer la Modification
+            </button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT & INITIALISATION DES GRAPHIQUES -->
     <script>
-        let tresor = 850000; let commissions = 145500; let soldeJeanMukendi = 32500;
+        let tresor = 850000; let commissions = 145500;
         let adminCredential = { email: "admin@transvision.cd", pass: "123456" };
+        let ciblePartenaire = null;
 
-        const cguDefaut = `CONDITIONS GÉNÉRALES D'UTILISATION (CGU) — TRANSVISION
-Éditées par Global Tech Solutions SARL
-
-1. OBJET DU SERVICE :
-TransVision fournit aux partenaires transporteurs et propriétaires privés une plateforme de supervision télématique par balises SinoTrack.
-
-2. FACTURATION ET FRAIS DE SERVICE :
-- Offre Commerciale : Prélèvement de 500 CDF par rotation validée ou 30 000 CDF / mois par véhicule.
-- Recharges : Effectuées via passerelles sécurisées Mobile Money.
-
-3. SÉCURITÉ ET TRAITEMENT DES DONNÉES :
-Les données télémétriques et de géolocalisation sont hébergées de façon confidentielle pour le calcul des indicateurs de bord et le verrouillage à distance du circuit moteur.`;
+        const cguDefaut = `CONDITIONS GÉNÉRALES D'UTILISATION (CGU) — TRANSVISION\nÉditées par Global Tech Solutions SARL\n\n1. OBJET DU SERVICE :\nTransVision fournit aux partenaires transporteurs et propriétaires privés une plateforme de supervision télématique par balises SinoTrack.\n\n2. FACTURATION ET VALIDITÉ :\nLa commission est perçue sur base d'un forfait flexible au nombre de jours d'activité convenus ou mensuel.`;
 
         function chargerCGUAdmin() {
-            const cgu = localStorage.getItem('transvision_cgu') || cguDefaut;
             const el = document.getElementById('cfg-cgu-texte');
-            if (el) el.value = cgu;
+            if (el) el.value = localStorage.getItem('transvision_cgu') || cguDefaut;
         }
 
         function sauvegarderCGUAdmin() {
@@ -312,6 +352,7 @@ Les données télémétriques et de géolocalisation sont hébergées de façon 
                 document.getElementById('corps-application-admin').classList.remove('hidden');
                 document.body.className = "bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col";
                 chargerCGUAdmin();
+                initialiserGraphiquesAdmin();
             } else { alert("❌ Accès refusé."); }
         }
 
@@ -336,59 +377,99 @@ Les données télémétriques et de géolocalisation sont hébergées de façon 
             });
         }
 
-        function executerActionPartenaire(nom, selectElement) {
-            const action = selectElement.value; if(!action) return;
-            if(action === "recharger") {
-                const montant = prompt(`Montant CDF pour ${nom} :`);
-                if(montant && !isNaN(montant)) {
-                    soldeJeanMukendi += parseFloat(montant);
-                    document.getElementById('solde-jean-mukendi').textContent = soldeJeanMukendi.toLocaleString() + " CDF";
-                    alert("✅ Portefeuille crédité.");
+        // --- GESTION FLEXIBLE DU NOMBRE DE JOURS ---
+        function ouvrirModalRechargeFlexible(nom, idSolde, idJours) {
+            ciblePartenaire = { nom, idSolde, idJours };
+            document.getElementById('nom-partenaire-cible').textContent = nom;
+            document.getElementById('modal-recharge-flexible').classList.remove('hidden');
+        }
+
+        function fermerModalRechargeFlexible() {
+            document.getElementById('modal-recharge-flexible').classList.add('hidden');
+            ciblePartenaire = null;
+        }
+
+        function appliquerRechargeFlexible() {
+            const nbJours = parseInt(document.getElementById('input-jours-fixer').value) || 0;
+            const credit = parseFloat(document.getElementById('input-credit-fixer').value) || 0;
+
+            if (ciblePartenaire) {
+                // Mise à jour de l'affichage du nombre de jours
+                const badgeJours = document.getElementById(ciblePartenaire.idJours);
+                if (badgeJours) badgeJours.textContent = `${nbJours} Jours`;
+
+                // Mise à jour du solde si précisé
+                if (credit > 0) {
+                    const elSolde = document.getElementById(ciblePartenaire.idSolde);
+                    if (elSolde) {
+                        let actuel = parseFloat(elSolde.textContent.replace(/[^0-9]/g, '')) || 0;
+                        elSolde.textContent = (actuel + credit).toLocaleString() + " CDF";
+                    }
                 }
-            } else if(action === "activer") { alert("🟢 Activé."); } 
-            else if(action === "desactiver") { alert("🔴 Suspendu."); }
-            selectElement.value = ""; 
+                alert(`✅ Forfait de ${ciblePartenaire.nom} ajusté à ${nbJours} jours d'accès avec succès !`);
+            }
+            fermerModalRechargeFlexible();
         }
 
-        function executerVirementMobileMoneyAdmin() {
-            const amount = parseFloat(document.getElementById('wir-amount').value);
-            if(!amount || amount > tresor) { alert("Solde insuffisant."); return; }
-            tresor -= amount; document.getElementById('txt-tresor').textContent = tresor.toLocaleString() + " CDF";
-            alert(`🛰️ Virement de ${amount.toLocaleString()} CDF exécuté.`);
-            document.getElementById('wir-amount').value = "";
+        // --- INITIALISATION DES GRAPHIQUES CHART.JS ---
+        function initialiserGraphiquesAdmin() {
+            // Graphique Courbes (Recettes / Commissions)
+            const ctxRecettes = document.getElementById('chart-recettes-admin').getContext('2d');
+            new Chart(ctxRecettes, {
+                type: 'line',
+                data: {
+                    labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+                    datasets: [
+                        {
+                            label: 'Recettes Brutes (CDF)',
+                            data: [120000, 145000, 130000, 180000, 195000, 240000, 210000],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'Commissions TransVision (CDF)',
+                            data: [18000, 22000, 19500, 27000, 29000, 36000, 31500],
+                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#94a3b8', font: { size: 10 } } } },
+                    scales: {
+                        x: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 10 } } },
+                        y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 10 } } }
+                    }
+                }
+            });
+
+            // Graphique Donut (Répartition Communes)
+            const ctxCommunes = document.getElementById('chart-communes-admin').getContext('2d');
+            new Chart(ctxCommunes, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Gombe', 'Limete', 'Lemba', 'Ngaliema', 'Kintambo'],
+                    datasets: [{
+                        data: [45, 25, 15, 10, 5],
+                        backgroundColor: ['#6366f1', '#10b981', '#0ea5e9', '#f59e0b', '#ec4899'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } } }
+                }
+            });
         }
-
-        function modifierAccesPropresAdmin() {
-            const email = document.getElementById('cfg-admin-email').value;
-            const pass = document.getElementById('cfg-admin-pass').value;
-            if(!email) return; adminCredential.email = email; if(pass) adminCredential.pass = pass;
-            alert("🔒 Identifiants modifiés pour la prochaine session.");
-        }
-
-        function creerNouveauTronconAdmin() {
-            const origine = document.getElementById('add-origine').value;
-            const destination = document.getElementById('add-destination').value;
-            const distance = parseFloat(document.getElementById('add-distance').value);
-            const distanceReelle = parseFloat(document.getElementById('add-distance-reelle').value);
-            const prix = parseFloat(document.getElementById('add-prix-troncon').value);
-
-            if(!origine || !destination || isNaN(distance) || isNaN(distanceReelle) || isNaN(prix)) { alert("Champs obligatoires."); return; }
-            document.getElementById('box-matrice-troncons').insertAdjacentHTML('afterbegin', `
-                <div class="bg-slate-900 p-3 rounded-xl border border-indigo-500/30 flex justify-between items-center page-fade">
-                    <div>
-                        <p class="font-black text-slate-200">${origine.toUpperCase()} ➔ ${destination.toUpperCase()}</p>
-                        <p class="text-[10px] text-slate-500">📏 ${distance} km | ⚠️ Réelle: <span class="text-rose-400">${distanceReelle} km</span></p>
-                    </div>
-                    <span class="font-black text-emerald-400 text-base">${prix.toLocaleString()} CDF</span>
-                </div>
-            `);
-            document.getElementById('add-origine').value = ""; document.getElementById('add-destination').value = "";
-            document.getElementById('add-distance').value = ""; document.getElementById('add-distance-reelle').value = "";
-            document.getElementById('add-prix-troncon').value = "";
-            alert("🛰️ Trajet injecté.");
-        }
-
-        window.addEventListener('DOMContentLoaded', chargerCGUAdmin);
     </script>
 </body>
 </html>
