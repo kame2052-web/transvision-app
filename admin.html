@@ -21,10 +21,9 @@
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-center items-center">
 
-    <!-- 1. ÉCRAN DE CONNEXION LOGIN ADMIN -->
+    <!-- 1. CONNEXION ADMIN -->
     <div id="page-login-admin" class="w-full max-w-sm p-6 space-y-6 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl page-fade no-print">
         <div class="text-center space-y-2">
-            <!-- BANNIERE OFFICIELLE VISION.PNG -->
             <img src="VISION.png" alt="TransVision Banner" class="w-full max-w-[220px] mx-auto mb-2 rounded-xl shadow-lg">
             <h1 class="text-xl font-black tracking-wide">TransVision</h1>
             <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">by Global Tech Solutions</p>
@@ -46,7 +45,7 @@
         </div>
     </div>
 
-    <!-- 2. ARCHITECTURE APRES CONNEXION -->
+    <!-- 2. CORPS ADMIN -->
     <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
         <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
             <span class="text-xs font-bold text-indigo-400">Central Control Panel v14.1 — Global Tech Solutions :</span>
@@ -57,7 +56,7 @@
         </div>
 
         <div class="flex flex-1 min-h-[calc(100vh-53px)] w-full">
-            <!-- MENU LATERAL -->
+            <!-- ASIDE -->
             <aside class="w-64 bg-slate-900 border-r border-slate-800 p-5 flex flex-col justify-between h-[calc(100vh-53px)] sticky top-[53px] no-print">
                 <div class="space-y-5">
                     <div class="flex items-center gap-2.5 px-1">
@@ -107,7 +106,7 @@
                 </div>
             </aside>
 
-            <!-- CONTENEUR DES PAGES -->
+            <!-- CONTENU DES PAGES -->
             <main class="flex-1 p-6 lg:p-8 space-y-6 overflow-y-auto max-w-5xl">
                 <!-- SUIVI -->
                 <div id="page-suivi" class="space-y-4 page-fade class-page-admin">
@@ -200,6 +199,12 @@
                     </div>
                 </div>
 
+                <!-- OBSERVATIONS -->
+                <div id="page-observations" class="space-y-4 page-fade class-page-admin hidden">
+                    <h2 class="text-xl font-black text-slate-100">🚨 Observations Dynamiques</h2>
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 text-xs text-amber-400 font-mono">⚠️ Bus KIN 4082AE : Déviation signalée zone Ma Campagne.</div>
+                </div>
+
                 <!-- TRÉSORERIE -->
                 <div id="page-tresorerie" class="space-y-5 page-fade class-page-admin hidden">
                     <h2 class="text-xl font-black text-slate-100">💸 Trésorerie & Sortie de Fonds</h2>
@@ -220,14 +225,47 @@
                     </div>
                 </div>
 
-                <!-- PARAMETRES -->
+                <!-- STATISTIQUES CROISÉES -->
+                <div id="page-stats-croisees" class="space-y-5 page-fade class-page-admin hidden">
+                    <h2 class="text-xl font-black text-slate-100">📊 Croisement Analytique</h2>
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 text-xs font-mono">
+                        <p class="text-emerald-400 font-bold">Rendement opérationnel optimal sur l'axe Gombe — UPN.</p>
+                    </div>
+                </div>
+
+                <!-- PARAMETRES & EDITEUR CGU -->
                 <div id="page-parametres" class="space-y-5 page-fade class-page-admin hidden">
-                    <h2 class="text-xl font-black text-slate-100">⚙️ Configuration Système</h2>
+                    <h2 class="text-xl font-black text-slate-100">⚙️ Configuration Système Back-Office</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+                        <!-- PASSERELLES -->
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
                             <h3 class="font-bold text-indigo-400 uppercase tracking-wider text-[10px]">Passerelles Kinshasa</h3>
                             <input type="text" id="cfg-mpesa" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono" value="+243 812 000 000">
                             <button onclick="alert('Sauvegardé')" class="w-full bg-indigo-500 text-slate-950 font-black py-2 rounded-xl uppercase">Mettre à jour</button>
+                        </div>
+
+                        <!-- MODIFIER ACCÈS ADMIN -->
+                        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
+                            <h3 class="font-bold text-sky-400 uppercase tracking-wider text-[10px]">Accès Super Admin</h3>
+                            <input type="email" id="cfg-admin-email" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 font-mono" value="admin@transvision.cd">
+                            <input type="password" id="cfg-admin-pass" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 font-mono" placeholder="Nouveau mot de passe">
+                            <button onclick="modifierAccesPropresAdmin()" class="w-full bg-sky-500 text-slate-950 font-black py-1.5 rounded-xl text-[10px] uppercase">Appliquer</button>
+                        </div>
+
+                        <!-- ÉDITEUR DES CGU -->
+                        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3 md:col-span-2">
+                            <div class="flex justify-between items-center">
+                                <h3 class="font-bold text-emerald-400 uppercase tracking-wider text-[10px] flex items-center gap-1">
+                                    <i class="fa-solid fa-file-contract"></i> Rédaction des CGU & Conditions Partenaires
+                                </h3>
+                                <span class="text-[9px] text-slate-500 font-mono">Synchronisé en temps réel</span>
+                            </div>
+                            <textarea id="cfg-cgu-texte" rows="6" class="w-full bg-slate-900 border border-slate-850 focus:border-indigo-500 focus:outline-none rounded-xl p-3 text-xs text-slate-300 font-mono leading-relaxed" placeholder="Rédigez les conditions générales d'utilisation..."></textarea>
+                            <div class="flex justify-end">
+                                <button onclick="sauvegarderCGUAdmin()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-2 px-5 rounded-xl uppercase text-xs transition-all shadow-lg shadow-emerald-500/10">
+                                    Publier les CGU
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -235,10 +273,36 @@
         </div>
     </div>
 
-    <!-- SCRIPT LOGIQUE -->
+    <!-- JS ADMIN -->
     <script>
         let tresor = 850000; let commissions = 145500; let soldeJeanMukendi = 32500;
         let adminCredential = { email: "admin@transvision.cd", pass: "123456" };
+
+        const cguDefaut = `CONDITIONS GÉNÉRALES D'UTILISATION (CGU) — TRANSVISION
+Éditées par Global Tech Solutions SARL
+
+1. OBJET DU SERVICE :
+TransVision fournit aux partenaires transporteurs et propriétaires privés une plateforme de supervision télématique par balises SinoTrack.
+
+2. FACTURATION ET FRAIS DE SERVICE :
+- Offre Commerciale : Prélèvement de 500 CDF par rotation validée ou 30 000 CDF / mois par véhicule.
+- Recharges : Effectuées via passerelles sécurisées Mobile Money.
+
+3. SÉCURITÉ ET TRAITEMENT DES DONNÉES :
+Les données télémétriques et de géolocalisation sont hébergées de façon confidentielle pour le calcul des indicateurs de bord et le verrouillage à distance du circuit moteur.`;
+
+        function chargerCGUAdmin() {
+            const cgu = localStorage.getItem('transvision_cgu') || cguDefaut;
+            const el = document.getElementById('cfg-cgu-texte');
+            if (el) el.value = cgu;
+        }
+
+        function sauvegarderCGUAdmin() {
+            const texte = document.getElementById('cfg-cgu-texte').value.trim();
+            if (!texte) { alert("Le texte ne peut pas être vide."); return; }
+            localStorage.setItem('transvision_cgu', texte);
+            alert("✅ CGU mises à jour et publiées avec succès !");
+        }
 
         function authentifierSessionAdmin() {
             const email = document.getElementById('login-email-admin').value;
@@ -247,6 +311,7 @@
                 document.getElementById('page-login-admin').classList.add('hidden');
                 document.getElementById('corps-application-admin').classList.remove('hidden');
                 document.body.className = "bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col";
+                chargerCGUAdmin();
             } else { alert("❌ Accès refusé."); }
         }
 
@@ -293,6 +358,13 @@
             document.getElementById('wir-amount').value = "";
         }
 
+        function modifierAccesPropresAdmin() {
+            const email = document.getElementById('cfg-admin-email').value;
+            const pass = document.getElementById('cfg-admin-pass').value;
+            if(!email) return; adminCredential.email = email; if(pass) adminCredential.pass = pass;
+            alert("🔒 Identifiants modifiés pour la prochaine session.");
+        }
+
         function creerNouveauTronconAdmin() {
             const origine = document.getElementById('add-origine').value;
             const destination = document.getElementById('add-destination').value;
@@ -315,6 +387,8 @@
             document.getElementById('add-prix-troncon').value = "";
             alert("🛰️ Trajet injecté.");
         }
+
+        window.addEventListener('DOMContentLoaded', chargerCGUAdmin);
     </script>
 </body>
 </html>
