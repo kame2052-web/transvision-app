@@ -42,7 +42,7 @@
     <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-4 max-w-md mx-auto no-print">
         <span class="text-[10px] font-bold text-emerald-400">🛠️ DEV CONTROL :</span>
         <div class="flex gap-1.5 font-mono">
-            <button onclick="naviguerVers('page-inscription')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[9px] px-2 py-1 rounded-lg">Déco</button>
+            <button onclick="naviguerVers('page-auth')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[9px] px-2 py-1 rounded-lg">Déco</button>
             <button onclick="changerModeProjet('transvision')" class="bg-indigo-600 hover:bg-indigo-700 text-slate-100 text-[9px] px-2 py-1 rounded-lg">TransVision</button>
             <button onclick="changerModeProjet('carvision')" class="bg-rose-600 hover:bg-rose-700 text-slate-100 text-[9px] px-2 py-1 rounded-lg">CarVision</button>
         </div>
@@ -61,17 +61,50 @@
             </div>
         </div>
 
-        <!-- 1. ÉCRAN D'INSCRIPTION -->
-        <div id="page-inscription" class="p-6 space-y-5 flex-1 flex flex-col justify-between no-print overflow-y-auto">
-            <div class="space-y-4 mt-2">
+        <!-- 1. ÉCRAN AUTHENTIFICATION : CONNEXION OU INSCRIPTION -->
+        <div id="page-auth" class="p-6 space-y-5 flex-1 flex flex-col justify-between no-print overflow-y-auto">
+            <div class="space-y-4 mt-1">
                 <div class="text-center">
                     <img src="logo%20192x192.png" alt="Logo TransVision" class="w-16 h-16 rounded-2xl mx-auto mb-2 shadow-lg shadow-emerald-500/20">
                     <h2 class="text-xl font-black tracking-wide">TransVision</h2>
                     <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">by Global Tech Solutions</p>
-                    <p class="text-[9px] text-slate-400 mt-1 italic">La clarté sur vos recettes.</p>
+                    <p class="text-[9px] text-slate-400 mt-0.5 italic">La clarté sur vos recettes.</p>
                 </div>
 
-                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-3 shadow-xl">
+                <!-- BASCULE CONNEXION / INSCRIPTION -->
+                <div class="grid grid-cols-2 gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                    <button id="tab-btn-login" onclick="basculerVueAuth('login')" class="py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950">
+                        <i class="fa-solid fa-right-to-bracket mr-1"></i> Connexion
+                    </button>
+                    <button id="tab-btn-register" onclick="basculerVueAuth('register')" class="py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200">
+                        <i class="fa-solid fa-user-plus mr-1"></i> Inscription
+                    </button>
+                </div>
+
+                <!-- VUE CONNEXION -->
+                <div id="form-connexion" class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-4 shadow-xl">
+                    <div class="border-b border-slate-800 pb-2">
+                        <h3 class="text-xs font-extrabold text-slate-200 uppercase tracking-wider">Accès Espace Partenaire</h3>
+                        <p class="text-[10px] text-slate-500">Renseignez votre numéro pour retrouver vos véhicules.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Téléphone Enregistré</label>
+                        <input type="tel" id="login-tel" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-mono font-bold" placeholder="+243..." value="+243812345678">
+                    </div>
+
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Code PIN Sécurité</label>
+                        <input type="password" id="login-pin" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-mono" placeholder="4 chiffres (optionnel)">
+                    </div>
+
+                    <button onclick="executerConnexionPartenaire()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl text-xs tracking-wider uppercase shadow-lg shadow-emerald-500/10 transition-colors">
+                        Accéder à ma Flotte
+                    </button>
+                </div>
+
+                <!-- VUE INSCRIPTION -->
+                <div id="form-inscription" class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-3 shadow-xl hidden">
                     <h3 class="text-xs font-extrabold text-emerald-400 uppercase tracking-widest">Type d'Usage</h3>
                     <div>
                         <select id="ins-projet" onchange="adapterFormulaireInscription()" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-bold">
@@ -80,10 +113,10 @@
                         </select>
                     </div>
 
-                    <h3 class="text-xs font-extrabold text-slate-300 uppercase tracking-widest mt-4 pt-4 border-t border-slate-800">Profil Propriétaire</h3>
+                    <h3 class="text-xs font-extrabold text-slate-300 uppercase tracking-widest mt-3 pt-3 border-t border-slate-800">Profil Propriétaire</h3>
                     <div>
                         <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nom Complet</label>
-                        <input type="text" id="ins-nom" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-2.5 text-xs text-slate-200" placeholder="Jean Mukendi" value="Jean Mukendi">
+                        <input type="text" id="ins-nom" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-2.5 text-xs text-slate-200" placeholder="Ex: Jean Mukendi" value="Jean Mukendi">
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
@@ -103,12 +136,25 @@
                             <option value="abonnement">Forfait mensuel (30 000 CDF)</option>
                         </select>
                     </div>
+
+                    <button onclick="finaliserInscription()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl text-xs tracking-wider uppercase mt-3 shadow-lg shadow-emerald-500/10 transition-colors">
+                        Créer mon Compte
+                    </button>
+
+                    <!-- LIEN CGU DANS L'INSCRIPTION -->
+                    <p class="text-[10px] text-slate-500 text-center mt-2">
+                        En créant un compte, vous acceptez nos 
+                        <button type="button" onclick="ouvrirModalCGU()" class="text-emerald-400 font-bold underline hover:text-emerald-300">CGU & Conditions</button>.
+                    </p>
                 </div>
             </div>
-            <button onclick="finaliserInscription()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3.5 rounded-xl text-xs tracking-wider uppercase mt-4 shadow-lg shadow-emerald-500/10">S'enregistrer</button>
+            
+            <div class="text-center py-2 text-[9px] font-mono text-slate-600 border-t border-slate-850/50">
+                TransVision v14.1 — by <span class="text-slate-400 font-bold">Global Tech Solutions</span>
+            </div>
         </div>
 
-        <!-- 2. APPLICATION MOBILE CONNECTÉE -->
+        <!-- 2. APPLICATION MOBILE PRINCIPALE (CONNECTÉE) -->
         <div id="app-proprietaire" class="flex-1 flex flex-col hidden relative">
             <header class="p-5 border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-20 no-print">
                 <div class="flex justify-between items-center mb-4">
@@ -138,7 +184,7 @@
                 </div>
             </header>
             
-            <!-- ONGLET A : LA FLOTTE -->
+            <!-- ONGLET FLOTTE -->
             <div id="onglet-flotte" class="p-4 space-y-4 blur-transition class-onglet no-print pb-32">
                 <div class="flex justify-between items-center">
                     <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ma Flotte (<span id="txt-compteur-vehicules">0</span>)</h2>
@@ -147,7 +193,7 @@
                 <div id="conteneur-vehicules-actifs" class="space-y-4"></div>
             </div>
 
-            <!-- ONGLET B : AJOUTER UN VÉHICULE -->
+            <!-- ONGLET AJOUT VÉHICULE -->
             <div id="onglet-ajouter" class="p-5 space-y-4 class-onglet hidden no-print pb-32">
                 <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-4 shadow-xl">
                     <h3 class="text-sm font-black text-slate-200 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-square-plus text-emerald-400"></i> Enregistrer un Véhicule</h3>
@@ -199,7 +245,7 @@
                 </div>
             </div>
 
-            <!-- ONGLET C : ANALYSES -->
+            <!-- ONGLET ANALYSES -->
             <div id="onglet-analyses" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
                 <div class="flex justify-between items-center">
                     <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Performances & Audits</h2>
@@ -223,7 +269,7 @@
                 </div>
             </div>
 
-            <!-- ONGLET D : RAPPORT -->
+            <!-- ONGLET RAPPORT -->
             <div id="onglet-maintenance" class="p-4 space-y-4 class-onglet hidden overflow-y-auto max-h-[620px] pb-32 print:pb-0 print:overflow-visible">
                 <div class="flex justify-between items-center no-print">
                     <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rapport de Mouvements</h2>
@@ -246,13 +292,16 @@
                 </div>
             </div>
 
-            <!-- ONGLET E : PROFIL -->
+            <!-- ONGLET PROFIL -->
             <div id="onglet-profil" class="p-4 space-y-4 class-onglet hidden overflow-y-auto max-h-[580px] no-print pb-32">
                 <div class="flex justify-between items-center">
                     <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mon Profil & Sécurité</h2>
                     <span class="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-mono font-bold">ID: #TV-9021</span>
                 </div>
                 <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-3 shadow-xl">
+                    <button onclick="ouvrirModalCGU()" class="w-full bg-slate-900 border border-slate-800 hover:border-emerald-500/50 text-slate-300 font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-file-contract text-emerald-400"></i> Consulter les CGU
+                    </button>
                     <button onclick="declencherDeconnexion()" class="w-full bg-rose-500/10 border border-rose-500/20 text-rose-400 font-black py-3 rounded-xl text-xs uppercase flex items-center justify-center gap-2 mt-4"><i class="fa-solid fa-power-off"></i> Se Déconnecter</button>
                 </div>
             </div>
@@ -294,11 +343,30 @@
                 </div>
             </div>
         </div>
+
+        <!-- MODAL DE LECTURE DES CGU -->
+        <div id="modal-cgu" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md max-h-[80vh] flex flex-col overflow-hidden shadow-2xl">
+                <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-file-contract text-emerald-400"></i>
+                        <h3 class="font-black text-xs text-slate-100 uppercase tracking-wider">Conditions d'Utilisation</h3>
+                    </div>
+                    <button onclick="fermerModalCGU()" class="text-slate-400 hover:text-slate-100 text-sm p-1">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="p-5 overflow-y-auto space-y-3 text-slate-300 text-xs font-mono leading-relaxed whitespace-pre-wrap" id="zone-texte-cgu"></div>
+                <div class="p-3 border-t border-slate-800 bg-slate-950/50 text-right">
+                    <button onclick="fermerModalCGU()" class="bg-emerald-500 text-slate-950 font-black text-xs px-4 py-2 rounded-xl">Fermer</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- CODE JS -->
+    <!-- CODE JAVASCRIPT -->
     <script>
-        // Installation PWA
+        // PWA Installation
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').catch(err => console.log('PWA SW:', err));
@@ -318,6 +386,18 @@
             }
         });
 
+        // GESTION DES CGU DYNAMIQUES
+        function ouvrirModalCGU() {
+            const texteCGU = localStorage.getItem('transvision_cgu') || 
+                "CONDITIONS GÉNÉRALES D'UTILISATION (CGU) — TRANSVISION\nÉditées par Global Tech Solutions\n\n1. OBJET DU SERVICE :\nTransVision fournit un service de suivi GPS et d'audit de trajets en temps réel pour le transport urbain et véhicules privés.\n\n2. FACTURATION :\nLe service opère au choix par commission par rotation (500 CDF) ou forfait mensuel (30 000 CDF).\n\n3. GÉOLOCALISATION :\nLe propriétaire autorise la transmission continue des données télématiques des boîtiers SinoTrack.";
+            document.getElementById('zone-texte-cgu').textContent = texteCGU;
+            document.getElementById('modal-cgu').classList.remove('hidden');
+        }
+
+        function fermerModalCGU() {
+            document.getElementById('modal-cgu').classList.add('hidden');
+        }
+
         const referentielItineraires = {
             "KINGASANI PASCAL — ROUTE MOKALI PONT MANGO": { tarif: 1500, distance: 4.5, distanceDeviee: 5.3 },
             "KINGASANI PASCAL — MIKONDO BOSAWA": { tarif: 500, distance: 3.0, distanceDeviee: 3.6 },
@@ -336,7 +416,7 @@
 
         let client = {
             nom: "Jean Mukendi",
-            tel: "+243 812 345 678",
+            tel: "+243812345678",
             commune: "Gombe",
             projet: "transvision",
             mode: "rotation",
@@ -346,9 +426,35 @@
             ]
         };
 
+        function basculerVueAuth(mode) {
+            const formConnexion = document.getElementById('form-connexion');
+            const formInscription = document.getElementById('form-inscription');
+            const btnLogin = document.getElementById('tab-btn-login');
+            const btnRegister = document.getElementById('tab-btn-register');
+
+            if (mode === 'login') {
+                formConnexion.classList.remove('hidden');
+                formInscription.classList.add('hidden');
+                btnLogin.className = "py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950";
+                btnRegister.className = "py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200";
+            } else {
+                formConnexion.classList.add('hidden');
+                formInscription.classList.remove('hidden');
+                btnRegister.className = "py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950";
+                btnLogin.className = "py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200";
+            }
+        }
+
+        function executerConnexionPartenaire() {
+            const tel = document.getElementById('login-tel').value.trim();
+            if (!tel) { alert("Veuillez renseigner votre numéro."); return; }
+            client.tel = tel;
+            appliquerConfigurationDom();
+            naviguerVers('app-proprietaire');
+        }
+
         function initialiserCommunes() {
-            const conteneurs = document.querySelectorAll('.conteneur-communes');
-            conteneurs.forEach(select => {
+            document.querySelectorAll('.conteneur-communes').forEach(select => {
                 select.innerHTML = "";
                 communesKinshasa.forEach(c => {
                     const selected = c === client.commune ? "selected" : "";
@@ -376,7 +482,7 @@
         }
 
         function naviguerVers(id) {
-            document.getElementById('page-inscription').classList.add('hidden');
+            document.getElementById('page-auth').classList.add('hidden');
             document.getElementById('app-proprietaire').classList.add('hidden');
             document.getElementById(id).classList.remove('hidden');
         }
@@ -397,6 +503,7 @@
         function finaliserInscription() {
             client.nom = document.getElementById('ins-nom').value || client.nom;
             client.commune = document.getElementById('ins-commune').value;
+            client.tel = document.getElementById('ins-tel').value || client.tel;
             client.projet = document.getElementById('ins-projet').value;
             if (client.projet === 'transvision') { client.mode = document.getElementById('ins-type-facturation').value; }
             appliquerConfigurationDom();
@@ -529,14 +636,14 @@
         }
 
         function changerModeProjet(mode) { client.projet = mode; appliquerConfigurationDom(); }
-        function declencherDeconnexion() { naviguerVers('page-inscription'); }
+        function declencherDeconnexion() { naviguerVers('page-auth'); }
         function ouvrirModalGestion() { document.getElementById('modal-gestion').classList.remove('hidden'); }
         function fermerModalGestion() { document.getElementById('modal-gestion').classList.add('hidden'); }
 
         initialiserCommunes();
         initialiserOriginesDestinations();
         adapterFormulaireInscription();
-        naviguerVers('page-inscription');
+        naviguerVers('page-auth');
     </script>
 </body>
 </html>
