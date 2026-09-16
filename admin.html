@@ -52,7 +52,7 @@
             <span class="text-xs font-bold text-indigo-400">Central Control Panel v14.1 — Global Tech Solutions :</span>
             <div class="flex gap-2 text-[10px] font-mono">
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Supabase Engine : <span class="text-emerald-400 font-bold">En Ligne</span></span>
-                <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Chart Engine : <span class="text-emerald-400 font-bold">Actif</span></span>
+                <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Chart Analytics : <span class="text-emerald-400 font-bold">Actif</span></span>
             </div>
         </div>
 
@@ -124,7 +124,7 @@
                     </div>
                 </div>
 
-                <!-- GESTION PARTENAIRES AVEC JOUVENCE DE RECHARGE FLEXIBLE -->
+                <!-- PARTENAIRES & GESTION FORFAITS -->
                 <div id="page-partenaires" class="space-y-4 page-fade class-page-admin hidden print:block">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 no-print">
                         <div>
@@ -232,45 +232,93 @@
                     </div>
                 </div>
 
-                <!-- STATISTIQUES CROISÉES AVEC GRAPHIQUES CHART.JS -->
+                <!-- STATISTIQUES CROISÉES : 3 GRAPHIQUES EXIGÉS -->
                 <div id="page-stats-croisees" class="space-y-5 page-fade class-page-admin hidden">
                     <div>
                         <h2 class="text-xl font-black text-slate-100">📊 Tableaux de Bord Analytiques & Graphiques</h2>
-                        <p class="text-xs text-slate-400">Suivi visuel des encaissements, des commissions et de la répartition spatiale.</p>
+                        <p class="text-xs text-slate-400">Croisement des flux financiers, répartition des contrats et empreinte spatiale.</p>
+                    </div>
+
+                    <!-- GRAPHIQUE 1 : ÉVOLUTION RECETTES ET DÉPENSES -->
+                    <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-xs font-black uppercase text-emerald-400 flex items-center gap-2">
+                                <i class="fa-solid fa-chart-line"></i> Évolution des Recettes & Dépenses (7 Derniers Jours)
+                            </h3>
+                            <span class="text-[9px] text-slate-500 font-mono">CDF / Jour</span>
+                        </div>
+                        <div class="h-64 relative">
+                            <canvas id="chart-recettes-depenses"></canvas>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- GRAPHIQUE 1 : ÉVOLUTION RECETTES -->
+                        <!-- GRAPHIQUE 2 : PART DES CLIENTS (COMMERCE VS PERSONNEL) -->
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
                             <h3 class="text-xs font-black uppercase text-indigo-400 flex items-center gap-2">
-                                <i class="fa-solid fa-chart-line"></i> Évolution des Recettes & Commissions (7 Jours)
+                                <i class="fa-solid fa-users-viewfinder"></i> Répartition des Clients (Commerce vs Personnel)
                             </h3>
-                            <div class="h-64 relative">
-                                <canvas id="chart-recettes-admin"></canvas>
+                            <div class="h-56 relative flex items-center justify-center">
+                                <canvas id="chart-clients-types"></canvas>
                             </div>
                         </div>
 
-                        <!-- GRAPHIQUE 2 : DENSITÉ FLOTTE -->
+                        <!-- GRAPHIQUE 3 : PART DES COMMUNES -->
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
-                            <h3 class="text-xs font-black uppercase text-emerald-400 flex items-center gap-2">
-                                <i class="fa-solid fa-chart-pie"></i> Répartition de la Flotte par Commune
+                            <h3 class="text-xs font-black uppercase text-sky-400 flex items-center gap-2">
+                                <i class="fa-solid fa-map-pin"></i> Part de la Flotte par Commune (Kinshasa)
                             </h3>
-                            <div class="h-64 relative flex items-center justify-center">
-                                <canvas id="chart-communes-admin"></canvas>
+                            <div class="h-56 relative flex items-center justify-center">
+                                <canvas id="chart-communes-part"></canvas>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- PARAMETRES & CGU -->
+                <!-- PARAMÈTRES : RESTAURATION MODIFICATION IDENTIFIANTS ADMIN AVEC ANCIEN MOT DE PASSE -->
                 <div id="page-parametres" class="space-y-5 page-fade class-page-admin hidden">
-                    <h2 class="text-xl font-black text-slate-100">⚙️ Configuration Système & CGU</h2>
+                    <h2 class="text-xl font-black text-slate-100">⚙️ Configuration Système & Sécurité</h2>
+                    
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
-                        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
-                            <h3 class="font-bold text-indigo-400 uppercase tracking-wider text-[10px]">Passerelles Kinshasa</h3>
-                            <input type="text" id="cfg-mpesa" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono" value="+243 812 000 000">
-                            <button onclick="alert('Sauvegardé')" class="w-full bg-indigo-500 text-slate-950 font-black py-2 rounded-xl uppercase">Mettre à jour</button>
+                        
+                        <!-- MODULE SÉCURITÉ ADMIN : ANCIEN + NOUVEAU MOT DE PASSE -->
+                        <div class="bg-slate-950 p-5 rounded-2xl border border-indigo-500/30 space-y-3.5 shadow-xl">
+                            <div class="flex items-center gap-2 border-b border-slate-850 pb-2">
+                                <i class="fa-solid fa-shield-halved text-indigo-400 text-sm"></i>
+                                <h3 class="font-bold text-indigo-400 uppercase tracking-wider text-[10px]">Identifiants Super Admin</h3>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Identifiant Email</label>
+                                <input type="email" id="cfg-admin-email" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-slate-200 focus:outline-none focus:border-indigo-500" value="admin@transvision.cd">
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Ancien Mot de Passe (Obligatoire)</label>
+                                <input type="password" id="cfg-admin-old-pass" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-slate-200 focus:outline-none focus:border-indigo-500" placeholder="••••••••">
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nouveau Mot de Passe</label>
+                                <input type="password" id="cfg-admin-new-pass" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-emerald-400 focus:outline-none focus:border-emerald-500" placeholder="Minimum 6 caractères">
+                            </div>
+
+                            <button onclick="modifierAccesPropresAdmin()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-2.5 rounded-xl uppercase text-xs transition-all shadow-lg shadow-indigo-500/10 mt-1">
+                                Valider & Modifier mes Accès
+                            </button>
                         </div>
+
+                        <!-- COMPTES MARCHANDS -->
+                        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
+                            <div class="flex items-center gap-2 border-b border-slate-850 pb-2">
+                                <i class="fa-solid fa-money-bill-transfer text-emerald-400 text-sm"></i>
+                                <h3 class="font-bold text-emerald-400 uppercase tracking-wider text-[10px]">Passerelles Kinshasa</h3>
+                            </div>
+                            <input type="text" id="cfg-mpesa" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono" value="+243 812 000 000">
+                            <button onclick="alert('Sauvegardé')" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-black py-2 rounded-xl uppercase">Mettre à jour</button>
+                        </div>
+
+                        <!-- ÉDITEUR DES CGU -->
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3 md:col-span-2">
                             <div class="flex justify-between items-center">
                                 <h3 class="font-bold text-emerald-400 uppercase tracking-wider text-[10px]">Rédaction des CGU TransVision</h3>
@@ -285,7 +333,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE GESTION FLEXIBLE DES JOURS ET DU SOLDE -->
+    <!-- MODAL RECHARGE FLEXIBLE -->
     <div id="modal-recharge-flexible" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -301,7 +349,7 @@
                 <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nombre de Jours d'Accès à Fixer</label>
                     <div class="flex gap-2">
-                        <input type="number" id="input-jours-fixer" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-center font-black text-lg text-emerald-400" placeholder="Ex: 30" value="30">
+                        <input type="number" id="input-jours-fixer" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-center font-black text-lg text-emerald-400" value="30">
                         <span class="flex items-center text-slate-400 font-bold px-2">Jours</span>
                     </div>
                     <div class="flex gap-1.5 mt-2">
@@ -314,7 +362,7 @@
 
                 <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Ajout de Crédit Solde (CDF)</label>
-                    <input type="number" id="input-credit-fixer" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 font-black text-emerald-400" placeholder="0 CDF" value="0">
+                    <input type="number" id="input-credit-fixer" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 font-black text-emerald-400" value="0">
                 </div>
             </div>
 
@@ -324,11 +372,16 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT & INITIALISATION DES GRAPHIQUES -->
+    <!-- JAVASCRIPT LOGIQUE & CHARTS -->
     <script>
         let tresor = 850000; let commissions = 145500;
         let adminCredential = { email: "admin@transvision.cd", pass: "123456" };
         let ciblePartenaire = null;
+
+        // Variables pour retenir les instances Chart.js
+        let chartRecettesDepensesInstance = null;
+        let chartClientsTypesInstance = null;
+        let chartCommunesPartInstance = null;
 
         const cguDefaut = `CONDITIONS GÉNÉRALES D'UTILISATION (CGU) — TRANSVISION\nÉditées par Global Tech Solutions SARL\n\n1. OBJET DU SERVICE :\nTransVision fournit aux partenaires transporteurs et propriétaires privés une plateforme de supervision télématique par balises SinoTrack.\n\n2. FACTURATION ET VALIDITÉ :\nLa commission est perçue sur base d'un forfait flexible au nombre de jours d'activité convenus ou mensuel.`;
 
@@ -353,7 +406,7 @@
                 document.body.className = "bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col";
                 chargerCGUAdmin();
                 initialiserGraphiquesAdmin();
-            } else { alert("❌ Accès refusé."); }
+            } else { alert("❌ Accès refusé : Identifiant ou code secret erroné."); }
         }
 
         function declencherDeconnexionAdmin() {
@@ -369,6 +422,10 @@
             document.getElementById(idPage).classList.remove('hidden');
             document.querySelectorAll('.nav-link-admin').forEach(l => { l.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"; });
             boutonClique.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/10 nav-link-admin";
+            
+            if (idPage === 'page-stats-croisees') {
+                setTimeout(initialiserGraphiquesAdmin, 100);
+            }
         }
 
         function filtrerPartenairesContrat(type) {
@@ -394,11 +451,9 @@
             const credit = parseFloat(document.getElementById('input-credit-fixer').value) || 0;
 
             if (ciblePartenaire) {
-                // Mise à jour de l'affichage du nombre de jours
                 const badgeJours = document.getElementById(ciblePartenaire.idJours);
                 if (badgeJours) badgeJours.textContent = `${nbJours} Jours`;
 
-                // Mise à jour du solde si précisé
                 if (credit > 0) {
                     const elSolde = document.getElementById(ciblePartenaire.idSolde);
                     if (elSolde) {
@@ -406,69 +461,136 @@
                         elSolde.textContent = (actuel + credit).toLocaleString() + " CDF";
                     }
                 }
-                alert(`✅ Forfait de ${ciblePartenaire.nom} ajusté à ${nbJours} jours d'accès avec succès !`);
+                alert(`✅ Forfait de ${ciblePartenaire.nom} ajusté à ${nbJours} jours avec succès !`);
             }
             fermerModalRechargeFlexible();
         }
 
-        // --- INITIALISATION DES GRAPHIQUES CHART.JS ---
-        function initialiserGraphiquesAdmin() {
-            // Graphique Courbes (Recettes / Commissions)
-            const ctxRecettes = document.getElementById('chart-recettes-admin').getContext('2d');
-            new Chart(ctxRecettes, {
-                type: 'line',
-                data: {
-                    labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
-                    datasets: [
-                        {
-                            label: 'Recettes Brutes (CDF)',
-                            data: [120000, 145000, 130000, 180000, 195000, 240000, 210000],
-                            borderColor: '#10b981',
-                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                            borderWidth: 2,
-                            tension: 0.3,
-                            fill: true
-                        },
-                        {
-                            label: 'Commissions TransVision (CDF)',
-                            data: [18000, 22000, 19500, 27000, 29000, 36000, 31500],
-                            borderColor: '#6366f1',
-                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                            borderWidth: 2,
-                            tension: 0.3,
-                            fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#94a3b8', font: { size: 10 } } } },
-                    scales: {
-                        x: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 10 } } },
-                        y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 10 } } }
-                    }
-                }
-            });
+        // --- RESTAURATION FONCTIONNALITÉ MODIFICATION IDENTIFIANTS ADMIN ---
+        function modifierAccesPropresAdmin() {
+            const nouvelEmail = document.getElementById('cfg-admin-email').value.trim();
+            const ancienPass = document.getElementById('cfg-admin-old-pass').value;
+            const nouveauPass = document.getElementById('cfg-admin-new-pass').value;
 
-            // Graphique Donut (Répartition Communes)
-            const ctxCommunes = document.getElementById('chart-communes-admin').getContext('2d');
-            new Chart(ctxCommunes, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Gombe', 'Limete', 'Lemba', 'Ngaliema', 'Kintambo'],
-                    datasets: [{
-                        data: [45, 25, 15, 10, 5],
-                        backgroundColor: ['#6366f1', '#10b981', '#0ea5e9', '#f59e0b', '#ec4899'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } } }
-                }
-            });
+            if (!nouvelEmail) {
+                alert("❌ L'adresse email d'administration ne peut pas être vide.");
+                return;
+            }
+
+            // Vérification stricte de l'ancien mot de passe
+            if (ancienPass !== adminCredential.pass) {
+                alert("❌ Erreur de sécurité : L'ancien mot de passe saisi est incorrect.");
+                return;
+            }
+
+            if (!nouveauPass || nouveauPass.length < 6) {
+                alert("❌ Le nouveau mot de passe doit comporter au moins 6 caractères.");
+                return;
+            }
+
+            // Mise à jour effective
+            adminCredential.email = nouvelEmail;
+            adminCredential.pass = nouveauPass;
+
+            // Réinitialisation des champs de saisie
+            document.getElementById('cfg-admin-old-pass').value = "";
+            document.getElementById('cfg-admin-new-pass').value = "";
+
+            alert("✅ Vos accès Super Admin ont été mis à jour avec succès !\nUtilisez vos nouveaux identifiants dès la prochaine connexion.");
+        }
+
+        // --- INITIALISATION DES 3 GRAPHIQUES DEMANDÉS ---
+        function initialiserGraphiquesAdmin() {
+            // 1. Graphique Évolution Recettes & Dépenses
+            const canvasRecettes = document.getElementById('chart-recettes-depenses');
+            if (canvasRecettes) {
+                if (chartRecettesDepensesInstance) chartRecettesDepensesInstance.destroy();
+                chartRecettesDepensesInstance = new Chart(canvasRecettes.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+                        datasets: [
+                            {
+                                label: 'Recettes Brutes (CDF)',
+                                data: [180000, 210000, 195000, 240000, 270000, 310000, 290000],
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                borderWidth: 2,
+                                tension: 0.3,
+                                fill: true
+                            },
+                            {
+                                label: 'Dépenses / Sorties de Fonds (CDF)',
+                                data: [45000, 60000, 35000, 80000, 50000, 95000, 70000],
+                                borderColor: '#f43f5e',
+                                backgroundColor: 'rgba(244, 63, 94, 0.1)',
+                                borderWidth: 2,
+                                tension: 0.3,
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { labels: { color: '#94a3b8', font: { size: 10 } } } },
+                        scales: {
+                            x: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 10 } } },
+                            y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 10 } } }
+                        }
+                    }
+                });
+            }
+
+            // 2. Graphique Répartition Clients : Commerce vs Personnel
+            const canvasClients = document.getElementById('chart-clients-types');
+            if (canvasClients) {
+                if (chartClientsTypesInstance) chartClientsTypesInstance.destroy();
+                chartClientsTypesInstance = new Chart(canvasClients.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Commercial (TransVision)', 'Personnel (CarVision)'],
+                        datasets: [{
+                            data: [72, 28], // Ex: 72% commercial vs 28% personnel
+                            backgroundColor: ['#6366f1', '#f43f5e'],
+                            borderColor: '#020617',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } }
+                        }
+                    }
+                });
+            }
+
+            // 3. Graphique Part des Communes de Kinshasa
+            const canvasCommunes = document.getElementById('chart-communes-part');
+            if (canvasCommunes) {
+                if (chartCommunesPartInstance) chartCommunesPartInstance.destroy();
+                chartCommunesPartInstance = new Chart(canvasCommunes.getContext('2d'), {
+                    type: 'pie',
+                    data: {
+                        labels: ['Gombe', 'Limete', 'Lemba', 'Ngaliema', 'Matete', 'Bandalungwa'],
+                        datasets: [{
+                            data: [35, 20, 15, 12, 10, 8],
+                            backgroundColor: ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6'],
+                            borderColor: '#020617',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } }
+                        }
+                    }
+                });
+            }
         }
     </script>
 </body>
