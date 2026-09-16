@@ -1,0 +1,17 @@
+{
+  "name": "TransVision by Global Tech Solutions",
+  "short_name": "TransVision",
+  "description": "Suivi de flotte et contrôle des recettes par Global Tech Solutions.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "logo%20192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
