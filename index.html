@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TransVision / CarVision — Espace Propriétaire (V14)</title>
+    <!-- Tailwind CSS & FontAwesome -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .blur-transition { transition: filter 0.4s ease, opacity 0.4s ease; }
+        @media print {
+            body { background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            #onglet-maintenance { display: block !important; max-h-none !important; overflow: visible !important; padding: 0 !important; }
+            .print-clean { background: transparent !important; border: 1px solid #cbd5e1 !important; color: black !important; box-shadow: none !important; }
+            .print-text { color: black !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen pb-12">
+
+    <!-- SELECTEUR D'ÉTATS POUR TESTS (Masqué à l'impression) -->
+    <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-4 max-w-md mx-auto no-print">
+        <span class="text-[10px] font-bold text-emerald-400">🛠️ DEV CONTROL :</span>
+        <div class="flex gap-1.5 font-mono">
+            <button onclick="naviguerVers('page-inscription')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[9px] px-2 py-1 rounded-lg">Déco</button>
+            <button onclick="changerModeProjet('transvision')" class="bg-indigo-600 hover:bg-indigo-700 text-slate-100 text-[9px] px-2 py-1 rounded-lg">TransVision</button>
+            <button onclick="changerModeProjet('carvision')" class="bg-rose-600 hover:bg-rose-700 text-slate-100 text-[9px] px-2 py-1 rounded-lg">CarVision</button>
+        </div>
+    </div>
+
+    <!-- MAQUETTE MOBILE PRINCIPALE -->
+    <div class="max-w-md mx-auto bg-slate-900 min-h-[850px] shadow-2xl relative overflow-hidden flex flex-col border-x border-slate-800 pb-16 print:border-none print:shadow-none print:bg-white" id="zone-flotte">
+        
+        <!-- ÉCRAN DE BLOCAGE -->
+        <div id="ecran-bloque" class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden no-print">
+            <div class="text-center p-6 bg-slate-900 border border-rose-500/30 rounded-2xl shadow-2xl space-y-3 max-w-[85%]">
+                <i class="fa-solid fa-triangle-exclamation text-4xl text-rose-500 mb-2"></i>
+                <h2 class="text-lg font-black text-slate-100">Accès Suspendu</h2>
+                <p class="text-xs text-slate-400">Votre compte partenaire présente des irrégularités.</p>
+                <button onclick="contacterWhatsApp()" class="mt-4 bg-rose-500/20 text-rose-400 border border-rose-500/30 px-4 py-2 rounded-xl text-xs font-bold"><i class="fa-brands fa-whatsapp mr-2"></i>Support</button>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- 1. ÉCRAN D'INSCRIPTION COMPLÈTE                           -->
+        <!-- ========================================================= -->
+        <div id="page-inscription" class="p-6 space-y-5 flex-1 flex flex-col justify-between no-print overflow-y-auto">
+            <div class="space-y-4 mt-2">
+                <div class="text-center">
+                    <span class="bg-emerald-500 text-slate-950 w-12 h-12 rounded-2xl flex items-center justify-center font-black text-xl mx-auto mb-2 shadow-lg shadow-emerald-500/20">TV</span>
+                    <h2 class="text-xl font-black tracking-wide">Créer un Compte</h2>
+                    <p class="text-[10px] text-slate-400">Enregistrez-vous sur le réseau global.</p>
+                </div>
+
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-3 shadow-xl">
+                    <h3 class="text-xs font-extrabold text-emerald-400 uppercase tracking-widest">Type d'Usage</h3>
+                    <div>
+                        <select id="ins-projet" onchange="adapterFormulaireInscription()" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-bold">
+                            <option value="transvision">🚌 TransVision (Commercial / Recettes)</option>
+                            <option value="carvision">🚗 CarVision (Personnel / Sécurité Antivol)</option>
+                        </select>
+                    </div>
+
+                    <h3 class="text-xs font-extrabold text-slate-300 uppercase tracking-widest mt-4 pt-4 border-t border-slate-800">Profil Propriétaire</h3>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nom Complet</label>
+                        <input type="text" id="ins-nom" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-2.5 text-xs text-slate-200" placeholder="Jean Mukendi" value="Jean Mukendi">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Téléphone RDC</label>
+                            <input type="tel" id="ins-tel" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-2.5 text-xs text-slate-200" value="+243812345678">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Commune</label>
+                            <select id="ins-commune" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-2.5 text-xs text-slate-200 font-bold conteneur-communes"></select>
+                        </div>
+                    </div>
+                    
+                    <div id="bloc-facturation">
+                        <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1 mt-2">Facturation</label>
+                        <select id="ins-type-facturation" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-2.5 text-xs text-slate-200 font-bold">
+                            <option value="rotation">Commission par rotation (500 CDF)</option>
+                            <option value="abonnement">Forfait mensuel (30 000 CDF)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <button onclick="finaliserInscription()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3.5 rounded-xl text-xs tracking-wider uppercase mt-4 shadow-lg shadow-emerald-500/10">S'enregistrer</button>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- 2. APPLICATION MOBILE PRINCIPALE (CONNECTÉE)               -->
+        <!-- ========================================================= -->
+        <div id="app-proprietaire" class="flex-1 flex flex-col hidden relative">
+            
+            <!-- HEADER -->
+            <header class="p-5 border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-20 no-print">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <h1 id="lbl-nom-partenaire" class="text-sm font-black text-slate-100">Jean Mukendi</h1>
+                            <span id="lbl-commune-badge" class="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-bold">Gombe</span>
+                        </div>
+                        <span id="badge-projet" class="text-[9px] bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider mt-1 inline-block">TransVision</span>
+                    </div>
+                    <span class="flex items-center gap-1.5 bg-emerald-500/10 text-emerald-400 text-[10px] px-2.5 py-1 rounded-full font-black">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> CONNECTÉ
+                    </span>
+                </div>
+
+                <!-- PORTFOLIO FINANCIER (Masqué si CarVision) -->
+                <div id="bloc-header-finance" class="bg-slate-950 p-4 rounded-2xl border border-slate-850 shadow-inner">
+                    <div class="flex justify-between items-end">
+                        <div>
+                            <p class="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">Portefeuille Unique</p>
+                            <span id="lbl-solde-valeur" class="text-2xl font-black text-slate-100">32 500 <span class="text-emerald-400 text-sm">CDF</span></span>
+                        </div>
+                        <button onclick="ouvrirModalGestion()" class="bg-emerald-500 text-slate-950 font-black text-[11px] px-4 py-2.5 rounded-xl flex items-center gap-1 shadow-lg shadow-emerald-500/10">
+                            <i class="fa-solid fa-wallet"></i> Recharger
+                        </button>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- ONGLET A : LA FLOTTE -->
+            <div id="onglet-flotte" class="p-4 space-y-4 blur-transition class-onglet no-print pb-32">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ma Flotte (<span id="txt-compteur-vehicules">0</span>)</h2>
+                    <span class="text-[10px] text-slate-500"><i class="fa-solid fa-signal mr-1"></i>SinoTrack Live</span>
+                </div>
+                <div id="conteneur-vehicules-actifs" class="space-y-4"></div>
+            </div>
+
+            <!-- ONGLET B : AJOUTER UN VÉHICULE (NOUVELLE VERSION AVEC ORIGINE/DESTINATION) -->
+            <div id="onglet-ajouter" class="p-5 space-y-4 class-onglet hidden no-print pb-32">
+                <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-4 shadow-xl">
+                    <h3 class="text-sm font-black text-slate-200 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-square-plus text-emerald-400"></i> Enregistrer un Véhicule</h3>
+                    <div class="space-y-3">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Plaque d'immatriculation</label>
+                                <input type="text" id="add-plaque" class="w-full bg-slate-900 border border-slate-800 focus:outline-none focus:border-emerald-500 rounded-xl p-2.5 text-xs text-slate-200" placeholder="Ex: KIN 4082AE">
+                            </div>
+                            <div>
+                                <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Type de véhicule</label>
+                                <select id="add-type" class="w-full bg-slate-900 border border-slate-800 focus:outline-none focus:border-emerald-500 rounded-xl p-2.5 text-xs text-slate-200">
+                                    <option value="Mini-bus Mercedes 207">Mercedes 207</option>
+                                    <option value="Taxi Classique Ketch">Taxi Ketch</option>
+                                    <option value="Jeep 4x4 Personnel">Jeep 4x4 (Personnel)</option>
+                                    <option value="Berline Personnel">Berline (Personnel)</option>
+                                    <option value="Taxi-Moto Wewa">Taxi-Moto Wewa</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- SÉLECTEURS ORIGINE ET DESTINATION -->
+                        <div id="bloc-form-itineraire" class="grid grid-cols-2 gap-2 p-2 border border-slate-800 rounded-xl bg-slate-900/50">
+                            <div>
+                                <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Point d'Origine</label>
+                                <select id="add-origine" class="w-full bg-slate-900 border border-slate-800 focus:outline-none focus:border-emerald-500 rounded-xl p-2.5 text-[10px] text-slate-200 font-bold text-emerald-400">
+                                    <option value="Global">Détection (Global) 🌐</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Point de Destination</label>
+                                <select id="add-destination" class="w-full bg-slate-900 border border-slate-800 focus:outline-none focus:border-emerald-500 rounded-xl p-2.5 text-[10px] text-slate-200 font-bold text-emerald-400">
+                                    <option value="Global">Détection (Global) 🌐</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div id="bloc-form-places">
+                                <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Places Assises</label>
+                                <input type="number" id="add-places" class="w-full bg-slate-900 border border-slate-850 focus:outline-none focus:border-emerald-500 rounded-xl p-2.5 text-xs text-slate-200" placeholder="Ex: 18" value="18">
+                            </div>
+                            <div class="col-span-2">
+                                <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Numéro IMEI SinoTrack</label>
+                                <input type="text" id="add-imei" class="w-full bg-slate-900 border border-slate-800 focus:outline-none focus:border-emerald-500 rounded-xl p-3 text-xs text-slate-200 font-mono" placeholder="Ex: 865241092837401">
+                            </div>
+                        </div>
+                        <button onclick="validerAjoutVehicule()" class="w-full bg-emerald-500 text-slate-950 font-black py-3 rounded-xl text-xs uppercase mt-2">Enregistrer le Véhicule</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ONGLET C : ANALYSE DES PERFORMANCES (Réservé TransVision) -->
+            <div id="onglet-analyses" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Performances & Audits</h2>
+                    <div id="badge-filtre-analyse" class="text-[9px] bg-slate-800 text-slate-400 font-bold px-2 py-0.5 rounded flex items-center gap-1"><span>Vue Globale Flotte</span></div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-1">
+                        <span class="text-[9px] text-slate-500 uppercase font-black">Recettes Target</span>
+                        <p id="an-recettes" class="text-lg font-black text-emerald-400">0 CDF</p>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-1">
+                        <span class="text-[9px] text-slate-500 uppercase font-black">Trajets Validés</span>
+                        <p id="an-rotations" class="text-lg font-black text-slate-100">0 rot.</p>
+                    </div>
+                </div>
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-xs font-black uppercase text-slate-200">Rendement Flotte</h4>
+                        <button id="btn-reset-analyse" onclick="reinitialiserFiltreAnalyse()" class="text-[9px] text-amber-400 font-bold hidden hover:underline"><i class="fa-solid fa-arrow-rotate-left mr-1"></i>Voir Tout</button>
+                    </div>
+                    <div id="an-liste-progress" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <!-- ONGLET D : RAPPORT DE MOUVEMENTS -->
+            <div id="onglet-maintenance" class="p-4 space-y-4 class-onglet hidden overflow-y-auto max-h-[620px] pb-32 print:pb-0 print:overflow-visible">
+                <div class="flex justify-between items-center no-print">
+                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rapport de Mouvements</h2>
+                    <button onclick="window.print()" class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded flex items-center gap-1 hover:bg-emerald-500/20"><i class="fa-solid fa-print"></i> PDF</button>
+                </div>
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-2.5 print-clean">
+                    <h3 class="text-xs font-black uppercase text-slate-200 flex items-center gap-1.5 print-text"><i class="fa-solid fa-satellite-dish text-indigo-400 no-print"></i> Audit Diagnostic Matériel</h3>
+                    <div class="grid grid-cols-2 gap-2 text-[10px] font-mono text-slate-400 bg-slate-900 p-3 rounded-xl border border-slate-850 print-clean print-text">
+                        <div class="space-y-1">
+                            <p>🔌 Traceur : <span class="text-emerald-500 font-bold">En Ligne</span></p>
+                            <p>🔋 Batterie : <span class="text-emerald-500 font-bold">12.6V (OK)</span></p>
+                            <p>📡 Signal GPS : <span class="text-emerald-500 font-bold">Excellent</span></p>
+                        </div>
+                        <div class="space-y-1">
+                            <p>📶 Réseau : <span class="text-emerald-500 font-bold">Vodacom 4G</span></p>
+                            <p>⚡ Sabotage : <span class="text-emerald-500 font-bold">Zéro Alerte</span></p>
+                            <p>🚗 Compteur : <span class="text-emerald-500 font-bold">142 km</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ONGLET E : PROFIL -->
+            <div id="onglet-profil" class="p-4 space-y-4 class-onglet hidden overflow-y-auto max-h-[580px] no-print pb-32">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mon Profil & Sécurité</h2>
+                    <span class="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-mono font-bold">ID: #TV-9021</span>
+                </div>
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-3 shadow-xl">
+                    <h3 class="text-xs font-black uppercase text-slate-200 flex items-center gap-1.5"><i class="fa-solid fa-user-gear text-indigo-400"></i> Informations Personnelles</h3>
+                    <button onclick="declencherDeconnexion()" class="w-full bg-rose-500/10 border border-rose-500/20 text-rose-400 font-black py-3 rounded-xl text-xs uppercase flex items-center justify-center gap-2 mt-4"><i class="fa-solid fa-power-off"></i> Se Déconnecter</button>
+                </div>
+            </div>
+
+            <!-- BARRE DE NAVIGATION BASSE -->
+            <nav class="absolute bottom-0 inset-x-0 bg-slate-950 border-t border-slate-800 h-16 flex justify-around items-center z-40 no-print px-1">
+                <button onclick="changerOnglet('onglet-flotte', this)" class="flex flex-col items-center justify-center gap-1 text-emerald-400 btn-nav flex-1">
+                    <i class="fa-solid fa-bus text-sm"></i><span class="text-[7px] font-bold whitespace-nowrap">Flotte</span>
+                </button>
+                <button id="nav-analyses" onclick="changerOnglet('onglet-analyses', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1 hover:text-slate-300">
+                    <i class="fa-solid fa-chart-pie text-sm"></i><span class="text-[7px] font-bold whitespace-nowrap">Analyses</span>
+                </button>
+                <button onclick="changerOnglet('onglet-maintenance', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1 hover:text-slate-300">
+                    <i class="fa-solid fa-folder-open text-sm"></i><span class="text-[7px] font-bold whitespace-nowrap">Rapport</span>
+                </button>
+                <button onclick="changerOnglet('onglet-ajouter', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1 hover:text-slate-300">
+                    <i class="fa-solid fa-square-plus text-sm"></i><span class="text-[7px] font-bold whitespace-nowrap">Nouveau</span>
+                </button>
+                <button onclick="changerOnglet('onglet-profil', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1 hover:text-slate-300">
+                    <i class="fa-solid fa-user text-sm"></i><span class="text-[7px] font-bold whitespace-nowrap">Profil</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- MODAL DE RECHARGE -->
+        <div id="modal-gestion" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl p-5 space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                    <h3 class="font-bold text-sm text-slate-100">Recharger</h3>
+                    <button onclick="fermerModalGestion()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-850 text-xs font-mono text-slate-300 space-y-1">
+                    <p class="flex justify-between"><span>🔵 M-Pesa Admin :</span> <span class="text-slate-100 font-bold">+243 812 000 000</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CODE JAVASCRIPT -->
+    <script>
+        // --- 1. BASE DE DONNÉES DYNAMIQUE DES ITINÉRAIRES (Extrait représentatif) ---
+        const referentielItineraires = {
+            "KINGASANI PASCAL — ROUTE MOKALI PONT MANGO": { tarif: 1500, distance: 4.5, distanceDeviee: 5.3 },
+            "KINGASANI PASCAL — MIKONDO BOSAWA": { tarif: 500, distance: 3.0, distanceDeviee: 3.6 },
+            "KINGASANI PASCAL — AEROPORT DE N'DJILI": { tarif: 500, distance: 5.5, distanceDeviee: 6.2 },
+            "KINTAMBO MAGASIN — KINTAMBO CIMETIERE": { tarif: 1000, distance: 1.8, distanceDeviee: 2.3 },
+            "KINTAMBO MAGASIN — QUADO SAI SAI": { tarif: 500, distance: 1.2, distanceDeviee: 1.6 },
+            "MARCHE SELEMBAO — U.P.N.": { tarif: 1000, distance: 5.5, distanceDeviee: 6.7 },
+            "BANDALUNGWA MOULAERT — U.P.N.": { tarif: 2000, distance: 5.8, distanceDeviee: 7.0 },
+            "MARCHE MATETE — N'DJILI SAINTE THERESE": { tarif: 1500, distance: 4.2, distanceDeviee: 5.2 },
+            "GARE CENTRALE — UPN": { tarif: 1500, distance: 12.5, distanceDeviee: 15.0 },
+            "ROND POINT VICTOIRE — UPN": { tarif: 1500, distance: 9.5, distanceDeviee: 11.5 },
+            "MARCHE CENTRAL — KINGASANI YA SUKA": { tarif: 1500, distance: 15.5, distanceDeviee: 18.5 }
+        };
+
+        const communesKinshasa = ["Bandalungwa", "Gombe", "Kintambo", "Lemba", "Limete", "Matete", "Ngaliema"];
+
+        let client = {
+            nom: "Jean Mukendi",
+            tel: "+243 812 345 678",
+            commune: "Gombe",
+            projet: "transvision", // 'transvision' ou 'carvision'
+            mode: "rotation",
+            solde: 32500,
+            vehicules: [
+                { plaque: "KIN 4082AE", type: "Mini-bus Mercedes 207", places: 18, imei: "865241092837401", rotations: 12, itineraire: "GARE CENTRALE — UPN", moteurCoupe: false }
+            ]
+        };
+
+        // --- FONCTIONS INITIALISATION ---
+        function initialiserCommunes() {
+            const conteneurs = document.querySelectorAll('.conteneur-communes');
+            conteneurs.forEach(select => {
+                select.innerHTML = "";
+                communesKinshasa.forEach(c => {
+                    const selected = c === client.commune ? "selected" : "";
+                    select.insertAdjacentHTML('beforeend', `<option value="${c}" ${selected}>${c}</option>`);
+                });
+            });
+        }
+
+        function initialiserOriginesDestinations() {
+            const selectOrigine = document.getElementById('add-origine');
+            const selectDestination = document.getElementById('add-destination');
+            if(!selectOrigine || !selectDestination) return;
+
+            const originesSet = new Set();
+            const destinationsSet = new Set();
+
+            Object.keys(referentielItineraires).forEach(trajet => {
+                const parts = trajet.split(' — ');
+                if(parts.length === 2) {
+                    originesSet.add(parts[0]);
+                    destinationsSet.add(parts[1]);
+                }
+            });
+
+            const originesTriees = Array.from(originesSet).sort();
+            const destinationsTriees = Array.from(destinationsSet).sort();
+
+            originesTriees.forEach(org => selectOrigine.insertAdjacentHTML('beforeend', `<option value="${org}">${org}</option>`));
+            destinationsTriees.forEach(dest => selectDestination.insertAdjacentHTML('beforeend', `<option value="${dest}">${dest}</option>`));
+        }
+
+        // --- GESTION NAVIGATION & UI ---
+        function naviguerVers(id) {
+            document.getElementById('page-inscription').classList.add('hidden');
+            document.getElementById('app-proprietaire').classList.add('hidden');
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function changerOnglet(idOnglet, boutonActif) {
+            const onglets = document.querySelectorAll('.class-onglet');
+            onglets.forEach(ong => ong.classList.add('hidden'));
+            document.getElementById(idOnglet).classList.remove('hidden');
+            const boutons = document.querySelectorAll('.btn-nav');
+            boutons.forEach(btn => { btn.classList.remove('text-emerald-400'); btn.classList.add('text-slate-500'); });
+            boutonActif.classList.remove('text-slate-500'); boutonActif.classList.add('text-emerald-400');
+        }
+
+        function adapterFormulaireInscription() {
+            const projet = document.getElementById('ins-projet').value;
+            const blocFacturation = document.getElementById('bloc-facturation');
+            if (projet === 'carvision') { blocFacturation.classList.add('hidden'); } 
+            else { blocFacturation.classList.remove('hidden'); }
+        }
+
+        function finaliserInscription() {
+            client.nom = document.getElementById('ins-nom').value || client.nom;
+            client.commune = document.getElementById('ins-commune').value;
+            client.projet = document.getElementById('ins-projet').value;
+            if (client.projet === 'transvision') { client.mode = document.getElementById('ins-type-facturation').value; }
+            appliquerConfigurationDom();
+            naviguerVers('app-proprietaire');
+        }
+
+        function appliquerConfigurationDom() {
+            document.getElementById('lbl-nom-partenaire').textContent = client.nom;
+            document.getElementById('lbl-commune-badge').textContent = client.commune;
+            document.getElementById('txt-compteur-vehicules').textContent = client.vehicules.length;
+
+            const badgeProjet = document.getElementById('badge-projet');
+            const navAnalyses = document.getElementById('nav-analyses');
+            const blocHeaderFinance = document.getElementById('bloc-header-finance');
+            const blocFormItineraire = document.getElementById('bloc-form-itineraire');
+            const blocFormPlaces = document.getElementById('bloc-form-places');
+
+            if (client.projet === 'carvision') {
+                // UI CarVision (Personnel)
+                badgeProjet.textContent = "🚗 CarVision";
+                badgeProjet.className = "text-[9px] bg-rose-500/15 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider mt-1 inline-block";
+                navAnalyses.classList.add('hidden'); // Masquer l'onglet d'analyse
+                blocHeaderFinance.classList.add('hidden'); // Masquer le solde
+                blocFormItineraire.classList.add('hidden'); // Masquer choix de l'origine/destination
+                blocFormPlaces.classList.add('hidden');
+            } else {
+                // UI TransVision (Commercial)
+                badgeProjet.textContent = client.mode === "rotation" ? "🚌 TransVision (Rot.)" : "🚌 TransVision (Forfait)";
+                badgeProjet.className = "text-[9px] bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider mt-1 inline-block";
+                navAnalyses.classList.remove('hidden');
+                blocHeaderFinance.classList.remove('hidden');
+                blocFormItineraire.classList.remove('hidden');
+                blocFormPlaces.classList.remove('hidden');
+            }
+
+            genererCartesVehicules();
+            if(client.projet === 'transvision') genererAnalysesFlotte();
+        }
+
+        // --- GÉNÉRATION DYNAMIQUE DES VÉHICULES ---
+        function calculerRecette(itineraire, rotations, places) {
+            const donneesTrajet = referentielItineraires[itineraire];
+            const tarifUnitaire = donneesTrajet ? donneesTrajet.tarif : 500;
+            return rotations * places * tarifUnitaire;
+        }
+
+        function genererCartesVehicules() {
+            const conteneur = document.getElementById('conteneur-vehicules-actifs');
+            conteneur.innerHTML = "";
+            client.vehicules.forEach((v, index) => {
+                
+                let contenuSpecifique = "";
+
+                if (client.projet === 'transvision') {
+                    // AFFICHAGE COMMERCIAL (Recettes)
+                    const gainEstime = calculerRecette(v.itineraire, v.rotations, v.places);
+                    contenuSpecifique = `
+                        <p class="text-[10px] text-slate-400 mt-1 font-bold"><i class="fa-solid fa-route text-emerald-400"></i> Mode : ${v.itineraire}</p>
+                        <div class="grid grid-cols-3 gap-2 bg-slate-900/50 p-3 rounded-xl text-center text-xs mt-3 border border-slate-800">
+                            <div><span class="text-[9px] text-slate-500 block">Rotations</span><span class="font-black text-slate-200">${v.rotations}</span></div>
+                            <div><span class="text-[9px] text-slate-500 block">Places</span><span class="font-black text-slate-200">${v.places} pl.</span></div>
+                            <div><span class="text-[9px] text-slate-500 block">Recette</span><span class="font-black text-emerald-400">${gainEstime.toLocaleString()} CDF</span></div>
+                        </div>`;
+                } else {
+                    // AFFICHAGE PERSONNEL (CarVision - Coupure Moteur)
+                    const btnMoteur = v.moteurCoupe 
+                        ? `<button onclick="restaurerMoteur(${index})" class="w-full bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 font-black py-3 rounded-xl text-xs uppercase flex items-center justify-center gap-2 mt-4"><i class="fa-solid fa-unlock"></i> Restaurer Moteur</button>`
+                        : `<button onclick="arreterMoteur(${index})" class="w-full bg-rose-500/20 border border-rose-500/50 text-rose-400 font-black py-3 rounded-xl text-xs uppercase flex items-center justify-center gap-2 mt-4"><i class="fa-solid fa-lock"></i> Arrêt Moteur (Urgence)</button>`;
+                    
+                    contenuSpecifique = `
+                        <div class="bg-slate-900/50 p-3 rounded-xl text-xs mt-3 border border-slate-800">
+                            <p class="text-[10px] text-slate-400 font-mono"><i class="fa-solid fa-location-dot text-emerald-400"></i> Localisation GPS Active</p>
+                        </div>
+                        ${btnMoteur}
+                    `;
+                }
+
+                const carteHtml = `
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850">
+                        <div>
+                            <span class="text-[9px] font-black bg-slate-800 text-slate-300 px-2 py-0.5 rounded uppercase">${v.type}</span>
+                            <h3 class="text-base font-black mt-1 text-slate-100">${v.plaque}</h3>
+                        </div>
+                        ${contenuSpecifique}
+                    </div>`;
+                conteneur.insertAdjacentHTML('beforeend', carteHtml);
+            });
+        }
+
+        // --- COMMANDES SINOTRACK (CARVISION) ---
+        function arreterMoteur(index) {
+            if(confirm("🚨 DANGER : Couper l'alimentation carburant du véhicule ?")) {
+                client.vehicules[index].moteurCoupe = true;
+                alert("📡 Commande SMS 9400000 envoyée au traceur SinoTrack.\nLe véhicule va s'immobiliser.");
+                genererCartesVehicules();
+            }
+        }
+
+        function restaurerMoteur(index) {
+            client.vehicules[index].moteurCoupe = false;
+            alert("🟢 Commande SMS 9410000 envoyée.\nAlimentation rétablie.");
+            genererCartesVehicules();
+        }
+
+        // --- AJOUT DE VÉHICULE (Combiner Origine et Destination) ---
+        function validerAjoutVehicule() {
+            const plaque = document.getElementById('add-plaque').value;
+            const type = document.getElementById('add-type').value;
+            const imei = document.getElementById('add-imei').value;
+            
+            let itineraire = "Usage Personnel";
+            let places = 0;
+
+            if(client.projet === 'transvision') {
+                const origine = document.getElementById('add-origine').value;
+                const destination = document.getElementById('add-destination').value;
+                places = parseInt(document.getElementById('add-places').value) || 18;
+                itineraire = (origine === "Global" || destination === "Global") ? "Détection Globale 🌐" : `${origine} — ${destination}`;
+            }
+
+            if(!plaque || !imei) { alert("Saisie incomplète (Plaque ou IMEI manquant)."); return; }
+            
+            client.vehicules.push({ plaque: plaque, type: type, places: places, imei: imei, rotations: 0, itineraire: itineraire, moteurCoupe: false });
+            appliquerConfigurationDom();
+            
+            document.getElementById('add-plaque').value = ""; document.getElementById('add-imei').value = "";
+            alert(`✅ Véhicule ${plaque} enregistré avec succès.`);
+            changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
+        }
+
+        function genererAnalysesFlotte() {
+            // (Logique conservée pour le modèle commercial)
+            let totalGains = 0; let totalRotations = 0;
+            const conteneurProgress = document.getElementById('an-liste-progress');
+            conteneurProgress.innerHTML = "";
+            client.vehicules.forEach((v) => {
+                const gains = calculerRecette(v.itineraire, v.rotations, v.places);
+                totalGains += gains; totalRotations += v.rotations;
+                conteneurProgress.insertAdjacentHTML('beforeend', `<div class="space-y-1 text-xs bg-slate-900/40 p-2 rounded-xl border border-slate-850/60 flex items-center justify-between gap-3"><div class="flex-1 space-y-1"><div class="flex justify-between font-bold"><span class="text-slate-300">${v.plaque}</span><span class="text-emerald-400">${gains.toLocaleString()} CDF</span></div><div class="w-full bg-slate-950 rounded-full h-1"><div class="bg-emerald-500 h-1 rounded-full" style="width: 65%"></div></div></div></div>`);
+            });
+            document.getElementById('an-recettes').textContent = totalGains.toLocaleString() + " CDF";
+            document.getElementById('an-rotations').textContent = totalRotations + " rot.";
+        }
+
+        function changerModeProjet(mode) { client.projet = mode; appliquerConfigurationDom(); }
+        function declencherDeconnexion() { naviguerVers('page-inscription'); }
+        function ouvrirModalGestion() { document.getElementById('modal-gestion').classList.remove('hidden'); }
+        function fermerModalGestion() { document.getElementById('modal-gestion').classList.add('hidden'); }
+
+        // --- INIT ---
+        initialiserCommunes();
+        initialiserOriginesDestinations();
+        adapterFormulaireInscription();
+        naviguerVers('page-inscription');
+    </script>
+</body>
+</html>
