@@ -11,9 +11,10 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#020617">
 
-    <!-- Tailwind CSS & FontAwesome -->
+    <!-- Tailwind CSS, FontAwesome & Chart.js -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .blur-transition { transition: filter 0.4s ease, opacity 0.4s ease; }
         @media print {
@@ -25,12 +26,18 @@
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen pb-12" style="background: linear-gradient(rgba(2, 6, 23, 0.92), rgba(2, 6, 23, 0.96)), url('VISION.png') center/cover fixed no-repeat;">
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen relative overflow-x-hidden">
+
+    <!-- FOND D'ÉCRAN VISION.PNG PLEIN ÉCRAN FLUIDE ET FIXE -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <img src="VISION.png" alt="Fond d'écran TransVision" class="w-full h-full object-cover object-center opacity-25 select-none scale-105">
+        <div class="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/70 to-slate-950/90"></div>
+    </div>
 
     <!-- BANNIÈRE INSTALLATION PWA -->
-    <div id="pwa-install-banner" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-slate-900 border border-emerald-500/50 text-slate-100 p-3 rounded-2xl shadow-2xl flex items-center gap-3 z-[100] w-[90%] max-w-sm hidden no-print">
+    <div id="pwa-install-banner" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-slate-900/90 backdrop-blur border border-emerald-500/50 text-slate-100 p-3 rounded-2xl shadow-2xl flex items-center gap-3 z-[100] w-[90%] max-w-sm hidden no-print">
         <div class="w-10 h-10 rounded-xl overflow-hidden shadow-md flex items-center justify-center bg-slate-950 flex-shrink-0">
-            <img src="logo%20192x192.png" alt="Logo" class="w-full h-full object-cover" style="transform: scale(3.5); transform-origin: center;">
+            <img src="logo%20192x192.png" alt="Logo" class="w-full h-full object-contain" style="transform: scale(2.05); transform-origin: 48% 52%;">
         </div>
         <div class="flex-1">
             <p class="text-[11px] font-black text-emerald-400">Installer TransVision</p>
@@ -41,7 +48,7 @@
     </div>
 
     <!-- SELECTEUR D'ÉTATS POUR TESTS (Masqué à l'impression) -->
-    <div class="bg-slate-900/90 backdrop-blur border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-4 max-w-md mx-auto no-print">
+    <div class="relative z-10 bg-slate-900/80 backdrop-blur border-b border-slate-800/80 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-4 max-w-md mx-auto no-print">
         <span class="text-[10px] font-bold text-emerald-400">🛠️ DEV CONTROL :</span>
         <div class="flex gap-1.5 font-mono">
             <button onclick="naviguerVers('page-auth')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[9px] px-2 py-1 rounded-lg">Déco</button>
@@ -50,8 +57,8 @@
         </div>
     </div>
 
-    <!-- MAQUETTE MOBILE PRINCIPALE AVEC FOND VISION.PNG -->
-    <div class="max-w-md mx-auto min-h-[850px] shadow-2xl relative overflow-hidden flex flex-col border-x border-slate-800 pb-16 print:border-none print:shadow-none" id="zone-flotte" style="background: linear-gradient(rgba(15, 23, 42, 0.88), rgba(2, 6, 23, 0.94)), url('VISION.png') center/cover no-repeat;">
+    <!-- MAQUETTE MOBILE PRINCIPALE TRANSPARENTE -->
+    <div class="relative z-10 max-w-md mx-auto min-h-[850px] shadow-2xl overflow-hidden flex flex-col border-x border-slate-800/70 pb-16 print:border-none print:shadow-none bg-slate-900/60 backdrop-blur-xl" id="zone-flotte">
         
         <!-- ÉCRAN DE BLOCAGE -->
         <div id="ecran-bloque" class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden no-print">
@@ -63,13 +70,13 @@
             </div>
         </div>
 
-        <!-- 1. ÉCRAN AUTHENTIFICATION : CONNEXION OU INSCRIPTION -->
+        <!-- 1. AUTHENTIFICATION : CONNEXION OU INSCRIPTION -->
         <div id="page-auth" class="p-6 space-y-5 flex-1 flex flex-col justify-between no-print overflow-y-auto">
             <div class="space-y-4 mt-1">
                 <div class="text-center">
-                    <!-- LOGO CADRÉ À 100% SANS BORDURES BLANCHES GAUCHE/DROITE -->
-                    <div class="w-20 h-20 mx-auto mb-3 rounded-2xl overflow-hidden shadow-2xl shadow-emerald-500/25 border border-emerald-500/40 flex items-center justify-center bg-slate-950">
-                        <img src="logo%20192x192.png" alt="Logo TransVision" class="w-full h-full object-cover" style="transform: scale(3.5); transform-origin: center;">
+                    <!-- LOGO PARFAITEMENT CENTRÉ AVEC TOUTES SES BORDURES -->
+                    <div class="w-20 h-20 mx-auto mb-3 rounded-2xl overflow-hidden shadow-2xl shadow-emerald-500/25 flex items-center justify-center bg-slate-950 border border-emerald-500/30">
+                        <img src="logo%20192x192.png" alt="Logo TransVision" class="w-full h-full object-contain" style="transform: scale(2.05); transform-origin: 48% 52%;">
                     </div>
                     <h2 class="text-xl font-black tracking-wide">TransVision</h2>
                     <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">by Global Tech Solutions</p>
@@ -87,7 +94,7 @@
                 </div>
 
                 <!-- VUE CONNEXION -->
-                <div id="form-connexion" class="bg-slate-950/90 backdrop-blur p-5 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
+                <div id="form-connexion" class="bg-slate-950/85 backdrop-blur p-5 rounded-2xl border border-slate-800/80 space-y-4 shadow-xl">
                     <div class="border-b border-slate-800 pb-2">
                         <h3 class="text-xs font-extrabold text-slate-200 uppercase tracking-wider">Accès Espace Partenaire</h3>
                         <p class="text-[10px] text-slate-400">Renseignez votre numéro pour retrouver vos véhicules.</p>
@@ -109,7 +116,7 @@
                 </div>
 
                 <!-- VUE INSCRIPTION -->
-                <div id="form-inscription" class="bg-slate-950/90 backdrop-blur p-4 rounded-2xl border border-slate-800 space-y-3 shadow-xl hidden">
+                <div id="form-inscription" class="bg-slate-950/85 backdrop-blur p-4 rounded-2xl border border-slate-800/80 space-y-3 shadow-xl hidden">
                     <h3 class="text-xs font-extrabold text-emerald-400 uppercase tracking-widest">Type d'Usage</h3>
                     <div>
                         <select id="ins-projet" onchange="adapterFormulaireInscription()" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-bold">
@@ -134,7 +141,6 @@
                         </div>
                     </div>
                     
-                    <!-- COMMISSION FORFAITAIRE JOURNALIÈRE OU MENSUELLE -->
                     <div id="bloc-facturation">
                         <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 mt-2">Commission Forfaitaire</label>
                         <select id="ins-type-facturation" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-2.5 text-xs text-slate-200 font-bold">
@@ -161,7 +167,7 @@
 
         <!-- 2. APPLICATION MOBILE PRINCIPALE (CONNECTÉE) -->
         <div id="app-proprietaire" class="flex-1 flex flex-col hidden relative">
-            <header class="p-5 border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-20 no-print">
+            <header class="p-5 border-b border-slate-800/80 bg-slate-950/85 backdrop-blur sticky top-0 z-20 no-print">
                 <div class="flex justify-between items-center mb-4">
                     <div>
                         <div class="flex items-center gap-1.5">
@@ -173,19 +179,19 @@
                             <span class="text-[8px] text-slate-400 font-mono">by Global Tech Solutions</span>
                         </div>
                     </div>
-                    <!-- LOGO HEADER CADRÉ -->
-                    <div class="w-9 h-9 rounded-xl overflow-hidden border border-slate-700 shadow-md flex items-center justify-center bg-slate-950 flex-shrink-0">
-                        <img src="logo%20192x192.png" alt="Logo" class="w-full h-full object-cover" style="transform: scale(3.5); transform-origin: center;">
+                    <div class="w-9 h-9 rounded-xl overflow-hidden shadow-md flex items-center justify-center bg-slate-950 flex-shrink-0 border border-slate-800">
+                        <img src="logo%20192x192.png" alt="Logo" class="w-full h-full object-contain" style="transform: scale(2.05); transform-origin: 48% 52%;">
                     </div>
                 </div>
 
-                <div id="bloc-header-finance" class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800 shadow-inner">
+                <div id="bloc-header-finance" class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800/80 shadow-inner">
                     <div class="flex justify-between items-end">
                         <div>
                             <p class="text-[9px] text-slate-400 uppercase font-black tracking-widest mb-1">Portefeuille Unique</p>
                             <span id="lbl-solde-valeur" class="text-2xl font-black text-slate-100">32 500 <span class="text-emerald-400 text-sm">CDF</span></span>
+                            <span id="lbl-jours-restants" class="block text-[10px] text-emerald-400 font-mono font-bold mt-1">Actif : 26 jours restants</span>
                         </div>
-                        <button onclick="ouvrirModalGestion()" class="bg-emerald-500 text-slate-950 font-black text-[11px] px-4 py-2.5 rounded-xl flex items-center gap-1 shadow-lg shadow-emerald-500/10">
+                        <button onclick="ouvrirModalRecharge()" class="bg-emerald-500 text-slate-950 font-black text-[11px] px-4 py-2.5 rounded-xl flex items-center gap-1 shadow-lg shadow-emerald-500/10">
                             <i class="fa-solid fa-wallet"></i> Recharger
                         </button>
                     </div>
@@ -195,7 +201,7 @@
             <!-- ONGLET FLOTTE -->
             <div id="onglet-flotte" class="p-4 space-y-4 blur-transition class-onglet no-print pb-32">
                 <div class="flex justify-between items-center">
-                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ma Flotte (<span id="txt-compteur-vehicules">0</span>)</h2>
+                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ma Flotte (<span id="txt-compteur-vehicules">1</span>)</h2>
                     <span class="text-[10px] text-slate-400"><i class="fa-solid fa-signal mr-1 text-emerald-400 animate-pulse"></i>SinoTrack Live</span>
                 </div>
                 <div id="conteneur-vehicules-actifs" class="space-y-4"></div>
@@ -203,7 +209,7 @@
 
             <!-- ONGLET AJOUT VÉHICULE -->
             <div id="onglet-ajouter" class="p-5 space-y-4 class-onglet hidden no-print pb-32">
-                <div class="bg-slate-950/90 backdrop-blur p-5 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
+                <div class="bg-slate-950/85 backdrop-blur p-5 rounded-2xl border border-slate-800/80 space-y-4 shadow-xl">
                     <h3 class="text-sm font-black text-slate-200 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-square-plus text-emerald-400"></i> Enregistrer un Véhicule</h3>
                     <div class="space-y-3">
                         <div class="grid grid-cols-2 gap-2">
@@ -256,24 +262,27 @@
             <!-- ONGLET ANALYSES -->
             <div id="onglet-analyses" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
                 <div class="flex justify-between items-center">
-                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Performances & Audits</h2>
-                    <div id="badge-filtre-analyse" class="text-[9px] bg-slate-800 text-slate-400 font-bold px-2 py-0.5 rounded flex items-center gap-1"><span>Vue Globale Flotte</span></div>
+                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Performances Flotte</h2>
                 </div>
+
+                <div class="bg-slate-950/85 backdrop-blur p-4 rounded-2xl border border-slate-800/80 space-y-2">
+                    <h3 class="text-xs font-black uppercase text-emerald-400 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-simple"></i> Recettes Journalières (Semaine)
+                    </h3>
+                    <div class="h-48 relative">
+                        <canvas id="chart-recettes-partenaire"></canvas>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800 space-y-1">
-                        <span class="text-[9px] text-slate-400 uppercase font-black">Recettes Target</span>
-                        <p id="an-recettes" class="text-lg font-black text-emerald-400">0 CDF</p>
+                    <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800/80 space-y-1">
+                        <span class="text-[9px] text-slate-400 uppercase font-black">Total Semaine</span>
+                        <p class="text-lg font-black text-emerald-400">180 000 CDF</p>
                     </div>
-                    <div class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800 space-y-1">
-                        <span class="text-[9px] text-slate-400 uppercase font-black">Trajets Validés</span>
-                        <p id="an-rotations" class="text-lg font-black text-slate-100">0 rot.</p>
+                    <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800/80 space-y-1">
+                        <span class="text-[9px] text-slate-400 uppercase font-black">Rotations Moyenne</span>
+                        <p class="text-lg font-black text-slate-100">11 rot. / j</p>
                     </div>
-                </div>
-                <div class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800 space-y-3">
-                    <div class="flex justify-between items-center">
-                        <h4 class="text-xs font-black uppercase text-slate-200">Rendement Flotte</h4>
-                    </div>
-                    <div id="an-liste-progress" class="space-y-3"></div>
                 </div>
             </div>
 
@@ -306,7 +315,7 @@
                     <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mon Profil & Sécurité</h2>
                     <span class="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-mono font-bold">ID: #TV-9021</span>
                 </div>
-                <div class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800 space-y-3 shadow-xl">
+                <div class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800/80 space-y-3 shadow-xl">
                     <button onclick="ouvrirModalCGU()" class="w-full bg-slate-900 border border-slate-800 hover:border-emerald-500/50 text-slate-300 font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2">
                         <i class="fa-solid fa-file-contract text-emerald-400"></i> Consulter les CGU
                     </button>
@@ -322,52 +331,69 @@
             <!-- BARRE DE NAVIGATION BASSE -->
             <nav class="absolute bottom-0 inset-x-0 bg-slate-950/95 backdrop-blur border-t border-slate-800 h-16 flex justify-around items-center z-40 no-print px-1">
                 <button onclick="changerOnglet('onglet-flotte', this)" class="flex flex-col items-center justify-center gap-1 text-emerald-400 btn-nav flex-1">
-                    <i class="fa-solid fa-bus text-sm"></i><span class="text-[7px] font-bold whitespace-nowrap">Flotte</span>
+                    <i class="fa-solid fa-bus text-sm"></i><span class="text-[7px] font-bold">Flotte</span>
                 </button>
                 <button id="nav-analyses" onclick="changerOnglet('onglet-analyses', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1 hover:text-slate-300">
-                    <i class="fa-solid fa-chart-pie text-sm"></i><span class="text-[7px] font-bold whitespace-nowrap">Analyses</span>
+                    <i class="fa-solid fa-chart-pie text-sm"></i><span class="text-[7px] font-bold">Analyses</span>
                 </button>
                 <button onclick="changerOnglet('onglet-maintenance', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1 hover:text-slate-300">
-                    <i class="fa-solid fa-folder-open text-sm"></i><span class="text-[7px] font-bold whitespace-nowrap">Rapport</span>
+                    <i class="fa-solid fa-folder-open text-sm"></i><span class="text-[7px] font-bold">Rapport</span>
                 </button>
                 <button onclick="changerOnglet('onglet-ajouter', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1 hover:text-slate-300">
-                    <i class="fa-solid fa-square-plus text-sm"></i><span class="text-[7px] font-bold whitespace-nowrap">Nouveau</span>
+                    <i class="fa-solid fa-square-plus text-sm"></i><span class="text-[7px] font-bold">Nouveau</span>
                 </button>
                 <button onclick="changerOnglet('onglet-profil', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1 hover:text-slate-300">
-                    <i class="fa-solid fa-user text-sm"></i><span class="text-[7px] font-bold whitespace-nowrap">Profil</span>
+                    <i class="fa-solid fa-user text-sm"></i><span class="text-[7px] font-bold">Profil</span>
                 </button>
             </nav>
         </div>
 
-        <!-- MODAL RECHARGE -->
-        <div id="modal-gestion" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl p-5 space-y-4">
+        <!-- MODAL RECHARGE FLEXIBLE PAR JOURS -->
+        <div id="modal-recharge-partenaire" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
                 <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                    <h3 class="font-bold text-sm text-slate-100">Recharger</h3>
-                    <button onclick="fermerModalGestion()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+                    <h3 class="font-black text-sm text-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-emerald-400"></i> Durée de Recharge Partenaire
+                    </h3>
+                    <button onclick="fermerModalRecharge()" class="text-slate-500 hover:text-slate-300"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-                <div class="bg-slate-950 p-4 rounded-xl border border-slate-850 text-xs font-mono text-slate-300 space-y-1">
-                    <p class="flex justify-between"><span>🔵 M-Pesa Admin :</span> <span class="text-slate-100 font-bold">+243 812 000 000</span></p>
+
+                <div class="space-y-3">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase">Nombre de Jours Souhaité</label>
+                    <div class="grid grid-cols-4 gap-1.5">
+                        <button onclick="selectionnerDureeRecharge(1)" class="btn-duree bg-slate-800 text-slate-200 py-2 rounded-xl text-xs font-black">1 j</button>
+                        <button onclick="selectionnerDureeRecharge(7)" class="btn-duree bg-slate-800 text-slate-200 py-2 rounded-xl text-xs font-black">7 j</button>
+                        <button onclick="selectionnerDureeRecharge(15)" class="btn-duree bg-slate-800 text-slate-200 py-2 rounded-xl text-xs font-black">15 j</button>
+                        <button onclick="selectionnerDureeRecharge(30)" class="btn-duree bg-emerald-500 text-slate-950 py-2 rounded-xl text-xs font-black">30 j</button>
+                    </div>
+
+                    <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-1 text-center">
+                        <span class="text-[9px] text-slate-400 uppercase font-black">Montant Requis</span>
+                        <p id="prix-recharge-calcule" class="text-xl font-black text-emerald-400">30 000 CDF</p>
+                        <span id="label-recharge-details" class="text-[9px] text-slate-500 block">Accès illimité pour 30 jours</span>
+                    </div>
+
+                    <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-850 text-xs font-mono text-slate-300">
+                        <p class="text-[10px]">Passerelle M-Pesa / Airtel :</p>
+                        <p class="text-emerald-400 font-bold mt-0.5">+243 812 000 000</p>
+                    </div>
                 </div>
+
+                <button onclick="confirmerDemandeRecharge()" class="w-full bg-emerald-500 text-slate-950 font-black py-3 rounded-xl uppercase text-xs shadow-lg shadow-emerald-500/10">
+                    Confirmer la Demande
+                </button>
             </div>
         </div>
 
-        <!-- MODAL LECTURE CGU -->
+        <!-- MODAL CGU -->
         <div id="modal-cgu" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
             <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md max-h-[80vh] flex flex-col overflow-hidden shadow-2xl">
                 <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
-                    <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-file-contract text-emerald-400"></i>
-                        <h3 class="font-black text-xs text-slate-100 uppercase tracking-wider">Conditions d'Utilisation</h3>
-                    </div>
-                    <button onclick="fermerModalCGU()" class="text-slate-400 hover:text-slate-100 text-sm p-1">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
+                    <h3 class="font-black text-xs text-slate-100 uppercase">Conditions d'Utilisation TransVision</h3>
+                    <button onclick="fermerModalCGU()" class="text-slate-400 hover:text-slate-100 text-sm p-1"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-                <div class="p-5 overflow-y-auto space-y-3 text-slate-300 text-xs font-mono leading-relaxed whitespace-pre-wrap" id="zone-texte-cgu"></div>
-                <div class="p-3 border-t border-slate-800 bg-slate-950/50 text-right">
-                    <button onclick="fermerModalCGU()" class="bg-emerald-500 text-slate-950 font-black text-xs px-4 py-2 rounded-xl">Fermer</button>
-                </div>
+                <div class="p-5 overflow-y-auto text-slate-300 text-xs font-mono leading-relaxed whitespace-pre-wrap" id="zone-texte-cgu"></div>
+                <div class="p-3 border-t border-slate-800 text-right"><button onclick="fermerModalCGU()" class="bg-emerald-500 text-slate-950 font-black text-xs px-4 py-2 rounded-xl">Fermer</button></div>
             </div>
         </div>
     </div>
@@ -394,17 +420,21 @@
             }
         });
 
-        // Gestion CGU dynamiques
-        function ouvrirModalCGU() {
-            const texteCGU = localStorage.getItem('transvision_cgu') || 
-                "CONDITIONS GÉNÉRALES D'UTILISATION (CGU) — TRANSVISION\nÉditées par Global Tech Solutions\n\n1. OBJET DU SERVICE :\nTransVision fournit un service de suivi GPS et de contrôle d'activité de flotte.\n\n2. FACTURATION :\nLa commission est perçue sur base d'un forfait journalier (par jour d'activité) ou d'un forfait mensuel.\n\n3. GÉOLOCALISATION :\nLe propriétaire autorise la transmission continue des coordonnées GPS.";
-            document.getElementById('zone-texte-cgu').textContent = texteCGU;
-            document.getElementById('modal-cgu').classList.remove('hidden');
-        }
+        let joursChoisis = 30;
+        let chartPartenaireInstance = null;
 
-        function fermerModalCGU() {
-            document.getElementById('modal-cgu').classList.add('hidden');
-        }
+        let client = {
+            nom: "Jean Mukendi",
+            tel: "+243812345678",
+            commune: "Gombe",
+            projet: "transvision",
+            mode: "jour",
+            solde: 32500,
+            joursRestants: 26,
+            vehicules: [
+                { plaque: "KIN 4082AE", type: "Mini-bus Mercedes 207", places: 18, imei: "865241092837401", rotations: 12, itineraire: "GARE CENTRALE — UPN", moteurCoupe: false }
+            ]
+        };
 
         const referentielItineraires = {
             "KINGASANI PASCAL — ROUTE MOKALI PONT MANGO": { tarif: 1500, distance: 4.5, distanceDeviee: 5.3 },
@@ -422,34 +452,44 @@
 
         const communesKinshasa = ["Bandalungwa", "Gombe", "Kintambo", "Lemba", "Limete", "Matete", "Ngaliema"];
 
-        let client = {
-            nom: "Jean Mukendi",
-            tel: "+243812345678",
-            commune: "Gombe",
-            projet: "transvision",
-            mode: "jour",
-            solde: 32500,
-            vehicules: [
-                { plaque: "KIN 4082AE", type: "Mini-bus Mercedes 207", places: 18, imei: "865241092837401", rotations: 12, itineraire: "GARE CENTRALE — UPN", moteurCoupe: false }
-            ]
-        };
+        function ouvrirModalCGU() {
+            document.getElementById('zone-texte-cgu').textContent = localStorage.getItem('transvision_cgu') || "CONDITIONS GÉNÉRALES D'UTILISATION (CGU) — TRANSVISION\nÉditées par Global Tech Solutions\n\n1. OBJET DU SERVICE :\nTransVision fournit un service de suivi GPS et de contrôle d'activité de flotte.\n\n2. FACTURATION :\nLa commission est perçue sur base d'un forfait journalier (par jour d'activité) ou d'un forfait mensuel.\n\n3. GÉOLOCALISATION :\nLe propriétaire autorise la transmission continue des coordonnées GPS.";
+            document.getElementById('modal-cgu').classList.remove('hidden');
+        }
+        function fermerModalCGU() { document.getElementById('modal-cgu').classList.add('hidden'); }
+
+        function ouvrirModalRecharge() { document.getElementById('modal-recharge-partenaire').classList.remove('hidden'); }
+        function fermerModalRecharge() { document.getElementById('modal-recharge-partenaire').classList.add('hidden'); }
+
+        function selectionnerDureeRecharge(jours) {
+            joursChoisis = jours;
+            const tarifParJour = 1000;
+            const total = jours * tarifParJour;
+            document.getElementById('prix-recharge-calcule').textContent = `${total.toLocaleString()} CDF`;
+            document.getElementById('label-recharge-details').textContent = `Accès illimité pour ${jours} jour(s)`;
+
+            document.querySelectorAll('.btn-duree').forEach(btn => {
+                btn.className = "btn-duree bg-slate-800 text-slate-200 py-2 rounded-xl text-xs font-black";
+            });
+            event.target.className = "btn-duree bg-emerald-500 text-slate-950 py-2 rounded-xl text-xs font-black";
+        }
+
+        function confirmerDemandeRecharge() {
+            alert(`🛰️ Demande de recharge pour ${joursChoisis} jours transmise au serveur.\nEffectuez le transfert vers la passerelle.`);
+            fermerModalRecharge();
+        }
 
         function basculerVueAuth(mode) {
-            const formConnexion = document.getElementById('form-connexion');
-            const formInscription = document.getElementById('form-inscription');
-            const btnLogin = document.getElementById('tab-btn-login');
-            const btnRegister = document.getElementById('tab-btn-register');
-
-            if (mode === 'login') {
-                formConnexion.classList.remove('hidden');
-                formInscription.classList.add('hidden');
-                btnLogin.className = "py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950";
-                btnRegister.className = "py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200";
+            if(mode === 'login') {
+                document.getElementById('form-connexion').classList.remove('hidden');
+                document.getElementById('form-inscription').classList.add('hidden');
+                document.getElementById('tab-btn-login').className = "py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950";
+                document.getElementById('tab-btn-register').className = "py-2 text-xs font-black rounded-lg transition-all text-slate-400";
             } else {
-                formConnexion.classList.add('hidden');
-                formInscription.classList.remove('hidden');
-                btnRegister.className = "py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950";
-                btnLogin.className = "py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200";
+                document.getElementById('form-connexion').classList.add('hidden');
+                document.getElementById('form-inscription').classList.remove('hidden');
+                document.getElementById('tab-btn-register').className = "py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950";
+                document.getElementById('tab-btn-login').className = "py-2 text-xs font-black rounded-lg transition-all text-slate-400";
             }
         }
 
@@ -500,6 +540,8 @@
             document.getElementById(idOnglet).classList.remove('hidden');
             document.querySelectorAll('.btn-nav').forEach(btn => { btn.classList.remove('text-emerald-400'); btn.classList.add('text-slate-500'); });
             boutonActif.classList.remove('text-slate-500'); boutonActif.classList.add('text-emerald-400');
+
+            if (idOnglet === 'onglet-analyses') initialiserGraphiquePartenaire();
         }
 
         function adapterFormulaireInscription() {
@@ -546,7 +588,6 @@
             }
 
             genererCartesVehicules();
-            if(client.projet === 'transvision') genererAnalysesFlotte();
         }
 
         function calculerRecette(itineraire, rotations, places) {
@@ -630,23 +671,34 @@
             changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
         }
 
-        function genererAnalysesFlotte() {
-            let totalGains = 0; let totalRotations = 0;
-            const conteneurProgress = document.getElementById('an-liste-progress');
-            conteneurProgress.innerHTML = "";
-            client.vehicules.forEach((v) => {
-                const gains = calculerRecette(v.itineraire, v.rotations, v.places);
-                totalGains += gains; totalRotations += v.rotations;
-                conteneurProgress.insertAdjacentHTML('beforeend', `<div class="space-y-1 text-xs bg-slate-900/40 p-2 rounded-xl border border-slate-850/60 flex items-center justify-between gap-3"><div class="flex-1 space-y-1"><div class="flex justify-between font-bold"><span class="text-slate-300">${v.plaque}</span><span class="text-emerald-400">${gains.toLocaleString()} CDF</span></div><div class="w-full bg-slate-950 rounded-full h-1"><div class="bg-emerald-500 h-1 rounded-full" style="width: 65%"></div></div></div></div>`);
+        function initialiserGraphiquePartenaire() {
+            if (chartPartenaireInstance) return;
+            const ctx = document.getElementById('chart-recettes-partenaire').getContext('2d');
+            chartPartenaireInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+                    datasets: [{
+                        label: 'Gains Quotidiens (CDF)',
+                        data: [27000, 31500, 24000, 36000, 42000, 45000, 39000],
+                        backgroundColor: '#10b981',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 } } },
+                        y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 10 } } }
+                    }
+                }
             });
-            document.getElementById('an-recettes').textContent = totalGains.toLocaleString() + " CDF";
-            document.getElementById('an-rotations').textContent = totalRotations + " rot.";
         }
 
         function changerModeProjet(mode) { client.projet = mode; appliquerConfigurationDom(); }
         function declencherDeconnexion() { naviguerVers('page-auth'); }
-        function ouvrirModalGestion() { document.getElementById('modal-gestion').classList.remove('hidden'); }
-        function fermerModalGestion() { document.getElementById('modal-gestion').classList.add('hidden'); }
 
         initialiserCommunes();
         initialiserOriginesDestinations();
