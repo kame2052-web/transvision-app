@@ -5,14 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TransVision by Global Tech Solutions — Console Super Admin</title>
     <link rel="icon" type="image/png" href="logo%20192x192.png">
-    <!-- Tailwind CSS, FontAwesome & Chart.js -->
+    
+    <!-- Tailwind CSS, FontAwesome, Leaflet & Chart.js -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
         .page-fade { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Styles Carte Leaflet Mode Sombre */
+        #map-admin-suivi { height: 500px; width: 100%; border-radius: 1rem; z-index: 10; }
+        .leaflet-tile { filter: brightness(0.8) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3); }
+        .leaflet-container { background: #020617 !important; }
+        
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(100deg); cursor: pointer; }
+        
         @media print {
             body { background: white !important; color: black !important; }
             .no-print { display: none !important; }
@@ -50,10 +61,10 @@
     <!-- 2. CORPS ADMIN -->
     <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
         <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
-            <span class="text-xs font-bold text-indigo-400">Central Control Panel v14.1 — Global Tech Solutions :</span>
+            <span class="text-xs font-bold text-indigo-400">Central Control Panel v14.5 — Global Tech Solutions :</span>
             <div class="flex gap-2 text-[10px] font-mono">
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Supabase Engine : <span class="text-emerald-400 font-bold">En Ligne</span></span>
-                <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Chart Analytics : <span class="text-emerald-400 font-bold">Actif</span></span>
+                <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Map & Charts : <span class="text-emerald-400 font-bold">Actifs</span></span>
             </div>
         </div>
 
@@ -106,52 +117,74 @@
             <!-- CONTENU DES PAGES -->
             <main class="flex-1 p-6 lg:p-8 space-y-6 overflow-y-auto max-w-5xl">
                 
-                <!-- SUIVI LIVE -->
+                <!-- SUIVI LIVE (CARTE LEAFLET) -->
                 <div id="page-suivi" class="space-y-4 page-fade class-page-admin">
-                    <h2 class="text-xl font-black text-slate-100">🗺️ Suivi de la Flotte Live</h2>
-                    <div class="w-full h-80 bg-slate-950 border border-slate-850 rounded-2xl flex items-center justify-center relative">
-                        <span class="bg-emerald-500 text-slate-950 font-black px-2 py-1 rounded-lg text-[10px] animate-bounce">Bus KIN-4082 [Live]</span>
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-xl font-black text-slate-100">🗺️ Suivi Global de la Flotte Live</h2>
+                        <button onclick="centrerMapAdmin()" class="bg-slate-800 text-emerald-400 hover:bg-slate-700 text-[10px] px-3 py-1.5 rounded-lg font-bold border border-slate-700 transition-colors">
+                            <i class="fa-solid fa-crosshairs"></i> Recentrer
+                        </button>
                     </div>
+                    <div id="map-admin-suivi" class="w-full bg-slate-900 border border-slate-800 rounded-2xl shadow-xl"></div>
                 </div>
 
-                <!-- GESTION DE LA FLOTTE : INJECTION DES 3 VÉHICULES -->
+                <!-- GESTION DE LA FLOTTE : STATS + REGISTRE -->
                 <div id="page-gestion-flotte" class="space-y-4 page-fade class-page-admin hidden">
-                    <h2 class="text-xl font-black text-slate-100">🚍 Registre Général des Boîtiers SinoTrack</h2>
-                    <div class="bg-slate-950 rounded-2xl border border-slate-850 p-4 overflow-x-auto text-xs font-mono">
+                    <div class="flex justify-between items-end">
+                        <h2 class="text-xl font-black text-slate-100">🚍 Parc Automobile & Matériel SinoTrack</h2>
+                    </div>
+
+                    <!-- COMPTEURS GLOBAUX FLOTTE -->
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 shadow-md">
+                            <p class="text-[10px] text-slate-500 uppercase font-black tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-globe text-emerald-400"></i> Total Flotte</p>
+                            <p class="text-3xl font-black text-slate-100 mt-1">3</p>
+                        </div>
+                        <div class="bg-indigo-500/10 p-4 rounded-2xl border border-indigo-500/20 shadow-md">
+                            <p class="text-[10px] text-indigo-400 uppercase font-black tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-bus"></i> Commercial</p>
+                            <p class="text-3xl font-black text-indigo-300 mt-1">2</p>
+                        </div>
+                        <div class="bg-rose-500/10 p-4 rounded-2xl border border-rose-500/20 shadow-md">
+                            <p class="text-[10px] text-rose-400 uppercase font-black tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-car"></i> Personnel</p>
+                            <p class="text-3xl font-black text-rose-300 mt-1">1</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950 rounded-2xl border border-slate-850 p-4 overflow-x-auto text-xs font-mono shadow-md">
                         <table class="w-full text-left">
                             <thead>
                                 <tr class="border-b border-slate-800 text-slate-500 uppercase text-[9px] font-sans">
-                                    <th class="py-2">Plaque</th><th class="py-2">Modèle / Capacité</th><th class="py-2">IMEI SinoTrack</th><th class="py-2">Statut Moteur</th><th class="py-2">Km Estimé</th>
+                                    <th class="py-2">Plaque</th><th class="py-2">Modèle / Contrat</th><th class="py-2">IMEI SinoTrack</th><th class="py-2">Statut Moteur</th><th class="py-2">Partenaire</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-850">
                                 <tr>
                                     <td class="py-3 font-bold text-slate-200">KIN 4082AE</td>
-                                    <td class="py-3 font-sans">Mercedes 207 (18 pl.)</td>
+                                    <td class="py-3 font-sans"><span class="text-indigo-400 font-bold">Mercedes 207</span> (Com.)</td>
                                     <td class="py-3 text-slate-400">865241092837401</td>
                                     <td class="py-3 text-emerald-400 font-bold">ON</td>
-                                    <td class="py-3 text-slate-500">4 550 km</td>
+                                    <td class="py-3 text-slate-300">Jean Mukendi</td>
                                 </tr>
                                 <tr>
                                     <td class="py-3 font-bold text-slate-200">KIN 1234BB</td>
-                                    <td class="py-3 font-sans">Taxi Ketch (4 pl.)</td>
+                                    <td class="py-3 font-sans"><span class="text-indigo-400 font-bold">Taxi Ketch</span> (Com.)</td>
                                     <td class="py-3 text-slate-400">865241092837402</td>
                                     <td class="py-3 text-emerald-400 font-bold">ON</td>
-                                    <td class="py-3 text-slate-500">2 140 km</td>
+                                    <td class="py-3 text-slate-300">Jean Mukendi</td>
                                 </tr>
                                 <tr>
                                     <td class="py-3 font-bold text-slate-200">KIN 9876XX</td>
-                                    <td class="py-3 font-sans">Hiace (15 pl.)</td>
+                                    <td class="py-3 font-sans"><span class="text-rose-400 font-bold">Jeep 4x4</span> (Perso.)</td>
                                     <td class="py-3 text-slate-400">865241092837403</td>
-                                    <td class="py-3 text-rose-400 font-bold">COUPÉ</td>
-                                    <td class="py-3 text-slate-500">8 920 km</td>
+                                    <td class="py-3 text-rose-400 font-bold animate-pulse">COUPÉ</td>
+                                    <td class="py-3 text-slate-300">Marc Kabeya</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- PARTENAIRES : MENU DÉROULANT ACTIONS -->
+                <!-- PARTENAIRES : GESTION DES RECHARGES & ACCÈS -->
                 <div id="page-partenaires" class="space-y-4 page-fade class-page-admin hidden print:block">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 no-print">
                         <div>
@@ -165,7 +198,7 @@
                         </div>
                     </div>
                     
-                    <div class="bg-slate-950 rounded-2xl border border-slate-850 p-4 overflow-x-auto text-[11px] print-clean">
+                    <div class="bg-slate-950 rounded-2xl border border-slate-850 p-4 overflow-x-auto text-[11px] shadow-md print-clean">
                         <table class="w-full text-left">
                             <thead>
                                 <tr class="border-b border-slate-800 text-slate-500 font-black uppercase text-[9px] tracking-wider print:border-slate-300">
@@ -180,7 +213,7 @@
                                 <tr class="item-partenaire-row" data-contrat="commercial" id="row-part-1">
                                     <td class="py-3 font-black text-slate-200">Jean Mukendi<br><span class="text-[9px] font-normal text-slate-500">+243 812 345 678</span></td>
                                     <td class="py-3"><span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-black text-[10px] uppercase">Commercial</span></td>
-                                    <td class="py-3 text-center font-bold font-mono text-indigo-400">3 Véh.</td>
+                                    <td class="py-3 text-center font-bold font-mono text-indigo-400">2 Véh.</td>
                                     <td class="py-3 text-center font-mono"><span id="jours-jean-mukendi" class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-lg font-black text-[10px]">26 Jours</span></td>
                                     <td class="py-3 text-right no-print">
                                         <select onchange="executerActionPartenaire('Jean Mukendi', '+243812345678', '1234', 'solde-jean-mukendi', 'jours-jean-mukendi', this)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 focus:outline-none focus:border-indigo-500">
@@ -368,22 +401,39 @@
         </div>
     </div>
 
-    <!-- MODAL VALIDATION RECHARGE ADMIN -->
+    <!-- MODAL VALIDATION RECHARGE ADMIN (FLOTTE OU VÉHICULE) -->
     <div id="modal-recharge-flexible" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
                 <h3 class="font-black text-sm text-slate-100 flex items-center gap-2">
-                    <i class="fa-solid fa-check-double text-emerald-400"></i> Valider Recharge Partenaire
+                    <i class="fa-solid fa-check-double text-emerald-400"></i> Valider Recharge
                 </h3>
                 <button onclick="fermerModalRechargeFlexible()" class="text-slate-500 hover:text-slate-300"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
+            <p class="text-[10px] text-slate-400">Approuvez le paiement reçu et activez les jours correspondants.</p>
             <p class="text-xs text-slate-300 font-bold">Compte : <span id="nom-partenaire-cible" class="text-emerald-400"></span></p>
 
-            <div class="space-y-3 text-xs">
+            <div class="space-y-3 text-xs mt-2">
+                <!-- Choix d'application (Flotte entière ou véhicule ciblé) -->
+                <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-850 space-y-2">
+                    <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Cible de la validation</label>
+                    <select id="admin-recharge-mode" onchange="basculerSelectVehiculeAdmin()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-bold focus:outline-none focus:border-emerald-500">
+                        <option value="flotte">Flotte Complète</option>
+                        <option value="unitaire">Véhicule Spécifique</option>
+                    </select>
+                    
+                    <div id="bloc-admin-recharge-vehicule" class="hidden mt-2 border-t border-slate-800 pt-2">
+                        <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Sélectionner le Véhicule</label>
+                        <select id="admin-recharge-vehicule-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-mono text-[10px] focus:outline-none focus:border-emerald-500">
+                            <!-- Peuplé dynamiquement selon le partenaire cliqué -->
+                        </select>
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Montant Reçu (CDF)</label>
-                    <input type="number" id="input-credit-fixer" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 font-black text-emerald-400 outline-none focus:border-emerald-500" placeholder="Saisir montant" value="2000">
+                    <input type="number" id="input-credit-fixer" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 font-black text-emerald-400 outline-none focus:border-emerald-500" placeholder="Saisir montant">
                 </div>
 
                 <div>
@@ -401,7 +451,7 @@
                 </div>
             </div>
 
-            <button onclick="appliquerRechargeFlexible()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs shadow-lg shadow-emerald-500/10">
+            <button onclick="appliquerRechargeFlexible()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs shadow-lg shadow-emerald-500/10 mt-2">
                 Valider et Activer
             </button>
         </div>
@@ -411,6 +461,16 @@
         let tresor = 850000; let commissions = 145500;
         let adminCredential = { email: "admin@transvision.cd", pass: "123456" };
         let ciblePartenaire = null;
+
+        // Simulateur de base de données globale
+        const flotteGlobale = [
+            { plaque: "KIN 4082AE", type: "Commercial", lat: -4.3215, lng: 15.3115, partenaire: "Jean Mukendi", statut: "En ligne" },
+            { plaque: "KIN 1234BB", type: "Commercial", lat: -4.3150, lng: 15.2980, partenaire: "Jean Mukendi", statut: "En ligne" },
+            { plaque: "KIN 9876XX", type: "Personnel", lat: -4.3400, lng: 15.3300, partenaire: "Marc Kabeya", statut: "Coupé" }
+        ];
+
+        let mapAdmin = null;
+        let adminMarkers = [];
 
         let chartRecettesDepensesInstance = null;
         let chartClientsTypesInstance = null;
@@ -473,6 +533,29 @@
             boutonClique.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/10 nav-link-admin";
             
             if (idPage === 'page-stats-croisees') { setTimeout(initialiserGraphiquesAdmin, 100); }
+            if (idPage === 'page-suivi') { setTimeout(initMapAdmin, 50); }
+        }
+
+        // --- CARTE LEAFLET ADMIN (SUIVI GLOBAL) ---
+        function initMapAdmin() {
+            const container = document.getElementById('map-admin-suivi');
+            if (!container || container.offsetParent === null) return;
+
+            if (!mapAdmin) {
+                mapAdmin = L.map('map-admin-suivi').setView([-4.3224, 15.3070], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(mapAdmin);
+                
+                flotteGlobale.forEach(v => {
+                    let marker = L.marker([v.lat, v.lng]).addTo(mapAdmin)
+                        .bindPopup(`<b>${v.plaque}</b><br>Usage: ${v.type}<br>Partenaire: ${v.partenaire}<br>Statut: ${v.statut}`);
+                    adminMarkers.push(marker);
+                });
+            }
+            mapAdmin.invalidateSize();
+        }
+
+        function centrerMapAdmin() {
+            if(mapAdmin) mapAdmin.setView([-4.3224, 15.3070], 13);
         }
 
         function filtrerPartenairesContrat(type) {
@@ -510,10 +593,37 @@
             selectElem.value = ""; // Réinitialise le menu déroulant
         }
 
+        // --- VALIDATION DE RECHARGE (FLOTTE / UNITAIRE) ---
         function ouvrirModalRechargeFlexible(nom, idSolde, idJours) {
             ciblePartenaire = { nom, idSolde, idJours };
             document.getElementById('nom-partenaire-cible').textContent = nom;
+            document.getElementById('input-credit-fixer').value = ""; // Reset du montant
+            
+            // Peupler le menu déroulant des véhicules en fonction du partenaire choisi
+            const selVehicules = document.getElementById('admin-recharge-vehicule-select');
+            selVehicules.innerHTML = "";
+            const vehiculesDuPartenaire = flotteGlobale.filter(v => v.partenaire === nom);
+            
+            if(vehiculesDuPartenaire.length === 0) {
+                selVehicules.innerHTML = `<option value="">Aucun véhicule</option>`;
+            } else {
+                vehiculesDuPartenaire.forEach(v => {
+                    selVehicules.insertAdjacentHTML('beforeend', `<option value="${v.plaque}">${v.plaque}</option>`);
+                });
+            }
+
+            basculerSelectVehiculeAdmin();
             document.getElementById('modal-recharge-flexible').classList.remove('hidden');
+        }
+
+        function basculerSelectVehiculeAdmin() {
+            const mode = document.getElementById('admin-recharge-mode').value;
+            const blocSelect = document.getElementById('bloc-admin-recharge-vehicule');
+            if (mode === 'flotte') {
+                blocSelect.classList.add('hidden');
+            } else {
+                blocSelect.classList.remove('hidden');
+            }
         }
 
         function fermerModalRechargeFlexible() {
@@ -523,10 +633,21 @@
 
         function appliquerRechargeFlexible() {
             const nbJours = parseInt(document.getElementById('input-jours-fixer').value) || 0;
+            const credit = parseFloat(document.getElementById('input-credit-fixer').value) || 0;
+            const mode = document.getElementById('admin-recharge-mode').value;
+
             if (ciblePartenaire) {
+                let msgCible = "la flotte complète";
+                if(mode === 'unitaire') {
+                    const sel = document.getElementById('admin-recharge-vehicule-select');
+                    msgCible = `le véhicule ${sel.value}`;
+                }
+
+                // Pour la démo, on update l'affichage du tableau
                 const badgeJours = document.getElementById(ciblePartenaire.idJours);
                 if (badgeJours) badgeJours.textContent = `${nbJours} Jours`;
-                alert(`✅ Recharge de ${ciblePartenaire.nom} validée pour ${nbJours} jours d'accès !`);
+
+                alert(`✅ Validation réussie !\n\nPartenaire : ${ciblePartenaire.nom}\nCible : ${msgCible}\nMontant : ${credit.toLocaleString()} CDF\nAccès activé pour ${nbJours} jours.`);
             }
             fermerModalRechargeFlexible();
         }
@@ -552,14 +673,13 @@
             
             if (new Date(d1) > new Date(d2)) { alert("Période invalide."); return; }
             
-            // Simulation recalcul pour démo
-            const coef = 0.5 + Math.random(); // Coefficient aléatoire pour simuler le changement
+            const coef = 0.5 + Math.random(); 
             if (type === 'treso') {
                 const newTresor = 850000 * coef;
                 document.getElementById('txt-tresor').textContent = newTresor.toLocaleString('fr-FR', {maximumFractionDigits:0}) + " CDF";
                 document.getElementById('txt-commissions').textContent = (145500 * coef).toLocaleString('fr-FR', {maximumFractionDigits:0}) + " CDF";
             } else if (type === 'stats') {
-                initialiserGraphiquesAdmin(); // Regénère les graphiques
+                initialiserGraphiquesAdmin(); 
             }
             alert(`✅ Données mises à jour pour la période sélectionnée.`);
         }
@@ -569,7 +689,6 @@
             const canvasRecettes = document.getElementById('chart-recettes-depenses');
             if (canvasRecettes && canvasRecettes.offsetParent !== null) {
                 if (chartRecettesDepensesInstance) chartRecettesDepensesInstance.destroy();
-                // Données aléatoires pour simuler le filtre
                 const rData = Array.from({length: 7}, () => Math.floor(Math.random() * 200000) + 150000);
                 const dData = Array.from({length: 7}, () => Math.floor(Math.random() * 80000) + 30000);
                 
