@@ -11,31 +11,29 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#020617">
 
-    <!-- Tailwind CSS, FontAwesome & Chart.js -->
+    <!-- Tailwind CSS, FontAwesome & Leaflet (Cartographie GPS) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <style>
         .blur-transition { transition: filter 0.4s ease, opacity 0.4s ease; }
-        @media print {
-            body { background: white !important; color: black !important; }
-            .no-print { display: none !important; }
-            #onglet-maintenance { display: block !important; max-h-none !important; overflow: visible !important; padding: 0 !important; }
-            .print-clean { background: transparent !important; border: 1px solid #cbd5e1 !important; color: black !important; box-shadow: none !important; }
-            .print-text { color: black !important; }
-        }
+        #map-container { height: 260px; width: 100%; border-radius: 1rem; z-index: 10; }
+        .leaflet-tile { filter: brightness(0.8) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3); }
+        .leaflet-container { background: #020617 !important; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans min-h-screen relative overflow-x-hidden">
 
-    <!-- FOND D'ÉCRAN VISION.PNG PLEIN ÉCRAN FLUIDE ET FIXE -->
+    <!-- FOND D'ÉCRAN VISION.PNG PLEIN ÉCRAN FLUIDE -->
     <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <img src="VISION.png" alt="Fond d'écran TransVision" class="w-full h-full object-cover object-center opacity-25 select-none scale-105">
         <div class="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/70 to-slate-950/90"></div>
     </div>
 
     <!-- BANNIÈRE INSTALLATION PWA -->
-    <div id="pwa-install-banner" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-slate-900/90 backdrop-blur border border-emerald-500/50 text-slate-100 p-3 rounded-2xl shadow-2xl flex items-center gap-3 z-[100] w-[90%] max-w-sm hidden no-print">
+    <div id="pwa-install-banner" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-slate-900/95 backdrop-blur border border-emerald-500/50 text-slate-100 p-3 rounded-2xl shadow-2xl flex items-center gap-3 z-[100] w-[90%] max-w-sm hidden no-print">
         <div class="w-10 h-10 rounded-xl overflow-hidden shadow-md flex items-center justify-center bg-slate-950 flex-shrink-0">
             <img src="logo%20192x192.png" alt="Logo" class="w-full h-full object-contain" style="transform: scale(2.05); transform-origin: 48% 52%;">
         </div>
@@ -47,349 +45,282 @@
         <button onclick="document.getElementById('pwa-install-banner').classList.add('hidden')" class="text-slate-500 px-2"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
-    <!-- SELECTEUR D'ÉTATS POUR TESTS (Masqué à l'impression) -->
-    <div class="relative z-10 bg-slate-900/80 backdrop-blur border-b border-slate-800/80 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-4 max-w-md mx-auto no-print">
-        <span class="text-[10px] font-bold text-emerald-400">🛠️ DEV CONTROL :</span>
-        <div class="flex gap-1.5 font-mono">
-            <button onclick="naviguerVers('page-auth')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[9px] px-2 py-1 rounded-lg">Déco</button>
-            <button onclick="changerModeProjet('transvision')" class="bg-indigo-600 hover:bg-indigo-700 text-slate-100 text-[9px] px-2 py-1 rounded-lg">TransVision</button>
-            <button onclick="changerModeProjet('carvision')" class="bg-rose-600 hover:bg-rose-700 text-slate-100 text-[9px] px-2 py-1 rounded-lg">CarVision</button>
-        </div>
-    </div>
-
-    <!-- MAQUETTE MOBILE PRINCIPALE TRANSPARENTE -->
-    <div class="relative z-10 max-w-md mx-auto min-h-[850px] shadow-2xl overflow-hidden flex flex-col border-x border-slate-800/70 pb-16 print:border-none print:shadow-none bg-slate-900/60 backdrop-blur-xl" id="zone-flotte">
+    <!-- MAQUETTE PRINCIPALE -->
+    <div class="relative z-10 max-w-md mx-auto min-h-screen shadow-2xl overflow-hidden flex flex-col border-x border-slate-800/70 pb-20 bg-slate-900/70 backdrop-blur-xl" id="zone-flotte">
         
-        <!-- ÉCRAN DE BLOCAGE -->
-        <div id="ecran-bloque" class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden no-print">
-            <div class="text-center p-6 bg-slate-900 border border-rose-500/30 rounded-2xl shadow-2xl space-y-3 max-w-[85%]">
-                <i class="fa-solid fa-triangle-exclamation text-4xl text-rose-500 mb-2"></i>
-                <h2 class="text-lg font-black text-slate-100">Accès Suspendu</h2>
-                <p class="text-xs text-slate-400">Votre compte partenaire présente des irrégularités.</p>
-                <button onclick="alert('Contact support')" class="mt-4 bg-rose-500/20 text-rose-400 border border-rose-500/30 px-4 py-2 rounded-xl text-xs font-bold"><i class="fa-brands fa-whatsapp mr-2"></i>Support</button>
-            </div>
-        </div>
-
-        <!-- 1. AUTHENTIFICATION : CONNEXION OU INSCRIPTION -->
+        <!-- 1. ÉCRAN D'ACCÈS / PRÉ-PAIEMENT FORFAIT -->
         <div id="page-auth" class="p-6 space-y-5 flex-1 flex flex-col justify-between no-print overflow-y-auto">
             <div class="space-y-4 mt-1">
                 <div class="text-center">
-                    <!-- LOGO PARFAITEMENT CENTRÉ AVEC TOUTES SES BORDURES -->
                     <div class="w-20 h-20 mx-auto mb-3 rounded-2xl overflow-hidden shadow-2xl shadow-emerald-500/25 flex items-center justify-center bg-slate-950 border border-emerald-500/30">
                         <img src="logo%20192x192.png" alt="Logo TransVision" class="w-full h-full object-contain" style="transform: scale(2.05); transform-origin: 48% 52%;">
                     </div>
                     <h2 class="text-xl font-black tracking-wide">TransVision</h2>
                     <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">by Global Tech Solutions</p>
-                    <p class="text-[9px] text-slate-300 mt-0.5 italic">La clarté sur vos recettes.</p>
+                    <p class="text-[9px] text-slate-300 mt-0.5 italic">Contrôle de flotte & Audit des recettes</p>
                 </div>
 
                 <!-- BASCULE CONNEXION / INSCRIPTION -->
                 <div class="grid grid-cols-2 gap-1 bg-slate-950/80 backdrop-blur p-1 rounded-xl border border-slate-800">
-                    <button id="tab-btn-login" onclick="basculerVueAuth('login')" class="py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950">
-                        <i class="fa-solid fa-right-to-bracket mr-1"></i> Connexion
-                    </button>
-                    <button id="tab-btn-register" onclick="basculerVueAuth('register')" class="py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200">
-                        <i class="fa-solid fa-user-plus mr-1"></i> Inscription
-                    </button>
+                    <button id="tab-btn-login" onclick="basculerVueAuth('login')" class="py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950">Connexion</button>
+                    <button id="tab-btn-register" onclick="basculerVueAuth('register')" class="py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200">Nouveau Partenaire</button>
                 </div>
 
-                <!-- VUE CONNEXION -->
-                <div id="form-connexion" class="bg-slate-950/85 backdrop-blur p-5 rounded-2xl border border-slate-800/80 space-y-4 shadow-xl">
-                    <div class="border-b border-slate-800 pb-2">
-                        <h3 class="text-xs font-extrabold text-slate-200 uppercase tracking-wider">Accès Espace Partenaire</h3>
-                        <p class="text-[10px] text-slate-400">Renseignez votre numéro pour retrouver vos véhicules.</p>
+                <!-- RAPPEL OFFICIEL RÈGLE DU FORFAIT -->
+                <div class="bg-amber-500/10 border border-amber-500/30 p-3.5 rounded-2xl text-[11px] text-amber-300 flex items-start gap-2.5">
+                    <i class="fa-solid fa-clock-rotate-left text-base text-amber-400 mt-0.5"></i>
+                    <div>
+                        <p class="font-bold uppercase tracking-wide text-[10px]">Règle du Forfait Prépayé</p>
+                        <p class="text-[10px] text-slate-300 mt-0.5 leading-relaxed">
+                            Le paiement s'effectue avant le début de la rotation. Valable pour la journée de **5h00 à 23h59**. Quelle que soit l'heure de souscription, le forfait expire à 23h59.
+                        </p>
                     </div>
+                </div>
 
+                <!-- FORMULAIRE CONNEXION -->
+                <div id="form-connexion" class="bg-slate-950/85 backdrop-blur p-5 rounded-2xl border border-slate-800/80 space-y-4 shadow-xl">
                     <div>
                         <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Téléphone Enregistré</label>
-                        <input type="tel" id="login-tel" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-mono font-bold" placeholder="+243..." value="+243812345678">
+                        <input type="tel" id="login-tel" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-mono font-bold" value="+243812345678">
                     </div>
-
-                    <div>
-                        <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Code PIN Sécurité</label>
-                        <input type="password" id="login-pin" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-mono" placeholder="4 chiffres (optionnel)">
-                    </div>
-
-                    <button onclick="executerConnexionPartenaire()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl text-xs tracking-wider uppercase shadow-lg shadow-emerald-500/10 transition-colors">
-                        Accéder à ma Flotte
+                    <button onclick="executerConnexionPartenaire()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl text-xs uppercase shadow-lg shadow-emerald-500/10 transition-colors">
+                        Ouvrir mon Espace Flotte
                     </button>
                 </div>
 
-                <!-- VUE INSCRIPTION -->
+                <!-- FORMULAIRE INSCRIPTION -->
                 <div id="form-inscription" class="bg-slate-950/85 backdrop-blur p-4 rounded-2xl border border-slate-800/80 space-y-3 shadow-xl hidden">
-                    <h3 class="text-xs font-extrabold text-emerald-400 uppercase tracking-widest">Type d'Usage</h3>
                     <div>
-                        <select id="ins-projet" onchange="adapterFormulaireInscription()" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-bold">
-                            <option value="transvision">🚌 TransVision (Commercial / Recettes)</option>
-                            <option value="carvision">🚗 CarVision (Personnel / Sécurité Antivol)</option>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Usage Prévu</label>
+                        <select id="ins-projet" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-bold">
+                            <option value="transvision">🚌 TransVision (Transport Commercial / Recettes)</option>
+                            <option value="carvision">🚗 CarVision (Véhicule Privé / Antivol SinoTrack)</option>
                         </select>
                     </div>
-
-                    <h3 class="text-xs font-extrabold text-slate-300 uppercase tracking-widest mt-3 pt-3 border-t border-slate-800">Profil Propriétaire</h3>
                     <div>
-                        <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nom Complet</label>
-                        <input type="text" id="ins-nom" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-2.5 text-xs text-slate-200" placeholder="Ex: Jean Mukendi" value="Jean Mukendi">
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Nom Complet</label>
+                        <input type="text" id="ins-nom" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200" value="Jean Mukendi">
                     </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Téléphone RDC</label>
-                            <input type="tel" id="ins-tel" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-2.5 text-xs text-slate-200" value="+243812345678">
-                        </div>
-                        <div>
-                            <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Commune</label>
-                            <select id="ins-commune" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-2.5 text-xs text-slate-200 font-bold conteneur-communes"></select>
-                        </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Téléphone RDC</label>
+                        <input type="tel" id="ins-tel" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono" value="+243812345678">
                     </div>
-                    
-                    <div id="bloc-facturation">
-                        <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 mt-2">Commission Forfaitaire</label>
-                        <select id="ins-type-facturation" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-2.5 text-xs text-slate-200 font-bold">
-                            <option value="jour">Forfait Journalier (Par jour d'activité)</option>
-                            <option value="mois">Forfait Mensuel (Par mois)</option>
-                        </select>
-                    </div>
-
-                    <button onclick="finaliserInscription()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl text-xs tracking-wider uppercase mt-3 shadow-lg shadow-emerald-500/10 transition-colors">
-                        Créer mon Compte
-                    </button>
-
+                    <button onclick="finaliserInscription()" class="w-full bg-emerald-500 text-slate-950 font-black py-3 rounded-xl text-xs uppercase">Valider l'Inscription</button>
                     <p class="text-[10px] text-slate-400 text-center mt-2">
-                        En créant un compte, vous acceptez nos 
-                        <button type="button" onclick="ouvrirModalCGU()" class="text-emerald-400 font-bold underline hover:text-emerald-300">CGU & Conditions</button>.
+                        En adhérant, vous acceptez nos <button type="button" onclick="ouvrirModalCGU()" class="text-emerald-400 font-bold underline">CGU & Forfaits</button>.
                     </p>
                 </div>
             </div>
             
             <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v14.1 — by <span class="text-slate-200 font-bold">Global Tech Solutions</span>
+                TransVision v14.2 — by <span class="text-slate-200 font-bold">Global Tech Solutions</span>
             </div>
         </div>
 
-        <!-- 2. APPLICATION MOBILE PRINCIPALE (CONNECTÉE) -->
+        <!-- 2. ESPACE CLIENT CONNECTÉ -->
         <div id="app-proprietaire" class="flex-1 flex flex-col hidden relative">
-            <header class="p-5 border-b border-slate-800/80 bg-slate-950/85 backdrop-blur sticky top-0 z-20 no-print">
-                <div class="flex justify-between items-center mb-4">
+            
+            <!-- HEADER AVEC STATUT DU FORFAIT PRÉPAYÉ & COMPTE À REBOURS 23H59 -->
+            <header class="p-4 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur sticky top-0 z-30 no-print">
+                <div class="flex justify-between items-center mb-3">
                     <div>
-                        <div class="flex items-center gap-1.5">
+                        <div class="flex items-center gap-2">
                             <h1 id="lbl-nom-partenaire" class="text-sm font-black text-slate-100">Jean Mukendi</h1>
-                            <span id="lbl-commune-badge" class="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-bold">Gombe</span>
+                            <span class="text-[9px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono font-bold">KINSHASA</span>
                         </div>
-                        <div class="flex items-center gap-1.5 mt-0.5">
-                            <span id="badge-projet" class="text-[9px] bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider inline-block">TransVision</span>
-                            <span class="text-[8px] text-slate-400 font-mono">by Global Tech Solutions</span>
-                        </div>
+                        <p class="text-[8px] text-slate-400 font-mono">TransVision by Global Tech Solutions</p>
                     </div>
-                    <div class="w-9 h-9 rounded-xl overflow-hidden shadow-md flex items-center justify-center bg-slate-950 flex-shrink-0 border border-slate-800">
+                    <div class="w-8 h-8 rounded-xl overflow-hidden shadow border border-slate-800 bg-slate-950 flex-shrink-0">
                         <img src="logo%20192x192.png" alt="Logo" class="w-full h-full object-contain" style="transform: scale(2.05); transform-origin: 48% 52%;">
                     </div>
                 </div>
 
-                <div id="bloc-header-finance" class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800/80 shadow-inner">
-                    <div class="flex justify-between items-end">
-                        <div>
-                            <p class="text-[9px] text-slate-400 uppercase font-black tracking-widest mb-1">Portefeuille Unique</p>
-                            <span id="lbl-solde-valeur" class="text-2xl font-black text-slate-100">32 500 <span class="text-emerald-400 text-sm">CDF</span></span>
-                            <span id="lbl-jours-restants" class="block text-[10px] text-emerald-400 font-mono font-bold mt-1">Actif : 26 jours restants</span>
+                <!-- BANDEAU COMPTE À REBOURS DU FORFAIT DU JOUR -->
+                <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 flex items-center justify-between">
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="text-[10px] font-black uppercase text-emerald-400 tracking-wider">Forfait Jour Actif</span>
                         </div>
-                        <button onclick="ouvrirModalRecharge()" class="bg-emerald-500 text-slate-950 font-black text-[11px] px-4 py-2.5 rounded-xl flex items-center gap-1 shadow-lg shadow-emerald-500/10">
-                            <i class="fa-solid fa-wallet"></i> Recharger
-                        </button>
+                        <p class="text-[9px] text-slate-400 mt-0.5">Expire ce soir à 23h59 précises</p>
+                    </div>
+                    <div class="text-right">
+                        <span id="timer-compte-rebours" class="text-sm font-mono font-black text-slate-100 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg">--:--:--</span>
                     </div>
                 </div>
             </header>
-            
-            <!-- ONGLET FLOTTE -->
-            <div id="onglet-flotte" class="p-4 space-y-4 blur-transition class-onglet no-print pb-32">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ma Flotte (<span id="txt-compteur-vehicules">1</span>)</h2>
-                    <span class="text-[10px] text-slate-400"><i class="fa-solid fa-signal mr-1 text-emerald-400 animate-pulse"></i>SinoTrack Live</span>
+
+            <!-- ONGLET A : LA FLOTTE & GÉOLOCALISATION LIVE -->
+            <div id="onglet-flotte" class="p-4 space-y-4 blur-transition class-onglet no-print">
+                
+                <!-- CARTE LEAFLET LIVE POUR LOCALISER LE VÉHICULE -->
+                <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-2">
+                    <div class="flex justify-between items-center px-1">
+                        <h2 class="text-[10px] font-bold text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
+                            <i class="fa-solid fa-map-location-dot text-emerald-400"></i> Localisation Temps Réel
+                        </h2>
+                        <button onclick="centrerSurVehicule()" class="text-[9px] bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 px-2 py-1 rounded-lg font-mono">
+                            <i class="fa-solid fa-crosshairs text-emerald-400 mr-1"></i> Centrer
+                        </button>
+                    </div>
+                    <div id="map-container"></div>
+                    <div class="flex justify-between items-center text-[9px] font-mono text-slate-400 px-1">
+                        <span>Balise : <strong class="text-slate-200">SinoTrack 4G</strong></span>
+                        <span>Vitesse : <strong class="text-emerald-400" id="live-speed">34 km/h</strong></span>
+                        <span>Accompagnement : <strong class="text-sky-400">Actif</strong></span>
+                    </div>
+                </div>
+
+                <!-- LISTE DES VÉHICULES SOUS FORFAIT -->
+                <div class="flex justify-between items-center pt-1">
+                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Véhicule(s) Autorisé(s) (<span id="txt-compteur-vehicules">1</span>)</h2>
+                    <span class="text-[10px] text-emerald-400 font-mono"><i class="fa-solid fa-shield-check mr-1"></i>Prepaid OK</span>
                 </div>
                 <div id="conteneur-vehicules-actifs" class="space-y-4"></div>
             </div>
 
-            <!-- ONGLET AJOUT VÉHICULE -->
-            <div id="onglet-ajouter" class="p-5 space-y-4 class-onglet hidden no-print pb-32">
-                <div class="bg-slate-950/85 backdrop-blur p-5 rounded-2xl border border-slate-800/80 space-y-4 shadow-xl">
-                    <h3 class="text-sm font-black text-slate-200 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-square-plus text-emerald-400"></i> Enregistrer un Véhicule</h3>
+            <!-- ONGLET B : NOUVEL ITINÉRAIRE AVEC ASSISTANCE DU SYSTÈME -->
+            <div id="onglet-ajouter" class="p-4 space-y-4 class-onglet hidden no-print">
+                <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
+                    <div class="border-b border-slate-800 pb-2">
+                        <h3 class="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-route text-emerald-400"></i> Configuration &amp; Assistance Trajet
+                        </h3>
+                        <p class="text-[10px] text-slate-400">Le système assiste la tarification et calcule vos projections.</p>
+                    </div>
+
                     <div class="space-y-3">
                         <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Plaque</label>
-                                <input type="text" id="add-plaque" class="w-full bg-slate-900 border border-slate-800 focus:outline-none focus:border-emerald-500 rounded-xl p-2.5 text-xs text-slate-200" placeholder="Ex: KIN 4082AE">
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Plaque d'Immatriculation</label>
+                                <input type="text" id="add-plaque" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono" placeholder="Ex: KIN 4082AE" value="KIN 4082AE">
                             </div>
                             <div>
-                                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Type</label>
-                                <select id="add-type" class="w-full bg-slate-900 border border-slate-800 focus:outline-none focus:border-emerald-500 rounded-xl p-2.5 text-xs text-slate-200">
-                                    <option value="Mini-bus Mercedes 207">Mercedes 207</option>
-                                    <option value="Taxi Classique Ketch">Taxi Ketch</option>
-                                    <option value="Jeep 4x4 Personnel">Jeep 4x4 (Personnel)</option>
-                                    <option value="Berline Personnel">Berline (Personnel)</option>
-                                    <option value="Taxi-Moto Wewa">Taxi-Moto Wewa</option>
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Type de Transport</label>
+                                <select id="add-type" onchange="actualiserAssistanceItineraire()" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-bold">
+                                    <option value="Mini-bus Mercedes 207">Mini-bus 207 (18 pl.)</option>
+                                    <option value="Taxi Ketch">Taxi Ketch (4 pl.)</option>
+                                    <option value="Taxi-Moto Wewa">Taxi-Moto (1 pl.)</option>
+                                    <option value="Personnel Privé">Personnel (Antivol)</option>
                                 </select>
                             </div>
                         </div>
 
-                        <div id="bloc-form-itineraire" class="grid grid-cols-2 gap-2 p-2 border border-slate-800 rounded-xl bg-slate-900/50">
-                            <div>
-                                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Point d'Origine</label>
-                                <select id="add-origine" class="w-full bg-slate-900 border border-slate-800 focus:outline-none focus:border-emerald-500 rounded-xl p-2.5 text-[10px] text-slate-200 font-bold text-emerald-400">
-                                    <option value="Global">Détection (Global) 🌐</option>
-                                </select>
+                        <!-- ASSISTANT INTELLIGENT DE TRONÇON KINSHASA -->
+                        <div class="p-3 bg-slate-900/90 border border-indigo-500/30 rounded-2xl space-y-2.5">
+                            <span class="text-[9px] font-black uppercase text-indigo-400 tracking-wider flex items-center gap-1.5">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Assistance Automatisée du Réseau
+                            </span>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Origine / Point de départ</label>
+                                    <select id="sel-origine" onchange="actualiserAssistanceItineraire()" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-[11px] text-emerald-400 font-bold"></select>
+                                </div>
+                                <div>
+                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Terminus / Destination</label>
+                                    <select id="sel-destination" onchange="actualiserAssistanceItineraire()" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-[11px] text-emerald-400 font-bold"></select>
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Point de Destination</label>
-                                <select id="add-destination" class="w-full bg-slate-900 border border-slate-800 focus:outline-none focus:border-emerald-500 rounded-xl p-2.5 text-[10px] text-slate-200 font-bold text-emerald-400">
-                                    <option value="Global">Détection (Global) 🌐</option>
-                                </select>
+
+                            <!-- INDICATEURS ASSISTÉS PAR LE SYSTÈME -->
+                            <div class="grid grid-cols-3 gap-1.5 bg-slate-950 p-2.5 rounded-xl border border-slate-850 text-center font-mono">
+                                <div>
+                                    <span class="text-[8px] text-slate-500 block uppercase">Distance Est.</span>
+                                    <span id="ast-distance" class="text-xs font-black text-slate-200">12.5 km</span>
+                                </div>
+                                <div>
+                                    <span class="text-[8px] text-slate-500 block uppercase">Prix / Passager</span>
+                                    <span id="ast-tarif" class="text-xs font-black text-emerald-400">1 500 CDF</span>
+                                </div>
+                                <div>
+                                    <span class="text-[8px] text-slate-500 block uppercase">Recette / Rotation</span>
+                                    <span id="ast-rotation" class="text-xs font-black text-sky-400">27 000 CDF</span>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-2">
-                            <div id="bloc-form-places">
-                                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Places Assises</label>
-                                <input type="number" id="add-places" class="w-full bg-slate-900 border border-slate-850 focus:outline-none focus:border-emerald-500 rounded-xl p-2.5 text-xs text-slate-200" placeholder="Ex: 18" value="18">
-                            </div>
-                            <div class="col-span-2">
-                                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Numéro IMEI SinoTrack</label>
-                                <input type="text" id="add-imei" class="w-full bg-slate-900 border border-slate-800 focus:outline-none focus:border-emerald-500 rounded-xl p-3 text-xs text-slate-200 font-mono" placeholder="Ex: 865241092837401">
-                            </div>
+                        <div>
+                            <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Numéro IMEI Traceur SinoTrack</label>
+                            <input type="text" id="add-imei" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono" placeholder="Ex: 865241092837401" value="865241092837401">
                         </div>
-                        <button onclick="validerAjoutVehicule()" class="w-full bg-emerald-500 text-slate-950 font-black py-3 rounded-xl text-xs uppercase mt-2">Enregistrer le Véhicule</button>
+
+                        <button onclick="enregistrerVehiculeAssiste()" class="w-full bg-emerald-500 text-slate-950 font-black py-3 rounded-xl text-xs uppercase shadow-lg shadow-emerald-500/10">
+                            Enregistrer &amp; Activer sur Carte
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- ONGLET ANALYSES -->
-            <div id="onglet-analyses" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Performances Flotte</h2>
-                </div>
-
-                <div class="bg-slate-950/85 backdrop-blur p-4 rounded-2xl border border-slate-800/80 space-y-2">
-                    <h3 class="text-xs font-black uppercase text-emerald-400 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-simple"></i> Recettes Journalières (Semaine)
-                    </h3>
-                    <div class="h-48 relative">
-                        <canvas id="chart-recettes-partenaire"></canvas>
+            <!-- ONGLET C : RECHARGER MON FORFAIT PRÉPAYÉ -->
+            <div id="onglet-forfait" class="p-4 space-y-4 class-onglet hidden no-print">
+                <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
+                    <div class="border-b border-slate-800 pb-2">
+                        <h3 class="text-xs font-black uppercase text-amber-400 flex items-center gap-2">
+                            <i class="fa-solid fa-wallet"></i> Paiement Préalable Obligatoire
+                        </h3>
+                        <p class="text-[10px] text-slate-400">Payez avant de rouler. Forfait valide jusqu'à 23h59 ce soir.</p>
                     </div>
-                </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800/80 space-y-1">
-                        <span class="text-[9px] text-slate-400 uppercase font-black">Total Semaine</span>
-                        <p class="text-lg font-black text-emerald-400">180 000 CDF</p>
-                    </div>
-                    <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800/80 space-y-1">
-                        <span class="text-[9px] text-slate-400 uppercase font-black">Rotations Moyenne</span>
-                        <p class="text-lg font-black text-slate-100">11 rot. / j</p>
+                    <div class="space-y-3 text-xs">
+                        <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-slate-200">Forfait Journalier TransVision</span>
+                                <span class="font-black text-emerald-400 font-mono text-sm">2 000 CDF</span>
+                            </div>
+                            <p class="text-[9px] text-slate-400 leading-relaxed">
+                                • Période : 5h00 à 23h59.<br>
+                                • Expiration : 23h59 aujourd'hui (sans report sur le lendemain).
+                            </p>
+                        </div>
+
+                        <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-850 font-mono text-slate-300">
+                            <p class="text-[9px] uppercase text-slate-400 font-bold">Passerelles Officielles Kinshasa</p>
+                            <p class="text-xs text-emerald-400 font-bold mt-1">M-Pesa : +243 812 000 000</p>
+                            <p class="text-xs text-sky-400 font-bold">Airtel Money : +243 999 000 000</p>
+                        </div>
+
+                        <button onclick="declarerPaiementForfait()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs shadow-lg shadow-emerald-500/10">
+                            J'ai Payé — Activer mon Véhicule
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- ONGLET RAPPORT -->
-            <div id="onglet-maintenance" class="p-4 space-y-4 class-onglet hidden overflow-y-auto max-h-[620px] pb-32 print:pb-0 print:overflow-visible">
-                <div class="flex justify-between items-center no-print">
-                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rapport de Mouvements</h2>
-                    <button onclick="window.print()" class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded flex items-center gap-1 hover:bg-emerald-500/20"><i class="fa-solid fa-print"></i> PDF</button>
-                </div>
-                <div class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800 space-y-2.5 print-clean">
-                    <h3 class="text-xs font-black uppercase text-slate-200 flex items-center gap-1.5 print-text"><i class="fa-solid fa-satellite-dish text-indigo-400 no-print"></i> Diagnostic Matériel</h3>
-                    <div class="grid grid-cols-2 gap-2 text-[10px] font-mono text-slate-400 bg-slate-900/80 p-3 rounded-xl border border-slate-800 print-clean print-text">
-                        <div class="space-y-1">
-                            <p>🔌 Traceur : <span class="text-emerald-500 font-bold">En Ligne</span></p>
-                            <p>🔋 Batterie : <span class="text-emerald-500 font-bold">12.6V</span></p>
-                            <p>📡 Signal : <span class="text-emerald-500 font-bold">Excellent</span></p>
-                        </div>
-                        <div class="space-y-1">
-                            <p>📶 Réseau : <span class="text-emerald-500 font-bold">Airtel 4G</span></p>
-                            <p>⚡ Sabotage : <span class="text-emerald-500 font-bold">Zéro Alerte</span></p>
-                            <p>🚗 Compteur : <span class="text-emerald-500 font-bold">142 km</span></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ONGLET PROFIL -->
-            <div id="onglet-profil" class="p-4 space-y-4 class-onglet hidden overflow-y-auto max-h-[580px] no-print pb-32">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mon Profil & Sécurité</h2>
-                    <span class="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-mono font-bold">ID: #TV-9021</span>
-                </div>
-                <div class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800/80 space-y-3 shadow-xl">
-                    <button onclick="ouvrirModalCGU()" class="w-full bg-slate-900 border border-slate-800 hover:border-emerald-500/50 text-slate-300 font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2">
+            <!-- ONGLET D : PROFIL & CGU -->
+            <div id="onglet-profil" class="p-4 space-y-4 class-onglet hidden no-print">
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-3">
+                    <button onclick="ouvrirModalCGU()" class="w-full bg-slate-900 border border-slate-800 text-slate-300 font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2">
                         <i class="fa-solid fa-file-contract text-emerald-400"></i> Consulter les CGU
                     </button>
-                    <button onclick="declencherDeconnexion()" class="w-full bg-rose-500/10 border border-rose-500/20 text-rose-400 font-black py-3 rounded-xl text-xs uppercase flex items-center justify-center gap-2 mt-4"><i class="fa-solid fa-power-off"></i> Se Déconnecter</button>
+                    <button onclick="naviguerVers('page-auth')" class="w-full bg-rose-500/10 border border-rose-500/20 text-rose-400 font-black py-3 rounded-xl text-xs uppercase flex items-center justify-center gap-2 mt-4">
+                        <i class="fa-solid fa-power-off"></i> Se Déconnecter
+                    </button>
                 </div>
-            </div>
-
-            <!-- FOOTER MENTION PRO -->
-            <div class="text-center py-3 text-[9px] font-mono text-slate-400 border-t border-slate-800/80 mt-4 no-print">
-                TransVision v14.1 — by <span class="text-slate-200 font-bold">Global Tech Solutions</span>
             </div>
 
             <!-- BARRE DE NAVIGATION BASSE -->
-            <nav class="absolute bottom-0 inset-x-0 bg-slate-950/95 backdrop-blur border-t border-slate-800 h-16 flex justify-around items-center z-40 no-print px-1">
+            <nav class="fixed bottom-0 max-w-md w-full inset-x-0 mx-auto bg-slate-950/95 backdrop-blur border-t border-slate-800 h-16 flex justify-around items-center z-40 no-print px-1">
                 <button onclick="changerOnglet('onglet-flotte', this)" class="flex flex-col items-center justify-center gap-1 text-emerald-400 btn-nav flex-1">
-                    <i class="fa-solid fa-bus text-sm"></i><span class="text-[7px] font-bold">Flotte</span>
+                    <i class="fa-solid fa-location-crosshairs text-sm"></i><span class="text-[8px] font-bold">GPS Live</span>
                 </button>
-                <button id="nav-analyses" onclick="changerOnglet('onglet-analyses', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1 hover:text-slate-300">
-                    <i class="fa-solid fa-chart-pie text-sm"></i><span class="text-[7px] font-bold">Analyses</span>
+                <button onclick="changerOnglet('onglet-ajouter', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1">
+                    <i class="fa-solid fa-route text-sm"></i><span class="text-[8px] font-bold">Itinéraire</span>
                 </button>
-                <button onclick="changerOnglet('onglet-maintenance', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1 hover:text-slate-300">
-                    <i class="fa-solid fa-folder-open text-sm"></i><span class="text-[7px] font-bold">Rapport</span>
+                <button onclick="changerOnglet('onglet-forfait', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1">
+                    <i class="fa-solid fa-wallet text-sm"></i><span class="text-[8px] font-bold">Forfait</span>
                 </button>
-                <button onclick="changerOnglet('onglet-ajouter', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1 hover:text-slate-300">
-                    <i class="fa-solid fa-square-plus text-sm"></i><span class="text-[7px] font-bold">Nouveau</span>
-                </button>
-                <button onclick="changerOnglet('onglet-profil', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1 hover:text-slate-300">
-                    <i class="fa-solid fa-user text-sm"></i><span class="text-[7px] font-bold">Profil</span>
+                <button onclick="changerOnglet('onglet-profil', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1">
+                    <i class="fa-solid fa-user text-sm"></i><span class="text-[8px] font-bold">Profil</span>
                 </button>
             </nav>
-        </div>
-
-        <!-- MODAL RECHARGE FLEXIBLE PAR JOURS -->
-        <div id="modal-recharge-partenaire" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
-            <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
-                <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                    <h3 class="font-black text-sm text-slate-100 flex items-center gap-2">
-                        <i class="fa-solid fa-clock-rotate-left text-emerald-400"></i> Durée de Recharge Partenaire
-                    </h3>
-                    <button onclick="fermerModalRecharge()" class="text-slate-500 hover:text-slate-300"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-
-                <div class="space-y-3">
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase">Nombre de Jours Souhaité</label>
-                    <div class="grid grid-cols-4 gap-1.5">
-                        <button onclick="selectionnerDureeRecharge(1)" class="btn-duree bg-slate-800 text-slate-200 py-2 rounded-xl text-xs font-black">1 j</button>
-                        <button onclick="selectionnerDureeRecharge(7)" class="btn-duree bg-slate-800 text-slate-200 py-2 rounded-xl text-xs font-black">7 j</button>
-                        <button onclick="selectionnerDureeRecharge(15)" class="btn-duree bg-slate-800 text-slate-200 py-2 rounded-xl text-xs font-black">15 j</button>
-                        <button onclick="selectionnerDureeRecharge(30)" class="btn-duree bg-emerald-500 text-slate-950 py-2 rounded-xl text-xs font-black">30 j</button>
-                    </div>
-
-                    <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-1 text-center">
-                        <span class="text-[9px] text-slate-400 uppercase font-black">Montant Requis</span>
-                        <p id="prix-recharge-calcule" class="text-xl font-black text-emerald-400">30 000 CDF</p>
-                        <span id="label-recharge-details" class="text-[9px] text-slate-500 block">Accès illimité pour 30 jours</span>
-                    </div>
-
-                    <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-850 text-xs font-mono text-slate-300">
-                        <p class="text-[10px]">Passerelle M-Pesa / Airtel :</p>
-                        <p class="text-emerald-400 font-bold mt-0.5">+243 812 000 000</p>
-                    </div>
-                </div>
-
-                <button onclick="confirmerDemandeRecharge()" class="w-full bg-emerald-500 text-slate-950 font-black py-3 rounded-xl uppercase text-xs shadow-lg shadow-emerald-500/10">
-                    Confirmer la Demande
-                </button>
-            </div>
         </div>
 
         <!-- MODAL CGU -->
         <div id="modal-cgu" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
             <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md max-h-[80vh] flex flex-col overflow-hidden shadow-2xl">
                 <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
-                    <h3 class="font-black text-xs text-slate-100 uppercase">Conditions d'Utilisation TransVision</h3>
+                    <h3 class="font-black text-xs text-slate-100 uppercase">Conditions du Forfait TransVision</h3>
                     <button onclick="fermerModalCGU()" class="text-slate-400 hover:text-slate-100 text-sm p-1"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <div class="p-5 overflow-y-auto text-slate-300 text-xs font-mono leading-relaxed whitespace-pre-wrap" id="zone-texte-cgu"></div>
@@ -398,87 +329,129 @@
         </div>
     </div>
 
-    <!-- CODE JAVASCRIPT -->
+    <!-- LOGIQUE JAVASCRIPT -->
     <script>
-        // PWA Installation
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log('PWA SW:', err));
-            });
-        }
-        let promptInstall;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            promptInstall = e;
-            document.getElementById('pwa-install-banner').classList.remove('hidden');
-        });
-        document.getElementById('btn-install-pwa').addEventListener('click', async () => {
-            document.getElementById('pwa-install-banner').classList.add('hidden');
-            if (promptInstall) {
-                promptInstall.prompt();
-                promptInstall = null;
-            }
-        });
+        // --- 1. BASE DE DONNÉES D'ASSISTANCE DES ITINÉRAIRES KINOIS ---
+        const pointsKinshasa = [
+            "GARE CENTRALE", "UPN", "ROND POINT VICTOIRE", "KINGASANI PASCAL", 
+            "KINTAMBO MAGASIN", "MARCHE CENTRAL", "SAINTE THERESE N'DJILI", 
+            "POMPAGE", "BANDAL MOULAERT", "SELEMBAO"
+        ];
 
-        let joursChoisis = 30;
-        let chartPartenaireInstance = null;
+        const matriceTarifsDistances = {
+            "GARE CENTRALE — UPN": { distance: 12.5, tarif: 1500 },
+            "ROND POINT VICTOIRE — UPN": { distance: 9.5, tarif: 1500 },
+            "KINGASANI PASCAL — GARE CENTRALE": { distance: 16.0, tarif: 2000 },
+            "KINTAMBO MAGASIN — UPN": { distance: 6.5, tarif: 1000 },
+            "MARCHE CENTRAL — SAINTE THERESE N'DJILI": { distance: 14.5, tarif: 1500 }
+        };
 
         let client = {
             nom: "Jean Mukendi",
             tel: "+243812345678",
-            commune: "Gombe",
-            projet: "transvision",
-            mode: "jour",
-            solde: 32500,
-            joursRestants: 26,
+            forfaitPaye: true,
             vehicules: [
-                { plaque: "KIN 4082AE", type: "Mini-bus Mercedes 207", places: 18, imei: "865241092837401", rotations: 12, itineraire: "GARE CENTRALE — UPN", moteurCoupe: false }
+                { plaque: "KIN 4082AE", type: "Mini-bus Mercedes 207", places: 18, imei: "865241092837401", rotations: 8, itineraire: "GARE CENTRALE — UPN", lat: -4.3215, lng: 15.3115 }
             ]
         };
 
-        const referentielItineraires = {
-            "KINGASANI PASCAL — ROUTE MOKALI PONT MANGO": { tarif: 1500, distance: 4.5, distanceDeviee: 5.3 },
-            "KINGASANI PASCAL — MIKONDO BOSAWA": { tarif: 500, distance: 3.0, distanceDeviee: 3.6 },
-            "KINGASANI PASCAL — AEROPORT DE N'DJILI": { tarif: 500, distance: 5.5, distanceDeviee: 6.2 },
-            "KINTAMBO MAGASIN — KINTAMBO CIMETIERE": { tarif: 1000, distance: 1.8, distanceDeviee: 2.3 },
-            "KINTAMBO MAGASIN — QUADO SAI SAI": { tarif: 500, distance: 1.2, distanceDeviee: 1.6 },
-            "MARCHE SELEMBAO — U.P.N.": { tarif: 1000, distance: 5.5, distanceDeviee: 6.7 },
-            "BANDALUNGWA MOULAERT — U.P.N.": { tarif: 2000, distance: 5.8, distanceDeviee: 7.0 },
-            "MARCHE MATETE — N'DJILI SAINTE THERESE": { tarif: 1500, distance: 4.2, distanceDeviee: 5.2 },
-            "GARE CENTRALE — UPN": { tarif: 1500, distance: 12.5, distanceDeviee: 15.0 },
-            "ROND POINT VICTOIRE — UPN": { tarif: 1500, distance: 9.5, distanceDeviee: 11.5 },
-            "MARCHE CENTRAL — KINGASANI YA SUKA": { tarif: 1500, distance: 15.5, distanceDeviee: 18.5 }
-        };
+        // --- 2. GESTION DE LA CARTE LEAFLET ---
+        let map = null;
+        let busMarker = null;
 
-        const communesKinshasa = ["Bandalungwa", "Gombe", "Kintambo", "Lemba", "Limete", "Matete", "Ngaliema"];
+        function initMap() {
+            if (map) return;
+            // Coordonnées Kinshasa Centre (-4.3224, 15.3070)
+            map = L.map('map-container').setView([-4.3224, 15.3070], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18
+            }).addTo(map);
 
-        function ouvrirModalCGU() {
-            document.getElementById('zone-texte-cgu').textContent = localStorage.getItem('transvision_cgu') || "CONDITIONS GÉNÉRALES D'UTILISATION (CGU) — TRANSVISION\nÉditées par Global Tech Solutions\n\n1. OBJET DU SERVICE :\nTransVision fournit un service de suivi GPS et de contrôle d'activité de flotte.\n\n2. FACTURATION :\nLa commission est perçue sur base d'un forfait journalier (par jour d'activité) ou d'un forfait mensuel.\n\n3. GÉOLOCALISATION :\nLe propriétaire autorise la transmission continue des coordonnées GPS.";
-            document.getElementById('modal-cgu').classList.remove('hidden');
+            // Marqueur dynamique du véhicule
+            const v = client.vehicules[0];
+            busMarker = L.marker([v.lat, v.lng]).addTo(map)
+                .bindPopup(`<b>${v.plaque}</b><br>${v.type}<br>Ligne : ${v.itineraire}`)
+                .openPopup();
         }
-        function fermerModalCGU() { document.getElementById('modal-cgu').classList.add('hidden'); }
 
-        function ouvrirModalRecharge() { document.getElementById('modal-recharge-partenaire').classList.remove('hidden'); }
-        function fermerModalRecharge() { document.getElementById('modal-recharge-partenaire').classList.add('hidden'); }
+        function centrerSurVehicule() {
+            if (map && busMarker) {
+                map.setView(busMarker.getLatLng(), 15);
+                busMarker.openPopup();
+            }
+        }
 
-        function selectionnerDureeRecharge(jours) {
-            joursChoisis = jours;
-            const tarifParJour = 1000;
-            const total = jours * tarifParJour;
-            document.getElementById('prix-recharge-calcule').textContent = `${total.toLocaleString()} CDF`;
-            document.getElementById('label-recharge-details').textContent = `Accès illimité pour ${jours} jour(s)`;
+        // --- 3. GESTION STRICTE DU FORFAIT (5H00 À 23H59) ---
+        function actualiserCompteARebours23h59() {
+            const now = new Date();
+            const finJour = new Date();
+            finJour.setHours(23, 59, 59, 999);
 
-            document.querySelectorAll('.btn-duree').forEach(btn => {
-                btn.className = "btn-duree bg-slate-800 text-slate-200 py-2 rounded-xl text-xs font-black";
+            const resteMs = finJour - now;
+            if (resteMs <= 0) {
+                document.getElementById('timer-compte-rebours').textContent = "00:00:00 (Expiré)";
+                document.getElementById('timer-compte-rebours').className = "text-sm font-mono font-black text-rose-400 bg-slate-900 border border-rose-500/50 px-2.5 py-1 rounded-lg";
+                return;
+            }
+
+            const h = Math.floor(resteMs / 3600000);
+            const m = Math.floor((resteMs % 3600000) / 60000);
+            const s = Math.floor((resteMs % 60000) / 1000);
+
+            document.getElementById('timer-compte-rebours').textContent = 
+                `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+        setInterval(actualiserCompteARebours23h59, 1000);
+
+        // --- 4. ASSISTANCE DES ITINÉRAIRES ---
+        function peuplerSelectsPoints() {
+            const selO = document.getElementById('sel-origine');
+            const selD = document.getElementById('sel-destination');
+            selO.innerHTML = ""; selD.innerHTML = "";
+
+            pointsKinshasa.forEach((pt, i) => {
+                selO.insertAdjacentHTML('beforeend', `<option value="${pt}" ${i===0?'selected':''}>${pt}</option>`);
+                selD.insertAdjacentHTML('beforeend', `<option value="${pt}" ${i===1?'selected':''}>${pt}</option>`);
             });
-            event.target.className = "btn-duree bg-emerald-500 text-slate-950 py-2 rounded-xl text-xs font-black";
+            actualiserAssistanceItineraire();
         }
 
-        function confirmerDemandeRecharge() {
-            alert(`🛰️ Demande de recharge pour ${joursChoisis} jours transmise au serveur.\nEffectuez le transfert vers la passerelle.`);
-            fermerModalRecharge();
+        function actualiserAssistanceItineraire() {
+            const org = document.getElementById('sel-origine').value;
+            const dest = document.getElementById('sel-destination').value;
+            const type = document.getElementById('add-type').value;
+
+            let places = 18;
+            if (type.includes("Ketch")) places = 4;
+            if (type.includes("Wewa")) places = 1;
+            if (type.includes("Personnel")) places = 0;
+
+            const cle1 = `${org} — ${dest}`;
+            const cle2 = `${dest} — ${org}`;
+            const donnees = matriceTarifsDistances[cle1] || matriceTarifsDistances[cle2] || { distance: 10.0, tarif: 1500 };
+
+            document.getElementById('ast-distance').textContent = `${donnees.distance} km`;
+            document.getElementById('ast-tarif').textContent = `${donnees.tarif.toLocaleString()} CDF`;
+            document.getElementById('ast-rotation').textContent = `${(places * donnees.tarif).toLocaleString()} CDF`;
         }
 
+        function enregistrerVehiculeAssiste() {
+            const plaque = document.getElementById('add-plaque').value.trim();
+            const imei = document.getElementById('add-imei').value.trim();
+            const type = document.getElementById('add-type').value;
+            const org = document.getElementById('sel-origine').value;
+            const dest = document.getElementById('sel-destination').value;
+
+            if (!plaque || !imei) { alert("Plaque et IMEI obligatoires."); return; }
+
+            const itineraire = `${org} — ${dest}`;
+            client.vehicules[0] = { plaque, type, places: 18, imei, rotations: 0, itineraire, lat: -4.3215, lng: 15.3115 };
+            genererCartesVehicules();
+            alert(`✅ Trajet configuré avec assistance : ${itineraire}`);
+            changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
+        }
+
+        // --- 5. NAVIGATION & VUES ---
         function basculerVueAuth(mode) {
             if(mode === 'login') {
                 document.getElementById('form-connexion').classList.remove('hidden');
@@ -493,42 +466,6 @@
             }
         }
 
-        function executerConnexionPartenaire() {
-            const tel = document.getElementById('login-tel').value.trim();
-            if (!tel) { alert("Veuillez renseigner votre numéro."); return; }
-            client.tel = tel;
-            appliquerConfigurationDom();
-            naviguerVers('app-proprietaire');
-        }
-
-        function initialiserCommunes() {
-            document.querySelectorAll('.conteneur-communes').forEach(select => {
-                select.innerHTML = "";
-                communesKinshasa.forEach(c => {
-                    const selected = c === client.commune ? "selected" : "";
-                    select.insertAdjacentHTML('beforeend', `<option value="${c}" ${selected}>${c}</option>`);
-                });
-            });
-        }
-
-        function initialiserOriginesDestinations() {
-            const selectOrigine = document.getElementById('add-origine');
-            const selectDestination = document.getElementById('add-destination');
-            if(!selectOrigine || !selectDestination) return;
-
-            const originesSet = new Set();
-            const destinationsSet = new Set();
-            Object.keys(referentielItineraires).forEach(trajet => {
-                const parts = trajet.split(' — ');
-                if(parts.length === 2) {
-                    originesSet.add(parts[0]);
-                    destinationsSet.add(parts[1]);
-                }
-            });
-            Array.from(originesSet).sort().forEach(org => selectOrigine.insertAdjacentHTML('beforeend', `<option value="${org}">${org}</option>`));
-            Array.from(destinationsSet).sort().forEach(dest => selectDestination.insertAdjacentHTML('beforeend', `<option value="${dest}">${dest}</option>`));
-        }
-
         function naviguerVers(id) {
             document.getElementById('page-auth').classList.add('hidden');
             document.getElementById('app-proprietaire').classList.add('hidden');
@@ -541,169 +478,57 @@
             document.querySelectorAll('.btn-nav').forEach(btn => { btn.classList.remove('text-emerald-400'); btn.classList.add('text-slate-500'); });
             boutonActif.classList.remove('text-slate-500'); boutonActif.classList.add('text-emerald-400');
 
-            if (idOnglet === 'onglet-analyses') initialiserGraphiquePartenaire();
-        }
-
-        function adapterFormulaireInscription() {
-            const projet = document.getElementById('ins-projet').value;
-            const blocFacturation = document.getElementById('bloc-facturation');
-            if (projet === 'carvision') { blocFacturation.classList.add('hidden'); } else { blocFacturation.classList.remove('hidden'); }
-        }
-
-        function finaliserInscription() {
-            client.nom = document.getElementById('ins-nom').value || client.nom;
-            client.commune = document.getElementById('ins-commune').value;
-            client.tel = document.getElementById('ins-tel').value || client.tel;
-            client.projet = document.getElementById('ins-projet').value;
-            if (client.projet === 'transvision') { client.mode = document.getElementById('ins-type-facturation').value; }
-            appliquerConfigurationDom();
-            naviguerVers('app-proprietaire');
-        }
-
-        function appliquerConfigurationDom() {
-            document.getElementById('lbl-nom-partenaire').textContent = client.nom;
-            document.getElementById('lbl-commune-badge').textContent = client.commune;
-            document.getElementById('txt-compteur-vehicules').textContent = client.vehicules.length;
-
-            const badgeProjet = document.getElementById('badge-projet');
-            const navAnalyses = document.getElementById('nav-analyses');
-            const blocHeaderFinance = document.getElementById('bloc-header-finance');
-            const blocFormItineraire = document.getElementById('bloc-form-itineraire');
-            const blocFormPlaces = document.getElementById('bloc-form-places');
-
-            if (client.projet === 'carvision') {
-                badgeProjet.textContent = "🚗 CarVision";
-                badgeProjet.className = "text-[9px] bg-rose-500/15 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider inline-block";
-                navAnalyses.classList.add('hidden');
-                blocHeaderFinance.classList.add('hidden');
-                blocFormItineraire.classList.add('hidden');
-                blocFormPlaces.classList.add('hidden');
-            } else {
-                badgeProjet.textContent = client.mode === "jour" ? "🚌 TransVision (Forfait Jour)" : "🚌 TransVision (Forfait Mois)";
-                badgeProjet.className = "text-[9px] bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider inline-block";
-                navAnalyses.classList.remove('hidden');
-                blocHeaderFinance.classList.remove('hidden');
-                blocFormItineraire.classList.remove('hidden');
-                blocFormPlaces.classList.remove('hidden');
+            if (idOnglet === 'onglet-flotte') {
+                setTimeout(() => {
+                    initMap();
+                    if (map) map.invalidateSize();
+                }, 200);
             }
-
-            genererCartesVehicules();
         }
 
-        function calculerRecette(itineraire, rotations, places) {
-            const donneesTrajet = referentielItineraires[itineraire];
-            const tarifUnitaire = donneesTrajet ? donneesTrajet.tarif : 500;
-            return rotations * places * tarifUnitaire;
+        function executerConnexionPartenaire() {
+            naviguerVers('app-proprietaire');
+            genererCartesVehicules();
+            actualiserCompteARebours23h59();
+            setTimeout(initMap, 300);
         }
 
         function genererCartesVehicules() {
             const conteneur = document.getElementById('conteneur-vehicules-actifs');
             conteneur.innerHTML = "";
-            client.vehicules.forEach((v, index) => {
-                let contenuSpecifique = "";
-                if (client.projet === 'transvision') {
-                    const gainEstime = calculerRecette(v.itineraire, v.rotations, v.places);
-                    contenuSpecifique = `
-                        <p class="text-[10px] text-slate-400 mt-1 font-bold"><i class="fa-solid fa-route text-emerald-400"></i> Mode : ${v.itineraire}</p>
-                        <div class="grid grid-cols-3 gap-2 bg-slate-900/50 p-3 rounded-xl text-center text-xs mt-3 border border-slate-800">
-                            <div><span class="text-[9px] text-slate-500 block">Rotations</span><span class="font-black text-slate-200">${v.rotations}</span></div>
-                            <div><span class="text-[9px] text-slate-500 block">Places</span><span class="font-black text-slate-200">${v.places} pl.</span></div>
-                            <div><span class="text-[9px] text-slate-500 block">Recette</span><span class="font-black text-emerald-400">${gainEstime.toLocaleString()} CDF</span></div>
-                        </div>`;
-                } else {
-                    const btnMoteur = v.moteurCoupe 
-                        ? `<button onclick="restaurerMoteur(${index})" class="w-full bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 font-black py-3 rounded-xl text-xs uppercase flex items-center justify-center gap-2 mt-4"><i class="fa-solid fa-unlock"></i> Restaurer Moteur</button>`
-                        : `<button onclick="arreterMoteur(${index})" class="w-full bg-rose-500/20 border border-rose-500/50 text-rose-400 font-black py-3 rounded-xl text-xs uppercase flex items-center justify-center gap-2 mt-4"><i class="fa-solid fa-lock"></i> Arrêt Moteur (Urgence)</button>`;
-                    
-                    contenuSpecifique = `
-                        <div class="bg-slate-900/50 p-3 rounded-xl text-xs mt-3 border border-slate-800">
-                            <p class="text-[10px] text-slate-400 font-mono"><i class="fa-solid fa-location-dot text-emerald-400"></i> Localisation GPS Active</p>
+            client.vehicules.forEach(v => {
+                conteneur.insertAdjacentHTML('beforeend', `
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[9px] font-black bg-slate-800 text-slate-300 px-2 py-0.5 rounded uppercase">${v.type}</span>
+                                <h3 class="text-base font-black mt-1 text-slate-100">${v.plaque}</h3>
+                                <p class="text-[10px] text-emerald-400 font-bold mt-0.5"><i class="fa-solid fa-route"></i> Ligne : ${v.itineraire}</p>
+                            </div>
+                            <span class="bg-emerald-500/10 text-emerald-400 text-[9px] font-mono px-2 py-0.5 rounded font-bold">Actif SinoTrack</span>
                         </div>
-                        ${btnMoteur}
-                    `;
-                }
-
-                const carteHtml = `
-                    <div class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800">
-                        <div>
-                            <span class="text-[9px] font-black bg-slate-800 text-slate-300 px-2 py-0.5 rounded uppercase">${v.type}</span>
-                            <h3 class="text-base font-black mt-1 text-slate-100">${v.plaque}</h3>
+                        <div class="grid grid-cols-2 gap-2 bg-slate-900/50 p-2.5 rounded-xl border border-slate-800/80 text-xs font-mono">
+                            <div><span class="text-[8px] text-slate-500 block">IMEI Traceur</span><span class="text-slate-300">${v.imei}</span></div>
+                            <div class="text-right"><span class="text-[8px] text-slate-500 block">Expiration Forfait</span><span class="text-amber-400 font-bold">Ce soir 23h59</span></div>
                         </div>
-                        ${contenuSpecifique}
-                    </div>`;
-                conteneur.insertAdjacentHTML('beforeend', carteHtml);
+                    </div>`);
             });
         }
 
-        function arreterMoteur(index) {
-            if(confirm("🚨 DANGER : Couper l'alimentation carburant du véhicule ?")) {
-                client.vehicules[index].moteurCoupe = true;
-                alert("📡 Commande SMS 9400000 envoyée au traceur SinoTrack.\nLe véhicule va s'immobiliser.");
-                genererCartesVehicules();
-            }
-        }
-
-        function restaurerMoteur(index) {
-            client.vehicules[index].moteurCoupe = false;
-            alert("🟢 Commande SMS 9410000 envoyée.\nAlimentation rétablie.");
-            genererCartesVehicules();
-        }
-
-        function validerAjoutVehicule() {
-            const plaque = document.getElementById('add-plaque').value;
-            const type = document.getElementById('add-type').value;
-            const imei = document.getElementById('add-imei').value;
-            let itineraire = "Usage Personnel";
-            let places = 0;
-
-            if(client.projet === 'transvision') {
-                const origine = document.getElementById('add-origine').value;
-                const destination = document.getElementById('add-destination').value;
-                places = parseInt(document.getElementById('add-places').value) || 18;
-                itineraire = (origine === "Global" || destination === "Global") ? "Détection Globale 🌐" : `${origine} — ${destination}`;
-            }
-
-            if(!plaque || !imei) { alert("Saisie incomplète (Plaque ou IMEI manquant)."); return; }
-            client.vehicules.push({ plaque: plaque, type: type, places: places, imei: imei, rotations: 0, itineraire: itineraire, moteurCoupe: false });
-            appliquerConfigurationDom();
-            document.getElementById('add-plaque').value = ""; document.getElementById('add-imei').value = "";
-            alert(`✅ Véhicule ${plaque} enregistré.`);
+        function declarerPaiementForfait() {
+            alert("🛰️ Paiement pris en compte !\nVotre véhicule est autorisé à circuler jusqu'à 23h59.");
             changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
         }
 
-        function initialiserGraphiquePartenaire() {
-            if (chartPartenaireInstance) return;
-            const ctx = document.getElementById('chart-recettes-partenaire').getContext('2d');
-            chartPartenaireInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
-                    datasets: [{
-                        label: 'Gains Quotidiens (CDF)',
-                        data: [27000, 31500, 24000, 36000, 42000, 45000, 39000],
-                        backgroundColor: '#10b981',
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 } } },
-                        y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 10 } } }
-                    }
-                }
-            });
+        function ouvrirModalCGU() {
+            document.getElementById('zone-texte-cgu').textContent = 
+                "CONDITIONS DU FORFAIT PRÉPAYÉ TRANSVISION :\n\n1. OBLIGATION DE PRÉ-PAIEMENT :\nLe client doit impérativement souscrire son forfait avant le début de ses rotations.\n\n2. FENÊTRE JOURNALIÈRE (5H00 — 23H59) :\nLe forfait journalier s'applique uniquement pour la journée en cours. Quelle que soit l'heure où le paiement est validé, il expire à 23h59 précises le jour même.\n\n3. NON-REPORT :\nLes heures non consommées ne sont ni remboursables ni reportables sur le lendemain.\n\nGlobal Tech Solutions SARL.";
+            document.getElementById('modal-cgu').classList.remove('hidden');
         }
+        function fermerModalCGU() { document.getElementById('modal-cgu').classList.add('hidden'); }
 
-        function changerModeProjet(mode) { client.projet = mode; appliquerConfigurationDom(); }
-        function declencherDeconnexion() { naviguerVers('page-auth'); }
-
-        initialiserCommunes();
-        initialiserOriginesDestinations();
-        adapterFormulaireInscription();
-        naviguerVers('page-auth');
+        // Initialisation au chargement
+        peuplerSelectsPoints();
     </script>
 </body>
 </html>
