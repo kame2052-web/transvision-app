@@ -12,6 +12,7 @@
     <style>
         .page-fade { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(100deg); cursor: pointer; }
         @media print {
             body { background: white !important; color: black !important; }
             .no-print { display: none !important; }
@@ -61,7 +62,7 @@
             <aside class="w-64 bg-slate-900 border-r border-slate-800 p-5 flex flex-col justify-between h-[calc(100vh-53px)] sticky top-[53px] no-print">
                 <div class="space-y-5">
                     <div class="flex items-center gap-2.5 px-1">
-                        <img src="logo%20192x192.png" alt="Logo TV" class="w-8 h-8 rounded-lg shadow object-contain">
+                        <img src="logo%20192x192.png" alt="Logo TV" class="w-8 h-8 rounded-lg shadow object-contain bg-slate-950">
                         <div>
                             <h2 class="text-xs font-black tracking-wider uppercase text-slate-200">TransVision</h2>
                             <p class="text-[9px] font-mono text-indigo-400">by Global Tech Solutions</p>
@@ -83,7 +84,6 @@
                         </button>
                         <button onclick="changerPageAdmin('page-tresorerie', this)" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin">
                             <span class="flex items-center gap-3"><i class="fa-solid fa-wallet text-sm text-amber-500"></i> Trésorerie</span>
-                            <span id="badge-compteur-req" class="bg-amber-500 text-slate-950 font-black text-[9px] px-1.5 py-0.5 rounded-full">1</span>
                         </button>
                         <button onclick="changerPageAdmin('page-stats-croisees', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin">
                             <i class="fa-solid fa-chart-pie text-sm text-fuchsia-400"></i> Statistiques & Graphiques
@@ -105,7 +105,8 @@
 
             <!-- CONTENU DES PAGES -->
             <main class="flex-1 p-6 lg:p-8 space-y-6 overflow-y-auto max-w-5xl">
-                <!-- SUIVI -->
+                
+                <!-- SUIVI LIVE -->
                 <div id="page-suivi" class="space-y-4 page-fade class-page-admin">
                     <h2 class="text-xl font-black text-slate-100">🗺️ Suivi de la Flotte Live</h2>
                     <div class="w-full h-80 bg-slate-950 border border-slate-850 rounded-2xl flex items-center justify-center relative">
@@ -113,23 +114,49 @@
                     </div>
                 </div>
 
-                <!-- GESTION FLOTTE -->
+                <!-- GESTION DE LA FLOTTE : INJECTION DES 3 VÉHICULES -->
                 <div id="page-gestion-flotte" class="space-y-4 page-fade class-page-admin hidden">
                     <h2 class="text-xl font-black text-slate-100">🚍 Registre Général des Boîtiers SinoTrack</h2>
                     <div class="bg-slate-950 rounded-2xl border border-slate-850 p-4 overflow-x-auto text-xs font-mono">
                         <table class="w-full text-left">
-                            <thead><tr class="border-b border-slate-800 text-slate-500 uppercase text-[9px] font-sans"><th class="py-2">Plaque</th><th class="py-2">Modèle</th><th class="py-2">IMEI SinoTrack</th><th class="py-2">Index Km</th></tr></thead>
-                            <tbody><tr><td class="py-2 font-bold text-slate-200">KIN 4082AE</td><td class="py-2 font-sans">Mercedes 207</td><td class="py-2 text-slate-400">865241092837401</td><td class="py-2 text-slate-500">4 550 km</td></tr></tbody>
+                            <thead>
+                                <tr class="border-b border-slate-800 text-slate-500 uppercase text-[9px] font-sans">
+                                    <th class="py-2">Plaque</th><th class="py-2">Modèle / Capacité</th><th class="py-2">IMEI SinoTrack</th><th class="py-2">Statut Moteur</th><th class="py-2">Km Estimé</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-850">
+                                <tr>
+                                    <td class="py-3 font-bold text-slate-200">KIN 4082AE</td>
+                                    <td class="py-3 font-sans">Mercedes 207 (18 pl.)</td>
+                                    <td class="py-3 text-slate-400">865241092837401</td>
+                                    <td class="py-3 text-emerald-400 font-bold">ON</td>
+                                    <td class="py-3 text-slate-500">4 550 km</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 font-bold text-slate-200">KIN 1234BB</td>
+                                    <td class="py-3 font-sans">Taxi Ketch (4 pl.)</td>
+                                    <td class="py-3 text-slate-400">865241092837402</td>
+                                    <td class="py-3 text-emerald-400 font-bold">ON</td>
+                                    <td class="py-3 text-slate-500">2 140 km</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 font-bold text-slate-200">KIN 9876XX</td>
+                                    <td class="py-3 font-sans">Hiace (15 pl.)</td>
+                                    <td class="py-3 text-slate-400">865241092837403</td>
+                                    <td class="py-3 text-rose-400 font-bold">COUPÉ</td>
+                                    <td class="py-3 text-slate-500">8 920 km</td>
+                                </tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- PARTENAIRES & GESTION FORFAITS (VALIDATION ADMIN) -->
+                <!-- PARTENAIRES : MENU DÉROULANT ACTIONS -->
                 <div id="page-partenaires" class="space-y-4 page-fade class-page-admin hidden print:block">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 no-print">
                         <div>
-                            <h2 class="text-xl font-black text-slate-100">👤 Partenaires & Validation Recharges</h2>
-                            <p class="text-xs text-slate-400">Validez les transferts M-Pesa/Airtel et activez les accès.</p>
+                            <h2 class="text-xl font-black text-slate-100">👤 Base des Partenaires</h2>
+                            <p class="text-xs text-slate-400">Gérez les comptes, vérifiez les identifiants et validez les recharges.</p>
                         </div>
                         <div class="flex bg-slate-950 p-1.5 rounded-xl border border-slate-850 text-[10px] font-bold">
                             <button onclick="filtrerPartenairesContrat('tous')" class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-200">Tous</button>
@@ -144,43 +171,42 @@
                                 <tr class="border-b border-slate-800 text-slate-500 font-black uppercase text-[9px] tracking-wider print:border-slate-300">
                                     <th class="py-3">Nom Partenaire</th>
                                     <th class="py-3">Type Contrat</th>
-                                    <th class="py-3 text-center">Véhicules</th>
-                                    <th class="py-3 text-right">Solde Validé</th>
-                                    <th class="py-3 text-center">Validité Restante</th>
-                                    <th class="py-3 text-center no-print">Action Validation</th>
+                                    <th class="py-3 text-center">Flotte</th>
+                                    <th class="py-3 text-center">Statut Jours</th>
+                                    <th class="py-3 text-right">Actions Gestion</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-850 text-slate-300 print-text">
-                                <tr class="item-partenaire-row" data-contrat="commercial">
-                                    <td class="py-3 font-black text-slate-200 print-text">Jean Mukendi<br><span class="text-[9px] font-normal text-slate-500">+243 812 345 678</span></td>
-                                    <td class="py-3">
-                                        <span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-black text-[10px] uppercase inline-block">Commercial</span>
-                                    </td>
-                                    <td class="py-3 text-center font-bold font-mono text-indigo-400">3 Bus</td>
-                                    <td class="py-3 text-right font-black font-mono text-emerald-400" id="solde-jean-mukendi">32 500 CDF</td>
-                                    <td class="py-3 text-center font-mono">
-                                        <span id="jours-jean-mukendi" class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-lg font-black text-xs">26 Jours</span>
-                                    </td>
-                                    <td class="py-3 text-center no-print">
-                                        <button onclick="ouvrirModalRechargeFlexible('Jean Mukendi', 'solde-jean-mukendi', 'jours-jean-mukendi')" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black px-3 py-1.5 rounded-xl text-[10px] uppercase shadow-md flex items-center gap-1.5 mx-auto">
-                                            <i class="fa-solid fa-check-double"></i> Valider Recharge
-                                        </button>
+                                <tr class="item-partenaire-row" data-contrat="commercial" id="row-part-1">
+                                    <td class="py-3 font-black text-slate-200">Jean Mukendi<br><span class="text-[9px] font-normal text-slate-500">+243 812 345 678</span></td>
+                                    <td class="py-3"><span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-black text-[10px] uppercase">Commercial</span></td>
+                                    <td class="py-3 text-center font-bold font-mono text-indigo-400">3 Véh.</td>
+                                    <td class="py-3 text-center font-mono"><span id="jours-jean-mukendi" class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-lg font-black text-[10px]">26 Jours</span></td>
+                                    <td class="py-3 text-right no-print">
+                                        <select onchange="executerActionPartenaire('Jean Mukendi', '+243812345678', '1234', 'solde-jean-mukendi', 'jours-jean-mukendi', this)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 focus:outline-none focus:border-indigo-500">
+                                            <option value="">-- Actions --</option>
+                                            <option value="recharger" class="text-emerald-400">💸 Valider Recharge</option>
+                                            <option value="voir_id" class="text-sky-400">👁️ Voir Identifiants</option>
+                                            <option value="activer" class="text-emerald-500">🟢 Activer Compte</option>
+                                            <option value="suspendre" class="text-amber-500">🟠 Suspendre</option>
+                                            <option value="supprimer" class="text-rose-500">🔴 Supprimer Compte</option>
+                                        </select>
                                     </td>
                                 </tr>
-                                <tr class="item-partenaire-row" data-contrat="personnel">
-                                    <td class="py-3 font-black text-slate-200 print-text">Marc Kabeya<br><span class="text-[9px] font-normal text-slate-500">+243 998 765 432</span></td>
-                                    <td class="py-3">
-                                        <span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded font-black text-[10px] uppercase inline-block">Personnel</span>
-                                    </td>
+                                <tr class="item-partenaire-row" data-contrat="personnel" id="row-part-2">
+                                    <td class="py-3 font-black text-slate-200">Marc Kabeya<br><span class="text-[9px] font-normal text-slate-500">+243 998 765 432</span></td>
+                                    <td class="py-3"><span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded font-black text-[10px] uppercase">Personnel</span></td>
                                     <td class="py-3 text-center font-bold font-mono text-rose-400">1 Jeep</td>
-                                    <td class="py-3 text-right font-black font-mono text-slate-400" id="solde-marc-kabeya">0 CDF</td>
-                                    <td class="py-3 text-center font-mono">
-                                        <span id="jours-marc-kabeya" class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2.5 py-1 rounded-lg font-black text-xs">14 Jours</span>
-                                    </td>
-                                    <td class="py-3 text-center no-print">
-                                        <button onclick="ouvrirModalRechargeFlexible('Marc Kabeya', 'solde-marc-kabeya', 'jours-marc-kabeya')" class="bg-rose-500 hover:bg-rose-600 text-slate-950 font-black px-3 py-1.5 rounded-xl text-[10px] uppercase shadow-md flex items-center gap-1.5 mx-auto">
-                                            <i class="fa-solid fa-check-double"></i> Valider Recharge
-                                        </button>
+                                    <td class="py-3 text-center font-mono"><span id="jours-marc-kabeya" class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded-lg font-black text-[10px]">14 Jours</span></td>
+                                    <td class="py-3 text-right no-print">
+                                        <select onchange="executerActionPartenaire('Marc Kabeya', '+243998765432', '0000', 'solde-marc-kabeya', 'jours-marc-kabeya', this)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 focus:outline-none focus:border-indigo-500">
+                                            <option value="">-- Actions --</option>
+                                            <option value="recharger" class="text-emerald-400">💸 Valider Recharge</option>
+                                            <option value="voir_id" class="text-sky-400">👁️ Voir Identifiants</option>
+                                            <option value="activer" class="text-emerald-500">🟢 Activer Compte</option>
+                                            <option value="suspendre" class="text-amber-500">🟠 Suspendre</option>
+                                            <option value="supprimer" class="text-rose-500">🔴 Supprimer Compte</option>
+                                        </select>
                                     </td>
                                 </tr>
                             </tbody>
@@ -212,39 +238,59 @@
                     </div>
                 </div>
 
-                <!-- TRÉSORERIE -->
+                <!-- TRÉSORERIE AVEC FILTRE "DU-AU" -->
                 <div id="page-tresorerie" class="space-y-5 page-fade class-page-admin hidden">
-                    <h2 class="text-xl font-black text-slate-100">💸 Trésorerie & Sortie de Fonds</h2>
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                        <h2 class="text-xl font-black text-slate-100">💸 Trésorerie & Sortie de Fonds</h2>
+                        <!-- FILTRE DE DATE TRÉSORERIE -->
+                        <div class="flex items-center gap-2 bg-slate-950 border border-slate-800 p-1.5 rounded-xl">
+                            <span class="text-[9px] text-slate-500 font-bold uppercase ml-2">Du</span>
+                            <input type="date" id="date-debut-treso" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] text-emerald-400 outline-none">
+                            <span class="text-[9px] text-slate-500 font-bold uppercase">Au</span>
+                            <input type="date" id="date-fin-treso" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] text-emerald-400 outline-none">
+                            <button onclick="majFiltreDate('treso')" class="bg-slate-800 hover:bg-slate-700 text-white p-1.5 rounded-lg"><i class="fa-solid fa-rotate"></i></button>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                         <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-1">
-                            <span class="text-[9px] text-slate-500 uppercase block font-black">Encaissements</span>
+                            <span class="text-[9px] text-slate-500 uppercase block font-black">Encaissements (Période)</span>
                             <p id="txt-tresor" class="text-xl font-black text-emerald-400">850 000 CDF</p>
                         </div>
                         <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-1">
-                            <span class="text-[9px] text-slate-500 uppercase block font-black">Commissions</span>
+                            <span class="text-[9px] text-slate-500 uppercase block font-black">Commissions (Période)</span>
                             <p id="txt-commissions" class="text-xl font-black text-indigo-400">145 500 CDF</p>
                         </div>
                         <div class="bg-slate-950 p-4 rounded-2xl border border-indigo-500/20 space-y-2">
-                            <input type="tel" id="wir-phone" class="w-full bg-slate-900 border border-slate-800 p-2 rounded-xl" placeholder="Numéro Mobile Money">
-                            <input type="number" id="wir-amount" class="w-full bg-slate-900 border border-slate-800 p-2 rounded-xl text-emerald-400" placeholder="Montant CDF">
-                            <button onclick="executerVirementMobileMoneyAdmin()" class="w-full bg-indigo-500 text-slate-950 font-black py-2 rounded-xl uppercase">Virement</button>
+                            <input type="tel" id="wir-phone" class="w-full bg-slate-900 border border-slate-800 p-2 rounded-xl focus:border-indigo-500 outline-none" placeholder="N° Mobile Money Sortant">
+                            <input type="number" id="wir-amount" class="w-full bg-slate-900 border border-slate-800 p-2 rounded-xl text-emerald-400 focus:border-indigo-500 outline-none" placeholder="Montant CDF">
+                            <button onclick="executerVirementMobileMoneyAdmin()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-2 rounded-xl uppercase transition-colors">Décaisser</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- STATISTIQUES CROISÉES -->
+                <!-- STATISTIQUES CROISÉES AVEC FILTRE "DU-AU" -->
                 <div id="page-stats-croisees" class="space-y-5 page-fade class-page-admin hidden">
-                    <div>
-                        <h2 class="text-xl font-black text-slate-100">📊 Tableaux de Bord Analytiques & Graphiques</h2>
-                        <p class="text-xs text-slate-400">Croisement des flux financiers, répartition des contrats et empreinte spatiale.</p>
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                        <div>
+                            <h2 class="text-xl font-black text-slate-100">📊 Tableaux de Bord Analytiques</h2>
+                            <p class="text-xs text-slate-400">Croisement des flux financiers et empreinte spatiale.</p>
+                        </div>
+                        <!-- FILTRE DE DATE STATISTIQUES -->
+                        <div class="flex items-center gap-2 bg-slate-950 border border-slate-800 p-1.5 rounded-xl">
+                            <span class="text-[9px] text-slate-500 font-bold uppercase ml-2">Du</span>
+                            <input type="date" id="date-debut-stats" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] text-fuchsia-400 outline-none">
+                            <span class="text-[9px] text-slate-500 font-bold uppercase">Au</span>
+                            <input type="date" id="date-fin-stats" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] text-fuchsia-400 outline-none">
+                            <button onclick="majFiltreDate('stats')" class="bg-slate-800 hover:bg-slate-700 text-white p-1.5 rounded-lg"><i class="fa-solid fa-rotate"></i></button>
+                        </div>
                     </div>
 
                     <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
                         <div class="flex justify-between items-center">
                             <h3 class="text-xs font-black uppercase text-emerald-400 flex items-center gap-2">
-                                <i class="fa-solid fa-chart-line"></i> Évolution des Recettes & Dépenses (7 Derniers Jours)
+                                <i class="fa-solid fa-chart-line"></i> Évolution des Recettes & Dépenses
                             </h3>
-                            <span class="text-[9px] text-slate-500 font-mono">CDF / Jour</span>
                         </div>
                         <div class="h-64 relative">
                             <canvas id="chart-recettes-depenses"></canvas>
@@ -254,7 +300,7 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
                             <h3 class="text-xs font-black uppercase text-indigo-400 flex items-center gap-2">
-                                <i class="fa-solid fa-users-viewfinder"></i> Répartition des Clients (Commerce vs Personnel)
+                                <i class="fa-solid fa-users-viewfinder"></i> Répartition des Clients
                             </h3>
                             <div class="h-56 relative flex items-center justify-center">
                                 <canvas id="chart-clients-types"></canvas>
@@ -263,7 +309,7 @@
 
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
                             <h3 class="text-xs font-black uppercase text-sky-400 flex items-center gap-2">
-                                <i class="fa-solid fa-map-pin"></i> Part de la Flotte par Commune (Kinshasa)
+                                <i class="fa-solid fa-map-pin"></i> Part de la Flotte par Commune
                             </h3>
                             <div class="h-56 relative flex items-center justify-center">
                                 <canvas id="chart-communes-part"></canvas>
@@ -295,7 +341,7 @@
                                 <input type="password" id="cfg-admin-new-pass" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-emerald-400 focus:outline-none focus:border-emerald-500" placeholder="Minimum 6 caractères">
                             </div>
                             <button onclick="modifierAccesPropresAdmin()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-2.5 rounded-xl uppercase text-xs transition-all shadow-lg shadow-indigo-500/10 mt-1">
-                                Valider & Modifier mes Accès
+                                Valider & Modifier
                             </button>
                         </div>
 
@@ -332,19 +378,18 @@
                 <button onclick="fermerModalRechargeFlexible()" class="text-slate-500 hover:text-slate-300"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <p class="text-[10px] text-slate-400">Approuvez le paiement reçu et activez les jours correspondants.</p>
-            <p class="text-xs text-slate-300 font-bold">Compte : <span id="nom-partenaire-cible" class="text-emerald-400">Jean Mukendi</span></p>
+            <p class="text-xs text-slate-300 font-bold">Compte : <span id="nom-partenaire-cible" class="text-emerald-400"></span></p>
 
             <div class="space-y-3 text-xs">
                 <div>
                     <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Montant Reçu (CDF)</label>
-                    <input type="number" id="input-credit-fixer" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 font-black text-emerald-400" placeholder="Saisir montant" value="2000">
+                    <input type="number" id="input-credit-fixer" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 font-black text-emerald-400 outline-none focus:border-emerald-500" placeholder="Saisir montant" value="2000">
                 </div>
 
                 <div>
-                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Jours d'accès autorisés</label>
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Jours d'accès à valider</label>
                     <div class="flex gap-2">
-                        <input type="number" id="input-jours-fixer" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-center font-black text-lg text-emerald-400" value="1">
+                        <input type="number" id="input-jours-fixer" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-center font-black text-lg text-emerald-400 outline-none focus:border-emerald-500" value="1">
                         <span class="flex items-center text-slate-400 font-bold px-2">Jours</span>
                     </div>
                     <div class="flex gap-1.5 mt-2">
@@ -357,7 +402,7 @@
             </div>
 
             <button onclick="appliquerRechargeFlexible()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs shadow-lg shadow-emerald-500/10">
-                Valider la Recharge
+                Valider et Activer
             </button>
         </div>
     </div>
@@ -372,6 +417,23 @@
         let chartCommunesPartInstance = null;
 
         const cguDefaut = `CONDITIONS GÉNÉRALES D'UTILISATION (CGU) — TRANSVISION\nÉditées par Global Tech Solutions SARL\n\n1. OBJET DU SERVICE :\nTransVision fournit aux partenaires transporteurs et propriétaires privés une plateforme de supervision télématique par balises SinoTrack.\n\n2. FACTURATION ET VALIDITÉ :\nLa commission est perçue sur base d'un forfait flexible au nombre de jours d'activité convenus ou mensuel.`;
+
+        // Initialisation dates par défaut
+        window.addEventListener('DOMContentLoaded', () => {
+            const today = new Date();
+            const lastWeek = new Date(today);
+            lastWeek.setDate(today.getDate() - 7);
+            const strToday = today.toISOString().split('T')[0];
+            const strLastWeek = lastWeek.toISOString().split('T')[0];
+            
+            ['treso', 'stats'].forEach(prefix => {
+                const elD = document.getElementById(`date-debut-${prefix}`);
+                const elF = document.getElementById(`date-fin-${prefix}`);
+                if(elD) elD.value = strLastWeek;
+                if(elF) elF.value = strToday;
+            });
+            chargerCGUAdmin();
+        });
 
         function chargerCGUAdmin() {
             const el = document.getElementById('cfg-cgu-texte');
@@ -392,8 +454,7 @@
                 document.getElementById('page-login-admin').classList.add('hidden');
                 document.getElementById('corps-application-admin').classList.remove('hidden');
                 document.body.className = "bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col";
-                chargerCGUAdmin();
-                initialiserGraphiquesAdmin();
+                setTimeout(initialiserGraphiquesAdmin, 100);
             } else { alert("❌ Accès refusé : Identifiant ou code secret erroné."); }
         }
 
@@ -411,15 +472,42 @@
             document.querySelectorAll('.nav-link-admin').forEach(l => { l.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"; });
             boutonClique.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/10 nav-link-admin";
             
-            if (idPage === 'page-stats-croisees') {
-                setTimeout(initialiserGraphiquesAdmin, 100);
-            }
+            if (idPage === 'page-stats-croisees') { setTimeout(initialiserGraphiquesAdmin, 100); }
         }
 
         function filtrerPartenairesContrat(type) {
             document.querySelectorAll('.item-partenaire-row').forEach(row => {
                 if(type === 'tous' || row.getAttribute('data-contrat') === type) { row.classList.remove('hidden'); } else { row.classList.add('hidden'); }
             });
+        }
+
+        // --- GESTION DU MENU DÉROULANT DES ACTIONS PARTENAIRES ---
+        function executerActionPartenaire(nom, tel, pin, idSolde, idJours, selectElem) {
+            const action = selectElem.value;
+            if(!action) return;
+
+            if (action === 'recharger') {
+                ouvrirModalRechargeFlexible(nom, idSolde, idJours);
+            } 
+            else if (action === 'voir_id') {
+                alert(`👁️ IDENTIFIANTS DU PARTENAIRE\n\nNom: ${nom}\nTéléphone: ${tel}\nCode PIN actuel: ${pin}`);
+            }
+            else if (action === 'activer') {
+                alert(`🟢 Le compte de ${nom} a été réactivé.`);
+            }
+            else if (action === 'suspendre') {
+                if(confirm(`⚠️ Voulez-vous vraiment suspendre l'accès de ${nom} ?`)) {
+                    alert(`🟠 Le compte de ${nom} est désormais suspendu.`);
+                }
+            }
+            else if (action === 'supprimer') {
+                if(confirm(`🔴 ACTION IRRÉVERSIBLE : Supprimer définitivement le compte de ${nom} ?`)) {
+                    selectElem.closest('tr').remove();
+                    alert(`🗑️ Compte de ${nom} supprimé de la base de données.`);
+                }
+            }
+
+            selectElem.value = ""; // Réinitialise le menu déroulant
         }
 
         function ouvrirModalRechargeFlexible(nom, idSolde, idJours) {
@@ -435,20 +523,10 @@
 
         function appliquerRechargeFlexible() {
             const nbJours = parseInt(document.getElementById('input-jours-fixer').value) || 0;
-            const credit = parseFloat(document.getElementById('input-credit-fixer').value) || 0;
-
             if (ciblePartenaire) {
                 const badgeJours = document.getElementById(ciblePartenaire.idJours);
                 if (badgeJours) badgeJours.textContent = `${nbJours} Jours`;
-
-                if (credit > 0) {
-                    const elSolde = document.getElementById(ciblePartenaire.idSolde);
-                    if (elSolde) {
-                        let actuel = parseFloat(elSolde.textContent.replace(/[^0-9]/g, '')) || 0;
-                        elSolde.textContent = (actuel + credit).toLocaleString() + " CDF";
-                    }
-                }
-                alert(`✅ Forfait de ${ciblePartenaire.nom} validé avec succès pour ${nbJours} jours d'accès !`);
+                alert(`✅ Recharge de ${ciblePartenaire.nom} validée pour ${nbJours} jours d'accès !`);
             }
             fermerModalRechargeFlexible();
         }
@@ -462,31 +540,46 @@
             if (ancienPass !== adminCredential.pass) { alert("❌ Erreur de sécurité : L'ancien mot de passe saisi est incorrect."); return; }
             if (!nouveauPass || nouveauPass.length < 6) { alert("❌ Le nouveau mot de passe doit comporter au moins 6 caractères."); return; }
 
-            adminCredential.email = nouvelEmail;
-            adminCredential.pass = nouveauPass;
-            document.getElementById('cfg-admin-old-pass').value = "";
-            document.getElementById('cfg-admin-new-pass').value = "";
-
-            alert("✅ Vos accès Super Admin ont été mis à jour avec succès !\nUtilisez vos nouveaux identifiants dès la prochaine connexion.");
+            adminCredential.email = nouvelEmail; adminCredential.pass = nouveauPass;
+            document.getElementById('cfg-admin-old-pass').value = ""; document.getElementById('cfg-admin-new-pass').value = "";
+            alert("✅ Vos accès Super Admin ont été mis à jour avec succès !");
         }
 
+        // --- FILTRES DE DATES (TRÉSORERIE & STATS) ---
+        function majFiltreDate(type) {
+            const d1 = document.getElementById(`date-debut-${type}`).value;
+            const d2 = document.getElementById(`date-fin-${type}`).value;
+            
+            if (new Date(d1) > new Date(d2)) { alert("Période invalide."); return; }
+            
+            // Simulation recalcul pour démo
+            const coef = 0.5 + Math.random(); // Coefficient aléatoire pour simuler le changement
+            if (type === 'treso') {
+                const newTresor = 850000 * coef;
+                document.getElementById('txt-tresor').textContent = newTresor.toLocaleString('fr-FR', {maximumFractionDigits:0}) + " CDF";
+                document.getElementById('txt-commissions').textContent = (145500 * coef).toLocaleString('fr-FR', {maximumFractionDigits:0}) + " CDF";
+            } else if (type === 'stats') {
+                initialiserGraphiquesAdmin(); // Regénère les graphiques
+            }
+            alert(`✅ Données mises à jour pour la période sélectionnée.`);
+        }
+
+        // --- INITIALISATION DES GRAPHIQUES ---
         function initialiserGraphiquesAdmin() {
             const canvasRecettes = document.getElementById('chart-recettes-depenses');
-            if (canvasRecettes) {
+            if (canvasRecettes && canvasRecettes.offsetParent !== null) {
                 if (chartRecettesDepensesInstance) chartRecettesDepensesInstance.destroy();
+                // Données aléatoires pour simuler le filtre
+                const rData = Array.from({length: 7}, () => Math.floor(Math.random() * 200000) + 150000);
+                const dData = Array.from({length: 7}, () => Math.floor(Math.random() * 80000) + 30000);
+                
                 chartRecettesDepensesInstance = new Chart(canvasRecettes.getContext('2d'), {
                     type: 'line',
                     data: {
-                        labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+                        labels: ['J-6', 'J-5', 'J-4', 'J-3', 'J-2', 'J-1', 'Aujourd\'hui'],
                         datasets: [
-                            {
-                                label: 'Recettes Brutes (CDF)', data: [180000, 210000, 195000, 240000, 270000, 310000, 290000],
-                                borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderWidth: 2, tension: 0.3, fill: true
-                            },
-                            {
-                                label: 'Dépenses / Sorties de Fonds (CDF)', data: [45000, 60000, 35000, 80000, 50000, 95000, 70000],
-                                borderColor: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.1)', borderWidth: 2, tension: 0.3, fill: true
-                            }
+                            { label: 'Recettes Brutes (CDF)', data: rData, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderWidth: 2, tension: 0.3, fill: true },
+                            { label: 'Sorties de Fonds (CDF)', data: dData, borderColor: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.1)', borderWidth: 2, tension: 0.3, fill: true }
                         ]
                     },
                     options: {
@@ -497,7 +590,7 @@
             }
 
             const canvasClients = document.getElementById('chart-clients-types');
-            if (canvasClients) {
+            if (canvasClients && canvasClients.offsetParent !== null) {
                 if (chartClientsTypesInstance) chartClientsTypesInstance.destroy();
                 chartClientsTypesInstance = new Chart(canvasClients.getContext('2d'), {
                     type: 'doughnut',
@@ -510,7 +603,7 @@
             }
 
             const canvasCommunes = document.getElementById('chart-communes-part');
-            if (canvasCommunes) {
+            if (canvasCommunes && canvasCommunes.offsetParent !== null) {
                 if (chartCommunesPartInstance) chartCommunesPartInstance.destroy();
                 chartCommunesPartInstance = new Chart(canvasCommunes.getContext('2d'), {
                     type: 'pie',
