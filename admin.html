@@ -124,12 +124,12 @@
                     </div>
                 </div>
 
-                <!-- PARTENAIRES & GESTION FORFAITS -->
+                <!-- PARTENAIRES & GESTION FORFAITS (VALIDATION ADMIN) -->
                 <div id="page-partenaires" class="space-y-4 page-fade class-page-admin hidden print:block">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 no-print">
                         <div>
-                            <h2 class="text-xl font-black text-slate-100">👤 Partenaires & Forfaits Flexibles</h2>
-                            <p class="text-xs text-slate-400">Fixez librement les jours d'accès et créditez les comptes.</p>
+                            <h2 class="text-xl font-black text-slate-100">👤 Partenaires & Validation Recharges</h2>
+                            <p class="text-xs text-slate-400">Validez les transferts M-Pesa/Airtel et activez les accès.</p>
                         </div>
                         <div class="flex bg-slate-950 p-1.5 rounded-xl border border-slate-850 text-[10px] font-bold">
                             <button onclick="filtrerPartenairesContrat('tous')" class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-200">Tous</button>
@@ -145,9 +145,9 @@
                                     <th class="py-3">Nom Partenaire</th>
                                     <th class="py-3">Type Contrat</th>
                                     <th class="py-3 text-center">Véhicules</th>
-                                    <th class="py-3 text-right">Solde Actif</th>
+                                    <th class="py-3 text-right">Solde Validé</th>
                                     <th class="py-3 text-center">Validité Restante</th>
-                                    <th class="py-3 text-center no-print">Action Recharge</th>
+                                    <th class="py-3 text-center no-print">Action Validation</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-850 text-slate-300 print-text">
@@ -156,14 +156,14 @@
                                     <td class="py-3">
                                         <span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-black text-[10px] uppercase inline-block">Commercial</span>
                                     </td>
-                                    <td class="py-3 text-center font-bold font-mono text-indigo-400">1 Bus</td>
+                                    <td class="py-3 text-center font-bold font-mono text-indigo-400">3 Bus</td>
                                     <td class="py-3 text-right font-black font-mono text-emerald-400" id="solde-jean-mukendi">32 500 CDF</td>
                                     <td class="py-3 text-center font-mono">
                                         <span id="jours-jean-mukendi" class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-lg font-black text-xs">26 Jours</span>
                                     </td>
                                     <td class="py-3 text-center no-print">
                                         <button onclick="ouvrirModalRechargeFlexible('Jean Mukendi', 'solde-jean-mukendi', 'jours-jean-mukendi')" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black px-3 py-1.5 rounded-xl text-[10px] uppercase shadow-md flex items-center gap-1.5 mx-auto">
-                                            <i class="fa-solid fa-clock-rotate-left"></i> Fixer Jours / Solde
+                                            <i class="fa-solid fa-check-double"></i> Valider Recharge
                                         </button>
                                     </td>
                                 </tr>
@@ -179,7 +179,7 @@
                                     </td>
                                     <td class="py-3 text-center no-print">
                                         <button onclick="ouvrirModalRechargeFlexible('Marc Kabeya', 'solde-marc-kabeya', 'jours-marc-kabeya')" class="bg-rose-500 hover:bg-rose-600 text-slate-950 font-black px-3 py-1.5 rounded-xl text-[10px] uppercase shadow-md flex items-center gap-1.5 mx-auto">
-                                            <i class="fa-solid fa-clock-rotate-left"></i> Fixer Jours / Solde
+                                            <i class="fa-solid fa-check-double"></i> Valider Recharge
                                         </button>
                                     </td>
                                 </tr>
@@ -232,14 +232,13 @@
                     </div>
                 </div>
 
-                <!-- STATISTIQUES CROISÉES : 3 GRAPHIQUES EXIGÉS -->
+                <!-- STATISTIQUES CROISÉES -->
                 <div id="page-stats-croisees" class="space-y-5 page-fade class-page-admin hidden">
                     <div>
                         <h2 class="text-xl font-black text-slate-100">📊 Tableaux de Bord Analytiques & Graphiques</h2>
                         <p class="text-xs text-slate-400">Croisement des flux financiers, répartition des contrats et empreinte spatiale.</p>
                     </div>
 
-                    <!-- GRAPHIQUE 1 : ÉVOLUTION RECETTES ET DÉPENSES -->
                     <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
                         <div class="flex justify-between items-center">
                             <h3 class="text-xs font-black uppercase text-emerald-400 flex items-center gap-2">
@@ -253,7 +252,6 @@
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- GRAPHIQUE 2 : PART DES CLIENTS (COMMERCE VS PERSONNEL) -->
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
                             <h3 class="text-xs font-black uppercase text-indigo-400 flex items-center gap-2">
                                 <i class="fa-solid fa-users-viewfinder"></i> Répartition des Clients (Commerce vs Personnel)
@@ -263,7 +261,6 @@
                             </div>
                         </div>
 
-                        <!-- GRAPHIQUE 3 : PART DES COMMUNES -->
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
                             <h3 class="text-xs font-black uppercase text-sky-400 flex items-center gap-2">
                                 <i class="fa-solid fa-map-pin"></i> Part de la Flotte par Commune (Kinshasa)
@@ -275,40 +272,33 @@
                     </div>
                 </div>
 
-                <!-- PARAMÈTRES : RESTAURATION MODIFICATION IDENTIFIANTS ADMIN AVEC ANCIEN MOT DE PASSE -->
+                <!-- PARAMÈTRES & SÉCURITÉ ADMIN -->
                 <div id="page-parametres" class="space-y-5 page-fade class-page-admin hidden">
                     <h2 class="text-xl font-black text-slate-100">⚙️ Configuration Système & Sécurité</h2>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
-                        
-                        <!-- MODULE SÉCURITÉ ADMIN : ANCIEN + NOUVEAU MOT DE PASSE -->
                         <div class="bg-slate-950 p-5 rounded-2xl border border-indigo-500/30 space-y-3.5 shadow-xl">
                             <div class="flex items-center gap-2 border-b border-slate-850 pb-2">
                                 <i class="fa-solid fa-shield-halved text-indigo-400 text-sm"></i>
                                 <h3 class="font-bold text-indigo-400 uppercase tracking-wider text-[10px]">Identifiants Super Admin</h3>
                             </div>
-                            
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Identifiant Email</label>
                                 <input type="email" id="cfg-admin-email" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-slate-200 focus:outline-none focus:border-indigo-500" value="admin@transvision.cd">
                             </div>
-
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Ancien Mot de Passe (Obligatoire)</label>
                                 <input type="password" id="cfg-admin-old-pass" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-slate-200 focus:outline-none focus:border-indigo-500" placeholder="••••••••">
                             </div>
-
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nouveau Mot de Passe</label>
                                 <input type="password" id="cfg-admin-new-pass" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-emerald-400 focus:outline-none focus:border-emerald-500" placeholder="Minimum 6 caractères">
                             </div>
-
                             <button onclick="modifierAccesPropresAdmin()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-2.5 rounded-xl uppercase text-xs transition-all shadow-lg shadow-indigo-500/10 mt-1">
                                 Valider & Modifier mes Accès
                             </button>
                         </div>
 
-                        <!-- COMPTES MARCHANDS -->
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
                             <div class="flex items-center gap-2 border-b border-slate-850 pb-2">
                                 <i class="fa-solid fa-money-bill-transfer text-emerald-400 text-sm"></i>
@@ -318,7 +308,6 @@
                             <button onclick="alert('Sauvegardé')" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-black py-2 rounded-xl uppercase">Mettre à jour</button>
                         </div>
 
-                        <!-- ÉDITEUR DES CGU -->
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3 md:col-span-2">
                             <div class="flex justify-between items-center">
                                 <h3 class="font-bold text-emerald-400 uppercase tracking-wider text-[10px]">Rédaction des CGU TransVision</h3>
@@ -333,23 +322,29 @@
         </div>
     </div>
 
-    <!-- MODAL RECHARGE FLEXIBLE -->
+    <!-- MODAL VALIDATION RECHARGE ADMIN -->
     <div id="modal-recharge-flexible" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
                 <h3 class="font-black text-sm text-slate-100 flex items-center gap-2">
-                    <i class="fa-solid fa-calendar-days text-emerald-400"></i> Ajuster Forfait Partenaire
+                    <i class="fa-solid fa-check-double text-emerald-400"></i> Valider Recharge Partenaire
                 </h3>
                 <button onclick="fermerModalRechargeFlexible()" class="text-slate-500 hover:text-slate-300"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <p class="text-xs text-slate-300 font-bold">Partenaire : <span id="nom-partenaire-cible" class="text-emerald-400">Jean Mukendi</span></p>
+            <p class="text-[10px] text-slate-400">Approuvez le paiement reçu et activez les jours correspondants.</p>
+            <p class="text-xs text-slate-300 font-bold">Compte : <span id="nom-partenaire-cible" class="text-emerald-400">Jean Mukendi</span></p>
 
             <div class="space-y-3 text-xs">
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nombre de Jours d'Accès à Fixer</label>
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Montant Reçu (CDF)</label>
+                    <input type="number" id="input-credit-fixer" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 font-black text-emerald-400" placeholder="Saisir montant" value="2000">
+                </div>
+
+                <div>
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Jours d'accès autorisés</label>
                     <div class="flex gap-2">
-                        <input type="number" id="input-jours-fixer" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-center font-black text-lg text-emerald-400" value="30">
+                        <input type="number" id="input-jours-fixer" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-center font-black text-lg text-emerald-400" value="1">
                         <span class="flex items-center text-slate-400 font-bold px-2">Jours</span>
                     </div>
                     <div class="flex gap-1.5 mt-2">
@@ -359,26 +354,19 @@
                         <button onclick="document.getElementById('input-jours-fixer').value=30" class="flex-1 bg-slate-800 hover:bg-slate-700 text-[10px] py-1 rounded font-bold">30j</button>
                     </div>
                 </div>
-
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Ajout de Crédit Solde (CDF)</label>
-                    <input type="number" id="input-credit-fixer" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 font-black text-emerald-400" value="0">
-                </div>
             </div>
 
             <button onclick="appliquerRechargeFlexible()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs shadow-lg shadow-emerald-500/10">
-                Enregistrer la Modification
+                Valider la Recharge
             </button>
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIQUE & CHARTS -->
     <script>
         let tresor = 850000; let commissions = 145500;
         let adminCredential = { email: "admin@transvision.cd", pass: "123456" };
         let ciblePartenaire = null;
 
-        // Variables pour retenir les instances Chart.js
         let chartRecettesDepensesInstance = null;
         let chartClientsTypesInstance = null;
         let chartCommunesPartInstance = null;
@@ -434,7 +422,6 @@
             });
         }
 
-        // --- GESTION FLEXIBLE DU NOMBRE DE JOURS ---
         function ouvrirModalRechargeFlexible(nom, idSolde, idJours) {
             ciblePartenaire = { nom, idSolde, idJours };
             document.getElementById('nom-partenaire-cible').textContent = nom;
@@ -461,47 +448,29 @@
                         elSolde.textContent = (actuel + credit).toLocaleString() + " CDF";
                     }
                 }
-                alert(`✅ Forfait de ${ciblePartenaire.nom} ajusté à ${nbJours} jours avec succès !`);
+                alert(`✅ Forfait de ${ciblePartenaire.nom} validé avec succès pour ${nbJours} jours d'accès !`);
             }
             fermerModalRechargeFlexible();
         }
 
-        // --- RESTAURATION FONCTIONNALITÉ MODIFICATION IDENTIFIANTS ADMIN ---
         function modifierAccesPropresAdmin() {
             const nouvelEmail = document.getElementById('cfg-admin-email').value.trim();
             const ancienPass = document.getElementById('cfg-admin-old-pass').value;
             const nouveauPass = document.getElementById('cfg-admin-new-pass').value;
 
-            if (!nouvelEmail) {
-                alert("❌ L'adresse email d'administration ne peut pas être vide.");
-                return;
-            }
+            if (!nouvelEmail) { alert("❌ L'adresse email d'administration ne peut pas être vide."); return; }
+            if (ancienPass !== adminCredential.pass) { alert("❌ Erreur de sécurité : L'ancien mot de passe saisi est incorrect."); return; }
+            if (!nouveauPass || nouveauPass.length < 6) { alert("❌ Le nouveau mot de passe doit comporter au moins 6 caractères."); return; }
 
-            // Vérification stricte de l'ancien mot de passe
-            if (ancienPass !== adminCredential.pass) {
-                alert("❌ Erreur de sécurité : L'ancien mot de passe saisi est incorrect.");
-                return;
-            }
-
-            if (!nouveauPass || nouveauPass.length < 6) {
-                alert("❌ Le nouveau mot de passe doit comporter au moins 6 caractères.");
-                return;
-            }
-
-            // Mise à jour effective
             adminCredential.email = nouvelEmail;
             adminCredential.pass = nouveauPass;
-
-            // Réinitialisation des champs de saisie
             document.getElementById('cfg-admin-old-pass').value = "";
             document.getElementById('cfg-admin-new-pass').value = "";
 
             alert("✅ Vos accès Super Admin ont été mis à jour avec succès !\nUtilisez vos nouveaux identifiants dès la prochaine connexion.");
         }
 
-        // --- INITIALISATION DES 3 GRAPHIQUES DEMANDÉS ---
         function initialiserGraphiquesAdmin() {
-            // 1. Graphique Évolution Recettes & Dépenses
             const canvasRecettes = document.getElementById('chart-recettes-depenses');
             if (canvasRecettes) {
                 if (chartRecettesDepensesInstance) chartRecettesDepensesInstance.destroy();
@@ -511,38 +480,22 @@
                         labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
                         datasets: [
                             {
-                                label: 'Recettes Brutes (CDF)',
-                                data: [180000, 210000, 195000, 240000, 270000, 310000, 290000],
-                                borderColor: '#10b981',
-                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                                borderWidth: 2,
-                                tension: 0.3,
-                                fill: true
+                                label: 'Recettes Brutes (CDF)', data: [180000, 210000, 195000, 240000, 270000, 310000, 290000],
+                                borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderWidth: 2, tension: 0.3, fill: true
                             },
                             {
-                                label: 'Dépenses / Sorties de Fonds (CDF)',
-                                data: [45000, 60000, 35000, 80000, 50000, 95000, 70000],
-                                borderColor: '#f43f5e',
-                                backgroundColor: 'rgba(244, 63, 94, 0.1)',
-                                borderWidth: 2,
-                                tension: 0.3,
-                                fill: true
+                                label: 'Dépenses / Sorties de Fonds (CDF)', data: [45000, 60000, 35000, 80000, 50000, 95000, 70000],
+                                borderColor: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.1)', borderWidth: 2, tension: 0.3, fill: true
                             }
                         ]
                     },
                     options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { labels: { color: '#94a3b8', font: { size: 10 } } } },
-                        scales: {
-                            x: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 10 } } },
-                            y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 10 } } }
-                        }
+                        responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8', font: { size: 10 } } } },
+                        scales: { x: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 10 } } }, y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 10 } } } }
                     }
                 });
             }
 
-            // 2. Graphique Répartition Clients : Commerce vs Personnel
             const canvasClients = document.getElementById('chart-clients-types');
             if (canvasClients) {
                 if (chartClientsTypesInstance) chartClientsTypesInstance.destroy();
@@ -550,24 +503,12 @@
                     type: 'doughnut',
                     data: {
                         labels: ['Commercial (TransVision)', 'Personnel (CarVision)'],
-                        datasets: [{
-                            data: [72, 28], // Ex: 72% commercial vs 28% personnel
-                            backgroundColor: ['#6366f1', '#f43f5e'],
-                            borderColor: '#020617',
-                            borderWidth: 2
-                        }]
+                        datasets: [{ data: [72, 28], backgroundColor: ['#6366f1', '#f43f5e'], borderColor: '#020617', borderWidth: 2 }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } }
-                        }
-                    }
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } } } }
                 });
             }
 
-            // 3. Graphique Part des Communes de Kinshasa
             const canvasCommunes = document.getElementById('chart-communes-part');
             if (canvasCommunes) {
                 if (chartCommunesPartInstance) chartCommunesPartInstance.destroy();
@@ -575,20 +516,9 @@
                     type: 'pie',
                     data: {
                         labels: ['Gombe', 'Limete', 'Lemba', 'Ngaliema', 'Matete', 'Bandalungwa'],
-                        datasets: [{
-                            data: [35, 20, 15, 12, 10, 8],
-                            backgroundColor: ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6'],
-                            borderColor: '#020617',
-                            borderWidth: 2
-                        }]
+                        datasets: [{ data: [35, 20, 15, 12, 10, 8], backgroundColor: ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6'], borderColor: '#020617', borderWidth: 2 }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } }
-                        }
-                    }
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } } } }
                 });
             }
         }
