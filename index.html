@@ -16,12 +16,19 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         .blur-transition { transition: filter 0.4s ease, opacity 0.4s ease; }
         #map-container { height: 260px; width: 100%; border-radius: 1rem; z-index: 10; }
         .leaflet-tile { filter: brightness(0.8) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3); }
         .leaflet-container { background: #020617 !important; }
+        @media print {
+            body { background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            .print-clean { background: transparent !important; border: 1px solid #cbd5e1 !important; color: black !important; box-shadow: none !important; }
+            .print-text { color: black !important; }
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans min-h-screen relative overflow-x-hidden">
@@ -48,6 +55,16 @@
     <!-- MAQUETTE PRINCIPALE -->
     <div class="relative z-10 max-w-md mx-auto min-h-screen shadow-2xl overflow-hidden flex flex-col border-x border-slate-800/70 pb-20 bg-slate-900/70 backdrop-blur-xl" id="zone-flotte">
         
+        <!-- ÉCRAN DE BLOCAGE -->
+        <div id="ecran-bloque" class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden no-print">
+            <div class="text-center p-6 bg-slate-900 border border-rose-500/30 rounded-2xl shadow-2xl space-y-3 max-w-[85%]">
+                <i class="fa-solid fa-triangle-exclamation text-4xl text-rose-500 mb-2"></i>
+                <h2 class="text-lg font-black text-slate-100">Accès Suspendu</h2>
+                <p class="text-xs text-slate-400">Votre compte partenaire présente des irrégularités.</p>
+                <button onclick="alert('Contact support')" class="mt-4 bg-rose-500/20 text-rose-400 border border-rose-500/30 px-4 py-2 rounded-xl text-xs font-bold"><i class="fa-brands fa-whatsapp mr-2"></i>Support</button>
+            </div>
+        </div>
+
         <!-- 1. ÉCRAN D'ACCÈS / PRÉ-PAIEMENT FORFAIT -->
         <div id="page-auth" class="p-6 space-y-5 flex-1 flex flex-col justify-between no-print overflow-y-auto">
             <div class="space-y-4 mt-1">
@@ -64,17 +81,6 @@
                 <div class="grid grid-cols-2 gap-1 bg-slate-950/80 backdrop-blur p-1 rounded-xl border border-slate-800">
                     <button id="tab-btn-login" onclick="basculerVueAuth('login')" class="py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950">Connexion</button>
                     <button id="tab-btn-register" onclick="basculerVueAuth('register')" class="py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200">Nouveau Partenaire</button>
-                </div>
-
-                <!-- RAPPEL OFFICIEL RÈGLE DU FORFAIT -->
-                <div class="bg-amber-500/10 border border-amber-500/30 p-3.5 rounded-2xl text-[11px] text-amber-300 flex items-start gap-2.5">
-                    <i class="fa-solid fa-clock-rotate-left text-base text-amber-400 mt-0.5"></i>
-                    <div>
-                        <p class="font-bold uppercase tracking-wide text-[10px]">Règle du Forfait Prépayé</p>
-                        <p class="text-[10px] text-slate-300 mt-0.5 leading-relaxed">
-                            Le paiement s'effectue avant le début de la rotation. Valable pour la journée de **5h00 à 23h59**. Quelle que soit l'heure de souscription, le forfait expire à 23h59.
-                        </p>
-                    </div>
                 </div>
 
                 <!-- FORMULAIRE CONNEXION -->
@@ -105,7 +111,7 @@
                         <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Téléphone RDC</label>
                         <input type="tel" id="ins-tel" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono" value="+243812345678">
                     </div>
-                    <button onclick="finaliserInscription()" class="w-full bg-emerald-500 text-slate-950 font-black py-3 rounded-xl text-xs uppercase">Valider l'Inscription</button>
+                    <button onclick="finaliserInscription()" class="w-full bg-emerald-500 text-slate-950 font-black py-3 rounded-xl text-xs uppercase mt-3">Valider l'Inscription</button>
                     <p class="text-[10px] text-slate-400 text-center mt-2">
                         En adhérant, vous acceptez nos <button type="button" onclick="ouvrirModalCGU()" class="text-emerald-400 font-bold underline">CGU & Forfaits</button>.
                     </p>
@@ -155,49 +161,50 @@
                 
                 <!-- CARTE LEAFLET LIVE POUR LOCALISER LE VÉHICULE -->
                 <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-2">
-                    <div class="flex justify-between items-center px-1">
+                    <div class="flex justify-between items-center px-1 pb-1">
                         <h2 class="text-[10px] font-bold text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
                             <i class="fa-solid fa-map-location-dot text-emerald-400"></i> Localisation Temps Réel
                         </h2>
-                        <button onclick="centrerSurVehicule()" class="text-[9px] bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 px-2 py-1 rounded-lg font-mono">
-                            <i class="fa-solid fa-crosshairs text-emerald-400 mr-1"></i> Centrer
-                        </button>
+                        <!-- SÉLECTEUR DE VÉHICULE À LOCALISER -->
+                        <select id="select-vehicule-map" onchange="centrerSurVehicule(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg text-[9px] text-emerald-400 font-bold px-2 py-1 outline-none">
+                            <!-- Les options seront générées par JS -->
+                        </select>
                     </div>
                     <div id="map-container"></div>
                     <div class="flex justify-between items-center text-[9px] font-mono text-slate-400 px-1">
                         <span>Balise : <strong class="text-slate-200">SinoTrack 4G</strong></span>
                         <span>Vitesse : <strong class="text-emerald-400" id="live-speed">34 km/h</strong></span>
-                        <span>Accompagnement : <strong class="text-sky-400">Actif</strong></span>
+                        <span>Moteur : <strong class="text-sky-400">ON</strong></span>
                     </div>
                 </div>
 
                 <!-- LISTE DES VÉHICULES SOUS FORFAIT -->
                 <div class="flex justify-between items-center pt-1">
-                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Véhicule(s) Autorisé(s) (<span id="txt-compteur-vehicules">1</span>)</h2>
+                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Véhicules Actifs (<span id="txt-compteur-vehicules">1</span>)</h2>
                     <span class="text-[10px] text-emerald-400 font-mono"><i class="fa-solid fa-shield-check mr-1"></i>Prepaid OK</span>
                 </div>
                 <div id="conteneur-vehicules-actifs" class="space-y-4"></div>
             </div>
 
-            <!-- ONGLET B : NOUVEL ITINÉRAIRE AVEC ASSISTANCE DU SYSTÈME -->
+            <!-- ONGLET B : NOUVEL ITINÉRAIRE (SAISIE LIBRE) -->
             <div id="onglet-ajouter" class="p-4 space-y-4 class-onglet hidden no-print">
                 <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
                     <div class="border-b border-slate-800 pb-2">
                         <h3 class="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center gap-2">
-                            <i class="fa-solid fa-route text-emerald-400"></i> Configuration &amp; Assistance Trajet
+                            <i class="fa-solid fa-route text-emerald-400"></i> Configuration du Véhicule
                         </h3>
-                        <p class="text-[10px] text-slate-400">Le système assiste la tarification et calcule vos projections.</p>
+                        <p class="text-[10px] text-slate-400">Associez un boîtier SinoTrack à une ligne d'exploitation.</p>
                     </div>
 
                     <div class="space-y-3">
                         <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Plaque d'Immatriculation</label>
-                                <input type="text" id="add-plaque" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono" placeholder="Ex: KIN 4082AE" value="KIN 4082AE">
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Plaque / ID</label>
+                                <input type="text" id="add-plaque" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono focus:border-emerald-500 focus:outline-none" placeholder="Ex: KIN 4082AE">
                             </div>
                             <div>
                                 <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Type de Transport</label>
-                                <select id="add-type" onchange="actualiserAssistanceItineraire()" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-bold">
+                                <select id="add-type" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-[11px] text-slate-200 font-bold focus:border-emerald-500 focus:outline-none">
                                     <option value="Mini-bus Mercedes 207">Mini-bus 207 (18 pl.)</option>
                                     <option value="Taxi Ketch">Taxi Ketch (4 pl.)</option>
                                     <option value="Taxi-Moto Wewa">Taxi-Moto (1 pl.)</option>
@@ -206,46 +213,35 @@
                             </div>
                         </div>
 
-                        <!-- ASSISTANT INTELLIGENT DE TRONÇON KINSHASA -->
-                        <div class="p-3 bg-slate-900/90 border border-indigo-500/30 rounded-2xl space-y-2.5">
+                        <!-- SAISIE LIBRE DE L'ITINÉRAIRE -->
+                        <div class="p-3 bg-slate-900/90 border border-indigo-500/30 rounded-2xl space-y-3">
                             <span class="text-[9px] font-black uppercase text-indigo-400 tracking-wider flex items-center gap-1.5">
-                                <i class="fa-solid fa-wand-magic-sparkles"></i> Assistance Automatisée du Réseau
+                                <i class="fa-solid fa-pen-to-square"></i> Parcours d'Exploitation
                             </span>
+
+                            <div>
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Saisie libre de l'Itinéraire</label>
+                                <input type="text" id="add-itineraire-libre" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-emerald-400 font-bold focus:border-emerald-500 focus:outline-none" placeholder="Ex: GARE CENTRALE — UPN via Kintambo">
+                            </div>
 
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
-                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Origine / Point de départ</label>
-                                    <select id="sel-origine" onchange="actualiserAssistanceItineraire()" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-[11px] text-emerald-400 font-bold"></select>
+                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Tarif Passager (CDF)</label>
+                                    <input type="number" id="add-tarif-passager" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none" placeholder="Ex: 1500" value="1500">
                                 </div>
                                 <div>
-                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Terminus / Destination</label>
-                                    <select id="sel-destination" onchange="actualiserAssistanceItineraire()" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-[11px] text-emerald-400 font-bold"></select>
-                                </div>
-                            </div>
-
-                            <!-- INDICATEURS ASSISTÉS PAR LE SYSTÈME -->
-                            <div class="grid grid-cols-3 gap-1.5 bg-slate-950 p-2.5 rounded-xl border border-slate-850 text-center font-mono">
-                                <div>
-                                    <span class="text-[8px] text-slate-500 block uppercase">Distance Est.</span>
-                                    <span id="ast-distance" class="text-xs font-black text-slate-200">12.5 km</span>
-                                </div>
-                                <div>
-                                    <span class="text-[8px] text-slate-500 block uppercase">Prix / Passager</span>
-                                    <span id="ast-tarif" class="text-xs font-black text-emerald-400">1 500 CDF</span>
-                                </div>
-                                <div>
-                                    <span class="text-[8px] text-slate-500 block uppercase">Recette / Rotation</span>
-                                    <span id="ast-rotation" class="text-xs font-black text-sky-400">27 000 CDF</span>
+                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Objectif Rotations / Jour</label>
+                                    <input type="number" id="add-objectif-rotations" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none" placeholder="Ex: 12" value="10">
                                 </div>
                             </div>
                         </div>
 
                         <div>
                             <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Numéro IMEI Traceur SinoTrack</label>
-                            <input type="text" id="add-imei" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono" placeholder="Ex: 865241092837401" value="865241092837401">
+                            <input type="text" id="add-imei" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono focus:border-emerald-500 focus:outline-none" placeholder="Ex: 865241092837401">
                         </div>
 
-                        <button onclick="enregistrerVehiculeAssiste()" class="w-full bg-emerald-500 text-slate-950 font-black py-3 rounded-xl text-xs uppercase shadow-lg shadow-emerald-500/10">
+                        <button onclick="enregistrerVehiculeSaisi()" class="w-full bg-emerald-500 text-slate-950 font-black py-3 rounded-xl text-xs uppercase shadow-lg shadow-emerald-500/10">
                             Enregistrer &amp; Activer sur Carte
                         </button>
                     </div>
@@ -331,57 +327,54 @@
 
     <!-- LOGIQUE JAVASCRIPT -->
     <script>
-        // --- 1. BASE DE DONNÉES D'ASSISTANCE DES ITINÉRAIRES KINOIS ---
-        const pointsKinshasa = [
-            "GARE CENTRALE", "UPN", "ROND POINT VICTOIRE", "KINGASANI PASCAL", 
-            "KINTAMBO MAGASIN", "MARCHE CENTRAL", "SAINTE THERESE N'DJILI", 
-            "POMPAGE", "BANDAL MOULAERT", "SELEMBAO"
-        ];
-
-        const matriceTarifsDistances = {
-            "GARE CENTRALE — UPN": { distance: 12.5, tarif: 1500 },
-            "ROND POINT VICTOIRE — UPN": { distance: 9.5, tarif: 1500 },
-            "KINGASANI PASCAL — GARE CENTRALE": { distance: 16.0, tarif: 2000 },
-            "KINTAMBO MAGASIN — UPN": { distance: 6.5, tarif: 1000 },
-            "MARCHE CENTRAL — SAINTE THERESE N'DJILI": { distance: 14.5, tarif: 1500 }
-        };
-
         let client = {
             nom: "Jean Mukendi",
             tel: "+243812345678",
             forfaitPaye: true,
             vehicules: [
-                { plaque: "KIN 4082AE", type: "Mini-bus Mercedes 207", places: 18, imei: "865241092837401", rotations: 8, itineraire: "GARE CENTRALE — UPN", lat: -4.3215, lng: 15.3115 }
+                { plaque: "KIN 4082AE", type: "Mini-bus Mercedes 207", places: 18, imei: "865241092837401", rotations: 8, tarif: 1500, itineraire: "GARE CENTRALE — UPN", lat: -4.3215, lng: 15.3115 }
             ]
         };
 
-        // --- 2. GESTION DE LA CARTE LEAFLET ---
+        // --- 1. GESTION DE LA CARTE LEAFLET ET CHOIX VÉHICULE ---
         let map = null;
         let busMarker = null;
 
         function initMap() {
-            if (map) return;
-            // Coordonnées Kinshasa Centre (-4.3224, 15.3070)
+            if (map) { map.remove(); map = null; }
+            
+            // Initialisation centrée sur Kinshasa
             map = L.map('map-container').setView([-4.3224, 15.3070], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 18
-            }).addTo(map);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
 
-            // Marqueur dynamique du véhicule
-            const v = client.vehicules[0];
-            busMarker = L.marker([v.lat, v.lng]).addTo(map)
-                .bindPopup(`<b>${v.plaque}</b><br>${v.type}<br>Ligne : ${v.itineraire}`)
-                .openPopup();
-        }
+            // Remplir le sélecteur
+            const selectVehicule = document.getElementById('select-vehicule-map');
+            selectVehicule.innerHTML = '';
+            client.vehicules.forEach((v, index) => {
+                selectVehicule.insertAdjacentHTML('beforeend', `<option value="${index}">${v.plaque}</option>`);
+            });
 
-        function centrerSurVehicule() {
-            if (map && busMarker) {
-                map.setView(busMarker.getLatLng(), 15);
-                busMarker.openPopup();
+            // Afficher le premier véhicule par défaut
+            if (client.vehicules.length > 0) {
+                centrerSurVehicule(0);
             }
         }
 
-        // --- 3. GESTION STRICTE DU FORFAIT (5H00 À 23H59) ---
+        function centrerSurVehicule(indexStr) {
+            const index = parseInt(indexStr);
+            const v = client.vehicules[index];
+            if (!v || !map) return;
+
+            if (busMarker) map.removeLayer(busMarker);
+
+            busMarker = L.marker([v.lat, v.lng]).addTo(map)
+                .bindPopup(`<b>${v.plaque}</b><br>${v.type}<br>Ligne : ${v.itineraire}`)
+                .openPopup();
+            
+            map.setView([v.lat, v.lng], 15);
+        }
+
+        // --- 2. GESTION STRICTE DU FORFAIT (5H00 À 23H59) ---
         function actualiserCompteARebours23h59() {
             const now = new Date();
             const finJour = new Date();
@@ -403,55 +396,42 @@
         }
         setInterval(actualiserCompteARebours23h59, 1000);
 
-        // --- 4. ASSISTANCE DES ITINÉRAIRES ---
-        function peuplerSelectsPoints() {
-            const selO = document.getElementById('sel-origine');
-            const selD = document.getElementById('sel-destination');
-            selO.innerHTML = ""; selD.innerHTML = "";
-
-            pointsKinshasa.forEach((pt, i) => {
-                selO.insertAdjacentHTML('beforeend', `<option value="${pt}" ${i===0?'selected':''}>${pt}</option>`);
-                selD.insertAdjacentHTML('beforeend', `<option value="${pt}" ${i===1?'selected':''}>${pt}</option>`);
-            });
-            actualiserAssistanceItineraire();
-        }
-
-        function actualiserAssistanceItineraire() {
-            const org = document.getElementById('sel-origine').value;
-            const dest = document.getElementById('sel-destination').value;
+        // --- 3. SAISIE LIBRE D'ITINÉRAIRE & AJOUT DE VÉHICULE ---
+        function enregistrerVehiculeSaisi() {
+            const plaque = document.getElementById('add-plaque').value.trim();
+            const imei = document.getElementById('add-imei').value.trim();
             const type = document.getElementById('add-type').value;
+            const itineraire = document.getElementById('add-itineraire-libre').value.trim();
+            const tarif = parseInt(document.getElementById('add-tarif-passager').value) || 1500;
+            const objRotations = parseInt(document.getElementById('add-objectif-rotations').value) || 0;
 
             let places = 18;
             if (type.includes("Ketch")) places = 4;
             if (type.includes("Wewa")) places = 1;
             if (type.includes("Personnel")) places = 0;
 
-            const cle1 = `${org} — ${dest}`;
-            const cle2 = `${dest} — ${org}`;
-            const donnees = matriceTarifsDistances[cle1] || matriceTarifsDistances[cle2] || { distance: 10.0, tarif: 1500 };
+            if (!plaque || !imei || !itineraire) { 
+                alert("Veuillez remplir la plaque, l'IMEI et l'itinéraire."); 
+                return; 
+            }
 
-            document.getElementById('ast-distance').textContent = `${donnees.distance} km`;
-            document.getElementById('ast-tarif').textContent = `${donnees.tarif.toLocaleString()} CDF`;
-            document.getElementById('ast-rotation').textContent = `${(places * donnees.tarif).toLocaleString()} CDF`;
-        }
+            // Génération de coordonnées aléatoires proches du centre-ville de Kinshasa pour la démo
+            const randLat = -4.32 + (Math.random() * 0.05 - 0.025);
+            const randLng = 15.30 + (Math.random() * 0.05 - 0.025);
 
-        function enregistrerVehiculeAssiste() {
-            const plaque = document.getElementById('add-plaque').value.trim();
-            const imei = document.getElementById('add-imei').value.trim();
-            const type = document.getElementById('add-type').value;
-            const org = document.getElementById('sel-origine').value;
-            const dest = document.getElementById('sel-destination').value;
-
-            if (!plaque || !imei) { alert("Plaque et IMEI obligatoires."); return; }
-
-            const itineraire = `${org} — ${dest}`;
-            client.vehicules[0] = { plaque, type, places: 18, imei, rotations: 0, itineraire, lat: -4.3215, lng: 15.3115 };
+            client.vehicules.push({ plaque, type, places, imei, rotations: 0, tarif, itineraire, lat: randLat, lng: randLng });
             genererCartesVehicules();
-            alert(`✅ Trajet configuré avec assistance : ${itineraire}`);
+            
+            // Nettoyage
+            document.getElementById('add-plaque').value = ""; 
+            document.getElementById('add-imei').value = "";
+            document.getElementById('add-itineraire-libre').value = "";
+            
+            alert(`✅ Véhicule ${plaque} enregistré avec succès sur l'itinéraire : ${itineraire}`);
             changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
         }
 
-        // --- 5. NAVIGATION & VUES ---
+        // --- 4. NAVIGATION & VUES ---
         function basculerVueAuth(mode) {
             if(mode === 'login') {
                 document.getElementById('form-connexion').classList.remove('hidden');
@@ -496,39 +476,40 @@
         function genererCartesVehicules() {
             const conteneur = document.getElementById('conteneur-vehicules-actifs');
             conteneur.innerHTML = "";
+            document.getElementById('txt-compteur-vehicules').textContent = client.vehicules.length;
+
             client.vehicules.forEach(v => {
+                const gainEstime = v.rotations * v.places * v.tarif;
                 conteneur.insertAdjacentHTML('beforeend', `
-                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3 shadow-md">
                         <div class="flex justify-between items-start">
                             <div>
                                 <span class="text-[9px] font-black bg-slate-800 text-slate-300 px-2 py-0.5 rounded uppercase">${v.type}</span>
                                 <h3 class="text-base font-black mt-1 text-slate-100">${v.plaque}</h3>
-                                <p class="text-[10px] text-emerald-400 font-bold mt-0.5"><i class="fa-solid fa-route"></i> Ligne : ${v.itineraire}</p>
+                                <p class="text-[10px] text-emerald-400 font-bold mt-0.5"><i class="fa-solid fa-route"></i> ${v.itineraire}</p>
                             </div>
-                            <span class="bg-emerald-500/10 text-emerald-400 text-[9px] font-mono px-2 py-0.5 rounded font-bold">Actif SinoTrack</span>
+                            <span class="bg-emerald-500/10 text-emerald-400 text-[9px] font-mono px-2 py-0.5 rounded font-bold">Traceur GPS OK</span>
                         </div>
-                        <div class="grid grid-cols-2 gap-2 bg-slate-900/50 p-2.5 rounded-xl border border-slate-800/80 text-xs font-mono">
-                            <div><span class="text-[8px] text-slate-500 block">IMEI Traceur</span><span class="text-slate-300">${v.imei}</span></div>
-                            <div class="text-right"><span class="text-[8px] text-slate-500 block">Expiration Forfait</span><span class="text-amber-400 font-bold">Ce soir 23h59</span></div>
+                        <div class="grid grid-cols-3 gap-2 bg-slate-900/50 p-3 rounded-xl text-center text-xs mt-3 border border-slate-800">
+                            <div><span class="text-[9px] text-slate-500 block">Rotations</span><span class="font-black text-slate-200">${v.rotations}</span></div>
+                            <div><span class="text-[9px] text-slate-500 block">Tarif/Pl.</span><span class="font-black text-slate-200">${v.tarif} CDF</span></div>
+                            <div><span class="text-[9px] text-slate-500 block">Recette</span><span class="font-black text-emerald-400">${gainEstime.toLocaleString()} CDF</span></div>
                         </div>
                     </div>`);
             });
         }
 
         function declarerPaiementForfait() {
-            alert("🛰️ Paiement pris en compte !\nVotre véhicule est autorisé à circuler jusqu'à 23h59.");
+            alert("🛰️ Paiement pris en compte !\nVos véhicules sont autorisés à circuler jusqu'à 23h59 ce soir.");
             changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
         }
 
         function ouvrirModalCGU() {
             document.getElementById('zone-texte-cgu').textContent = 
-                "CONDITIONS DU FORFAIT PRÉPAYÉ TRANSVISION :\n\n1. OBLIGATION DE PRÉ-PAIEMENT :\nLe client doit impérativement souscrire son forfait avant le début de ses rotations.\n\n2. FENÊTRE JOURNALIÈRE (5H00 — 23H59) :\nLe forfait journalier s'applique uniquement pour la journée en cours. Quelle que soit l'heure où le paiement est validé, il expire à 23h59 précises le jour même.\n\n3. NON-REPORT :\nLes heures non consommées ne sont ni remboursables ni reportables sur le lendemain.\n\nGlobal Tech Solutions SARL.";
+                "CONDITIONS DU FORFAIT PRÉPAYÉ TRANSVISION :\n\n1. OBLIGATION DE PRÉ-PAIEMENT :\nLe client doit impérativement souscrire son forfait journalier avant le début de ses rotations.\n\n2. FENÊTRE JOURNALIÈRE (5H00 — 23H59) :\nLe forfait journalier s'applique uniquement pour la journée en cours. Quelle que soit l'heure où le paiement est validé, il expire à 23h59 précises le jour même.\n\n3. NON-REPORT :\nLes heures non consommées ne sont ni remboursables ni reportables sur le lendemain.\n\nGlobal Tech Solutions SARL.";
             document.getElementById('modal-cgu').classList.remove('hidden');
         }
         function fermerModalCGU() { document.getElementById('modal-cgu').classList.add('hidden'); }
-
-        // Initialisation au chargement
-        peuplerSelectsPoints();
     </script>
 </body>
 </html>
