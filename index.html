@@ -160,7 +160,10 @@
                 <div class="mt-2">
                     <button onclick="ouvrirModalRecharge()" class="w-full bg-slate-950 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl text-center shadow-lg transition-colors flex items-center justify-center gap-3">
                         <i class="fa-solid fa-wallet text-2xl text-emerald-400"></i>
-                        <h3 class="text-[11px] font-black uppercase text-slate-200">Recharger Forfait Journalier</h3>
+                        <div class="text-left">
+                            <h3 class="text-[11px] font-black uppercase text-slate-200">Recharger Flotte Entière</h3>
+                            <p class="text-[9px] text-slate-400 mt-0.5">Payer le forfait journalier pour tous vos véhicules</p>
+                        </div>
                     </button>
                 </div>
             </div>
@@ -226,7 +229,7 @@
                 </div>
             </div>
 
-            <!-- ONGLET C : RAPPORT FINANCIER AVEC FILTRE -->
+            <!-- ONGLET C : RAPPORT FINANCIER -->
             <div id="onglet-rapport" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
                 <div class="bg-slate-950/90 backdrop-blur p-3.5 rounded-2xl border border-slate-800 space-y-3 shadow-md">
                     <div class="flex justify-between items-center">
@@ -241,7 +244,6 @@
                             <label class="block text-[8px] text-slate-500 uppercase mb-1">Cibler un Véhicule</label>
                             <select id="filtre-fin-vehicule" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-[10px] text-slate-200 font-bold focus:outline-none focus:border-emerald-500">
                                 <option value="all">Tous les véhicules (Flotte globale)</option>
-                                <!-- Rempli par JS -->
                             </select>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
@@ -260,7 +262,6 @@
                     </button>
                 </div>
 
-                <!-- GRAPHIQUE -->
                 <div class="bg-slate-950/85 backdrop-blur p-4 rounded-2xl border border-slate-800/80 space-y-2">
                     <h3 class="text-xs font-black uppercase text-emerald-400 flex items-center gap-2">
                         <i class="fa-solid fa-chart-simple"></i> Évolution des Recettes
@@ -287,9 +288,8 @@
                 </div>
             </div>
 
-            <!-- ONGLET D : ANALYSE TECHNIQUE (AVEC FILTRE) -->
+            <!-- ONGLET D : ANALYSE TECHNIQUE -->
             <div id="onglet-analyse" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
-                
                 <div class="bg-slate-950/90 backdrop-blur p-3.5 rounded-2xl border border-slate-800 space-y-3 shadow-md">
                     <div class="flex justify-between items-center">
                         <label class="block text-[10px] font-bold text-slate-300 uppercase tracking-wider">
@@ -302,7 +302,6 @@
                             <label class="block text-[8px] text-slate-500 uppercase mb-1">Cibler un Véhicule</label>
                             <select id="filtre-tech-vehicule" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-[10px] text-slate-200 font-bold focus:outline-none focus:border-sky-500">
                                 <option value="all">Tous les véhicules (Flotte globale)</option>
-                                <!-- Rempli par JS -->
                             </select>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
@@ -376,7 +375,7 @@
             </nav>
         </div>
 
-        <!-- MODAL RECHARGE FORFAIT -->
+        <!-- MODAL RECHARGE FORFAIT FLOTTE COMPLÈTE -->
         <div id="modal-recharge-partenaire" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
             <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
                 <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -387,12 +386,12 @@
                 </div>
                 <div class="space-y-3">
                     <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-1 text-center">
-                        <span class="text-[9px] text-slate-400 uppercase font-black">Forfait Journalier Requis</span>
-                        <p class="text-xl font-black text-emerald-400">2 000 CDF</p>
+                        <span id="recharge-titre" class="text-[9px] text-slate-400 uppercase font-black">Forfait Flotte globale</span>
+                        <p id="recharge-montant" class="text-xl font-black text-emerald-400">0 CDF</p>
+                        <span id="recharge-detail" class="text-[9px] text-slate-500 font-mono block">0 véhicule x 2 000 CDF</span>
                         <span class="text-[9px] text-rose-400 font-bold block mt-1">⚠️ Expire à 23h59 ce soir</span>
                     </div>
 
-                    <!-- MENU DÉROULANT DES NUMÉROS -->
                     <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-850 text-xs font-mono text-slate-300">
                         <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Sélectionner le réseau de paiement</label>
                         <select id="recharge-numero" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-emerald-400 font-bold focus:outline-none focus:border-emerald-500">
@@ -426,7 +425,7 @@
 
     <!-- LOGIQUE JAVASCRIPT -->
     <script>
-        // Injection de 3 véhicules avec données journalières simulées
+        // Base de véhicules simulés
         let client = {
             nom: "Jean Mukendi",
             tel: "+243812345678",
@@ -449,7 +448,7 @@
             ['fin', 'tech'].forEach(prefix => {
                 const elStart = document.getElementById(`date-debut-${prefix}`);
                 const elEnd = document.getElementById(`date-fin-${prefix}`);
-                if(elStart) elStart.value = strToday; // Par défaut : aujourd'hui
+                if(elStart) elStart.value = strToday;
                 if(elEnd) elEnd.value = strToday;
             });
         }
@@ -460,7 +459,7 @@
             if (isNaN(d1) || isNaN(d2)) return 1;
             const diffTime = d2 - d1;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-            return diffDays < 0 ? 0 : (diffDays === 0 ? 1 : diffDays + 1); // +1 car bornes incluses (ex: 19 au 19 = 1 jour)
+            return diffDays < 0 ? 0 : (diffDays === 0 ? 1 : diffDays + 1);
         }
 
         function peuplerSelecteursFiltre() {
@@ -486,8 +485,6 @@
             initFiltresDates();
             peuplerSelecteursFiltre();
             majSelecteurMap();
-            
-            // On calcule pour 1 jour (Aujourd'hui) par défaut
             genererRapportFinancier(1, 'all'); 
             genererRapportTechnique(1, 'all');
         }
@@ -574,13 +571,11 @@
             changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
         }
 
-        // --- VUE : RAPPORT FINANCIER (AVEC FILTRES) ---
+        // --- VUE : RAPPORT FINANCIER ---
         function appliquerFiltreFinancier() {
             const jours = getJoursFiltre('fin');
             const vehiculeIdx = document.getElementById('filtre-fin-vehicule').value;
-            
             if (jours <= 0) { alert("Période invalide. La date de début doit être antérieure ou égale à la date de fin."); return; }
-            
             genererRapportFinancier(jours, vehiculeIdx);
         }
 
@@ -590,9 +585,7 @@
             if(list) list.innerHTML = "";
 
             let vehiculesCibles = client.vehicules;
-            if (cibleIdx !== 'all') {
-                vehiculesCibles = [client.vehicules[parseInt(cibleIdx)]];
-            }
+            if (cibleIdx !== 'all') { vehiculesCibles = [client.vehicules[parseInt(cibleIdx)]]; }
 
             vehiculesCibles.forEach(v => {
                 const rotPeriode = v.rotationsJour * joursFiltre;
@@ -631,22 +624,18 @@
 
             if (chartPartenaireInstance) chartPartenaireInstance.destroy();
             
-            // Simulation logique : on divise le total généré par le nombre de jours pour l'afficher sur le graph
-            let dataGains = [];
-            let labels = [];
+            let dataGains = []; let labels = [];
             const gainMoyenJour = totalAffiche / joursFiltre;
 
             if (joursFiltre === 1) {
-                labels = ['Aujourd\'hui'];
-                dataGains = [totalAffiche];
+                labels = ['Aujourd\'hui']; dataGains = [totalAffiche];
             } else if (joursFiltre <= 7) {
                 for(let i=1; i<=joursFiltre; i++) {
                     labels.push(`J-${joursFiltre - i + 1}`);
-                    // Variation aléatoire autour de la moyenne
                     dataGains.push(gainMoyenJour * (0.8 + Math.random() * 0.4));
                 }
             } else {
-                labels = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4']; // Simplification visuelle pour > 7j
+                labels = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'];
                 dataGains = [totalAffiche * 0.2, totalAffiche * 0.3, totalAffiche * 0.25, totalAffiche * 0.25];
             }
 
@@ -655,10 +644,7 @@
                 type: 'bar',
                 data: {
                     labels: labels,
-                    datasets: [{
-                        label: 'Gains (CDF)', data: dataGains,
-                        backgroundColor: '#10b981', borderRadius: 4
-                    }]
+                    datasets: [{ label: 'Gains (CDF)', data: dataGains, backgroundColor: '#10b981', borderRadius: 4 }]
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
@@ -667,11 +653,10 @@
             });
         }
 
-        // --- VUE : ANALYSE TECHNIQUE (AVEC FILTRES) ---
+        // --- VUE : ANALYSE TECHNIQUE ---
         function appliquerFiltreTechnique() {
             const jours = getJoursFiltre('tech');
             const vehiculeIdx = document.getElementById('filtre-tech-vehicule').value;
-            
             if (jours <= 0) { alert("Période invalide."); return; }
             genererRapportTechnique(jours, vehiculeIdx);
         }
@@ -682,19 +667,16 @@
             list.innerHTML = "";
             
             let vehiculesCibles = client.vehicules;
-            if (cibleIdx && cibleIdx !== 'all') {
-                vehiculesCibles = [client.vehicules[parseInt(cibleIdx)]];
-            }
+            if (cibleIdx && cibleIdx !== 'all') { vehiculesCibles = [client.vehicules[parseInt(cibleIdx)]]; }
 
             vehiculesCibles.forEach((v) => {
-                const origineIndex = client.vehicules.indexOf(v); // Pour retrouver le vrai index
+                const origineIndex = client.vehicules.indexOf(v);
                 const btnMoteur = v.moteurCoupe 
                     ? `<button onclick="basculerMoteur(${origineIndex}, false)" class="w-full bg-emerald-500/20 text-emerald-400 font-bold py-2 rounded text-[10px] uppercase mt-2"><i class="fa-solid fa-unlock"></i> Restaurer Moteur</button>`
                     : `<button onclick="basculerMoteur(${origineIndex}, true)" class="w-full bg-rose-500/20 text-rose-400 font-bold py-2 rounded text-[10px] uppercase mt-2"><i class="fa-solid fa-lock"></i> Couper Moteur (Urgence)</button>`;
 
                 const couleurEntretien = v.entretien.includes("Alerte") ? 'text-rose-400 animate-pulse' : 'text-emerald-400';
                 
-                // Calcul proportionnel à la durée filtrée
                 const consoPeriode = (v.carburantJour * joursFiltre).toFixed(1);
                 const kmPeriode = (v.kmJour * joursFiltre).toLocaleString();
 
@@ -706,7 +688,7 @@
                             <p>🔋 Batt: <span class="text-emerald-400">12.6V</span></p>
                             <p>⛽ Conso: <span class="text-sky-400 font-bold">${consoPeriode} L</span></p>
                             <p>🛣️ Dist: <span class="text-sky-400 font-bold">${kmPeriode} km</span></p>
-                            <p class="col-span-2">🛠️ Maint: <span class="${couleurEntretien} font-bold">${v.entretien}</span></p>
+                            <p class="col-span-2">🛠️ Maint: <span class="${couleurEntretien} font-bold truncate block">${v.entretien}</span></p>
                             <p class="col-span-2">⚡ Moteur: <span class="${v.moteurCoupe ? 'text-rose-400 font-bold' : 'text-emerald-400'}">${v.moteurCoupe ? 'COUPÉ' : 'ON'}</span></p>
                         </div>
                         ${btnMoteur}
@@ -717,7 +699,7 @@
         function basculerMoteur(i, couper) {
             client.vehicules[i].moteurCoupe = couper;
             alert(`📡 Commande SMS envoyée. Moteur ${couper ? 'coupé' : 'restauré'} pour le véhicule ${client.vehicules[i].plaque}.`);
-            appliquerFiltreTechnique(); // Recharge le filtre actif
+            appliquerFiltreTechnique();
         }
 
         // --- PROFIL & SÉCURITÉ ---
@@ -729,7 +711,7 @@
             } else { alert("❌ Le PIN doit contenir au moins 4 caractères."); }
         }
 
-        // --- HORLOGE FORFAIT 23H59 & RECHARGE ---
+        // --- HORLOGE FORFAIT & RECHARGE GLOBALE DE FLOTTE ---
         function actualiserCompteARebours23h59() {
             const now = new Date(); const finJour = new Date(); finJour.setHours(23, 59, 59, 999);
             const resteMs = finJour - now;
@@ -752,11 +734,22 @@
         function declarerPaiementForfait() {
             const num = document.getElementById('recharge-numero');
             const res = num.options[num.selectedIndex].text;
-            alert(`🛰️ Paiement validé via ${res} !\nVos véhicules sont autorisés à rouler jusqu'à 23h59.`);
+            const nbVehicules = client.vehicules.length;
+            alert(`🛰️ Paiement validé via ${res} !\nVos ${nbVehicules} véhicule${nbVehicules > 1 ? 's' : ''} sont autorisés à rouler jusqu'à 23h59.`);
             fermerModalRecharge();
         }
 
-        function ouvrirModalRecharge() { document.getElementById('modal-recharge-partenaire').classList.remove('hidden'); }
+        function ouvrirModalRecharge() { 
+            const nbVehicules = client.vehicules.length;
+            const tarifUnitaire = 2000;
+            const totalCDF = nbVehicules * tarifUnitaire;
+
+            document.getElementById('recharge-titre').textContent = `Forfait Flotte (${nbVehicules} véhicule${nbVehicules > 1 ? 's' : ''})`;
+            document.getElementById('recharge-montant').textContent = `${totalCDF.toLocaleString()} CDF`;
+            document.getElementById('recharge-detail').textContent = `${nbVehicules} véhicule${nbVehicules > 1 ? 's' : ''} x ${tarifUnitaire.toLocaleString()} CDF`;
+
+            document.getElementById('modal-recharge-partenaire').classList.remove('hidden'); 
+        }
         function fermerModalRecharge() { document.getElementById('modal-recharge-partenaire').classList.add('hidden'); }
 
         // --- LOGIQUE GLOBALE AUTHENTIFICATION ---
