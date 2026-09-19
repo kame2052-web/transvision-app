@@ -55,7 +55,7 @@
     <!-- MAQUETTE PRINCIPALE -->
     <div class="relative z-10 max-w-md mx-auto min-h-screen shadow-2xl overflow-hidden flex flex-col border-x border-slate-800/70 pb-20 bg-slate-900/70 backdrop-blur-xl" id="zone-flotte">
         
-        <!-- 1. ÉCRAN D'ACCÈS / AUTHENTIFICATION -->
+        <!-- ÉCRAN D'ACCÈS / AUTHENTIFICATION -->
         <div id="page-auth" class="p-6 space-y-5 flex-1 flex flex-col justify-between no-print overflow-y-auto">
             <div class="space-y-4 mt-1">
                 <div class="text-center">
@@ -116,7 +116,6 @@
         <!-- 2. ESPACE CLIENT CONNECTÉ -->
         <div id="app-proprietaire" class="flex-1 flex flex-col hidden relative">
             
-            <!-- HEADER -->
             <header class="p-4 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur sticky top-0 z-30 no-print">
                 <div class="flex justify-between items-center mb-3">
                     <div>
@@ -152,27 +151,21 @@
                         <h2 class="text-[10px] font-bold text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
                             <i class="fa-solid fa-map-location-dot text-emerald-400"></i> Traceur GPS
                         </h2>
-                        <!-- SÉLECTEUR POUR AFFICHER LE VÉHICULE SUR LA CARTE -->
-                        <select id="select-vehicule-map" onchange="centrerSurVehicule(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg text-[10px] text-emerald-400 font-bold px-2 py-1 outline-none"></select>
+                        <!-- SÉLECTEUR DE VÉHICULE -->
+                        <select id="select-vehicule-map" onchange="centrerSurVehicule(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg text-[10px] text-emerald-400 font-bold px-2 py-1 outline-none truncate max-w-[130px]"></select>
                     </div>
-                    <!-- CONTENEUR CARTE LEAFLET -->
                     <div id="map-container"></div>
                 </div>
 
-                <!-- ACTIONS RAPIDES SUR LA FLOTTE -->
-                <div class="grid grid-cols-2 gap-3 mt-4">
-                    <button onclick="ouvrirModalRecharge()" class="bg-slate-950 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl text-center shadow-lg transition-colors">
-                        <i class="fa-solid fa-wallet text-xl text-emerald-400 mb-2"></i>
-                        <h3 class="text-[10px] font-black uppercase text-slate-200">Forfait Journalier</h3>
-                    </button>
-                    <button onclick="changerOnglet('onglet-ajouter', document.querySelectorAll('.btn-nav')[1])" class="bg-slate-950 border border-slate-800 hover:border-indigo-500/50 p-4 rounded-2xl text-center shadow-lg transition-colors">
-                        <i class="fa-solid fa-plus-circle text-xl text-indigo-400 mb-2"></i>
-                        <h3 class="text-[10px] font-black uppercase text-slate-200">Ajouter Véhicule</h3>
+                <div class="mt-2">
+                    <button onclick="ouvrirModalRecharge()" class="w-full bg-slate-950 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl text-center shadow-lg transition-colors flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-wallet text-2xl text-emerald-400"></i>
+                        <h3 class="text-[11px] font-black uppercase text-slate-200">Recharger Forfait Journalier</h3>
                     </button>
                 </div>
             </div>
 
-            <!-- ONGLET B : NOUVEAU VÉHICULE & ITINÉRAIRE EN DEUX CHAMPS -->
+            <!-- ONGLET B : NOUVEAU VÉHICULE & ITINÉRAIRE -->
             <div id="onglet-ajouter" class="p-4 space-y-4 class-onglet hidden no-print">
                 <div class="bg-slate-950/85 backdrop-blur p-5 rounded-2xl border border-slate-800/80 space-y-4 shadow-xl">
                     <div class="border-b border-slate-800 pb-2">
@@ -190,16 +183,21 @@
                             </div>
                             <div>
                                 <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Modèle</label>
-                                <select id="add-type" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-[11px] text-slate-200 font-bold focus:border-indigo-500 outline-none">
-                                    <option value="Mercedes 207">Mercedes 207 (18 pl.)</option>
-                                    <option value="Hiace">Hiace (15 pl.)</option>
-                                    <option value="Taxi Ketch">Taxi Ketch (4 pl.)</option>
-                                    <option value="Personnel">Usage Personnel</option>
-                                </select>
+                                <input type="text" id="add-type" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:border-indigo-500 outline-none" placeholder="Ex: Mercedes 207">
                             </div>
                         </div>
 
-                        <!-- SAISIE DE L'ITINÉRAIRE EN 2 CHAMPS DISTINCTS -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Places Assises</label>
+                                <input type="number" id="add-places" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:border-indigo-500 outline-none" placeholder="Ex: 18">
+                            </div>
+                            <div>
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Tarif Passager (CDF)</label>
+                                <input type="number" id="add-tarif" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:border-indigo-500 outline-none" placeholder="Ex: 1500">
+                            </div>
+                        </div>
+
                         <div class="p-3 bg-slate-900/90 border border-indigo-500/30 rounded-2xl space-y-3">
                             <span class="text-[9px] font-black uppercase text-indigo-400 tracking-wider flex items-center gap-1.5">
                                 <i class="fa-solid fa-route"></i> Parcours d'Exploitation
@@ -207,23 +205,12 @@
 
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
-                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Point d'Origine</label>
-                                    <input type="text" id="add-origine" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold focus:border-indigo-500 outline-none" placeholder="Ex: GARE CENTRALE">
+                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Origine</label>
+                                    <input type="text" id="add-origine" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold focus:border-indigo-500 outline-none" placeholder="Départ">
                                 </div>
                                 <div>
                                     <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Destination</label>
-                                    <input type="text" id="add-destination" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold focus:border-indigo-500 outline-none" placeholder="Ex: UPN">
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-2 mt-2">
-                                <div>
-                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Tarif Passager (CDF)</label>
-                                    <input type="number" id="add-tarif-passager" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-slate-200 focus:border-indigo-500 outline-none" value="1500">
-                                </div>
-                                <div>
-                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Objectif Rotations/Jour</label>
-                                    <input type="number" id="add-objectif-rotations" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-slate-200 focus:border-indigo-500 outline-none" value="10">
+                                    <input type="text" id="add-destination" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold focus:border-indigo-500 outline-none" placeholder="Arrivée">
                                 </div>
                             </div>
                         </div>
@@ -247,7 +234,6 @@
                     <button onclick="window.print()" class="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded font-bold"><i class="fa-solid fa-print"></i> PDF</button>
                 </div>
 
-                <!-- GRAPHIQUE DES RECETTES -->
                 <div class="bg-slate-950/85 backdrop-blur p-4 rounded-2xl border border-slate-800/80 space-y-2">
                     <h3 class="text-xs font-black uppercase text-emerald-400 flex items-center gap-2">
                         <i class="fa-solid fa-chart-simple"></i> Recettes Flotte (Semaine)
@@ -268,19 +254,17 @@
                     </div>
                 </div>
 
-                <!-- LISTE DÉTAILLÉE PAR VÉHICULE -->
                 <div class="space-y-3">
                     <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-800 pb-1">Détails par Véhicule</h3>
                     <div id="fin-vehicules-list" class="space-y-3"></div>
                 </div>
             </div>
 
-            <!-- ONGLET D : ANALYSE TECHNIQUE -->
+            <!-- ONGLET D : ANALYSE TECHNIQUE (CARBURANT & ENTRETIEN) -->
             <div id="onglet-analyse" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
                 <div class="flex justify-between items-center">
                     <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rapport Technique Matériel</h2>
                 </div>
-                <!-- LISTE DIAGNOSTIQUE TECHNIQUE DES TRACEURS -->
                 <div id="tech-vehicules-list" class="space-y-3"></div>
             </div>
 
@@ -288,7 +272,6 @@
             <div id="onglet-profil" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
                 <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mon Profil & Sécurité</h2>
                 
-                <!-- GESTION IDENTIFIANTS -->
                 <div class="bg-slate-950/80 backdrop-blur p-5 rounded-2xl border border-slate-800 space-y-3 shadow-xl">
                     <h3 class="text-xs font-black uppercase text-indigo-400 flex items-center gap-2 border-b border-slate-800 pb-2">
                         <i class="fa-solid fa-shield-halved"></i> Mes Identifiants
@@ -316,35 +299,30 @@
 
             <!-- BARRE DE NAVIGATION BASSE (5 ICÔNES) -->
             <nav class="fixed bottom-0 max-w-md w-full inset-x-0 mx-auto bg-slate-950/95 backdrop-blur border-t border-slate-800 h-16 flex justify-around items-center z-40 no-print px-1">
-                <!-- 1. GPS Live (onglet-flotte) -->
                 <button onclick="changerOnglet('onglet-flotte', this)" class="flex flex-col items-center justify-center gap-1 text-emerald-400 btn-nav flex-1">
                     <i class="fa-solid fa-location-crosshairs text-sm"></i><span class="text-[8px] font-bold">GPS Live</span>
                 </button>
-                <!-- 2. Nouveau (onglet-ajouter) -->
                 <button onclick="changerOnglet('onglet-ajouter', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1">
                     <i class="fa-solid fa-plus-circle text-sm"></i><span class="text-[8px] font-bold">Nouveau</span>
                 </button>
-                <!-- 3. Rapport (onglet-rapport) -->
                 <button onclick="changerOnglet('onglet-rapport', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1">
-                    <i class="fa-solid fa-file-invoice-dollar text-sm"></i><span class="text-[8px] font-bold">Rapport Fin.</span>
+                    <i class="fa-solid fa-file-invoice-dollar text-sm"></i><span class="text-[8px] font-bold">Rapport</span>
                 </button>
-                <!-- 4. Analyse Tech (onglet-analyse) -->
                 <button onclick="changerOnglet('onglet-analyse', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1">
-                    <i class="fa-solid fa-satellite-dish text-sm"></i><span class="text-[8px] font-bold">Tech.</span>
+                    <i class="fa-solid fa-wrench text-sm"></i><span class="text-[8px] font-bold">Tech.</span>
                 </button>
-                <!-- 5. Profil (onglet-profil) -->
                 <button onclick="changerOnglet('onglet-profil', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1">
                     <i class="fa-solid fa-user text-sm"></i><span class="text-[8px] font-bold">Profil</span>
                 </button>
             </nav>
         </div>
 
-        <!-- MODAL RECHARGE FORFAIT PRÉPAYÉ -->
+        <!-- MODAL RECHARGE FORFAIT AVEC MENU DÉROULANT DES NUMÉROS -->
         <div id="modal-recharge-partenaire" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
             <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
                 <div class="flex justify-between items-center border-b border-slate-800 pb-3">
                     <h3 class="font-black text-sm text-slate-100 flex items-center gap-2">
-                        <i class="fa-solid fa-wallet text-emerald-400"></i> Paiement Forfait Prépayé
+                        <i class="fa-solid fa-wallet text-emerald-400"></i> Paiement Forfait
                     </h3>
                     <button onclick="fermerModalRecharge()" class="text-slate-500 hover:text-slate-300"><i class="fa-solid fa-xmark"></i></button>
                 </div>
@@ -354,12 +332,19 @@
                         <p class="text-xl font-black text-emerald-400">2 000 CDF</p>
                         <span class="text-[9px] text-rose-400 font-bold block mt-1">⚠️ Expire à 23h59 ce soir</span>
                     </div>
+
+                    <!-- MENU DÉROULANT DES NUMÉROS -->
                     <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-850 text-xs font-mono text-slate-300">
-                        <p class="text-[10px]">Paiement M-Pesa / Airtel :</p>
-                        <p class="text-emerald-400 font-bold mt-0.5">+243 812 000 000</p>
+                        <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Sélectionner le réseau de paiement</label>
+                        <select id="recharge-numero" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-emerald-400 font-bold focus:outline-none focus:border-emerald-500">
+                            <option value="mpesa">+243 812 000 000 (M-Pesa)</option>
+                            <option value="airtel">+243 999 000 000 (Airtel Money)</option>
+                            <option value="orange">+243 890 000 000 (Orange Money)</option>
+                            <option value="afrimoney">+243 850 000 000 (Afrimoney)</option>
+                        </select>
                     </div>
                 </div>
-                <button onclick="declarerPaiementForfait()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs transition-colors">
+                <button onclick="declarerPaiementForfait()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs transition-colors mt-2">
                     J'ai payé — Activer
                 </button>
             </div>
@@ -382,11 +367,14 @@
 
     <!-- LOGIQUE JAVASCRIPT CORRIGÉE -->
     <script>
+        // Injection de 3 véhicules pour démonstration
         let client = {
             nom: "Jean Mukendi",
             tel: "+243812345678",
             vehicules: [
-                { plaque: "KIN 4082AE", type: "Mercedes 207", places: 18, imei: "865241092837401", rotations: 8, tarif: 1500, itineraire: "GARE CENTRALE — UPN", lat: -4.3215, lng: 15.3115, moteurCoupe: false }
+                { plaque: "KIN 4082AE", type: "Mercedes 207", places: 18, imei: "865241092837401", rotations: 8, tarif: 1500, itineraire: "GARE CENTRALE — UPN", lat: -4.3215, lng: 15.3115, moteurCoupe: false, carburant: 24.5, entretien: "OK (Prochain: 500km)" },
+                { plaque: "KIN 1234BB", type: "Taxi Ketch", places: 4, imei: "865241092837402", rotations: 12, tarif: 2500, itineraire: "KINTAMBO — GOMBE", lat: -4.3150, lng: 15.2980, moteurCoupe: false, carburant: 12.0, entretien: "Alerte: Vidange requise" },
+                { plaque: "KIN 9876XX", type: "Hiace", places: 15, imei: "865241092837403", rotations: 5, tarif: 1000, itineraire: "KINGASANI — PASCAL", lat: -4.3400, lng: 15.3300, moteurCoupe: false, carburant: 8.2, entretien: "OK (Prochain: 1200km)" }
             ]
         };
 
@@ -394,7 +382,7 @@
         let busMarker = null;
         let chartPartenaireInstance = null;
 
-        // --- 1. MOTEUR D'AFFICHAGE & NAVIGATION ONGLET (CORRIGÉ POUR ÉVITER LES BUGS) ---
+        // --- 1. MOTEUR D'AFFICHAGE & NAVIGATION ONGLET ---
         function genererToutesLesVues() {
             document.getElementById('lbl-nom-partenaire').textContent = client.nom;
             document.getElementById('prof-tel').value = client.tel;
@@ -404,35 +392,29 @@
             genererRapportTechnique();
         }
 
-        // Fonction corrigée : Les instances s'initialisent seulement quand l'onglet est visible !
         function changerOnglet(idOnglet, boutonActif) {
-            // Masquer tous les onglets
             document.querySelectorAll('.class-onglet').forEach(ong => ong.classList.add('hidden'));
             
-            // Afficher l'onglet ciblé
             const target = document.getElementById(idOnglet);
             if(target) target.classList.remove('hidden');
             
-            // Reset des couleurs des boutons
             document.querySelectorAll('.btn-nav').forEach(btn => { 
                 btn.classList.remove('text-emerald-400'); 
                 btn.classList.add('text-slate-500'); 
             });
-            // Activer la couleur du bouton cliqué
             if(boutonActif) {
                 boutonActif.classList.remove('text-slate-500'); 
                 boutonActif.classList.add('text-emerald-400');
             }
 
-            // Exécuter les scripts lourds APRÈS que le DOM soit rendu visible
             setTimeout(() => {
                 if (idOnglet === 'onglet-flotte') {
                     const sel = document.getElementById('select-vehicule-map');
                     initMapEtCentrer(sel && sel.value ? parseInt(sel.value) : 0);
-                    if (map) map.invalidateSize(); // Force Leaflet à recalculer sa taille
+                    if (map) map.invalidateSize();
                 } 
                 else if (idOnglet === 'onglet-rapport') {
-                    genererRapportFinancier(); // Régénère et charge Chart.js en sécurité
+                    genererRapportFinancier(); 
                 }
             }, 50);
         }
@@ -442,11 +424,10 @@
             const sel = document.getElementById('select-vehicule-map');
             if(!sel) return;
             sel.innerHTML = "";
-            client.vehicules.forEach((v, i) => sel.insertAdjacentHTML('beforeend', `<option value="${i}">${v.plaque}</option>`));
+            client.vehicules.forEach((v, i) => sel.insertAdjacentHTML('beforeend', `<option value="${i}">${v.plaque} (${v.type})</option>`));
         }
 
         function initMapEtCentrer(index) {
-            // Sécurité : Ne pas charger la carte si le div est caché (Bug Leaflet classique)
             const mapContainer = document.getElementById('map-container');
             if (!mapContainer || mapContainer.offsetParent === null) return;
 
@@ -461,42 +442,36 @@
             busMarker = L.marker([v.lat, v.lng]).addTo(map).bindPopup(`<b>${v.plaque}</b><br>${v.itineraire}`).openPopup();
             map.setView([v.lat, v.lng], 14);
         }
-
         function centrerSurVehicule(indexStr) { initMapEtCentrer(parseInt(indexStr)); }
 
-        // --- 3. VUE : NOUVEAU VÉHICULE (Saisie Assistée avec Origine et Destination) ---
+        // --- 3. VUE : NOUVEAU VÉHICULE (7 Champs précis) ---
         function enregistrerVehiculeSaisi() {
             const plaque = document.getElementById('add-plaque').value.trim();
-            const type = document.getElementById('add-type').value;
+            const type = document.getElementById('add-type').value.trim();
+            const places = parseInt(document.getElementById('add-places').value) || 0;
             const origine = document.getElementById('add-origine').value.trim();
             const dest = document.getElementById('add-destination').value.trim();
-            const tarif = parseInt(document.getElementById('add-tarif-passager').value) || 1500;
+            const tarif = parseInt(document.getElementById('add-tarif').value) || 0;
             const imei = document.getElementById('add-imei').value.trim();
 
-            if (!plaque || !imei || !origine || !dest) { 
-                alert("Veuillez remplir tous les champs obligatoires (Plaque, Origine, Destination, IMEI)."); 
+            if (!plaque || !type || !origine || !dest || !imei) { 
+                alert("Veuillez remplir au moins la Plaque, le Modèle, l'Origine, la Destination et l'IMEI."); 
                 return; 
             }
 
             const itineraire = `${origine} — ${dest}`;
-            const places = type.includes("207") ? 18 : (type.includes("Ketch") ? 4 : (type.includes("Wewa") ? 1 : 0));
-            
-            // Simuler des coordonnées d'insertion proches
             const randLat = -4.32 + (Math.random() * 0.04 - 0.02);
             const randLng = 15.31 + (Math.random() * 0.04 - 0.02);
 
-            client.vehicules.push({ plaque, type, places, imei, rotations: 0, tarif, itineraire, lat: randLat, lng: randLng, moteurCoupe: false });
+            client.vehicules.push({ plaque, type, places, imei, rotations: 0, tarif, itineraire, lat: randLat, lng: randLng, moteurCoupe: false, carburant: 0, entretien: "Nouveau" });
             
-            // Vider les champs
-            document.getElementById('add-plaque').value = ""; 
-            document.getElementById('add-imei').value = ""; 
-            document.getElementById('add-origine').value = "";
-            document.getElementById('add-destination').value = "";
+            document.getElementById('add-plaque').value = ""; document.getElementById('add-type').value = "";
+            document.getElementById('add-places').value = ""; document.getElementById('add-tarif').value = "";
+            document.getElementById('add-origine').value = ""; document.getElementById('add-destination').value = "";
+            document.getElementById('add-imei').value = "";
             
             alert(`✅ Véhicule ${plaque} enregistré sur le tronçon : ${itineraire}`);
-            genererToutesLesVues(); // Met à jour le sélecteur
-            
-            // Basculer vers l'onglet Flotte pour voir le véhicule
+            genererToutesLesVues();
             changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
         }
 
@@ -519,7 +494,7 @@
                             </div>
                             <div class="flex gap-4 text-[10px] text-slate-400 font-mono">
                                 <span><i class="fa-solid fa-rotate text-indigo-400"></i> ${v.rotations} rotations</span>
-                                <span><i class="fa-solid fa-users text-sky-400"></i> Tarif: ${v.tarif} FC</span>
+                                <span><i class="fa-solid fa-users text-sky-400"></i> ${v.tarif} FC/pl</span>
                             </div>
                             <p class="text-[9px] text-slate-500 truncate"><i class="fa-solid fa-route"></i> ${v.itineraire}</p>
                         </div>`);
@@ -537,7 +512,6 @@
 
         function initialiserGraphiqueRapport() {
             const canvas = document.getElementById('chart-recettes-partenaire');
-            // Empêche le plantage si le canvas n'est pas visible ou introuvable
             if (!canvas || canvas.offsetParent === null) return; 
 
             if (chartPartenaireInstance) chartPartenaireInstance.destroy();
@@ -548,7 +522,7 @@
                 data: {
                     labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
                     datasets: [{
-                        label: 'Gains (CDF)', data: [27000, 31500, 24000, 36000, 42000, 45000, 39000],
+                        label: 'Gains (CDF)', data: [112000, 135000, 105000, 145000, 160000, 175000, 150000],
                         backgroundColor: '#10b981', borderRadius: 4
                     }]
                 },
@@ -559,7 +533,7 @@
             });
         }
 
-        // --- 5. VUE : ANALYSE TECHNIQUE (TECH) ---
+        // --- 5. VUE : ANALYSE TECHNIQUE (CARBURANT & ENTRETIEN) ---
         function genererRapportTechnique() {
             const list = document.getElementById('tech-vehicules-list');
             if(!list) return;
@@ -570,14 +544,18 @@
                     ? `<button onclick="basculerMoteur(${i}, false)" class="w-full bg-emerald-500/20 text-emerald-400 font-bold py-2 rounded text-[10px] uppercase mt-2"><i class="fa-solid fa-unlock"></i> Restaurer Moteur</button>`
                     : `<button onclick="basculerMoteur(${i}, true)" class="w-full bg-rose-500/20 text-rose-400 font-bold py-2 rounded text-[10px] uppercase mt-2"><i class="fa-solid fa-lock"></i> Couper Moteur (Urgence)</button>`;
 
+                const couleurEntretien = v.entretien.includes("Alerte") ? 'text-rose-400 animate-pulse' : 'text-emerald-400';
+
                 list.insertAdjacentHTML('beforeend', `
                     <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
                         <h4 class="font-black text-slate-200">${v.plaque} <span class="text-[9px] font-mono text-slate-500 float-right">IMEI: ${v.imei}</span></h4>
-                        <div class="grid grid-cols-2 gap-2 text-[9px] font-mono bg-slate-900 p-2 rounded">
-                            <p>📡 Signal GPS: <span class="text-emerald-400">Fort</span></p>
-                            <p>🔋 Batterie: <span class="text-emerald-400">12.6V</span></p>
+                        <div class="grid grid-cols-2 gap-y-2 gap-x-1 text-[9px] font-mono bg-slate-900 p-2.5 rounded border border-slate-800">
+                            <p>📡 GPS: <span class="text-emerald-400">Fort</span></p>
+                            <p>🔋 Batt: <span class="text-emerald-400">12.6V</span></p>
+                            <p>⛽ Conso: <span class="text-sky-400 font-bold">${v.carburant} L</span></p>
+                            <p>🛠️ Maint: <span class="${couleurEntretien} font-bold">${v.entretien}</span></p>
                             <p>📶 Réseau: <span class="text-emerald-400">4G Actif</span></p>
-                            <p>⚡ Statut Moteur: <span class="${v.moteurCoupe ? 'text-rose-400' : 'text-emerald-400'}">${v.moteurCoupe ? 'COUPÉ' : 'ON'}</span></p>
+                            <p>⚡ Moteur: <span class="${v.moteurCoupe ? 'text-rose-400 font-bold' : 'text-emerald-400'}">${v.moteurCoupe ? 'COUPÉ' : 'ON'}</span></p>
                         </div>
                         ${btnMoteur}
                     </div>`);
@@ -587,10 +565,10 @@
         function basculerMoteur(i, couper) {
             client.vehicules[i].moteurCoupe = couper;
             alert(`📡 Commande SMS envoyée. Moteur ${couper ? 'coupé' : 'restauré'} pour le véhicule ${client.vehicules[i].plaque}.`);
-            genererRapportTechnique(); // Met à jour le bouton
+            genererRapportTechnique();
         }
 
-        // --- 6. VUE : PROFIL & SÉCURITÉ ---
+        // --- 6. PROFIL & SÉCURITÉ ---
         function majIdentifiants() {
             const newPin = document.getElementById('prof-pin-new').value;
             if(newPin && newPin.length >= 4) {
@@ -599,7 +577,7 @@
             } else { alert("❌ Le PIN doit contenir au moins 4 caractères."); }
         }
 
-        // --- 7. LOGIQUE HORLOGE & FORFAIT 23H59 ---
+        // --- 7. HORLOGE FORFAIT 23H59 & RECHARGE ---
         function actualiserCompteARebours23h59() {
             const now = new Date(); const finJour = new Date(); finJour.setHours(23, 59, 59, 999);
             const resteMs = finJour - now;
@@ -620,9 +598,10 @@
         setInterval(actualiserCompteARebours23h59, 1000);
 
         function declarerPaiementForfait() {
-            alert("🛰️ Forfait activé !\nVos véhicules sont autorisés à rouler jusqu'à 23h59 ce soir.");
+            const num = document.getElementById('recharge-numero');
+            const res = num.options[num.selectedIndex].text;
+            alert(`🛰️ Paiement validé via ${res} !\nVos véhicules sont autorisés à rouler jusqu'à 23h59.`);
             fermerModalRecharge();
-            changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
         }
 
         function ouvrirModalRecharge() { document.getElementById('modal-recharge-partenaire').classList.remove('hidden'); }
@@ -656,9 +635,7 @@
             changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
         }
 
-        function declencherDeconnexion() { 
-            naviguerVers('page-auth'); 
-        }
+        function declencherDeconnexion() { naviguerVers('page-auth'); }
 
         function ouvrirModalCGU() { 
             document.getElementById('zone-texte-cgu').textContent = "CONDITIONS DU FORFAIT PRÉPAYÉ TRANSVISION :\n\n1. OBLIGATION DE PRÉ-PAIEMENT :\nLe client doit impérativement payer son forfait avant le début de ses rotations.\n\n2. FENÊTRE JOURNALIÈRE (5H00 — 23H59) :\nLe forfait journalier s'applique uniquement pour la journée en cours. Quelle que soit l'heure où le paiement est validé, il expire à 23h59 précises le jour même sans report.\n\nGlobal Tech Solutions SARL."; 
