@@ -162,7 +162,7 @@
                         <i class="fa-solid fa-wallet text-2xl text-emerald-400"></i>
                         <div class="text-left">
                             <h3 class="text-[11px] font-black uppercase text-slate-200">Recharger Mon Forfait</h3>
-                            <p class="text-[9px] text-slate-400 mt-0.5">Payer le forfait journalier TransVision</p>
+                            <p class="text-[9px] text-slate-400 mt-0.5">Envoyer des fonds sur votre compte partenaire</p>
                         </div>
                     </button>
                 </div>
@@ -375,40 +375,40 @@
             </nav>
         </div>
 
-        <!-- MODAL RECHARGE FORFAIT : CHOIX FLOTTE / VÉHICULE -->
+        <!-- MODAL RECHARGE FORFAIT LIBRE : SAISIE MONTANT MANUEL -->
         <div id="modal-recharge-partenaire" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
             <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
                 <div class="flex justify-between items-center border-b border-slate-800 pb-3">
                     <h3 class="font-black text-sm text-slate-100 flex items-center gap-2">
-                        <i class="fa-solid fa-wallet text-emerald-400"></i> Paiement Forfait
+                        <i class="fa-solid fa-wallet text-emerald-400"></i> Paiement Mobile
                     </h3>
                     <button onclick="fermerModalRecharge()" class="text-slate-500 hover:text-slate-300"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 
                 <div class="space-y-3">
-                    <!-- CHOIX DU MODE DE RECHARGE (Flotte ou Unitaire) -->
+                    <!-- CHOIX DE LA CIBLE DE RECHARGE -->
                     <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-850 space-y-2">
-                        <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Option de Recharge</label>
-                        <select id="recharge-mode" onchange="actualiserCalculRecharge()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-bold focus:outline-none focus:border-emerald-500">
+                        <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Compte Cible</label>
+                        <select id="recharge-mode" onchange="basculerSelectVehiculeRecharge()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-bold focus:outline-none focus:border-emerald-500">
                             <option value="flotte">Flotte Complète</option>
                             <option value="unitaire">Véhicule Spécifique</option>
                         </select>
                         
-                        <!-- Apparait uniquement si "Véhicule Spécifique" est choisi -->
                         <div id="bloc-recharge-vehicule" class="hidden mt-2 border-t border-slate-800 pt-2">
                             <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Sélectionner le Véhicule</label>
-                            <select id="recharge-vehicule-select" onchange="actualiserCalculRecharge()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-mono text-[10px] focus:outline-none focus:border-emerald-500">
+                            <select id="recharge-vehicule-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-mono text-[10px] focus:outline-none focus:border-emerald-500">
                                 <!-- Peuplé dynamiquement -->
                             </select>
                         </div>
                     </div>
 
-                    <!-- AFFICHAGE DU MONTANT TEMPS RÉEL -->
-                    <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-1 text-center shadow-inner">
-                        <span id="recharge-titre" class="text-[9px] text-slate-400 uppercase font-black">Forfait Journalier Requis</span>
-                        <p id="recharge-montant" class="text-2xl font-black text-emerald-400">0 CDF</p>
-                        <span id="recharge-detail" class="text-[9px] text-slate-500 font-mono block">Calcul en cours...</span>
-                        <span class="text-[9px] text-rose-400 font-bold block mt-1">⚠️ Expire à 23h59 ce soir</span>
+                    <!-- SAISIE LIBRE DU MONTANT -->
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-emerald-500/30 space-y-1 shadow-inner">
+                        <label class="block text-[10px] text-emerald-400 uppercase font-black text-center mb-2">Montant à transférer</label>
+                        <div class="flex items-center gap-2">
+                            <input type="number" id="input-montant-libre" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-2xl font-black text-slate-100 text-right focus:outline-none focus:border-emerald-500" placeholder="Ex: 5000">
+                            <span class="text-slate-400 font-black text-lg">CDF</span>
+                        </div>
                     </div>
 
                     <!-- CHOIX DU MOYEN DE PAIEMENT -->
@@ -423,7 +423,7 @@
                     </div>
                 </div>
                 <button onclick="declarerPaiementForfait()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs transition-colors shadow-lg mt-2">
-                    J'ai payé — Activer
+                    Transférer les fonds
                 </button>
             </div>
         </div>
@@ -445,7 +445,7 @@
 
     <!-- LOGIQUE JAVASCRIPT -->
     <script>
-        // Injection de 3 véhicules avec données journalières simulées
+        // Injection de 3 véhicules
         let client = {
             nom: "Jean Mukendi",
             tel: "+243812345678",
@@ -459,7 +459,6 @@
         let map = null;
         let busMarker = null;
         let chartPartenaireInstance = null;
-        const TARIF_FORFAIT_JOURNALIER = 2000;
 
         // --- GESTION DES FILTRES DE DATE ---
         function initFiltresDates() {
@@ -510,7 +509,6 @@
             majSelecteurMap();
             genererRapportFinancier(1, 'all'); 
             genererRapportTechnique(1, 'all');
-            actualiserCalculRecharge(); // Met à jour le modal de paiement
         }
 
         function changerOnglet(idOnglet, boutonActif) {
@@ -677,7 +675,7 @@
             });
         }
 
-        // --- VUE : ANALYSE TECHNIQUE ---
+        // --- VUE : ANALYSE TECHNIQUE (AVEC FILTRES) ---
         function appliquerFiltreTechnique() {
             const jours = getJoursFiltre('tech');
             const vehiculeIdx = document.getElementById('filtre-tech-vehicule').value;
@@ -735,7 +733,7 @@
             } else { alert("❌ Le PIN doit contenir au moins 4 caractères."); }
         }
 
-        // --- RECHARGE & FORFAIT OPTIONNEL (FLOTTE OU UNITAIRE) ---
+        // --- HORLOGE FORFAIT 23H59 & RECHARGE LIBRE ---
         function actualiserCompteARebours23h59() {
             const now = new Date(); const finJour = new Date(); finJour.setHours(23, 59, 59, 999);
             const resteMs = finJour - now;
@@ -755,58 +753,49 @@
         }
         setInterval(actualiserCompteARebours23h59, 1000);
 
-        function actualiserCalculRecharge() {
+        function basculerSelectVehiculeRecharge() {
             const mode = document.getElementById('recharge-mode').value;
-            const blocSelectVehicule = document.getElementById('bloc-recharge-vehicule');
-            
-            let nbVehiculesCibles = 1;
-            let detailTexte = "";
-            let titreTexte = "";
-
+            const blocSelect = document.getElementById('bloc-recharge-vehicule');
             if (mode === 'flotte') {
-                blocSelectVehicule.classList.add('hidden');
-                nbVehiculesCibles = client.vehicules.length;
-                titreTexte = `Forfait Flotte (${nbVehiculesCibles} véhicules)`;
-                detailTexte = `${nbVehiculesCibles} véhicule${nbVehiculesCibles > 1 ? 's' : ''} x ${TARIF_FORFAIT_JOURNALIER.toLocaleString()} CDF`;
+                blocSelect.classList.add('hidden');
             } else {
-                blocSelectVehicule.classList.remove('hidden');
-                nbVehiculesCibles = 1;
-                const indexVehicule = document.getElementById('recharge-vehicule-select').value;
-                const plaque = client.vehicules[indexVehicule]?.plaque || "Véhicule cible";
-                titreTexte = `Forfait Véhicule Unique`;
-                detailTexte = `Plaque: ${plaque}`;
+                blocSelect.classList.remove('hidden');
             }
-
-            const montantTotal = nbVehiculesCibles * TARIF_FORFAIT_JOURNALIER;
-            
-            document.getElementById('recharge-titre').textContent = titreTexte;
-            document.getElementById('recharge-montant').textContent = `${montantTotal.toLocaleString()} CDF`;
-            document.getElementById('recharge-detail').textContent = detailTexte;
         }
 
         function declarerPaiementForfait() {
-            const num = document.getElementById('recharge-numero');
-            const res = num.options[num.selectedIndex].text;
-            const mode = document.getElementById('recharge-mode').value;
-            
-            let message = "";
-            if(mode === 'flotte') {
-                message = `🛰️ Paiement de flotte validé via ${res} !\nToute votre flotte est autorisée à rouler jusqu'à 23h59.`;
-            } else {
-                const indexVehicule = document.getElementById('recharge-vehicule-select').value;
-                const plaque = client.vehicules[indexVehicule].plaque;
-                message = `🛰️ Paiement validé via ${res} !\nLe véhicule ${plaque} est autorisé à rouler jusqu'à 23h59.`;
+            const montant = parseInt(document.getElementById('input-montant-libre').value);
+            if (!montant || montant <= 0) {
+                alert("❌ Veuillez saisir un montant valide (ex: 2000).");
+                return;
             }
 
-            alert(message);
+            const num = document.getElementById('recharge-numero');
+            const reseau = num.options[num.selectedIndex].text;
+            const mode = document.getElementById('recharge-mode').value;
+            
+            let cible = "la flotte complète";
+            if (mode === 'unitaire') {
+                const indexVehicule = document.getElementById('recharge-vehicule-select').value;
+                cible = `le véhicule ${client.vehicules[indexVehicule].plaque}`;
+            }
+
+            alert(`🛰️ Demande de transfert de ${montant.toLocaleString()} CDF pour ${cible}.\nTransaction via ${reseau} en cours de traitement.`);
+            
+            // Remise à zéro et fermeture
+            document.getElementById('input-montant-libre').value = "";
             fermerModalRecharge();
         }
 
         function ouvrirModalRecharge() { 
-            actualiserCalculRecharge(); // Calcule et affiche immédiatement les montants
+            // S'assure que les sélecteurs de véhicules dans le modal de recharge sont à jour
+            peuplerSelecteursFiltre();
+            basculerSelectVehiculeRecharge();
             document.getElementById('modal-recharge-partenaire').classList.remove('hidden'); 
         }
-        function fermerModalRecharge() { document.getElementById('modal-recharge-partenaire').classList.add('hidden'); }
+        function fermerModalRecharge() { 
+            document.getElementById('modal-recharge-partenaire').classList.add('hidden'); 
+        }
 
         // --- LOGIQUE GLOBALE AUTHENTIFICATION ---
         function basculerVueAuth(mode) {
