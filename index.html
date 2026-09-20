@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#020617">
 
-    <!-- Tailwind CSS, FontAwesome, Leaflet, Chart.js & Socket.IO -->
+    <!-- Tailwind CSS, FontAwesome, Leaflet, Chart.js, Socket.IO & Supabase -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -19,6 +19,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Moteur de communication avec le serveur DigitalOcean -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <!-- Client Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         .blur-transition { transition: filter 0.4s ease, opacity 0.4s ease; }
@@ -38,14 +40,14 @@
 
     <!-- FOND D'ÉCRAN VISION.PNG PLEIN ÉCRAN FLUIDE -->
     <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <img src="VISION.png" alt="Fond d'écran TransVision" class="w-full h-full object-cover object-center opacity-25 select-none scale-105">
+        <img src="VISION.png" alt="Fond d'écran TransVision" class="w-full h-full object-cover object-center opacity-25 select-none scale-105" onerror="this.style.display='none'">
         <div class="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/70 to-slate-950/90"></div>
     </div>
 
     <!-- BANNIÈRE INSTALLATION PWA -->
     <div id="pwa-install-banner" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-slate-900/95 backdrop-blur border border-emerald-500/50 text-slate-100 p-3 rounded-2xl shadow-2xl flex items-center gap-3 z-[100] w-[90%] max-w-sm hidden no-print">
         <div class="w-10 h-10 rounded-xl overflow-hidden shadow-md flex items-center justify-center bg-slate-950 flex-shrink-0">
-            <img src="logo%20192x192.png" alt="Logo" class="w-full h-full object-contain" style="transform: scale(2.05); transform-origin: 48% 52%;">
+            <img src="logo%20192x192.png" alt="Logo" class="w-full h-full object-contain" style="transform: scale(2.05); transform-origin: 48% 52%;" onerror="this.style.display='none'">
         </div>
         <div class="flex-1">
             <p class="text-[11px] font-black text-emerald-400">Installer TransVision</p>
@@ -63,7 +65,7 @@
             <div class="space-y-4 mt-1">
                 <div class="text-center">
                     <div class="w-20 h-20 mx-auto mb-3 rounded-2xl overflow-hidden shadow-2xl shadow-emerald-500/25 flex items-center justify-center bg-slate-950 border border-emerald-500/30">
-                        <img src="logo%20192x192.png" alt="Logo TransVision" class="w-full h-full object-contain" style="transform: scale(2.05); transform-origin: 48% 52%;">
+                        <img src="logo%20192x192.png" alt="Logo TransVision" class="w-full h-full object-contain" style="transform: scale(2.05); transform-origin: 48% 52%;" onerror="this.style.display='none'">
                     </div>
                     <h2 class="text-xl font-black tracking-wide">TransVision</h2>
                     <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">by Global Tech Solutions</p>
@@ -112,7 +114,7 @@
             </div>
             
             <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v14.4 — by <span class="text-slate-200 font-bold">Global Tech Solutions</span>
+                TransVision v14.5 — by <span class="text-slate-200 font-bold">Global Tech Solutions</span>
             </div>
         </div>
 
@@ -129,7 +131,7 @@
                         <p class="text-[8px] text-slate-400 font-mono">TransVision by Global Tech Solutions</p>
                     </div>
                     <div class="w-8 h-8 rounded-xl overflow-hidden shadow border border-slate-800 bg-slate-950 flex-shrink-0">
-                        <img src="logo%20192x192.png" alt="Logo" class="w-full h-full object-contain" style="transform: scale(2.05); transform-origin: 48% 52%;">
+                        <img src="logo%20192x192.png" alt="Logo" class="w-full h-full object-contain" style="transform: scale(2.05); transform-origin: 48% 52%;" onerror="this.style.display='none'">
                     </div>
                 </div>
 
@@ -137,9 +139,9 @@
                     <div>
                         <div class="flex items-center gap-1.5">
                             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="statut-serveur-voyant"></span>
-                            <span class="text-[10px] font-black uppercase text-emerald-400 tracking-wider" id="statut-serveur-texte">Serveur DigitalOcean Connecté</span>
+                            <span class="text-[10px] font-black uppercase text-emerald-400 tracking-wider" id="statut-serveur-texte">Connexion en cours...</span>
                         </div>
-                        <p class="text-[9px] text-slate-400 mt-0.5" id="last-update-text">En attente de position GPS...</p>
+                        <p class="text-[9px] text-slate-400 mt-0.5" id="last-update-text">Chargement de l'historique...</p>
                     </div>
                     <div class="text-right">
                         <span id="timer-compte-rebours" class="text-sm font-mono font-black text-slate-100 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg shadow-inner">--:--:--</span>
@@ -447,14 +449,18 @@
 
     <!-- LOGIQUE JAVASCRIPT CONNECTÉE AU SERVEUR DIGITALOCEAN -->
     <script>
-        // --- CONNEXION SOCKET.IO AU SERVEUR DIGITALOCEAN ---
+        // --- CONFIGURATION SUPABASE & SOCKET ---
+        const supabaseUrl = 'https://vbriworyscymnmtzzdny.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
         const SERVEUR_URL = "http://134.209.116.89:3000";
         const socket = io(SERVEUR_URL, {
             transports: ['websocket'],
             reconnection: true
         });
 
-        // Structure d'accueil pour les véhicules (sera remplie par le serveur)
+        // Structure d'accueil pour les véhicules
         let client = {
             nom: "Dolce",
             tel: "0965647819",
@@ -465,7 +471,67 @@
         let busMarker = null;
         let chartPartenaireInstance = null;
 
-        // --- GESTION DES ÉVÉNEMENTS SOCKET ---
+        // --- NOUVEAU : INITIALISATION DE LA FLOTTE DEPUIS SUPABASE AU DÉMARRAGE ---
+        async function chargerDernieresPositions() {
+            try {
+                document.getElementById('last-update-text').textContent = "Recherche des dernières positions...";
+                
+                // On récupère les 100 dernières positions de la table GPS
+                const { data, error } = await supabase
+                    .from('transvision_positions_gps')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(100);
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    // Filtrer pour ne garder que la toute dernière position de chaque IMEI unique
+                    const vehiculesTrouves = {};
+                    data.forEach(pos => {
+                        if (!vehiculesTrouves[pos.imei]) {
+                            vehiculesTrouves[pos.imei] = pos;
+                        }
+                    });
+
+                    // Peupler l'interface avec cet historique
+                    Object.values(vehiculesTrouves).forEach(pos => {
+                        client.vehicules.push({
+                            plaque: `Tracker ${pos.imei.slice(-4)}`,
+                            type: "Traceur GPS",
+                            places: 14,
+                            imei: pos.imei,
+                            rotationsJour: 0,
+                            tarif: 1500,
+                            itineraire: "Assigné",
+                            lat: pos.latitude,  // IMPORTANT: nom de la colonne Supabase
+                            lng: pos.longitude, // IMPORTANT: nom de la colonne Supabase
+                            moteurCoupe: false,
+                            carburantJour: 0,
+                            kmJour: 0,
+                            entretien: "OK"
+                        });
+                    });
+                    
+                    console.log("✅ Historique Supabase chargé :", client.vehicules);
+                    
+                    // Mettre à jour la carte et les menus
+                    majSelecteurMap();
+                    const sel = document.getElementById('select-vehicule-map');
+                    if (sel && sel.value !== "none") initMapEtCentrer(parseInt(sel.value));
+                    
+                    document.getElementById('last-update-text').textContent = "Historique synchronisé. Prêt.";
+                } else {
+                    document.getElementById('last-update-text').textContent = "Aucun historique trouvé.";
+                }
+            } catch (err) {
+                console.error("❌ Erreur chargement Supabase :", err);
+                document.getElementById('last-update-text').textContent = "Erreur de connexion BDD.";
+            }
+        }
+
+
+        // --- GESTION DES ÉVÉNEMENTS SOCKET (LIVE) ---
         socket.on('connect', () => {
             console.log("Connecté au serveur DigitalOcean !");
             document.getElementById('statut-serveur-voyant').classList.replace('bg-rose-500', 'bg-emerald-400');
@@ -481,11 +547,11 @@
         });
 
         socket.on('nouvelle_position', (data) => {
-            console.log("Nouvelle position reçue :", data);
+            console.log("📍 Nouvelle position reçue (LIVE) :", data);
             
             // Mise à jour de l'heure
             const now = new Date();
-            document.getElementById('last-update-text').textContent = `Dernière position : ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+            document.getElementById('last-update-text').textContent = `Mise à jour en direct : ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
 
             // Cherche si le véhicule existe déjà par son IMEI
             let vehiculeIndex = client.vehicules.findIndex(v => v.imei === data.imei);
@@ -493,15 +559,15 @@
             if (vehiculeIndex === -1) {
                 // S'il n'existe pas, on l'ajoute
                 client.vehicules.push({
-                    plaque: data.plaque || "TOYOTA RACTIS",
+                    plaque: data.plaque || `Nouveau ${data.imei.slice(-4)}`,
                     type: "Traceur GPS",
-                    places: 4,
+                    places: 14,
                     imei: data.imei,
                     rotationsJour: 0,
-                    tarif: 0,
+                    tarif: 1500,
                     itineraire: "Kinshasa",
-                    lat: data.lat,
-                    lng: data.lng,
+                    lat: data.lat, // Donnée du socket
+                    lng: data.lng, // Donnée du socket
                     moteurCoupe: false,
                     carburantJour: 0,
                     kmJour: 0,
@@ -598,7 +664,7 @@
             setTimeout(() => {
                 if (idOnglet === 'onglet-flotte') {
                     const sel = document.getElementById('select-vehicule-map');
-                    initMapEtCentrer(sel && sel.value ? parseInt(sel.value) : 0);
+                    initMapEtCentrer(sel && sel.value !== "none" ? parseInt(sel.value) : 0);
                     if (map) map.invalidateSize();
                 } 
                 else if (idOnglet === 'onglet-rapport') { appliquerFiltreFinancier(); }
@@ -643,7 +709,9 @@
             busMarker = L.marker([lat, lng]).addTo(map).bindPopup(label).openPopup();
             map.setView([lat, lng], 14);
         }
-        function centrerSurVehicule(indexStr) { initMapEtCentrer(parseInt(indexStr)); }
+        function centrerSurVehicule(indexStr) { 
+            if (indexStr !== "none") initMapEtCentrer(parseInt(indexStr)); 
+        }
 
         // --- VUE : NOUVEAU VÉHICULE ---
         function enregistrerVehiculeSaisi() {
@@ -662,7 +730,6 @@
 
             const itineraire = `${origine} — ${dest}`;
             
-            // Envoi de la requête de création au serveur (simulé ici en local)
             client.vehicules.push({ plaque, type, places, imei, rotationsJour: 0, tarif, itineraire, lat: -4.32, lng: 15.31, moteurCoupe: false, carburantJour: 0, kmJour: 0, entretien: "Nouveau" });
             
             document.getElementById('add-plaque').value = ""; document.getElementById('add-type').value = "";
@@ -679,7 +746,7 @@
         function appliquerFiltreFinancier() {
             const jours = getJoursFiltre('fin');
             const vehiculeIdx = document.getElementById('filtre-fin-vehicule').value;
-            if (jours <= 0) { alert("Période invalide. La date de début doit être antérieure ou égale à la date de fin."); return; }
+            if (jours <= 0) { alert("Période invalide."); return; }
             genererRapportFinancier(jours, vehiculeIdx);
         }
 
@@ -903,11 +970,14 @@
         }
 
         function executerConnexionPartenaire() { 
-            // Vraie application : Ici on devrait envoyer le PIN au serveur pour vérification
             naviguerVers('app-proprietaire'); 
-            genererToutesLesVues(); 
-            actualiserCompteARebours23h59(); 
-            changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
+            
+            // --- NOUVEAU : ON LANCE LE CHARGEMENT SUPABASE ICI LORS DE LA CONNEXION ---
+            chargerDernieresPositions().then(() => {
+                genererToutesLesVues(); 
+                actualiserCompteARebours23h59(); 
+                changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
+            });
         }
 
         function declencherDeconnexion() { naviguerVers('page-auth'); }
