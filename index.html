@@ -114,7 +114,7 @@
             </div>
             
             <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v14.5 — by <span class="text-slate-200 font-bold">Global Tech Solutions</span>
+                TransVision v14.6 — by <span class="text-slate-200 font-bold">Global Tech Solutions</span>
             </div>
         </div>
 
@@ -452,7 +452,9 @@
         // --- CONFIGURATION SUPABASE & SOCKET ---
         const supabaseUrl = 'https://vbriworyscymnmtzzdny.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+        
+        // CORRECTION DU NOM DE LA VARIABLE POUR ÉVITER LE CONFLIT !
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
         const SERVEUR_URL = "http://134.209.116.89:3000";
         const socket = io(SERVEUR_URL, {
@@ -484,8 +486,8 @@
                     return;
                 }
 
-                // 2. Requête vers Supabase
-                const { data, error } = await supabase
+                // 2. Requête vers Supabase (en utilisant le NOUVEAU NOM)
+                const { data, error } = await supabaseClient
                     .from('transvision_positions_gps')
                     .select('*')
                     .order('created_at', { ascending: false })
@@ -494,7 +496,7 @@
                 if (error) {
                     txtStatut.textContent = "Erreur d'accès à la table.";
                     console.error("Erreur API Supabase :", error.message);
-                    return; // On arrête là si Supabase refuse l'accès
+                    return; 
                 }
 
                 console.log("📡 Données brutes reçues de Supabase :", data);
@@ -502,7 +504,7 @@
                 if (data && data.length > 0) {
                     const vehiculesTrouves = {};
                     
-                    // 3. Filtrer en ignorant les lignes corrompues (sans IMEI)
+                    // 3. Filtrer en ignorant les lignes corrompues
                     data.forEach(pos => {
                         if (pos.imei && pos.latitude && pos.longitude) {
                             if (!vehiculesTrouves[pos.imei]) {
@@ -542,7 +544,7 @@
                     
                     txtStatut.textContent = `Historique chargé (${client.vehicules.length} véhicule(s)).`;
                 } else {
-                    console.warn("La requête a réussi, mais la table semble vide pour le moment.");
+                    console.warn("La requête a réussi, mais la table semble vide.");
                     txtStatut.textContent = "Historique vide. En attente de direct...";
                 }
             } catch (err) {
@@ -993,7 +995,7 @@
         function executerConnexionPartenaire() { 
             naviguerVers('app-proprietaire'); 
             
-            // --- NOUVEAU : ON LANCE LE CHARGEMENT SUPABASE ICI LORS DE LA CONNEXION ---
+            // --- ON LANCE LE CHARGEMENT SUPABASE ICI LORS DE LA CONNEXION ---
             chargerDernieresPositions().then(() => {
                 genererToutesLesVues(); 
                 actualiserCompteARebours23h59(); 
