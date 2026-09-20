@@ -471,41 +471,59 @@
         let busMarker = null;
         let chartPartenaireInstance = null;
 
-        // --- NOUVEAU : INITIALISATION DE LA FLOTTE DEPUIS SUPABASE AU DÉMARRAGE ---
+        // --- NOUVEAU : INITIALISATION DE LA FLOTTE ULTRA-ROBUSTE ---
         async function chargerDernieresPositions() {
             try {
-                document.getElementById('last-update-text').textContent = "Recherche des dernières positions...";
+                const txtStatut = document.getElementById('last-update-text');
+                txtStatut.textContent = "Connexion à la base de données...";
                 
-                // On récupère les 100 dernières positions de la table GPS
+                // 1. Vérifier que Supabase est bien chargé
+                if (!window.supabase) {
+                    txtStatut.textContent = "Erreur: Librairie Supabase non chargée.";
+                    console.error("Supabase est introuvable. Vérifiez votre connexion internet.");
+                    return;
+                }
+
+                // 2. Requête vers Supabase
                 const { data, error } = await supabase
                     .from('transvision_positions_gps')
                     .select('*')
                     .order('created_at', { ascending: false })
                     .limit(100);
 
-                if (error) throw error;
+                if (error) {
+                    txtStatut.textContent = "Erreur d'accès à la table.";
+                    console.error("Erreur API Supabase :", error.message);
+                    return; // On arrête là si Supabase refuse l'accès
+                }
+
+                console.log("📡 Données brutes reçues de Supabase :", data);
 
                 if (data && data.length > 0) {
-                    // Filtrer pour ne garder que la toute dernière position de chaque IMEI unique
                     const vehiculesTrouves = {};
+                    
+                    // 3. Filtrer en ignorant les lignes corrompues (sans IMEI)
                     data.forEach(pos => {
-                        if (!vehiculesTrouves[pos.imei]) {
-                            vehiculesTrouves[pos.imei] = pos;
+                        if (pos.imei && pos.latitude && pos.longitude) {
+                            if (!vehiculesTrouves[pos.imei]) {
+                                vehiculesTrouves[pos.imei] = pos;
+                            }
                         }
                     });
 
-                    // Peupler l'interface avec cet historique
+                    // 4. Créer les véhicules de manière sécurisée
                     Object.values(vehiculesTrouves).forEach(pos => {
+                        const imeiStr = String(pos.imei);
                         client.vehicules.push({
-                            plaque: `Tracker ${pos.imei.slice(-4)}`,
+                            plaque: `Tracker ${imeiStr.slice(-4)}`,
                             type: "Traceur GPS",
                             places: 14,
-                            imei: pos.imei,
+                            imei: imeiStr,
                             rotationsJour: 0,
                             tarif: 1500,
-                            itineraire: "Assigné",
-                            lat: pos.latitude,  // IMPORTANT: nom de la colonne Supabase
-                            lng: pos.longitude, // IMPORTANT: nom de la colonne Supabase
+                            itineraire: "Kinshasa",
+                            lat: pos.latitude,
+                            lng: pos.longitude,
                             moteurCoupe: false,
                             carburantJour: 0,
                             kmJour: 0,
@@ -513,20 +531,23 @@
                         });
                     });
                     
-                    console.log("✅ Historique Supabase chargé :", client.vehicules);
+                    console.log("✅ Véhicules injectés dans la carte :", client.vehicules);
                     
-                    // Mettre à jour la carte et les menus
+                    // 5. Mettre à jour l'interface
                     majSelecteurMap();
                     const sel = document.getElementById('select-vehicule-map');
-                    if (sel && sel.value !== "none") initMapEtCentrer(parseInt(sel.value));
+                    if (sel && sel.value !== "none") {
+                        initMapEtCentrer(parseInt(sel.value));
+                    }
                     
-                    document.getElementById('last-update-text').textContent = "Historique synchronisé. Prêt.";
+                    txtStatut.textContent = `Historique chargé (${client.vehicules.length} véhicule(s)).`;
                 } else {
-                    document.getElementById('last-update-text').textContent = "Aucun historique trouvé.";
+                    console.warn("La requête a réussi, mais la table semble vide pour le moment.");
+                    txtStatut.textContent = "Historique vide. En attente de direct...";
                 }
             } catch (err) {
-                console.error("❌ Erreur chargement Supabase :", err);
-                document.getElementById('last-update-text').textContent = "Erreur de connexion BDD.";
+                console.error("❌ Crash inattendu de la fonction de chargement :", err);
+                document.getElementById('last-update-text').textContent = "Erreur de chargement (Voir console).";
             }
         }
 
