@@ -6,7 +6,7 @@
     <title>TransVision by Global Tech Solutions — Console Super Admin</title>
     <link rel="icon" type="image/png" href="logo%20192x192.png">
     
-    <!-- Tailwind CSS, FontAwesome, Leaflet, Chart.js & Socket.IO -->
+    <!-- Tailwind CSS, FontAwesome, Leaflet, Chart.js, Socket.IO & Supabase & SheetJS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -14,6 +14,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Moteur de communication avec le serveur DigitalOcean -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <!-- Client Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Librairie pour lire les fichiers Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     
     <style>
         .page-fade { animation: fadeIn 0.3s ease-in-out; }
@@ -25,6 +29,8 @@
         .leaflet-container { background: #020617 !important; }
         
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(100deg); cursor: pointer; }
+        input[type="file"]::file-selector-button { background-color: #4f46e5; color: white; border: none; border-radius: 0.5rem; padding: 0.5rem 1rem; cursor: pointer; font-weight: bold; transition: background 0.3s; }
+        input[type="file"]::file-selector-button:hover { background-color: #4338ca; }
         
         @media print {
             body { background: white !important; color: black !important; }
@@ -39,7 +45,7 @@
     <!-- 1. CONNEXION ADMIN -->
     <div id="page-login-admin" class="w-full max-w-sm p-6 space-y-6 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl page-fade no-print">
         <div class="text-center space-y-2">
-            <img src="VISION.png" alt="TransVision Banner" class="w-full max-w-[220px] mx-auto mb-2 rounded-xl shadow-lg">
+            <img src="VISION.png" alt="TransVision Banner" class="w-full max-w-[220px] mx-auto mb-2 rounded-xl shadow-lg" onerror="this.style.display='none'">
             <h1 class="text-xl font-black tracking-wide">TransVision</h1>
             <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">by Global Tech Solutions</p>
             <p class="text-[9px] text-slate-500">Console Super Admin Industrielle</p>
@@ -63,9 +69,10 @@
     <!-- 2. CORPS ADMIN -->
     <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
         <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
-            <span class="text-xs font-bold text-indigo-400">Central Control Panel v14.5 — Global Tech Solutions :</span>
+            <span class="text-xs font-bold text-indigo-400">Central Control Panel v14.6 — Global Tech Solutions :</span>
             <div class="flex gap-2 text-[10px] font-mono">
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 flex items-center gap-1">Central DO : <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="admin-server-dot"></span><span class="text-emerald-400 font-bold" id="admin-server-text">En Ligne</span></span>
+                <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Historique : <span class="text-sky-400 font-bold" id="admin-historique-statut">Chargement...</span></span>
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Live : <span class="text-emerald-400 font-bold" id="admin-flotte-count">0 Traceur(s)</span></span>
             </div>
         </div>
@@ -75,7 +82,7 @@
             <aside class="w-64 bg-slate-900 border-r border-slate-800 p-5 flex flex-col justify-between h-[calc(100vh-53px)] sticky top-[53px] no-print">
                 <div class="space-y-5">
                     <div class="flex items-center gap-2.5 px-1">
-                        <img src="logo%20192x192.png" alt="Logo TV" class="w-8 h-8 rounded-lg shadow object-contain bg-slate-950">
+                        <img src="logo%20192x192.png" alt="Logo TV" class="w-8 h-8 rounded-lg shadow object-contain bg-slate-950" onerror="this.style.display='none'">
                         <div>
                             <h2 class="text-xs font-black tracking-wider uppercase text-slate-200">TransVision</h2>
                             <p class="text-[9px] font-mono text-indigo-400">by Global Tech Solutions</p>
@@ -215,26 +222,52 @@
                     </div>
                 </div>
 
-                <!-- ITINÉRAIRES -->
+                <!-- NOUVEAU: ITINÉRAIRES AVEC IMPORT EXCEL -->
                 <div id="page-itineraires" class="space-y-5 page-fade class-page-admin hidden">
                     <h2 class="text-xl font-black text-slate-100">🛣️ Dynamic Routing — Planificateur Spatial</h2>
+                    
+                    <!-- BLOC IMPORT EXCEL -->
+                    <div class="bg-slate-950 p-5 rounded-2xl border border-emerald-500/30 space-y-4">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-file-excel text-2xl text-emerald-400"></i>
+                            <div>
+                                <h3 class="text-xs font-black uppercase tracking-widest text-emerald-400">Importer Itinéraires & Distances (Excel)</h3>
+                                <p class="text-[10px] text-slate-400 mt-1">Format requis : Un fichier .xlsx avec les colonnes : Origine, Destination, Distance (km).</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3 items-center">
+                            <input type="file" id="excel-file-upload" accept=".xlsx, .xls" class="block w-full text-xs text-slate-400 border border-slate-800 rounded-xl cursor-pointer bg-slate-900 focus:outline-none">
+                            <button onclick="importerItinerairesExcel()" class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black px-6 py-2 rounded-xl uppercase text-xs shadow-lg flex-shrink-0 transition-colors">
+                                Lire le Fichier
+                            </button>
+                        </div>
+                        <div id="excel-status-msg" class="text-[10px] font-mono text-slate-500 hidden"></div>
+                    </div>
+
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- SAISIE MANUELLE -->
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-4">
-                            <h3 class="text-xs font-black uppercase tracking-widest text-indigo-400">Ajouter un Itinéraire</h3>
+                            <h3 class="text-xs font-black uppercase tracking-widest text-indigo-400">Ajout Manuel</h3>
                             <div class="space-y-3 text-xs">
                                 <div><input type="text" id="add-origine" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200" placeholder="Origine (ex: GARE CENTRALE)"></div>
                                 <div><input type="text" id="add-destination" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200" placeholder="Destination (ex: UPN)"></div>
                                 <div class="grid grid-cols-2 gap-2">
-                                    <input type="number" id="add-distance" step="0.1" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5" placeholder="Dist. Off (km)">
-                                    <input type="number" id="add-distance-reelle" step="0.1" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-rose-400" placeholder="Dist. Réelle (km)">
+                                    <input type="number" id="add-distance" step="0.1" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5" placeholder="Dist. Théorique">
+                                    <input type="number" id="add-distance-reelle" step="0.1" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-rose-400 focus:border-rose-500" placeholder="Dist. Audit (km)">
                                 </div>
-                                <input type="number" id="add-prix-troncon" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-emerald-400" placeholder="Prix (CDF)">
                                 <button onclick="creerNouveauTronconAdmin()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-2.5 rounded-xl uppercase text-xs">Injecter</button>
                             </div>
                         </div>
+                        
+                        <!-- LISTE DES ITINÉRAIRES -->
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 lg:col-span-2 space-y-3">
-                            <h3 class="text-xs font-black uppercase tracking-widest text-slate-400">Itinéraires Actifs</h3>
-                            <div class="space-y-2 overflow-y-auto max-h-[350px] text-xs font-mono" id="box-matrice-troncons"></div>
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400">Itinéraires Actifs (Base de calcul)</h3>
+                                <span id="badge-nb-routes" class="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded font-bold">0 Rte(s)</span>
+                            </div>
+                            <div class="space-y-2 overflow-y-auto max-h-[350px] text-xs font-mono" id="box-matrice-troncons">
+                                <p class="text-slate-500 italic text-[10px] text-center mt-10">Aucun itinéraire enregistré. Ajoutez-les manuellement ou via Excel pour permettre le calcul des rotations.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -427,11 +460,17 @@
 
     <!-- LOGIQUE JAVASCRIPT CONNECTÉE AU SERVEUR DIGITALOCEAN -->
     <script>
+        // --- NOUVEAU : CONFIGURATION SUPABASE ---
+        const supabaseUrl = 'https://vbriworyscymnmtzzdny.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
         let adminCredential = { email: "admin@transvision.cd", pass: "123456" };
         let ciblePartenaire = null;
 
         // Base de données dynamique de la flotte
         let flotteGlobale = [];
+        let listeItineraires = []; // Pour stocker les itinéraires Excel/Manuel
         let mapAdmin = null;
         let adminMarkers = {};
 
@@ -441,6 +480,74 @@
             transports: ['websocket'],
             reconnection: true
         });
+
+        // --- NOUVEAU : CHARGEMENT DE L'HISTORIQUE SUPABASE POUR L'ADMIN ---
+        async function chargerHistoriqueAdmin() {
+            try {
+                const statTxt = document.getElementById('admin-historique-statut');
+                statTxt.textContent = "Recherche...";
+                statTxt.className = "text-amber-400 font-bold";
+
+                if (!window.supabase) throw new Error("Supabase JS introuvable");
+
+                const { data, error } = await supabaseClient
+                    .from('transvision_positions_gps')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(200);
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    const vehiculesUniques = {};
+                    data.forEach(pos => {
+                        if (pos.imei && pos.latitude && pos.longitude) {
+                            if (!vehiculesUniques[pos.imei]) {
+                                vehiculesUniques[pos.imei] = pos;
+                            }
+                        }
+                    });
+
+                    Object.values(vehiculesUniques).forEach(pos => {
+                        flotteGlobale.push({
+                            imei: String(pos.imei),
+                            plaque: `TRK-${String(pos.imei).slice(-4)}`,
+                            partenaire: "TransVision Base",
+                            lat: pos.latitude,
+                            lng: pos.longitude,
+                            derniereCo: new Date(pos.created_at || Date.now())
+                        });
+                    });
+
+                    statTxt.textContent = `${flotteGlobale.length} Véhicules`;
+                    statTxt.className = "text-emerald-400 font-bold";
+                    
+                    document.getElementById('stat-total-flotte').textContent = flotteGlobale.length;
+                    document.getElementById('admin-flotte-count').textContent = `${flotteGlobale.length} Live`;
+                    
+                    majTableauFlotteAdmin();
+                    
+                    if(mapAdmin) {
+                        flotteGlobale.forEach(v => {
+                            if(!adminMarkers[v.imei]) {
+                                let marker = L.marker([v.lat, v.lng]).addTo(mapAdmin)
+                                    .bindPopup(`<b>IMEI: ${v.imei}</b><br>Statut: Historique`);
+                                adminMarkers[v.imei] = marker;
+                            }
+                        });
+                    }
+                } else {
+                    statTxt.textContent = "Vide";
+                    statTxt.className = "text-slate-400 font-bold";
+                }
+            } catch (err) {
+                console.error("Erreur chargement admin Supabase:", err);
+                const statTxt = document.getElementById('admin-historique-statut');
+                statTxt.textContent = "Erreur SQL";
+                statTxt.className = "text-rose-400 font-bold";
+            }
+        }
+
 
         // --- GESTION DES ÉVÉNEMENTS SOCKET ---
         socket.on('connect', () => {
@@ -467,7 +574,7 @@
                 // Nouveau boîtier détecté
                 const nouveauVehicule = {
                     imei: data.imei,
-                    plaque: data.plaque || "NON IDENTIFIÉ",
+                    plaque: data.plaque || `TRK-${String(data.imei).slice(-4)}`,
                     partenaire: "Inconnu (Nouveau)",
                     lat: data.lat,
                     lng: data.lng,
@@ -496,6 +603,7 @@
                 // Déplacer le marqueur sur la carte
                 if(mapAdmin && adminMarkers[data.imei]) {
                     adminMarkers[data.imei].setLatLng([data.lat, data.lng]);
+                    adminMarkers[data.imei].getPopup().setContent(`<b>IMEI: ${data.imei}</b><br>Dernier Live: ${vehiculeExistant.derniereCo.toLocaleTimeString()}`);
                 }
             }
 
@@ -508,7 +616,7 @@
             tbody.innerHTML = "";
             
             flotteGlobale.forEach(v => {
-                const heure = v.derniereCo.toLocaleTimeString();
+                const heure = v.derniereCo.toLocaleTimeString ? v.derniereCo.toLocaleTimeString() : "Récemment";
                 tbody.insertAdjacentHTML('beforeend', `
                     <tr>
                         <td class="py-3 font-bold text-slate-200">${v.plaque}</td>
@@ -563,6 +671,10 @@
                 document.getElementById('page-login-admin').classList.add('hidden');
                 document.getElementById('corps-application-admin').classList.remove('hidden');
                 document.body.className = "bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col";
+                
+                // --- ON CHARGE SUPABASE ---
+                chargerHistoriqueAdmin();
+                
                 setTimeout(initialiserGraphiquesAdmin, 100);
             } else { alert("❌ Accès refusé : Identifiant ou code secret erroné."); }
         }
@@ -585,6 +697,126 @@
             if (idPage === 'page-suivi') { setTimeout(initMapAdmin, 50); }
         }
 
+        // --- NOUVEAU : LECTURE EXCEL POUR LES ITINÉRAIRES ---
+        function importerItinerairesExcel() {
+            const fileUpload = document.getElementById('excel-file-upload');
+            const statusMsg = document.getElementById('excel-status-msg');
+            
+            if (!fileUpload.files || fileUpload.files.length === 0) {
+                alert("Veuillez sélectionner un fichier Excel (.xlsx ou .xls) avant de cliquer sur Lire.");
+                return;
+            }
+            
+            const file = fileUpload.files[0];
+            statusMsg.classList.remove('hidden');
+            statusMsg.textContent = "⏳ Lecture du fichier en cours...";
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    // On utilise la librairie XLSX (SheetJS)
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    
+                    // Convertir la feuille en tableau JSON
+                    const jsonObject = XLSX.utils.sheet_to_json(worksheet);
+                    
+                    if (jsonObject.length === 0) {
+                        statusMsg.textContent = "❌ Le fichier est vide ou illisible.";
+                        return;
+                    }
+                    
+                    let nbAjoutes = 0;
+                    
+                    // On parcourt les lignes pour extraire Origine, Destination et Distance
+                    jsonObject.forEach(row => {
+                        // On cherche des mots clés dans l'entête des colonnes
+                        const origine = row['Origine'] || row['Depart'] || row['origine'] || "Inconnu";
+                        const destination = row['Destination'] || row['Arrivee'] || row['destination'] || "Inconnu";
+                        const distanceStr = row['Distance'] || row['Distance (km)'] || row['km'] || row['distance'];
+                        
+                        const distanceReelle = parseFloat(distanceStr) || 0;
+                        
+                        if(distanceReelle > 0 && origine !== "Inconnu") {
+                            listeItineraires.push({
+                                origine: origine,
+                                destination: destination,
+                                distReelle: distanceReelle
+                            });
+                            nbAjoutes++;
+                        }
+                    });
+                    
+                    statusMsg.textContent = `✅ Succès: ${nbAjoutes} itinéraires importés.`;
+                    statusMsg.className = "text-[10px] font-mono text-emerald-400 mt-2";
+                    
+                    afficherItinerairesAdmin();
+                    fileUpload.value = ""; // Reset de l'input
+                    
+                } catch(error) {
+                    console.error("Erreur de lecture Excel:", error);
+                    statusMsg.textContent = "❌ Erreur : Le fichier n'est pas un format Excel valide.";
+                    statusMsg.className = "text-[10px] font-mono text-rose-400 mt-2";
+                }
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+
+        // --- GESTION MANUELLE DES ITINÉRAIRES ---
+        function creerNouveauTronconAdmin() {
+            const origine = document.getElementById('add-origine').value.trim();
+            const dest = document.getElementById('add-destination').value.trim();
+            const distReelle = parseFloat(document.getElementById('add-distance-reelle').value) || 0;
+
+            if(!origine || !dest || distReelle <= 0) {
+                alert("Veuillez remplir l'Origine, la Destination et la Distance réelle.");
+                return;
+            }
+
+            listeItineraires.push({ origine, destination: dest, distReelle });
+            
+            document.getElementById('add-origine').value = "";
+            document.getElementById('add-destination').value = "";
+            document.getElementById('add-distance').value = "";
+            document.getElementById('add-distance-reelle').value = "";
+            
+            afficherItinerairesAdmin();
+        }
+
+        function afficherItinerairesAdmin() {
+            const box = document.getElementById('box-matrice-troncons');
+            document.getElementById('badge-nb-routes').textContent = `${listeItineraires.length} Rte(s)`;
+            
+            if(listeItineraires.length === 0) {
+                box.innerHTML = `<p class="text-slate-500 italic text-[10px] text-center mt-10">Aucun itinéraire enregistré.</p>`;
+                return;
+            }
+            
+            box.innerHTML = "";
+            listeItineraires.forEach((it, index) => {
+                box.insertAdjacentHTML('beforeend', `
+                    <div class="flex justify-between items-center p-2.5 bg-slate-900 border border-slate-800 rounded-xl hover:border-emerald-500/30 transition-colors">
+                        <div class="flex flex-col">
+                            <span class="text-slate-200 font-bold uppercase tracking-wider">${it.origine} <i class="fa-solid fa-arrow-right text-emerald-500 mx-1"></i> ${it.destination}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-emerald-400 font-black text-sm bg-slate-950 px-2 py-1 rounded">${it.distReelle} km</span>
+                            <button onclick="supprimerItineraire(${index})" class="text-rose-500 hover:text-rose-400 p-1"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `);
+            });
+        }
+        
+        function supprimerItineraire(index) {
+            listeItineraires.splice(index, 1);
+            afficherItinerairesAdmin();
+        }
+
         // --- CARTE LEAFLET ADMIN (SUIVI GLOBAL) ---
         function initMapAdmin() {
             const container = document.getElementById('map-admin-suivi');
@@ -598,7 +830,7 @@
                 flotteGlobale.forEach(v => {
                     if(!adminMarkers[v.imei]) {
                         let marker = L.marker([v.lat, v.lng]).addTo(mapAdmin)
-                            .bindPopup(`<b>IMEI: ${v.imei}</b><br>Statut: Actif`);
+                            .bindPopup(`<b>IMEI: ${v.imei}</b><br>Statut: Historique/Actif`);
                         adminMarkers[v.imei] = marker;
                     }
                 });
