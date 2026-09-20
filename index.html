@@ -11,12 +11,14 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#020617">
 
-    <!-- Tailwind CSS, FontAwesome, Leaflet & Chart.js -->
+    <!-- Tailwind CSS, FontAwesome, Leaflet, Chart.js & Socket.IO -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Moteur de communication avec le serveur DigitalOcean -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
     <style>
         .blur-transition { transition: filter 0.4s ease, opacity 0.4s ease; }
@@ -77,11 +79,11 @@
                 <div id="form-connexion" class="bg-slate-950/85 backdrop-blur p-5 rounded-2xl border border-slate-800/80 space-y-4 shadow-xl">
                     <div>
                         <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Téléphone Enregistré</label>
-                        <input type="tel" id="login-tel" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-mono font-bold" value="+243812345678">
+                        <input type="tel" id="login-tel" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-mono font-bold" value="0965647819">
                     </div>
                     <div>
                         <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Code PIN Sécurité</label>
-                        <input type="password" id="login-pin" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-mono" placeholder="4 chiffres">
+                        <input type="password" id="login-pin" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-mono" placeholder="4 chiffres" value="0000">
                     </div>
                     <button onclick="executerConnexionPartenaire()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl text-xs uppercase shadow-lg shadow-emerald-500/10 transition-colors">
                         Ouvrir mon Espace Flotte
@@ -92,11 +94,11 @@
                 <div id="form-inscription" class="bg-slate-950/85 backdrop-blur p-4 rounded-2xl border border-slate-800/80 space-y-3 shadow-xl hidden">
                     <div>
                         <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Nom Complet</label>
-                        <input type="text" id="ins-nom" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200" value="Jean Mukendi">
+                        <input type="text" id="ins-nom" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200" value="Dolce">
                     </div>
                     <div>
                         <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Téléphone RDC</label>
-                        <input type="tel" id="ins-tel" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono" value="+243812345678">
+                        <input type="tel" id="ins-tel" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono" value="0965647819">
                     </div>
                     <div>
                         <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Créer un Code PIN</label>
@@ -121,7 +123,7 @@
                 <div class="flex justify-between items-center mb-3">
                     <div>
                         <div class="flex items-center gap-2">
-                            <h1 id="lbl-nom-partenaire" class="text-sm font-black text-slate-100">Jean Mukendi</h1>
+                            <h1 id="lbl-nom-partenaire" class="text-sm font-black text-slate-100">Dolce</h1>
                             <span class="text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded font-mono font-bold">ACTIF</span>
                         </div>
                         <p class="text-[8px] text-slate-400 font-mono">TransVision by Global Tech Solutions</p>
@@ -134,10 +136,10 @@
                 <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 flex items-center justify-between shadow-md">
                     <div>
                         <div class="flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                            <span class="text-[10px] font-black uppercase text-emerald-400 tracking-wider">Forfait Jour Actif</span>
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="statut-serveur-voyant"></span>
+                            <span class="text-[10px] font-black uppercase text-emerald-400 tracking-wider" id="statut-serveur-texte">Serveur DigitalOcean Connecté</span>
                         </div>
-                        <p class="text-[9px] text-slate-400 mt-0.5">Expire ce soir à 23h59</p>
+                        <p class="text-[9px] text-slate-400 mt-0.5" id="last-update-text">En attente de position GPS...</p>
                     </div>
                     <div class="text-right">
                         <span id="timer-compte-rebours" class="text-sm font-mono font-black text-slate-100 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg shadow-inner">--:--:--</span>
@@ -443,22 +445,89 @@
         </div>
     </div>
 
-    <!-- LOGIQUE JAVASCRIPT -->
+    <!-- LOGIQUE JAVASCRIPT CONNECTÉE AU SERVEUR DIGITALOCEAN -->
     <script>
-        // Injection de 3 véhicules avec données journalières simulées
+        // --- CONNEXION SOCKET.IO AU SERVEUR DIGITALOCEAN ---
+        const SERVEUR_URL = "http://134.209.116.89:3000";
+        const socket = io(SERVEUR_URL, {
+            transports: ['websocket'],
+            reconnection: true
+        });
+
+        // Structure d'accueil pour les véhicules (sera remplie par le serveur)
         let client = {
-            nom: "Jean Mukendi",
-            tel: "+243812345678",
-            vehicules: [
-                { plaque: "KIN 4082AE", type: "Mercedes 207", places: 18, imei: "865241092837401", rotationsJour: 8, tarif: 1500, itineraire: "GARE CENTRALE — UPN", lat: -4.3215, lng: 15.3115, moteurCoupe: false, carburantJour: 24.5, kmJour: 142, entretien: "OK (Prochain: 500km)" },
-                { plaque: "KIN 1234BB", type: "Taxi Ketch", places: 4, imei: "865241092837402", rotationsJour: 12, tarif: 2500, itineraire: "KINTAMBO — GOMBE", lat: -4.3150, lng: 15.2980, moteurCoupe: false, carburantJour: 12.0, kmJour: 95, entretien: "Alerte: Vidange requise" },
-                { plaque: "KIN 9876XX", type: "Hiace", places: 15, imei: "865241092837403", rotationsJour: 5, tarif: 1000, itineraire: "KINGASANI — PASCAL", lat: -4.3400, lng: 15.3300, moteurCoupe: false, carburantJour: 8.2, kmJour: 58, entretien: "OK (Prochain: 1200km)" }
-            ]
+            nom: "Dolce",
+            tel: "0965647819",
+            vehicules: []
         };
 
         let map = null;
         let busMarker = null;
         let chartPartenaireInstance = null;
+
+        // --- GESTION DES ÉVÉNEMENTS SOCKET ---
+        socket.on('connect', () => {
+            console.log("Connecté au serveur DigitalOcean !");
+            document.getElementById('statut-serveur-voyant').classList.replace('bg-rose-500', 'bg-emerald-400');
+            document.getElementById('statut-serveur-texte').textContent = "Serveur Connecté";
+            document.getElementById('statut-serveur-texte').classList.replace('text-rose-400', 'text-emerald-400');
+        });
+
+        socket.on('disconnect', () => {
+            console.log("Déconnecté du serveur !");
+            document.getElementById('statut-serveur-voyant').classList.replace('bg-emerald-400', 'bg-rose-500');
+            document.getElementById('statut-serveur-texte').textContent = "Serveur Déconnecté";
+            document.getElementById('statut-serveur-texte').classList.replace('text-emerald-400', 'text-rose-400');
+        });
+
+        socket.on('nouvelle_position', (data) => {
+            console.log("Nouvelle position reçue :", data);
+            
+            // Mise à jour de l'heure
+            const now = new Date();
+            document.getElementById('last-update-text').textContent = `Dernière position : ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+
+            // Cherche si le véhicule existe déjà par son IMEI
+            let vehiculeIndex = client.vehicules.findIndex(v => v.imei === data.imei);
+            
+            if (vehiculeIndex === -1) {
+                // S'il n'existe pas, on l'ajoute
+                client.vehicules.push({
+                    plaque: data.plaque || "TOYOTA RACTIS",
+                    type: "Traceur GPS",
+                    places: 4,
+                    imei: data.imei,
+                    rotationsJour: 0,
+                    tarif: 0,
+                    itineraire: "Kinshasa",
+                    lat: data.lat,
+                    lng: data.lng,
+                    moteurCoupe: false,
+                    carburantJour: 0,
+                    kmJour: 0,
+                    entretien: "OK"
+                });
+                vehiculeIndex = client.vehicules.length - 1;
+                majSelecteurMap();
+            } else {
+                // S'il existe, on met à jour ses coordonnées
+                client.vehicules[vehiculeIndex].lat = data.lat;
+                client.vehicules[vehiculeIndex].lng = data.lng;
+            }
+
+            // Si c'est le véhicule actuellement sélectionné, on met à jour la carte
+            const selectMap = document.getElementById('select-vehicule-map');
+            if (selectMap && selectMap.value == vehiculeIndex) {
+                if(busMarker && map) {
+                    const newLatLng = new L.LatLng(data.lat, data.lng);
+                    busMarker.setLatLng(newLatLng);
+                    map.panTo(newLatLng);
+                } else {
+                    initMapEtCentrer(vehiculeIndex);
+                }
+            }
+        });
+
 
         // --- GESTION DES FILTRES DE DATE ---
         function initFiltresDates() {
@@ -542,6 +611,11 @@
             const sel = document.getElementById('select-vehicule-map');
             if(!sel) return;
             sel.innerHTML = "";
+            
+            if(client.vehicules.length === 0) {
+                sel.insertAdjacentHTML('beforeend', `<option value="none">Aucun véhicule détecté</option>`);
+                return;
+            }
             client.vehicules.forEach((v, i) => sel.insertAdjacentHTML('beforeend', `<option value="${i}">${v.plaque} (${v.type})</option>`));
         }
 
@@ -549,16 +623,25 @@
             const mapContainer = document.getElementById('map-container');
             if (!mapContainer || mapContainer.offsetParent === null) return;
 
+            // Coordonnées par défaut (Kinshasa Gombe) si aucun véhicule n'est reçu
+            let lat = -4.3215;
+            let lng = 15.3115;
+            let label = "En attente de connexion...";
+
             const v = client.vehicules[index];
-            if(!v) return;
+            if(v) {
+                lat = v.lat;
+                lng = v.lng;
+                label = `<b>${v.plaque}</b><br>IMEI: ${v.imei}`;
+            }
 
             if(!map) {
-                map = L.map('map-container').setView([v.lat, v.lng], 14);
+                map = L.map('map-container').setView([lat, lng], 14);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
             }
             if(busMarker) map.removeLayer(busMarker);
-            busMarker = L.marker([v.lat, v.lng]).addTo(map).bindPopup(`<b>${v.plaque}</b><br>${v.itineraire}`).openPopup();
-            map.setView([v.lat, v.lng], 14);
+            busMarker = L.marker([lat, lng]).addTo(map).bindPopup(label).openPopup();
+            map.setView([lat, lng], 14);
         }
         function centrerSurVehicule(indexStr) { initMapEtCentrer(parseInt(indexStr)); }
 
@@ -578,10 +661,9 @@
             }
 
             const itineraire = `${origine} — ${dest}`;
-            const randLat = -4.32 + (Math.random() * 0.04 - 0.02);
-            const randLng = 15.31 + (Math.random() * 0.04 - 0.02);
-
-            client.vehicules.push({ plaque, type, places, imei, rotationsJour: 0, tarif, itineraire, lat: randLat, lng: randLng, moteurCoupe: false, carburantJour: 0, kmJour: 0, entretien: "Nouveau" });
+            
+            // Envoi de la requête de création au serveur (simulé ici en local)
+            client.vehicules.push({ plaque, type, places, imei, rotationsJour: 0, tarif, itineraire, lat: -4.32, lng: 15.31, moteurCoupe: false, carburantJour: 0, kmJour: 0, entretien: "Nouveau" });
             
             document.getElementById('add-plaque').value = ""; document.getElementById('add-type').value = "";
             document.getElementById('add-places').value = ""; document.getElementById('add-tarif').value = "";
@@ -720,8 +802,12 @@
 
         function basculerMoteur(i, couper) {
             client.vehicules[i].moteurCoupe = couper;
-            alert(`📡 Commande SMS envoyée. Moteur ${couper ? 'coupé' : 'restauré'} pour le véhicule ${client.vehicules[i].plaque}.`);
-            appliquerFiltreTechnique(); // Recharge le filtre actif
+            
+            // Envoi de la commande à DigitalOcean (qui relaiera au boîtier via TCP)
+            socket.emit('commande_moteur', { imei: client.vehicules[i].imei, couper: couper });
+            
+            alert(`📡 Commande envoyée au serveur. Moteur ${couper ? 'coupé' : 'restauré'} pour le véhicule ${client.vehicules[i].plaque}.`);
+            appliquerFiltreTechnique(); 
         }
 
         // --- PROFIL & SÉCURITÉ ---
@@ -775,20 +861,18 @@
             const mode = document.getElementById('recharge-mode').value;
             
             let cible = "la flotte complète";
-            if (mode === 'unitaire') {
+            if (mode === 'unitaire' && client.vehicules.length > 0) {
                 const indexVehicule = document.getElementById('recharge-vehicule-select').value;
                 cible = `le véhicule ${client.vehicules[indexVehicule].plaque}`;
             }
 
             alert(`🛰️ Demande de transfert de ${montant.toLocaleString()} CDF pour ${cible}.\nTransaction via ${reseau} en cours de traitement.`);
             
-            // Remise à zéro et fermeture
             document.getElementById('input-montant-libre').value = "";
             fermerModalRecharge();
         }
 
         function ouvrirModalRecharge() { 
-            // S'assure que les sélecteurs de véhicules dans le modal de recharge sont à jour
             peuplerSelecteursFiltre();
             basculerSelectVehiculeRecharge();
             document.getElementById('modal-recharge-partenaire').classList.remove('hidden'); 
@@ -819,6 +903,7 @@
         }
 
         function executerConnexionPartenaire() { 
+            // Vraie application : Ici on devrait envoyer le PIN au serveur pour vérification
             naviguerVers('app-proprietaire'); 
             genererToutesLesVues(); 
             actualiserCompteARebours23h59(); 
