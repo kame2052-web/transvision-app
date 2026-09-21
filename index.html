@@ -114,7 +114,7 @@
             </div>
             
             <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v14.6 — by <span class="text-slate-200 font-bold">Global Tech Solutions</span>
+                TransVision v14.7 — by <span class="text-slate-200 font-bold">Global Tech Solutions</span>
             </div>
         </div>
 
@@ -452,8 +452,6 @@
         // --- CONFIGURATION SUPABASE & SOCKET ---
         const supabaseUrl = 'https://vbriworyscymnmtzzdny.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
-        
-        // CORRECTION DU NOM DE LA VARIABLE POUR ÉVITER LE CONFLIT !
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
         const SERVEUR_URL = "http://134.209.116.89:3000";
@@ -473,20 +471,30 @@
         let busMarker = null;
         let chartPartenaireInstance = null;
 
-        // --- NOUVEAU : INITIALISATION DE LA FLOTTE ULTRA-ROBUSTE ---
+        // --- NOUVEAU : FORMULE DE CALCUL DE DISTANCE GPS (HAVERSINE) ---
+        function calculerDistanceGPS(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Rayon de la Terre en km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c; // Retourne la distance en kilomètres
+        }
+
+        // --- INITIALISATION DE LA FLOTTE ULTRA-ROBUSTE ---
         async function chargerDernieresPositions() {
             try {
                 const txtStatut = document.getElementById('last-update-text');
                 txtStatut.textContent = "Connexion à la base de données...";
                 
-                // 1. Vérifier que Supabase est bien chargé
                 if (!window.supabase) {
                     txtStatut.textContent = "Erreur: Librairie Supabase non chargée.";
                     console.error("Supabase est introuvable. Vérifiez votre connexion internet.");
                     return;
                 }
 
-                // 2. Requête vers Supabase (en utilisant le NOUVEAU NOM)
                 const { data, error } = await supabaseClient
                     .from('transvision_positions_gps')
                     .select('*')
@@ -499,12 +507,9 @@
                     return; 
                 }
 
-                console.log("📡 Données brutes reçues de Supabase :", data);
-
                 if (data && data.length > 0) {
                     const vehiculesTrouves = {};
                     
-                    // 3. Filtrer en ignorant les lignes corrompues
                     data.forEach(pos => {
                         if (pos.imei && pos.latitude && pos.longitude) {
                             if (!vehiculesTrouves[pos.imei]) {
@@ -513,7 +518,6 @@
                         }
                     });
 
-                    // 4. Créer les véhicules de manière sécurisée
                     Object.values(vehiculesTrouves).forEach(pos => {
                         const imeiStr = String(pos.imei);
                         client.vehicules.push({
@@ -524,6 +528,7 @@
                             rotationsJour: 0,
                             tarif: 1500,
                             itineraire: "Kinshasa",
+                            distanceReference: 5.0, // <-- Itinéraire par défaut 5km
                             lat: pos.latitude,
                             lng: pos.longitude,
                             moteurCoupe: false,
@@ -533,9 +538,6 @@
                         });
                     });
                     
-                    console.log("✅ Véhicules injectés dans la carte :", client.vehicules);
-                    
-                    // 5. Mettre à jour l'interface
                     majSelecteurMap();
                     const sel = document.getElementById('select-vehicule-map');
                     if (sel && sel.value !== "none") {
@@ -544,7 +546,6 @@
                     
                     txtStatut.textContent = `Historique chargé (${client.vehicules.length} véhicule(s)).`;
                 } else {
-                    console.warn("La requête a réussi, mais la table semble vide.");
                     txtStatut.textContent = "Historique vide. En attente de direct...";
                 }
             } catch (err) {
@@ -554,7 +555,7 @@
         }
 
 
-        // --- GESTION DES ÉVÉNEMENTS SOCKET (LIVE) ---
+        // --- GESTION DES ÉVÉNEMENTS SOCKET (LIVE) & CALCULS ---
         socket.on('connect', () => {
             console.log("Connecté au serveur DigitalOcean !");
             document.getElementById('statut-serveur-voyant').classList.replace('bg-rose-500', 'bg-emerald-400');
@@ -569,18 +570,17 @@
             document.getElementById('statut-serveur-texte').classList.replace('text-emerald-400', 'text-rose-400');
         });
 
+        // MISE À JOUR MAJEURE ICI : CALCUL DES KILOMÈTRES ET DES ROTATIONS
         socket.on('nouvelle_position', (data) => {
             console.log("📍 Nouvelle position reçue (LIVE) :", data);
             
-            // Mise à jour de l'heure
             const now = new Date();
             document.getElementById('last-update-text').textContent = `Mise à jour en direct : ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
 
-            // Cherche si le véhicule existe déjà par son IMEI
             let vehiculeIndex = client.vehicules.findIndex(v => v.imei === data.imei);
             
             if (vehiculeIndex === -1) {
-                // S'il n'existe pas, on l'ajoute
+                // Nouveau véhicule détecté
                 client.vehicules.push({
                     plaque: data.plaque || `Nouveau ${data.imei.slice(-4)}`,
                     type: "Traceur GPS",
@@ -589,8 +589,9 @@
                     rotationsJour: 0,
                     tarif: 1500,
                     itineraire: "Kinshasa",
-                    lat: data.lat, // Donnée du socket
-                    lng: data.lng, // Donnée du socket
+                    distanceReference: 5.0, // <-- L'itinéraire de base fait 5 km
+                    lat: data.lat,
+                    lng: data.lng,
                     moteurCoupe: false,
                     carburantJour: 0,
                     kmJour: 0,
@@ -599,12 +600,38 @@
                 vehiculeIndex = client.vehicules.length - 1;
                 majSelecteurMap();
             } else {
-                // S'il existe, on met à jour ses coordonnées
-                client.vehicules[vehiculeIndex].lat = data.lat;
-                client.vehicules[vehiculeIndex].lng = data.lng;
+                // VÉHICULE CONNU : CALCUL DES DISTANCES ET DEMI-TERRAINS
+                let v = client.vehicules[vehiculeIndex];
+                
+                // 1. Calcul de la distance parcourue depuis la DERNIÈRE position reçue
+                let distanceParcourue = calculerDistanceGPS(v.lat, v.lng, data.lat, data.lng);
+                
+                // On filtre les sauts GPS aberrants (ex: + de 2km en 20 secondes)
+                if (distanceParcourue > 0.005 && distanceParcourue < 2) {
+                    
+                    // Ajout au compteur kilométrique de la journée
+                    v.kmJour += distanceParcourue;
+                    
+                    // Calcul de la consommation (Estimation : 12 Litres / 100km)
+                    v.carburantJour = v.kmJour * 0.12; 
+                    
+                    // CALCUL DES ROTATIONS & DEMI-TERRAINS
+                    // Un demi-terrain = la moitié de la distance de référence (ex: 2.5km pour une ligne de 5km)
+                    let distDemiTerrain = (v.distanceReference || 5.0) / 2;
+                    
+                    // On compte combien de tranches de demi-terrain le véhicule a fait
+                    let nbTranches = Math.floor(v.kmJour / distDemiTerrain);
+                    
+                    // On convertit en rotations (ex: 3 tranches = 1.5 rotations)
+                    v.rotationsJour = nbTranches / 2; 
+                }
+
+                // 2. On met à jour les coordonnées pour le prochain calcul
+                v.lat = data.lat;
+                v.lng = data.lng;
             }
 
-            // Si c'est le véhicule actuellement sélectionné, on met à jour la carte
+            // Mise à jour de la carte si le véhicule est sélectionné
             const selectMap = document.getElementById('select-vehicule-map');
             if (selectMap && selectMap.value == vehiculeIndex) {
                 if(busMarker && map) {
@@ -615,6 +642,10 @@
                     initMapEtCentrer(vehiculeIndex);
                 }
             }
+
+            // Rafraîchir silencieusement les rapports si on est sur l'onglet Rapport ou Analyse
+            genererRapportFinancier(getJoursFiltre('fin'), document.getElementById('filtre-fin-vehicule').value);
+            genererRapportTechnique(getJoursFiltre('tech'), document.getElementById('filtre-tech-vehicule').value);
         });
 
 
@@ -712,7 +743,6 @@
             const mapContainer = document.getElementById('map-container');
             if (!mapContainer || mapContainer.offsetParent === null) return;
 
-            // Coordonnées par défaut (Kinshasa Gombe) si aucun véhicule n'est reçu
             let lat = -4.3215;
             let lng = 15.3115;
             let label = "En attente de connexion...";
@@ -872,7 +902,8 @@
                 const couleurEntretien = v.entretien.includes("Alerte") ? 'text-rose-400 animate-pulse' : 'text-emerald-400';
                 
                 const consoPeriode = (v.carburantJour * joursFiltre).toFixed(1);
-                const kmPeriode = (v.kmJour * joursFiltre).toLocaleString();
+                // Afficher le kilométrage avec 1 chiffre après la virgule
+                const kmPeriode = (v.kmJour * joursFiltre).toFixed(1);
 
                 list.insertAdjacentHTML('beforeend', `
                     <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
@@ -893,7 +924,6 @@
         function basculerMoteur(i, couper) {
             client.vehicules[i].moteurCoupe = couper;
             
-            // Envoi de la commande à DigitalOcean (qui relaiera au boîtier via TCP)
             socket.emit('commande_moteur', { imei: client.vehicules[i].imei, couper: couper });
             
             alert(`📡 Commande envoyée au serveur. Moteur ${couper ? 'coupé' : 'restauré'} pour le véhicule ${client.vehicules[i].plaque}.`);
@@ -971,7 +1001,6 @@
             document.getElementById('modal-recharge-partenaire').classList.add('hidden'); 
         }
 
-        // --- LOGIQUE GLOBALE AUTHENTIFICATION ---
         function basculerVueAuth(mode) {
             if(mode === 'login') {
                 document.getElementById('form-connexion').classList.remove('hidden'); 
@@ -995,7 +1024,6 @@
         function executerConnexionPartenaire() { 
             naviguerVers('app-proprietaire'); 
             
-            // --- ON LANCE LE CHARGEMENT SUPABASE ICI LORS DE LA CONNEXION ---
             chargerDernieresPositions().then(() => {
                 genererToutesLesVues(); 
                 actualiserCompteARebours23h59(); 
@@ -1011,7 +1039,6 @@
         }
         function fermerModalCGU() { document.getElementById('modal-cgu').classList.add('hidden'); }
 
-        // Initialisation de la vue de départ
         naviguerVers('page-auth');
     </script>
 </body>
