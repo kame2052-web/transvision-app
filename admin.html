@@ -12,18 +12,14 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Moteur de communication avec le serveur DigitalOcean -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <!-- Client Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Librairie pour lire les fichiers Excel -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     
     <style>
         .page-fade { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* Styles Carte Leaflet Mode Sombre */
         #map-admin-suivi { height: 500px; width: 100%; border-radius: 1rem; z-index: 10; }
         .leaflet-tile { filter: brightness(0.8) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3); }
         .leaflet-container { background: #020617 !important; }
@@ -69,7 +65,7 @@
     <!-- 2. CORPS ADMIN -->
     <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
         <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
-            <span class="text-xs font-bold text-indigo-400">Central Control Panel v14.6 — Global Tech Solutions :</span>
+            <span class="text-xs font-bold text-indigo-400">Central Control Panel v14.7 — Global Tech Solutions :</span>
             <div class="flex gap-2 text-[10px] font-mono">
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 flex items-center gap-1">Central DO : <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="admin-server-dot"></span><span class="text-emerald-400 font-bold" id="admin-server-text">En Ligne</span></span>
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Historique : <span class="text-sky-400 font-bold" id="admin-historique-statut">Chargement...</span></span>
@@ -150,12 +146,12 @@
                             <p class="text-3xl font-black text-slate-100 mt-1" id="stat-total-flotte">0</p>
                         </div>
                         <div class="bg-indigo-500/10 p-4 rounded-2xl border border-indigo-500/20 shadow-md">
-                            <p class="text-[10px] text-indigo-400 uppercase font-black tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-bus"></i> Commercial</p>
-                            <p class="text-3xl font-black text-indigo-300 mt-1">-</p>
+                            <p class="text-[10px] text-indigo-400 uppercase font-black tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-bus"></i> Rotations Jour</p>
+                            <p class="text-3xl font-black text-indigo-300 mt-1" id="stat-total-rotations">0</p>
                         </div>
                         <div class="bg-rose-500/10 p-4 rounded-2xl border border-rose-500/20 shadow-md">
-                            <p class="text-[10px] text-rose-400 uppercase font-black tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-car"></i> Personnel</p>
-                            <p class="text-3xl font-black text-rose-300 mt-1">-</p>
+                            <p class="text-[10px] text-rose-400 uppercase font-black tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-road"></i> Km Cumulés</p>
+                            <p class="text-3xl font-black text-rose-300 mt-1" id="stat-total-km">0</p>
                         </div>
                     </div>
 
@@ -163,7 +159,11 @@
                         <table class="w-full text-left">
                             <thead>
                                 <tr class="border-b border-slate-800 text-slate-500 uppercase text-[9px] font-sans">
-                                    <th class="py-2">Plaque (Si Enregistrée)</th><th class="py-2">Modèle / Contrat</th><th class="py-2">IMEI SinoTrack</th><th class="py-2">Dernière Connexion</th><th class="py-2">Détails</th>
+                                    <th class="py-2">Plaque / ID</th>
+                                    <th class="py-2">IMEI Traceur</th>
+                                    <th class="py-2">Dernière Connexion</th>
+                                    <th class="py-2">Distance Jour</th>
+                                    <th class="py-2">Rotations</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-850" id="table-vehicules-body">
@@ -222,7 +222,7 @@
                     </div>
                 </div>
 
-                <!-- NOUVEAU: ITINÉRAIRES AVEC IMPORT EXCEL -->
+                <!-- ITINÉRAIRES AVEC IMPORT EXCEL -->
                 <div id="page-itineraires" class="space-y-5 page-fade class-page-admin hidden">
                     <h2 class="text-xl font-black text-slate-100">🛣️ Dynamic Routing — Planificateur Spatial</h2>
                     
@@ -266,7 +266,7 @@
                                 <span id="badge-nb-routes" class="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded font-bold">0 Rte(s)</span>
                             </div>
                             <div class="space-y-2 overflow-y-auto max-h-[350px] text-xs font-mono" id="box-matrice-troncons">
-                                <p class="text-slate-500 italic text-[10px] text-center mt-10">Aucun itinéraire enregistré. Ajoutez-les manuellement ou via Excel pour permettre le calcul des rotations.</p>
+                                <p class="text-slate-500 italic text-[10px] text-center mt-10">Aucun itinéraire enregistré.</p>
                             </div>
                         </div>
                     </div>
@@ -276,7 +276,6 @@
                 <div id="page-tresorerie" class="space-y-5 page-fade class-page-admin hidden">
                     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
                         <h2 class="text-xl font-black text-slate-100">💸 Trésorerie & Sortie de Fonds</h2>
-                        <!-- FILTRE DE DATE TRÉSORERIE -->
                         <div class="flex items-center gap-2 bg-slate-950 border border-slate-800 p-1.5 rounded-xl">
                             <span class="text-[9px] text-slate-500 font-bold uppercase ml-2">Du</span>
                             <input type="date" id="date-debut-treso" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] text-emerald-400 outline-none">
@@ -310,7 +309,6 @@
                             <h2 class="text-xl font-black text-slate-100">📊 Tableaux de Bord Analytiques</h2>
                             <p class="text-xs text-slate-400">Croisement des flux financiers et empreinte spatiale.</p>
                         </div>
-                        <!-- FILTRE DE DATE STATISTIQUES -->
                         <div class="flex items-center gap-2 bg-slate-950 border border-slate-800 p-1.5 rounded-xl">
                             <span class="text-[9px] text-slate-500 font-bold uppercase ml-2">Du</span>
                             <input type="date" id="date-debut-stats" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] text-fuchsia-400 outline-none">
@@ -402,7 +400,7 @@
         </div>
     </div>
 
-    <!-- MODAL VALIDATION RECHARGE ADMIN (FLOTTE OU VÉHICULE) -->
+    <!-- MODAL VALIDATION RECHARGE ADMIN -->
     <div id="modal-recharge-flexible" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -416,7 +414,6 @@
             <p class="text-xs text-slate-300 font-bold">Compte : <span id="nom-partenaire-cible" class="text-emerald-400"></span></p>
 
             <div class="space-y-3 text-xs mt-2">
-                <!-- Choix d'application (Flotte entière ou véhicule ciblé) -->
                 <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-850 space-y-2">
                     <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Cible de la validation</label>
                     <select id="admin-recharge-mode" onchange="basculerSelectVehiculeAdmin()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-bold focus:outline-none focus:border-emerald-500">
@@ -427,7 +424,6 @@
                     <div id="bloc-admin-recharge-vehicule" class="hidden mt-2 border-t border-slate-800 pt-2">
                         <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Sélectionner le Véhicule</label>
                         <select id="admin-recharge-vehicule-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-mono text-[10px] focus:outline-none focus:border-emerald-500">
-                            <!-- Peuplé dynamiquement selon le partenaire cliqué -->
                         </select>
                     </div>
                 </div>
@@ -460,7 +456,6 @@
 
     <!-- LOGIQUE JAVASCRIPT CONNECTÉE AU SERVEUR DIGITALOCEAN -->
     <script>
-        // --- NOUVEAU : CONFIGURATION SUPABASE ---
         const supabaseUrl = 'https://vbriworyscymnmtzzdny.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
@@ -468,20 +463,29 @@
         let adminCredential = { email: "admin@transvision.cd", pass: "123456" };
         let ciblePartenaire = null;
 
-        // Base de données dynamique de la flotte
         let flotteGlobale = [];
-        let listeItineraires = []; // Pour stocker les itinéraires Excel/Manuel
+        let listeItineraires = []; 
         let mapAdmin = null;
         let adminMarkers = {};
 
-        // --- CONNEXION SOCKET.IO AU SERVEUR DIGITALOCEAN ---
         const SERVEUR_URL = "http://134.209.116.89:3000";
         const socket = io(SERVEUR_URL, {
             transports: ['websocket'],
             reconnection: true
         });
 
-        // --- NOUVEAU : CHARGEMENT DE L'HISTORIQUE SUPABASE POUR L'ADMIN ---
+        // --- NOUVEAU : FORMULE DE CALCUL DE DISTANCE GPS (HAVERSINE) ---
+        function calculerDistanceGPS(lat1, lon1, lat2, lon2) {
+            const R = 6371; 
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c; 
+        }
+
         async function chargerHistoriqueAdmin() {
             try {
                 const statTxt = document.getElementById('admin-historique-statut');
@@ -515,7 +519,10 @@
                             partenaire: "TransVision Base",
                             lat: pos.latitude,
                             lng: pos.longitude,
-                            derniereCo: new Date(pos.created_at || Date.now())
+                            derniereCo: new Date(pos.created_at || Date.now()),
+                            kmJour: 0,
+                            rotationsJour: 0,
+                            distanceReference: 5.0
                         });
                     });
 
@@ -549,7 +556,7 @@
         }
 
 
-        // --- GESTION DES ÉVÉNEMENTS SOCKET ---
+        // --- GESTION DES ÉVÉNEMENTS SOCKET (LIVE) & CALCULS ---
         socket.on('connect', () => {
             console.log("Console Admin Connectée au serveur DigitalOcean !");
             document.getElementById('admin-server-dot').classList.replace('bg-rose-500', 'bg-emerald-400');
@@ -564,51 +571,70 @@
             document.getElementById('admin-server-text').classList.replace('text-emerald-400', 'text-rose-400');
         });
 
+        // MISE À JOUR MAJEURE ICI : CALCUL DES KILOMÈTRES ET DES ROTATIONS CÔTÉ ADMIN
         socket.on('nouvelle_position', (data) => {
             console.log("TRAME ADMIN REÇUE :", data);
             
-            // Cherche si l'IMEI existe déjà dans notre flotte globale admin
             let vehiculeExistant = flotteGlobale.find(v => v.imei === data.imei);
             
             if (!vehiculeExistant) {
-                // Nouveau boîtier détecté
                 const nouveauVehicule = {
                     imei: data.imei,
                     plaque: data.plaque || `TRK-${String(data.imei).slice(-4)}`,
                     partenaire: "Inconnu (Nouveau)",
                     lat: data.lat,
                     lng: data.lng,
-                    derniereCo: new Date()
+                    derniereCo: new Date(),
+                    kmJour: 0,
+                    rotationsJour: 0,
+                    distanceReference: 5.0
                 };
                 flotteGlobale.push(nouveauVehicule);
                 
-                // Mettre à jour le tableau "Gestion de la flotte"
                 majTableauFlotteAdmin();
                 
-                // Si la carte est active, ajouter le marqueur
                 if(mapAdmin) {
                     let marker = L.marker([data.lat, data.lng]).addTo(mapAdmin)
                         .bindPopup(`<b>IMEI: ${data.imei}</b><br>Statut: Actif`);
                     adminMarkers[data.imei] = marker;
                 }
             } else {
-                // Boîtier connu, on met à jour sa position et son heure
+                // VÉHICULE CONNU : CALCUL DES DISTANCES ET DEMI-TERRAINS
+                let distanceParcourue = calculerDistanceGPS(vehiculeExistant.lat, vehiculeExistant.lng, data.lat, data.lng);
+                
+                // Filtre anti-saut (on ignore les sauts de + de 2km entre 2 pings de 20s)
+                if (distanceParcourue > 0.005 && distanceParcourue < 2) {
+                    vehiculeExistant.kmJour = (vehiculeExistant.kmJour || 0) + distanceParcourue;
+                    
+                    let distDemiTerrain = (vehiculeExistant.distanceReference || 5.0) / 2;
+                    let nbTranches = Math.floor(vehiculeExistant.kmJour / distDemiTerrain);
+                    vehiculeExistant.rotationsJour = nbTranches / 2;
+                }
+
                 vehiculeExistant.lat = data.lat;
                 vehiculeExistant.lng = data.lng;
                 vehiculeExistant.derniereCo = new Date();
                 
-                // Mettre à jour la date dans le tableau
                 majTableauFlotteAdmin();
 
-                // Déplacer le marqueur sur la carte
                 if(mapAdmin && adminMarkers[data.imei]) {
                     adminMarkers[data.imei].setLatLng([data.lat, data.lng]);
-                    adminMarkers[data.imei].getPopup().setContent(`<b>IMEI: ${data.imei}</b><br>Dernier Live: ${vehiculeExistant.derniereCo.toLocaleTimeString()}`);
+                    adminMarkers[data.imei].getPopup().setContent(`<b>IMEI: ${data.imei}</b><br>Dernier Live: ${vehiculeExistant.derniereCo.toLocaleTimeString()}<br>Km: ${(vehiculeExistant.kmJour||0).toFixed(1)} km`);
                 }
             }
 
             document.getElementById('admin-flotte-count').textContent = `${flotteGlobale.length} Traceur(s)`;
             document.getElementById('stat-total-flotte').textContent = flotteGlobale.length;
+            
+            // Mise à jour des compteurs globaux de l'Admin
+            let totalKm = 0;
+            let totalRot = 0;
+            flotteGlobale.forEach(v => {
+                totalKm += (v.kmJour || 0);
+                totalRot += (v.rotationsJour || 0);
+            });
+            document.getElementById('stat-total-km').textContent = totalKm.toFixed(1);
+            document.getElementById('stat-total-rotations').textContent = totalRot;
         });
 
         function majTableauFlotteAdmin() {
@@ -617,13 +643,16 @@
             
             flotteGlobale.forEach(v => {
                 const heure = v.derniereCo.toLocaleTimeString ? v.derniereCo.toLocaleTimeString() : "Récemment";
+                const distAffichee = (v.kmJour || 0).toFixed(1) + " km";
+                const rotAffichee = v.rotationsJour || 0;
+                
                 tbody.insertAdjacentHTML('beforeend', `
                     <tr>
                         <td class="py-3 font-bold text-slate-200">${v.plaque}</td>
-                        <td class="py-3 font-sans"><span class="text-indigo-400 font-bold">Inconnu</span> (Com.)</td>
-                        <td class="py-3 text-slate-400 font-mono">${v.imei}</td>
+                        <td class="py-3 font-sans text-slate-400 font-mono">${v.imei}</td>
                         <td class="py-3 text-emerald-400 font-bold">${heure}</td>
-                        <td class="py-3 text-slate-300"><button class="bg-slate-800 text-xs px-2 py-1 rounded border border-slate-700 hover:bg-slate-700">Gérer</button></td>
+                        <td class="py-3 font-bold text-sky-400">${distAffichee}</td>
+                        <td class="py-3 font-black text-indigo-400">${rotAffichee}</td>
                     </tr>
                 `);
             });
@@ -635,7 +664,6 @@
 
         const cguDefaut = `CONDITIONS GÉNÉRALES D'UTILISATION (CGU) — TRANSVISION\nÉditées par Global Tech Solutions SARL\n\n1. OBJET DU SERVICE :\nTransVision fournit aux partenaires transporteurs et propriétaires privés une plateforme de supervision télématique par balises SinoTrack.\n\n2. FACTURATION ET VALIDITÉ :\nLa commission est perçue sur base d'un forfait flexible au nombre de jours d'activité convenus ou mensuel.`;
 
-        // Initialisation dates par défaut
         window.addEventListener('DOMContentLoaded', () => {
             const today = new Date();
             const lastWeek = new Date(today);
@@ -672,7 +700,6 @@
                 document.getElementById('corps-application-admin').classList.remove('hidden');
                 document.body.className = "bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col";
                 
-                // --- ON CHARGE SUPABASE ---
                 chargerHistoriqueAdmin();
                 
                 setTimeout(initialiserGraphiquesAdmin, 100);
@@ -697,7 +724,7 @@
             if (idPage === 'page-suivi') { setTimeout(initMapAdmin, 50); }
         }
 
-        // --- NOUVEAU : LECTURE EXCEL POUR LES ITINÉRAIRES ---
+        // --- LECTURE EXCEL POUR LES ITINÉRAIRES ---
         function importerItinerairesExcel() {
             const fileUpload = document.getElementById('excel-file-upload');
             const statusMsg = document.getElementById('excel-status-msg');
@@ -716,12 +743,10 @@
             reader.onload = function(e) {
                 try {
                     const data = new Uint8Array(e.target.result);
-                    // On utilise la librairie XLSX (SheetJS)
                     const workbook = XLSX.read(data, {type: 'array'});
                     const firstSheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[firstSheetName];
                     
-                    // Convertir la feuille en tableau JSON
                     const jsonObject = XLSX.utils.sheet_to_json(worksheet);
                     
                     if (jsonObject.length === 0) {
@@ -731,9 +756,7 @@
                     
                     let nbAjoutes = 0;
                     
-                    // On parcourt les lignes pour extraire Origine, Destination et Distance
                     jsonObject.forEach(row => {
-                        // On cherche des mots clés dans l'entête des colonnes
                         const origine = row['Origine'] || row['Depart'] || row['origine'] || "Inconnu";
                         const destination = row['Destination'] || row['Arrivee'] || row['destination'] || "Inconnu";
                         const distanceStr = row['Distance'] || row['Distance (km)'] || row['km'] || row['distance'];
@@ -754,7 +777,7 @@
                     statusMsg.className = "text-[10px] font-mono text-emerald-400 mt-2";
                     
                     afficherItinerairesAdmin();
-                    fileUpload.value = ""; // Reset de l'input
+                    fileUpload.value = ""; 
                     
                 } catch(error) {
                     console.error("Erreur de lecture Excel:", error);
@@ -792,7 +815,7 @@
             document.getElementById('badge-nb-routes').textContent = `${listeItineraires.length} Rte(s)`;
             
             if(listeItineraires.length === 0) {
-                box.innerHTML = `<p class="text-slate-500 italic text-[10px] text-center mt-10">Aucun itinéraire enregistré.</p>`;
+                box.innerHTML = `<p class="text-slate-500 italic text-[10px] text-center mt-10">Aucun itinéraire enregistré. Ajoutez-les manuellement ou via Excel pour permettre le calcul des rotations.</p>`;
                 return;
             }
             
@@ -826,7 +849,6 @@
                 mapAdmin = L.map('map-admin-suivi').setView([-4.3224, 15.3070], 12);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(mapAdmin);
                 
-                // Dessine les véhicules déjà connus lors de l'ouverture de la page
                 flotteGlobale.forEach(v => {
                     if(!adminMarkers[v.imei]) {
                         let marker = L.marker([v.lat, v.lng]).addTo(mapAdmin)
@@ -874,14 +896,14 @@
                 }
             }
 
-            selectElem.value = ""; // Réinitialise le menu déroulant
+            selectElem.value = ""; 
         }
 
         // --- VALIDATION DE RECHARGE (FLOTTE / UNITAIRE) ---
         function ouvrirModalRechargeFlexible(nom, idSolde, idJours) {
             ciblePartenaire = { nom, idSolde, idJours };
             document.getElementById('nom-partenaire-cible').textContent = nom;
-            document.getElementById('input-credit-fixer').value = ""; // Reset du montant
+            document.getElementById('input-credit-fixer').value = ""; 
             
             const selVehicules = document.getElementById('admin-recharge-vehicule-select');
             selVehicules.innerHTML = `<option value="ALL">Sélectionner (Demo)</option>`;
@@ -913,7 +935,6 @@
             if (ciblePartenaire) {
                 let msgCible = "la flotte complète";
                 if(mode === 'unitaire') {
-                    const sel = document.getElementById('admin-recharge-vehicule-select');
                     msgCible = `le véhicule ciblé`;
                 }
 
@@ -939,7 +960,6 @@
             alert("✅ Vos accès Super Admin ont été mis à jour avec succès !");
         }
 
-        // --- FILTRES DE DATES (TRÉSORERIE & STATS) ---
         function majFiltreDate(type) {
             const d1 = document.getElementById(`date-debut-${type}`).value;
             const d2 = document.getElementById(`date-fin-${type}`).value;
@@ -957,7 +977,6 @@
             alert(`✅ Données mises à jour pour la période sélectionnée.`);
         }
 
-        // --- INITIALISATION DES GRAPHIQUES ---
         function initialiserGraphiquesAdmin() {
             const canvasRecettes = document.getElementById('chart-recettes-depenses');
             if (canvasRecettes && canvasRecettes.offsetParent !== null) {
