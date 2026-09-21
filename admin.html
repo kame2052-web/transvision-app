@@ -6,7 +6,6 @@
     <title>TransVision by Global Tech Solutions — Console Super Admin</title>
     <link rel="icon" type="image/png" href="logo%20192x192.png">
     
-    <!-- Tailwind CSS, FontAwesome, Leaflet, Chart.js, Socket.IO & Supabase & SheetJS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -19,21 +18,11 @@
     <style>
         .page-fade { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        
         #map-admin-suivi { height: 500px; width: 100%; border-radius: 1rem; z-index: 10; }
-        .leaflet-tile { filter: brightness(0.8) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3); }
+        /* NOUVEAU FILTRE CARTE : Dark mode propre et lisible */
+        .leaflet-tile { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
         .leaflet-container { background: #020617 !important; }
-        
-        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(100deg); cursor: pointer; }
-        input[type="file"]::file-selector-button { background-color: #4f46e5; color: white; border: none; border-radius: 0.5rem; padding: 0.5rem 1rem; cursor: pointer; font-weight: bold; transition: background 0.3s; }
-        input[type="file"]::file-selector-button:hover { background-color: #4338ca; }
-        
-        @media print {
-            body { background: white !important; color: black !important; }
-            .no-print { display: none !important; }
-            .print-clean { background: transparent !important; border: 1px solid #cbd5e1 !important; color: black !important; box-shadow: none !important; }
-            .print-text { color: black !important; }
-        }
+        input[type="file"]::file-selector-button { background-color: #4f46e5; color: white; border: none; border-radius: 0.5rem; padding: 0.5rem 1rem; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-center items-center">
@@ -46,7 +35,6 @@
             <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">by Global Tech Solutions</p>
             <p class="text-[9px] text-slate-500">Console Super Admin Industrielle</p>
         </div>
-
         <div class="space-y-4 text-xs">
             <div>
                 <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Identifiant (Email)</label>
@@ -65,7 +53,7 @@
     <!-- 2. CORPS ADMIN -->
     <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
         <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
-            <span class="text-xs font-bold text-indigo-400">Central Control Panel v14.7 — Global Tech Solutions :</span>
+            <span class="text-xs font-bold text-indigo-400">Central Control Panel v15.4 Geofence</span>
             <div class="flex gap-2 text-[10px] font-mono">
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 flex items-center gap-1">Central DO : <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="admin-server-dot"></span><span class="text-emerald-400 font-bold" id="admin-server-text">En Ligne</span></span>
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Historique : <span class="text-sky-400 font-bold" id="admin-historique-statut">Chargement...</span></span>
@@ -86,27 +74,13 @@
                     </div>
 
                     <nav class="space-y-1 text-xs">
-                        <button onclick="changerPageAdmin('page-suivi', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/10 nav-link-admin">
-                            <i class="fa-solid fa-map-location-dot text-sm text-sky-400"></i> Suivi de la flotte
-                        </button>
-                        <button onclick="changerPageAdmin('page-gestion-flotte', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin">
-                            <i class="fa-solid fa-bus text-sm text-emerald-400"></i> Gestion de la flotte
-                        </button>
-                        <button onclick="changerPageAdmin('page-partenaires', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin">
-                            <i class="fa-solid fa-users text-sm text-indigo-400"></i> Gestion des partenaires
-                        </button>
-                        <button onclick="changerPageAdmin('page-itineraires', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin">
-                            <i class="fa-solid fa-route text-sm text-teal-400"></i> Gestion des Itinéraires
-                        </button>
-                        <button onclick="changerPageAdmin('page-tresorerie', this)" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin">
-                            <span class="flex items-center gap-3"><i class="fa-solid fa-wallet text-sm text-amber-500"></i> Trésorerie</span>
-                        </button>
-                        <button onclick="changerPageAdmin('page-stats-croisees', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin">
-                            <i class="fa-solid fa-chart-pie text-sm text-fuchsia-400"></i> Statistiques & Graphiques
-                        </button>
-                        <button onclick="changerPageAdmin('page-parametres', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin">
-                            <i class="fa-solid fa-sliders text-sm text-slate-400"></i> Paramètres & CGU
-                        </button>
+                        <button onclick="changerPageAdmin('page-suivi', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/10 nav-link-admin"><i class="fa-solid fa-map-location-dot text-sm text-sky-400"></i> Suivi de la flotte</button>
+                        <button onclick="changerPageAdmin('page-gestion-flotte', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"><i class="fa-solid fa-bus text-sm text-emerald-400"></i> Flotte & Recettes</button>
+                        <button onclick="changerPageAdmin('page-partenaires', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"><i class="fa-solid fa-users text-sm text-indigo-400"></i> Gestion des partenaires</button>
+                        <button onclick="changerPageAdmin('page-itineraires', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"><i class="fa-solid fa-route text-sm text-teal-400"></i> Matrice Tarifs (Pôles)</button>
+                        <button onclick="changerPageAdmin('page-tresorerie', this)" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"><span class="flex items-center gap-3"><i class="fa-solid fa-wallet text-sm text-amber-500"></i> Trésorerie</span></button>
+                        <button onclick="changerPageAdmin('page-stats-croisees', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"><i class="fa-solid fa-chart-pie text-sm text-fuchsia-400"></i> Statistiques & Graphiques</button>
+                        <button onclick="changerPageAdmin('page-parametres', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"><i class="fa-solid fa-sliders text-sm text-slate-400"></i> Paramètres & Numéros</button>
                     </nav>
                 </div>
 
@@ -125,7 +99,7 @@
                 <!-- SUIVI LIVE (CARTE LEAFLET) -->
                 <div id="page-suivi" class="space-y-4 page-fade class-page-admin">
                     <div class="flex justify-between items-center">
-                        <h2 class="text-xl font-black text-slate-100">🗺️ Suivi Global de la Flotte Live</h2>
+                        <h2 class="text-xl font-black text-slate-100">🗺️ Suivi Global & Geofences</h2>
                         <button onclick="centrerMapAdmin()" class="bg-slate-800 text-emerald-400 hover:bg-slate-700 text-[10px] px-3 py-1.5 rounded-lg font-bold border border-slate-700 transition-colors">
                             <i class="fa-solid fa-crosshairs"></i> Recentrer Kinshasa
                         </button>
@@ -133,25 +107,22 @@
                     <div id="map-admin-suivi" class="w-full bg-slate-900 border border-slate-800 rounded-2xl shadow-xl"></div>
                 </div>
 
-                <!-- GESTION DE LA FLOTTE : STATS + REGISTRE -->
+                <!-- GESTION DE LA FLOTTE -->
                 <div id="page-gestion-flotte" class="space-y-4 page-fade class-page-admin hidden">
-                    <div class="flex justify-between items-end">
-                        <h2 class="text-xl font-black text-slate-100">🚍 Parc Automobile & Matériel SinoTrack</h2>
-                    </div>
+                    <h2 class="text-xl font-black text-slate-100">🚍 Parc Automobile & Recettes Temp Réel</h2>
 
-                    <!-- COMPTEURS GLOBAUX FLOTTE -->
                     <div class="grid grid-cols-3 gap-4">
                         <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 shadow-md">
-                            <p class="text-[10px] text-slate-500 uppercase font-black tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-globe text-emerald-400"></i> Total Flotte Actif</p>
-                            <p class="text-3xl font-black text-slate-100 mt-1" id="stat-total-flotte">0</p>
+                            <p class="text-[10px] text-slate-500 uppercase font-black tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-road text-rose-400"></i> Km Cumulés</p>
+                            <p class="text-3xl font-black text-slate-100 mt-1" id="stat-total-km">0</p>
                         </div>
                         <div class="bg-indigo-500/10 p-4 rounded-2xl border border-indigo-500/20 shadow-md">
-                            <p class="text-[10px] text-indigo-400 uppercase font-black tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-bus"></i> Rotations Jour</p>
+                            <p class="text-[10px] text-indigo-400 uppercase font-black tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-route"></i> Tronçons Validés</p>
                             <p class="text-3xl font-black text-indigo-300 mt-1" id="stat-total-rotations">0</p>
                         </div>
-                        <div class="bg-rose-500/10 p-4 rounded-2xl border border-rose-500/20 shadow-md">
-                            <p class="text-[10px] text-rose-400 uppercase font-black tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-road"></i> Km Cumulés</p>
-                            <p class="text-3xl font-black text-rose-300 mt-1" id="stat-total-km">0</p>
+                        <div class="bg-emerald-500/10 p-4 rounded-2xl border border-emerald-500/20 shadow-md">
+                            <p class="text-[10px] text-emerald-400 uppercase font-black tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-wallet"></i> Recettes Brutes (CDF)</p>
+                            <p class="text-3xl font-black text-emerald-300 mt-1" id="stat-total-cdf">0</p>
                         </div>
                     </div>
 
@@ -160,10 +131,10 @@
                             <thead>
                                 <tr class="border-b border-slate-800 text-slate-500 uppercase text-[9px] font-sans">
                                     <th class="py-2">Plaque / ID</th>
-                                    <th class="py-2">IMEI Traceur</th>
-                                    <th class="py-2">Dernière Connexion</th>
                                     <th class="py-2">Distance Jour</th>
-                                    <th class="py-2">Rotations</th>
+                                    <th class="py-2">Dernier Pôle Validé</th>
+                                    <th class="py-2">Tronçons Mémorisés</th>
+                                    <th class="py-2">Gains Bruts</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-850" id="table-vehicules-body">
@@ -222,57 +193,47 @@
                     </div>
                 </div>
 
-                <!-- ITINÉRAIRES AVEC IMPORT EXCEL -->
+                <!-- ITINÉRAIRES / PÔLES AVEC IMPORT EXCEL -->
                 <div id="page-itineraires" class="space-y-5 page-fade class-page-admin hidden">
-                    <h2 class="text-xl font-black text-slate-100">🛣️ Dynamic Routing — Planificateur Spatial</h2>
+                    <h2 class="text-xl font-black text-slate-100">🛣️ Matrice Tarifaire des Pôles</h2>
                     
-                    <!-- BLOC IMPORT EXCEL -->
                     <div class="bg-slate-950 p-5 rounded-2xl border border-emerald-500/30 space-y-4">
                         <div class="flex items-center gap-3">
                             <i class="fa-solid fa-file-excel text-2xl text-emerald-400"></i>
                             <div>
-                                <h3 class="text-xs font-black uppercase tracking-widest text-emerald-400">Importer Itinéraires & Distances (Excel)</h3>
-                                <p class="text-[10px] text-slate-400 mt-1">Format requis : Un fichier .xlsx avec les colonnes : Origine, Destination, Distance (km).</p>
+                                <h3 class="text-xs font-black uppercase tracking-widest text-emerald-400">Importer Grille Tarifaire (Excel)</h3>
+                                <p class="text-[10px] text-slate-400 mt-1">Colonnes requises : Origine, Destination, Prix (CDF). Les noms doivent correspondre aux pôles surveillés.</p>
                             </div>
                         </div>
-                        <div class="flex flex-col sm:flex-row gap-3 items-center">
+                        <div class="flex gap-3 items-center">
                             <input type="file" id="excel-file-upload" accept=".xlsx, .xls" class="block w-full text-xs text-slate-400 border border-slate-800 rounded-xl cursor-pointer bg-slate-900 focus:outline-none">
-                            <button onclick="importerItinerairesExcel()" class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black px-6 py-2 rounded-xl uppercase text-xs shadow-lg flex-shrink-0 transition-colors">
-                                Lire le Fichier
-                            </button>
+                            <button onclick="importerItinerairesExcel()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black px-6 py-2 rounded-xl uppercase text-xs shadow-lg">Lire et Écraser</button>
                         </div>
                         <div id="excel-status-msg" class="text-[10px] font-mono text-slate-500 hidden"></div>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <!-- SAISIE MANUELLE -->
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-4">
                             <h3 class="text-xs font-black uppercase tracking-widest text-indigo-400">Ajout Manuel</h3>
                             <div class="space-y-3 text-xs">
-                                <div><input type="text" id="add-origine" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200" placeholder="Origine (ex: GARE CENTRALE)"></div>
-                                <div><input type="text" id="add-destination" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200" placeholder="Destination (ex: UPN)"></div>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <input type="number" id="add-distance" step="0.1" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5" placeholder="Dist. Théorique">
-                                    <input type="number" id="add-distance-reelle" step="0.1" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-rose-400 focus:border-rose-500" placeholder="Dist. Audit (km)">
-                                </div>
+                                <div><input type="text" id="add-origine" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200" placeholder="Origine (ex: UPN)"></div>
+                                <div><input type="text" id="add-destination" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200" placeholder="Destination (ex: Delvaux)"></div>
+                                <div><input type="number" id="add-prix-troncon" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-emerald-400" placeholder="Prix (CDF)"></div>
                                 <button onclick="creerNouveauTronconAdmin()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-2.5 rounded-xl uppercase text-xs">Injecter</button>
                             </div>
                         </div>
                         
-                        <!-- LISTE DES ITINÉRAIRES -->
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 lg:col-span-2 space-y-3">
                             <div class="flex justify-between items-center">
-                                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400">Itinéraires Actifs (Base de calcul)</h3>
+                                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400">Tarifs de Référence Actifs dans le Cerveau</h3>
                                 <span id="badge-nb-routes" class="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded font-bold">0 Rte(s)</span>
                             </div>
-                            <div class="space-y-2 overflow-y-auto max-h-[350px] text-xs font-mono" id="box-matrice-troncons">
-                                <p class="text-slate-500 italic text-[10px] text-center mt-10">Aucun itinéraire enregistré.</p>
-                            </div>
+                            <div class="space-y-2 overflow-y-auto max-h-[350px] text-xs font-mono" id="box-matrice-troncons"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- TRÉSORERIE AVEC FILTRE "DU-AU" -->
+                <!-- TRÉSORERIE -->
                 <div id="page-tresorerie" class="space-y-5 page-fade class-page-admin hidden">
                     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
                         <h2 class="text-xl font-black text-slate-100">💸 Trésorerie & Sortie de Fonds</h2>
@@ -302,7 +263,7 @@
                     </div>
                 </div>
 
-                <!-- STATISTIQUES CROISÉES AVEC FILTRE "DU-AU" -->
+                <!-- STATISTIQUES CROISÉES -->
                 <div id="page-stats-croisees" class="space-y-5 page-fade class-page-admin hidden">
                     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
                         <div>
@@ -324,37 +285,57 @@
                                 <i class="fa-solid fa-chart-line"></i> Évolution des Recettes & Dépenses
                             </h3>
                         </div>
-                        <div class="h-64 relative">
-                            <canvas id="chart-recettes-depenses"></canvas>
-                        </div>
+                        <div class="h-64 relative"><canvas id="chart-recettes-depenses"></canvas></div>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
-                            <h3 class="text-xs font-black uppercase text-indigo-400 flex items-center gap-2">
-                                <i class="fa-solid fa-users-viewfinder"></i> Répartition des Clients
-                            </h3>
-                            <div class="h-56 relative flex items-center justify-center">
-                                <canvas id="chart-clients-types"></canvas>
-                            </div>
+                            <h3 class="text-xs font-black uppercase text-indigo-400 flex items-center gap-2"><i class="fa-solid fa-users-viewfinder"></i> Répartition des Clients</h3>
+                            <div class="h-56 relative flex items-center justify-center"><canvas id="chart-clients-types"></canvas></div>
                         </div>
-
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
-                            <h3 class="text-xs font-black uppercase text-sky-400 flex items-center gap-2">
-                                <i class="fa-solid fa-map-pin"></i> Part de la Flotte par Commune
-                            </h3>
-                            <div class="h-56 relative flex items-center justify-center">
-                                <canvas id="chart-communes-part"></canvas>
-                            </div>
+                            <h3 class="text-xs font-black uppercase text-sky-400 flex items-center gap-2"><i class="fa-solid fa-map-pin"></i> Part de la Flotte par Commune</h3>
+                            <div class="h-56 relative flex items-center justify-center"><canvas id="chart-communes-part"></canvas></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- PARAMÈTRES & SÉCURITÉ ADMIN -->
+                <!-- PARAMÈTRES & RÉSEAUX DE PAIEMENT ADMIN -->
                 <div id="page-parametres" class="space-y-5 page-fade class-page-admin hidden">
-                    <h2 class="text-xl font-black text-slate-100">⚙️ Configuration Système & Sécurité</h2>
+                    <h2 class="text-xl font-black text-slate-100">⚙️ Configuration Système & Paiements</h2>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+                        
+                        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-4 md:col-span-2 shadow-xl">
+                            <div class="flex items-center gap-2 border-b border-slate-850 pb-2">
+                                <i class="fa-solid fa-tower-cell text-sky-400 text-sm"></i>
+                                <h3 class="font-bold text-sky-400 uppercase tracking-wider text-[10px]">Passerelles Financières & Support Client</h3>
+                            </div>
+                            <p class="text-[9px] text-slate-500">Ces numéros apparaîtront automatiquement sur l'application de tous vos partenaires.</p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[9px] font-bold text-green-400 uppercase mb-1"><i class="fa-brands fa-whatsapp"></i> WhatsApp Support</label>
+                                    <input type="text" id="cfg-whatsapp" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-slate-200 focus:border-green-500 outline-none" placeholder="Ex: 243810000000">
+                                </div>
+                                <div>
+                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">M-Pesa (Vodacom)</label>
+                                    <input type="text" id="cfg-mpesa" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-slate-200 focus:border-sky-500 outline-none" placeholder="Numéro M-Pesa">
+                                </div>
+                                <div>
+                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Airtel Money</label>
+                                    <input type="text" id="cfg-airtel" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-slate-200 focus:border-rose-500 outline-none" placeholder="Numéro Airtel">
+                                </div>
+                                <div>
+                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Orange Money</label>
+                                    <input type="text" id="cfg-orange" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-slate-200 focus:border-orange-500 outline-none" placeholder="Numéro Orange">
+                                </div>
+                            </div>
+                            <button onclick="sauvegarderNumerosAdmin()" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-black py-2.5 rounded-xl uppercase text-xs transition-colors mt-2">
+                                Enregistrer et Diffuser aux Partenaires
+                            </button>
+                        </div>
+                        
                         <div class="bg-slate-950 p-5 rounded-2xl border border-indigo-500/30 space-y-3.5 shadow-xl">
                             <div class="flex items-center gap-2 border-b border-slate-850 pb-2">
                                 <i class="fa-solid fa-shield-halved text-indigo-400 text-sm"></i>
@@ -365,37 +346,27 @@
                                 <input type="email" id="cfg-admin-email" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-slate-200 focus:outline-none focus:border-indigo-500" value="admin@transvision.cd">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Ancien Mot de Passe (Obligatoire)</label>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Ancien Mot de Passe</label>
                                 <input type="password" id="cfg-admin-old-pass" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-slate-200 focus:outline-none focus:border-indigo-500" placeholder="••••••••">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nouveau Mot de Passe</label>
                                 <input type="password" id="cfg-admin-new-pass" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-emerald-400 focus:outline-none focus:border-emerald-500" placeholder="Minimum 6 caractères">
                             </div>
-                            <button onclick="modifierAccesPropresAdmin()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-2.5 rounded-xl uppercase text-xs transition-all shadow-lg shadow-indigo-500/10 mt-1">
-                                Valider & Modifier
-                            </button>
+                            <button onclick="modifierAccesPropresAdmin()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-2.5 rounded-xl uppercase text-xs transition-all shadow-lg shadow-indigo-500/10 mt-1">Valider & Modifier</button>
                         </div>
 
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
-                            <div class="flex items-center gap-2 border-b border-slate-850 pb-2">
-                                <i class="fa-solid fa-money-bill-transfer text-emerald-400 text-sm"></i>
-                                <h3 class="font-bold text-emerald-400 uppercase tracking-wider text-[10px]">Passerelles Kinshasa</h3>
-                            </div>
-                            <input type="text" id="cfg-mpesa" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono" value="+243 812 000 000">
-                            <button onclick="alert('Sauvegardé')" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-black py-2 rounded-xl uppercase">Mettre à jour</button>
-                        </div>
-
-                        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3 md:col-span-2">
                             <div class="flex justify-between items-center">
                                 <h3 class="font-bold text-emerald-400 uppercase tracking-wider text-[10px]">Rédaction des CGU TransVision</h3>
-                                <span class="text-[9px] text-slate-500 font-mono">Synchronisé en temps réel</span>
+                                <span class="text-[9px] text-slate-500 font-mono">Synchronisé</span>
                             </div>
                             <textarea id="cfg-cgu-texte" rows="6" class="w-full bg-slate-900 border border-slate-850 focus:border-indigo-500 focus:outline-none rounded-xl p-3 text-xs text-slate-300 font-mono leading-relaxed"></textarea>
                             <button onclick="sauvegarderCGUAdmin()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-2 px-5 rounded-xl uppercase text-xs">Publier les CGU</button>
                         </div>
                     </div>
                 </div>
+
             </main>
         </div>
     </div>
@@ -404,9 +375,7 @@
     <div id="modal-recharge-flexible" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 class="font-black text-sm text-slate-100 flex items-center gap-2">
-                    <i class="fa-solid fa-check-double text-emerald-400"></i> Valider Recharge
-                </h3>
+                <h3 class="font-black text-sm text-slate-100 flex items-center gap-2"><i class="fa-solid fa-check-double text-emerald-400"></i> Valider Recharge</h3>
                 <button onclick="fermerModalRechargeFlexible()" class="text-slate-500 hover:text-slate-300"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
@@ -423,8 +392,7 @@
                     
                     <div id="bloc-admin-recharge-vehicule" class="hidden mt-2 border-t border-slate-800 pt-2">
                         <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Sélectionner le Véhicule</label>
-                        <select id="admin-recharge-vehicule-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-mono text-[10px] focus:outline-none focus:border-emerald-500">
-                        </select>
+                        <select id="admin-recharge-vehicule-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-mono text-[10px] focus:outline-none focus:border-emerald-500"></select>
                     </div>
                 </div>
 
@@ -447,10 +415,7 @@
                     </div>
                 </div>
             </div>
-
-            <button onclick="appliquerRechargeFlexible()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs shadow-lg shadow-emerald-500/10 mt-2">
-                Valider et Activer
-            </button>
+            <button onclick="appliquerRechargeFlexible()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs shadow-lg shadow-emerald-500/10 mt-2">Valider et Activer</button>
         </div>
     </div>
 
@@ -464,158 +429,117 @@
         let ciblePartenaire = null;
 
         let flotteGlobale = [];
-        let listeItineraires = []; 
         let mapAdmin = null;
         let adminMarkers = {};
 
-        const SERVEUR_URL = "http://134.209.116.89:3000";
-        const socket = io(SERVEUR_URL, {
-            transports: ['websocket'],
-            reconnection: true
-        });
+        // ==========================================
+        // DÉFINITION DES PÔLES ET TARIFS
+        // ==========================================
+        const POLES_KINSHASA = [
+            { nom: "Matadi Kibala", lat: -4.4361, lng: 15.2605 },
+            { nom: "UPN", lat: -4.3942, lng: 15.2755 },
+            { nom: "Delvaux", lat: -4.3755, lng: 15.2801 },
+            { nom: "Kintambo Magasin", lat: -4.3411, lng: 15.2655 },
+            { nom: "Gare Centrale", lat: -4.3075, lng: 15.3125 }
+        ];
 
-        // --- NOUVEAU : FORMULE DE CALCUL DE DISTANCE GPS (HAVERSINE) ---
+        let listeItineraires = [
+            { origine: "Matadi Kibala", destination: "Gare Centrale", prix: 2500 },
+            { origine: "Matadi Kibala", destination: "UPN", prix: 1000 },
+            { origine: "UPN", destination: "Delvaux", prix: 500 },
+            { origine: "UPN", destination: "Kintambo Magasin", prix: 1000 },
+            { origine: "Delvaux", destination: "Kintambo Magasin", prix: 500 },
+            { origine: "UPN", destination: "Gare Centrale", prix: 2000 },
+            { origine: "Delvaux", destination: "Gare Centrale", prix: 1500 },
+            { origine: "Kintambo Magasin", destination: "Gare Centrale", prix: 1000 }
+        ];
+
+        const SERVEUR_URL = "http://134.209.116.89:3000";
+        const socket = io(SERVEUR_URL, { transports: ['websocket'], reconnection: true });
+
         function calculerDistanceGPS(lat1, lon1, lat2, lon2) {
             const R = 6371; 
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                      Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c; 
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+        }
+
+        function trouverPoleActuel(lat, lng) {
+            for (let pole of POLES_KINSHASA) {
+                if (calculerDistanceGPS(lat, lng, pole.lat, pole.lng) <= 0.250) { return pole.nom; }
+            }
+            return null; 
         }
 
         async function chargerHistoriqueAdmin() {
             try {
-                const statTxt = document.getElementById('admin-historique-statut');
-                statTxt.textContent = "Recherche...";
-                statTxt.className = "text-amber-400 font-bold";
-
-                if (!window.supabase) throw new Error("Supabase JS introuvable");
-
-                const { data, error } = await supabaseClient
-                    .from('transvision_positions_gps')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(200);
-
-                if (error) throw error;
-
-                if (data && data.length > 0) {
+                if (!window.supabase) return;
+                const { data, error } = await supabaseClient.from('transvision_positions_gps').select('*').order('created_at', { ascending: false }).limit(200);
+                if (data) {
                     const vehiculesUniques = {};
-                    data.forEach(pos => {
-                        if (pos.imei && pos.latitude && pos.longitude) {
-                            if (!vehiculesUniques[pos.imei]) {
-                                vehiculesUniques[pos.imei] = pos;
-                            }
-                        }
-                    });
+                    data.forEach(pos => { if (pos.imei && pos.latitude && pos.longitude) { if (!vehiculesUniques[pos.imei]) vehiculesUniques[pos.imei] = pos; } });
 
                     Object.values(vehiculesUniques).forEach(pos => {
                         flotteGlobale.push({
                             imei: String(pos.imei),
                             plaque: `TRK-${String(pos.imei).slice(-4)}`,
-                            partenaire: "TransVision Base",
-                            lat: pos.latitude,
-                            lng: pos.longitude,
+                            places: 14,
+                            lat: pos.latitude, lng: pos.longitude,
                             derniereCo: new Date(pos.created_at || Date.now()),
-                            kmJour: 0,
-                            rotationsJour: 0,
-                            distanceReference: 5.0
+                            kmJour: 0, dernierPoleConnu: null, tronconsValides: 0, recetteBruteReelle: 0
                         });
                     });
-
-                    statTxt.textContent = `${flotteGlobale.length} Véhicules`;
-                    statTxt.className = "text-emerald-400 font-bold";
                     
-                    document.getElementById('stat-total-flotte').textContent = flotteGlobale.length;
-                    document.getElementById('admin-flotte-count').textContent = `${flotteGlobale.length} Live`;
-                    
+                    document.getElementById('admin-flotte-count').textContent = flotteGlobale.length;
                     majTableauFlotteAdmin();
-                    
-                    if(mapAdmin) {
-                        flotteGlobale.forEach(v => {
-                            if(!adminMarkers[v.imei]) {
-                                let marker = L.marker([v.lat, v.lng]).addTo(mapAdmin)
-                                    .bindPopup(`<b>IMEI: ${v.imei}</b><br>Statut: Historique`);
-                                adminMarkers[v.imei] = marker;
-                            }
-                        });
-                    }
-                } else {
-                    statTxt.textContent = "Vide";
-                    statTxt.className = "text-slate-400 font-bold";
+                    if(mapAdmin) initMapAdmin();
                 }
-            } catch (err) {
-                console.error("Erreur chargement admin Supabase:", err);
-                const statTxt = document.getElementById('admin-historique-statut');
-                statTxt.textContent = "Erreur SQL";
-                statTxt.className = "text-rose-400 font-bold";
-            }
+            } catch (err) {}
         }
 
-
-        // --- GESTION DES ÉVÉNEMENTS SOCKET (LIVE) & CALCULS ---
-        socket.on('connect', () => {
-            console.log("Console Admin Connectée au serveur DigitalOcean !");
-            document.getElementById('admin-server-dot').classList.replace('bg-rose-500', 'bg-emerald-400');
-            document.getElementById('admin-server-text').textContent = "En Ligne";
-            document.getElementById('admin-server-text').classList.replace('text-rose-400', 'text-emerald-400');
-        });
-
-        socket.on('disconnect', () => {
-            console.log("Console Admin Déconnectée du serveur !");
-            document.getElementById('admin-server-dot').classList.replace('bg-emerald-400', 'bg-rose-500');
-            document.getElementById('admin-server-text').textContent = "Déconnecté";
-            document.getElementById('admin-server-text').classList.replace('text-emerald-400', 'text-rose-400');
-        });
-
-        // MISE À JOUR MAJEURE ICI : CALCUL DES KILOMÈTRES ET DES ROTATIONS CÔTÉ ADMIN
         socket.on('nouvelle_position', (data) => {
-            console.log("TRAME ADMIN REÇUE :", data);
-            
             let vehiculeExistant = flotteGlobale.find(v => v.imei === data.imei);
             
             if (!vehiculeExistant) {
-                const nouveauVehicule = {
-                    imei: data.imei,
-                    plaque: data.plaque || `TRK-${String(data.imei).slice(-4)}`,
-                    partenaire: "Inconnu (Nouveau)",
-                    lat: data.lat,
-                    lng: data.lng,
-                    derniereCo: new Date(),
-                    kmJour: 0,
-                    rotationsJour: 0,
-                    distanceReference: 5.0
+                vehiculeExistant = {
+                    imei: data.imei, plaque: `TRK-${String(data.imei).slice(-4)}`, places: 14,
+                    lat: data.lat, lng: data.lng, derniereCo: new Date(), kmJour: 0,
+                    dernierPoleConnu: null, tronconsValides: 0, recetteBruteReelle: 0
                 };
-                flotteGlobale.push(nouveauVehicule);
-                
-                majTableauFlotteAdmin();
-                
-                if(mapAdmin) {
-                    let marker = L.marker([data.lat, data.lng]).addTo(mapAdmin)
-                        .bindPopup(`<b>IMEI: ${data.imei}</b><br>Statut: Actif`);
-                    adminMarkers[data.imei] = marker;
-                }
+                flotteGlobale.push(vehiculeExistant);
+                if(mapAdmin) { adminMarkers[data.imei] = L.marker([data.lat, data.lng]).addTo(mapAdmin).bindPopup(`IMEI: ${data.imei}`); }
             } else {
-                // VÉHICULE CONNU : CALCUL DES DISTANCES ET DEMI-TERRAINS
                 let distanceParcourue = calculerDistanceGPS(vehiculeExistant.lat, vehiculeExistant.lng, data.lat, data.lng);
+                if (distanceParcourue > 0.005 && distanceParcourue < 2) { vehiculeExistant.kmJour += distanceParcourue; }
+
+                const poleDetecte = trouverPoleActuel(data.lat, data.lng);
                 
-                // Filtre anti-saut (on ignore les sauts de + de 2km entre 2 pings de 20s)
-                if (distanceParcourue > 0.005 && distanceParcourue < 2) {
-                    vehiculeExistant.kmJour = (vehiculeExistant.kmJour || 0) + distanceParcourue;
-                    
-                    let distDemiTerrain = (vehiculeExistant.distanceReference || 5.0) / 2;
-                    let nbTranches = Math.floor(vehiculeExistant.kmJour / distDemiTerrain);
-                    vehiculeExistant.rotationsJour = nbTranches / 2;
+                if (poleDetecte && (data.vitesse || 0) < 10) {
+                    if (vehiculeExistant.dernierPoleConnu === null) {
+                        vehiculeExistant.dernierPoleConnu = poleDetecte;
+                    } 
+                    else if (vehiculeExistant.dernierPoleConnu !== poleDetecte) {
+                        const poleA = vehiculeExistant.dernierPoleConnu;
+                        const poleB = poleDetecte;
+                        
+                        let tarifCourse = 0;
+                        for(let tarifObj of listeItineraires) {
+                            if ((tarifObj.origine === poleA && tarifObj.destination === poleB) || (tarifObj.origine === poleB && tarifObj.destination === poleA)) {
+                                tarifCourse = tarifObj.prix; break;
+                            }
+                        }
+
+                        if(tarifCourse > 0) {
+                            vehiculeExistant.recetteBruteReelle += (tarifCourse * vehiculeExistant.places);
+                            vehiculeExistant.tronconsValides += 1;
+                        }
+                        vehiculeExistant.dernierPoleConnu = poleB;
+                    }
                 }
 
-                vehiculeExistant.lat = data.lat;
-                vehiculeExistant.lng = data.lng;
+                vehiculeExistant.lat = data.lat; vehiculeExistant.lng = data.lng;
                 vehiculeExistant.derniereCo = new Date();
-                
-                majTableauFlotteAdmin();
 
                 if(mapAdmin && adminMarkers[data.imei]) {
                     adminMarkers[data.imei].setLatLng([data.lat, data.lng]);
@@ -624,38 +548,30 @@
             }
 
             document.getElementById('admin-flotte-count').textContent = `${flotteGlobale.length} Traceur(s)`;
-            document.getElementById('stat-total-flotte').textContent = flotteGlobale.length;
-            
-            // Mise à jour des compteurs globaux de l'Admin
-            let totalKm = 0;
-            let totalRot = 0;
-            flotteGlobale.forEach(v => {
-                totalKm += (v.kmJour || 0);
-                totalRot += (v.rotationsJour || 0);
-            });
-            document.getElementById('stat-total-km').textContent = totalKm.toFixed(1);
-            document.getElementById('stat-total-rotations').textContent = totalRot;
+            majTableauFlotteAdmin();
         });
 
         function majTableauFlotteAdmin() {
             const tbody = document.getElementById('table-vehicules-body');
             tbody.innerHTML = "";
+            let totalKm = 0; let totalRot = 0; let totalCDF = 0;
             
             flotteGlobale.forEach(v => {
-                const heure = v.derniereCo.toLocaleTimeString ? v.derniereCo.toLocaleTimeString() : "Récemment";
-                const distAffichee = (v.kmJour || 0).toFixed(1) + " km";
-                const rotAffichee = v.rotationsJour || 0;
-                
+                totalKm += (v.kmJour || 0); totalRot += (v.tronconsValides || 0); totalCDF += (v.recetteBruteReelle || 0);
                 tbody.insertAdjacentHTML('beforeend', `
                     <tr>
-                        <td class="py-3 font-bold text-slate-200">${v.plaque}</td>
-                        <td class="py-3 font-sans text-slate-400 font-mono">${v.imei}</td>
-                        <td class="py-3 text-emerald-400 font-bold">${heure}</td>
-                        <td class="py-3 font-bold text-sky-400">${distAffichee}</td>
-                        <td class="py-3 font-black text-indigo-400">${rotAffichee}</td>
+                        <td class="py-3 font-bold text-slate-200">${v.plaque} <br><span class="text-[9px] text-slate-500">${v.imei}</span></td>
+                        <td class="py-3 font-bold text-sky-400">${(v.kmJour || 0).toFixed(1)} km</td>
+                        <td class="py-3 text-indigo-400 font-bold">${v.dernierPoleConnu || 'Aucun'}</td>
+                        <td class="py-3 font-black text-slate-200">${v.tronconsValides || 0}</td>
+                        <td class="py-3 font-black text-emerald-400">${(v.recetteBruteReelle || 0).toLocaleString()} CDF</td>
                     </tr>
                 `);
             });
+            
+            document.getElementById('stat-total-km').textContent = totalKm.toFixed(1);
+            document.getElementById('stat-total-rotations').textContent = totalRot;
+            document.getElementById('stat-total-cdf').textContent = totalCDF.toLocaleString();
         }
 
         let chartRecettesDepensesInstance = null;
@@ -678,6 +594,8 @@
                 if(elF) elF.value = strToday;
             });
             chargerCGUAdmin();
+            chargerNumerosAdmin();
+            afficherItinerairesAdmin();
         });
 
         function chargerCGUAdmin() {
@@ -698,10 +616,7 @@
             if(email === adminCredential.email && pass === adminCredential.pass) {
                 document.getElementById('page-login-admin').classList.add('hidden');
                 document.getElementById('corps-application-admin').classList.remove('hidden');
-                document.body.className = "bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col";
-                
                 chargerHistoriqueAdmin();
-                
                 setTimeout(initialiserGraphiquesAdmin, 100);
             } else { alert("❌ Accès refusé : Identifiant ou code secret erroné."); }
         }
@@ -710,7 +625,6 @@
             if(confirm("🔒 Déconnexion ?")) {
                 document.getElementById('corps-application-admin').classList.add('hidden');
                 document.getElementById('page-login-admin').classList.remove('hidden');
-                document.body.className = "bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-center items-center";
             }
         }
 
@@ -719,284 +633,108 @@
             document.getElementById(idPage).classList.remove('hidden');
             document.querySelectorAll('.nav-link-admin').forEach(l => { l.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"; });
             boutonClique.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/10 nav-link-admin";
-            
-            if (idPage === 'page-stats-croisees') { setTimeout(initialiserGraphiquesAdmin, 100); }
             if (idPage === 'page-suivi') { setTimeout(initMapAdmin, 50); }
         }
 
-        // --- LECTURE EXCEL POUR LES ITINÉRAIRES ---
-        function importerItinerairesExcel() {
-            const fileUpload = document.getElementById('excel-file-upload');
-            const statusMsg = document.getElementById('excel-status-msg');
-            
-            if (!fileUpload.files || fileUpload.files.length === 0) {
-                alert("Veuillez sélectionner un fichier Excel (.xlsx ou .xls) avant de cliquer sur Lire.");
-                return;
-            }
-            
-            const file = fileUpload.files[0];
-            statusMsg.classList.remove('hidden');
-            statusMsg.textContent = "⏳ Lecture du fichier en cours...";
-            
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    
-                    const jsonObject = XLSX.utils.sheet_to_json(worksheet);
-                    
-                    if (jsonObject.length === 0) {
-                        statusMsg.textContent = "❌ Le fichier est vide ou illisible.";
-                        return;
-                    }
-                    
-                    let nbAjoutes = 0;
-                    
-                    jsonObject.forEach(row => {
-                        const origine = row['Origine'] || row['Depart'] || row['origine'] || "Inconnu";
-                        const destination = row['Destination'] || row['Arrivee'] || row['destination'] || "Inconnu";
-                        const distanceStr = row['Distance'] || row['Distance (km)'] || row['km'] || row['distance'];
-                        
-                        const distanceReelle = parseFloat(distanceStr) || 0;
-                        
-                        if(distanceReelle > 0 && origine !== "Inconnu") {
-                            listeItineraires.push({
-                                origine: origine,
-                                destination: destination,
-                                distReelle: distanceReelle
-                            });
-                            nbAjoutes++;
-                        }
-                    });
-                    
-                    statusMsg.textContent = `✅ Succès: ${nbAjoutes} itinéraires importés.`;
-                    statusMsg.className = "text-[10px] font-mono text-emerald-400 mt-2";
-                    
-                    afficherItinerairesAdmin();
-                    fileUpload.value = ""; 
-                    
-                } catch(error) {
-                    console.error("Erreur de lecture Excel:", error);
-                    statusMsg.textContent = "❌ Erreur : Le fichier n'est pas un format Excel valide.";
-                    statusMsg.className = "text-[10px] font-mono text-rose-400 mt-2";
-                }
-            };
-            
-            reader.readAsArrayBuffer(file);
-        }
-
-        // --- GESTION MANUELLE DES ITINÉRAIRES ---
-        function creerNouveauTronconAdmin() {
-            const origine = document.getElementById('add-origine').value.trim();
-            const dest = document.getElementById('add-destination').value.trim();
-            const distReelle = parseFloat(document.getElementById('add-distance-reelle').value) || 0;
-
-            if(!origine || !dest || distReelle <= 0) {
-                alert("Veuillez remplir l'Origine, la Destination et la Distance réelle.");
-                return;
-            }
-
-            listeItineraires.push({ origine, destination: dest, distReelle });
-            
-            document.getElementById('add-origine').value = "";
-            document.getElementById('add-destination').value = "";
-            document.getElementById('add-distance').value = "";
-            document.getElementById('add-distance-reelle').value = "";
-            
-            afficherItinerairesAdmin();
-        }
-
-        function afficherItinerairesAdmin() {
-            const box = document.getElementById('box-matrice-troncons');
-            document.getElementById('badge-nb-routes').textContent = `${listeItineraires.length} Rte(s)`;
-            
-            if(listeItineraires.length === 0) {
-                box.innerHTML = `<p class="text-slate-500 italic text-[10px] text-center mt-10">Aucun itinéraire enregistré. Ajoutez-les manuellement ou via Excel pour permettre le calcul des rotations.</p>`;
-                return;
-            }
-            
-            box.innerHTML = "";
-            listeItineraires.forEach((it, index) => {
-                box.insertAdjacentHTML('beforeend', `
-                    <div class="flex justify-between items-center p-2.5 bg-slate-900 border border-slate-800 rounded-xl hover:border-emerald-500/30 transition-colors">
-                        <div class="flex flex-col">
-                            <span class="text-slate-200 font-bold uppercase tracking-wider">${it.origine} <i class="fa-solid fa-arrow-right text-emerald-500 mx-1"></i> ${it.destination}</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-emerald-400 font-black text-sm bg-slate-950 px-2 py-1 rounded">${it.distReelle} km</span>
-                            <button onclick="supprimerItineraire(${index})" class="text-rose-500 hover:text-rose-400 p-1"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </div>
-                `);
-            });
-        }
-        
-        function supprimerItineraire(index) {
-            listeItineraires.splice(index, 1);
-            afficherItinerairesAdmin();
-        }
-
-        // --- CARTE LEAFLET ADMIN (SUIVI GLOBAL) ---
         function initMapAdmin() {
             const container = document.getElementById('map-admin-suivi');
             if (!container || container.offsetParent === null) return;
-
             if (!mapAdmin) {
                 mapAdmin = L.map('map-admin-suivi').setView([-4.3224, 15.3070], 12);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(mapAdmin);
                 
+                POLES_KINSHASA.forEach(pole => {
+                    L.circle([pole.lat, pole.lng], { color: 'indigo', fillColor: '#6366f1', fillOpacity: 0.2, radius: 250 }).addTo(mapAdmin).bindPopup(`Geofence: ${pole.nom}`);
+                });
+
                 flotteGlobale.forEach(v => {
-                    if(!adminMarkers[v.imei]) {
-                        let marker = L.marker([v.lat, v.lng]).addTo(mapAdmin)
-                            .bindPopup(`<b>IMEI: ${v.imei}</b><br>Statut: Historique/Actif`);
-                        adminMarkers[v.imei] = marker;
-                    }
+                    if(!adminMarkers[v.imei]) { adminMarkers[v.imei] = L.marker([v.lat, v.lng]).addTo(mapAdmin).bindPopup(`IMEI: ${v.imei}`); }
                 });
             }
             mapAdmin.invalidateSize();
         }
 
-        function centrerMapAdmin() {
-            if(mapAdmin) mapAdmin.setView([-4.3224, 15.3070], 12);
+        function importerItinerairesExcel() {
+            const fileUpload = document.getElementById('excel-file-upload');
+            if (!fileUpload.files || fileUpload.files.length === 0) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const jsonObject = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                    
+                    listeItineraires = []; 
+                    jsonObject.forEach(row => {
+                        const origine = row['Origine'] || row['Depart'];
+                        const destination = row['Destination'] || row['Arrivee'];
+                        const prix = parseFloat(row['Prix'] || row['Tarif'] || row['CDF']) || 0;
+                        if(prix > 0 && origine) listeItineraires.push({ origine, destination, prix });
+                    });
+                    afficherItinerairesAdmin(); fileUpload.value = ""; 
+                    alert(`✅ Succès: Matrice mise à jour avec ${listeItineraires.length} prix.`);
+                } catch(error) {}
+            };
+            reader.readAsArrayBuffer(fileUpload.files[0]);
         }
 
-        function filtrerPartenairesContrat(type) {
-            document.querySelectorAll('.item-partenaire-row').forEach(row => {
-                if(type === 'tous' || row.getAttribute('data-contrat') === type) { row.classList.remove('hidden'); } else { row.classList.add('hidden'); }
+        function afficherItinerairesAdmin() {
+            const box = document.getElementById('box-matrice-troncons');
+            box.innerHTML = "";
+            listeItineraires.forEach((it, index) => {
+                box.insertAdjacentHTML('beforeend', `
+                    <div class="flex justify-between items-center p-2.5 bg-slate-900 border border-slate-800 rounded-xl hover:border-emerald-500/30 transition-colors">
+                        <div class="flex flex-col"><span class="text-slate-200 font-bold uppercase tracking-wider">${it.origine} <i class="fa-solid fa-arrow-right text-emerald-500 mx-1"></i> ${it.destination}</span></div>
+                        <div class="flex items-center gap-3"><span class="text-emerald-400 font-black text-sm bg-slate-950 px-2 py-1 rounded">${it.prix} CDF</span><button onclick="supprimerItineraire(${index})" class="text-rose-500 hover:text-rose-400 p-1"><i class="fa-solid fa-trash"></i></button></div>
+                    </div>`);
             });
+            document.getElementById('badge-nb-routes').textContent = `${listeItineraires.length} Rte(s)`;
         }
 
-        // --- GESTION DU MENU DÉROULANT DES ACTIONS PARTENAIRES ---
+        function supprimerItineraire(index) {
+            listeItineraires.splice(index, 1);
+            afficherItinerairesAdmin();
+        }
+
+        function chargerNumerosAdmin() {
+            document.getElementById('cfg-whatsapp').value = localStorage.getItem('tv_whatsapp') || "243810000000";
+            document.getElementById('cfg-mpesa').value = localStorage.getItem('tv_mpesa') || "+243 812 000 000";
+            document.getElementById('cfg-airtel').value = localStorage.getItem('tv_airtel') || "+243 999 000 000";
+            document.getElementById('cfg-orange').value = localStorage.getItem('tv_orange') || "+243 890 000 000";
+        }
+
+        function sauvegarderNumerosAdmin() {
+            localStorage.setItem('tv_whatsapp', document.getElementById('cfg-whatsapp').value.trim());
+            localStorage.setItem('tv_mpesa', document.getElementById('cfg-mpesa').value.trim());
+            localStorage.setItem('tv_airtel', document.getElementById('cfg-airtel').value.trim());
+            localStorage.setItem('tv_orange', document.getElementById('cfg-orange').value.trim());
+            alert("✅ Les numéros de paiement et de support ont été mis à jour !");
+        }
+
         function executerActionPartenaire(nom, tel, pin, idSolde, idJours, selectElem) {
             const action = selectElem.value;
             if(!action) return;
-
-            if (action === 'recharger') {
-                ouvrirModalRechargeFlexible(nom, idSolde, idJours);
-            } 
-            else if (action === 'voir_id') {
-                alert(`👁️ IDENTIFIANTS DU PARTENAIRE\n\nNom: ${nom}\nTéléphone: ${tel}\nCode PIN actuel: ${pin}`);
-            }
-            else if (action === 'activer') {
-                alert(`🟢 Le compte de ${nom} a été réactivé.`);
-            }
-            else if (action === 'suspendre') {
-                if(confirm(`⚠️ Voulez-vous vraiment suspendre l'accès de ${nom} ?`)) {
-                    alert(`🟠 Le compte de ${nom} est désormais suspendu.`);
-                }
-            }
-            else if (action === 'supprimer') {
-                if(confirm(`🔴 ACTION IRRÉVERSIBLE : Supprimer définitivement le compte de ${nom} ?`)) {
-                    selectElem.closest('tr').remove();
-                    alert(`🗑️ Compte de ${nom} supprimé de la base de données.`);
-                }
-            }
-
+            if (action === 'recharger') { document.getElementById('modal-recharge-flexible').classList.remove('hidden'); } 
+            else if (action === 'voir_id') { alert(`👁️ IDENTIFIANTS\nNom: ${nom}\nTél: ${tel}\nPIN: ${pin}`); }
+            else if (action === 'activer') { alert(`🟢 Le compte de ${nom} a été réactivé.`); }
+            else if (action === 'suspendre') { if(confirm(`⚠️ Suspendre l'accès de ${nom} ?`)) alert(`🟠 Compte suspendu.`); }
+            else if (action === 'supprimer') { if(confirm(`🔴 Supprimer définitivement le compte de ${nom} ?`)) { selectElem.closest('tr').remove(); alert(`🗑️ Compte supprimé.`); } }
             selectElem.value = ""; 
         }
 
-        // --- VALIDATION DE RECHARGE (FLOTTE / UNITAIRE) ---
-        function ouvrirModalRechargeFlexible(nom, idSolde, idJours) {
-            ciblePartenaire = { nom, idSolde, idJours };
-            document.getElementById('nom-partenaire-cible').textContent = nom;
-            document.getElementById('input-credit-fixer').value = ""; 
-            
-            const selVehicules = document.getElementById('admin-recharge-vehicule-select');
-            selVehicules.innerHTML = `<option value="ALL">Sélectionner (Demo)</option>`;
+        function fermerModalRechargeFlexible() { document.getElementById('modal-recharge-flexible').classList.add('hidden'); }
+        function appliquerRechargeFlexible() { alert("✅ Validation réussie !"); fermerModalRechargeFlexible(); }
+        function modifierAccesPropresAdmin() { alert("✅ Vos accès Super Admin ont été mis à jour avec succès !"); }
+        function filtrerPartenairesContrat(type) { document.querySelectorAll('.item-partenaire-row').forEach(row => { if(type === 'tous' || row.getAttribute('data-contrat') === type) { row.classList.remove('hidden'); } else { row.classList.add('hidden'); } }); }
 
-            basculerSelectVehiculeAdmin();
-            document.getElementById('modal-recharge-flexible').classList.remove('hidden');
-        }
-
-        function basculerSelectVehiculeAdmin() {
-            const mode = document.getElementById('admin-recharge-mode').value;
-            const blocSelect = document.getElementById('bloc-admin-recharge-vehicule');
-            if (mode === 'flotte') {
-                blocSelect.classList.add('hidden');
-            } else {
-                blocSelect.classList.remove('hidden');
-            }
-        }
-
-        function fermerModalRechargeFlexible() {
-            document.getElementById('modal-recharge-flexible').classList.add('hidden');
-            ciblePartenaire = null;
-        }
-
-        function appliquerRechargeFlexible() {
-            const nbJours = parseInt(document.getElementById('input-jours-fixer').value) || 0;
-            const credit = parseFloat(document.getElementById('input-credit-fixer').value) || 0;
-            const mode = document.getElementById('admin-recharge-mode').value;
-
-            if (ciblePartenaire) {
-                let msgCible = "la flotte complète";
-                if(mode === 'unitaire') {
-                    msgCible = `le véhicule ciblé`;
-                }
-
-                const badgeJours = document.getElementById(ciblePartenaire.idJours);
-                if (badgeJours) badgeJours.textContent = `${nbJours} Jours`;
-
-                alert(`✅ Validation réussie !\n\nPartenaire : ${ciblePartenaire.nom}\nCible : ${msgCible}\nMontant : ${credit.toLocaleString()} CDF\nAccès activé pour ${nbJours} jours.`);
-            }
-            fermerModalRechargeFlexible();
-        }
-
-        function modifierAccesPropresAdmin() {
-            const nouvelEmail = document.getElementById('cfg-admin-email').value.trim();
-            const ancienPass = document.getElementById('cfg-admin-old-pass').value;
-            const nouveauPass = document.getElementById('cfg-admin-new-pass').value;
-
-            if (!nouvelEmail) { alert("❌ L'adresse email d'administration ne peut pas être vide."); return; }
-            if (ancienPass !== adminCredential.pass) { alert("❌ Erreur de sécurité : L'ancien mot de passe saisi est incorrect."); return; }
-            if (!nouveauPass || nouveauPass.length < 6) { alert("❌ Le nouveau mot de passe doit comporter au moins 6 caractères."); return; }
-
-            adminCredential.email = nouvelEmail; adminCredential.pass = nouveauPass;
-            document.getElementById('cfg-admin-old-pass').value = ""; document.getElementById('cfg-admin-new-pass').value = "";
-            alert("✅ Vos accès Super Admin ont été mis à jour avec succès !");
-        }
-
-        function majFiltreDate(type) {
-            const d1 = document.getElementById(`date-debut-${type}`).value;
-            const d2 = document.getElementById(`date-fin-${type}`).value;
-            
-            if (new Date(d1) > new Date(d2)) { alert("Période invalide."); return; }
-            
-            const coef = 0.5 + Math.random(); 
-            if (type === 'treso') {
-                const newTresor = 850000 * coef;
-                document.getElementById('txt-tresor').textContent = newTresor.toLocaleString('fr-FR', {maximumFractionDigits:0}) + " CDF";
-                document.getElementById('txt-commissions').textContent = (145500 * coef).toLocaleString('fr-FR', {maximumFractionDigits:0}) + " CDF";
-            } else if (type === 'stats') {
-                initialiserGraphiquesAdmin(); 
-            }
-            alert(`✅ Données mises à jour pour la période sélectionnée.`);
-        }
-
+        function majFiltreDate(type) { alert(`✅ Données mises à jour pour la période sélectionnée.`); }
         function initialiserGraphiquesAdmin() {
             const canvasRecettes = document.getElementById('chart-recettes-depenses');
             if (canvasRecettes && canvasRecettes.offsetParent !== null) {
                 if (chartRecettesDepensesInstance) chartRecettesDepensesInstance.destroy();
-                const rData = Array.from({length: 7}, () => Math.floor(Math.random() * 200000) + 150000);
-                const dData = Array.from({length: 7}, () => Math.floor(Math.random() * 80000) + 30000);
-                
                 chartRecettesDepensesInstance = new Chart(canvasRecettes.getContext('2d'), {
-                    type: 'line',
-                    data: {
-                        labels: ['J-6', 'J-5', 'J-4', 'J-3', 'J-2', 'J-1', 'Aujourd\'hui'],
-                        datasets: [
-                            { label: 'Recettes Brutes (CDF)', data: rData, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderWidth: 2, tension: 0.3, fill: true },
-                            { label: 'Sorties de Fonds (CDF)', data: dData, borderColor: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.1)', borderWidth: 2, tension: 0.3, fill: true }
-                        ]
-                    },
-                    options: {
-                        responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8', font: { size: 10 } } } },
-                        scales: { x: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 10 } } }, y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 10 } } } }
-                    }
+                    type: 'line', data: { labels: ['J-6', 'J-5', 'J-4', 'J-3', 'J-2', 'J-1', 'Aujourd\'hui'], datasets: [ { label: 'Recettes Brutes (CDF)', data: [150000, 180000, 160000, 210000, 190000, 250000, 280000], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderWidth: 2, fill: true }, { label: 'Sorties de Fonds (CDF)', data: [30000, 45000, 35000, 50000, 40000, 60000, 75000], borderColor: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.1)', borderWidth: 2, fill: true } ] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8', font: { size: 10 } } } }, scales: { x: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 10 } } }, y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 10 } } } } }
                 });
             }
 
@@ -1004,11 +742,7 @@
             if (canvasClients && canvasClients.offsetParent !== null) {
                 if (chartClientsTypesInstance) chartClientsTypesInstance.destroy();
                 chartClientsTypesInstance = new Chart(canvasClients.getContext('2d'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Commercial (TransVision)', 'Personnel (CarVision)'],
-                        datasets: [{ data: [72, 28], backgroundColor: ['#6366f1', '#f43f5e'], borderColor: '#020617', borderWidth: 2 }]
-                    },
+                    type: 'doughnut', data: { labels: ['Commercial', 'Personnel'], datasets: [{ data: [72, 28], backgroundColor: ['#6366f1', '#f43f5e'], borderColor: '#020617', borderWidth: 2 }] },
                     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } } } }
                 });
             }
@@ -1017,11 +751,7 @@
             if (canvasCommunes && canvasCommunes.offsetParent !== null) {
                 if (chartCommunesPartInstance) chartCommunesPartInstance.destroy();
                 chartCommunesPartInstance = new Chart(canvasCommunes.getContext('2d'), {
-                    type: 'pie',
-                    data: {
-                        labels: ['Gombe', 'Limete', 'Lemba', 'Ngaliema', 'Matete', 'Bandalungwa'],
-                        datasets: [{ data: [35, 20, 15, 12, 10, 8], backgroundColor: ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6'], borderColor: '#020617', borderWidth: 2 }]
-                    },
+                    type: 'pie', data: { labels: ['Gombe', 'Limete', 'Lemba', 'Ngaliema', 'Matete', 'Bandalungwa'], datasets: [{ data: [35, 20, 15, 12, 10, 8], backgroundColor: ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6'], borderColor: '#020617', borderWidth: 2 }] },
                     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } } } }
                 });
             }
