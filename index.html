@@ -24,7 +24,7 @@
 
     <style>
         .blur-transition { transition: filter 0.4s ease, opacity 0.4s ease; }
-        #map-container { height: 260px; width: 100%; border-radius: 1rem; z-index: 10; }
+        #map-container { height: 350px; width: 100%; border-radius: 1rem; z-index: 10; } /* Hauteur augmentée pour remplir l'écran */
         .leaflet-tile { filter: brightness(0.8) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3); }
         .leaflet-container { background: #020617 !important; }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(100deg); cursor: pointer; }
@@ -114,7 +114,7 @@
             </div>
             
             <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v14.7 — by <span class="text-slate-200 font-bold">Global Tech Solutions</span>
+                TransVision v15.2 — by <span class="text-slate-200 font-bold">Global Tech Solutions</span>
             </div>
         </div>
 
@@ -151,24 +151,14 @@
 
             <!-- ONGLET A : CARTE & FLOTTE LIVE -->
             <div id="onglet-flotte" class="p-4 space-y-4 blur-transition class-onglet no-print">
-                <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-2 shadow-md">
+                <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-2 shadow-md h-[430px] flex flex-col">
                     <div class="flex justify-between items-center px-1 pb-1">
                         <h2 class="text-[10px] font-bold text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
                             <i class="fa-solid fa-map-location-dot text-emerald-400"></i> Traceur GPS
                         </h2>
                         <select id="select-vehicule-map" onchange="centrerSurVehicule(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg text-[10px] text-emerald-400 font-bold px-2 py-1 outline-none truncate max-w-[130px]"></select>
                     </div>
-                    <div id="map-container" class="shadow-inner"></div>
-                </div>
-
-                <div class="mt-2">
-                    <button onclick="ouvrirModalRecharge()" class="w-full bg-slate-950 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl text-center shadow-lg transition-colors flex items-center justify-center gap-3">
-                        <i class="fa-solid fa-wallet text-2xl text-emerald-400"></i>
-                        <div class="text-left">
-                            <h3 class="text-[11px] font-black uppercase text-slate-200">Recharger Mon Forfait</h3>
-                            <p class="text-[9px] text-slate-400 mt-0.5">Envoyer des fonds sur votre compte partenaire</p>
-                        </div>
-                    </button>
+                    <div id="map-container" class="shadow-inner flex-1"></div>
                 </div>
             </div>
 
@@ -332,8 +322,17 @@
 
             <!-- ONGLET E : PROFIL & IDENTIFIANTS -->
             <div id="onglet-profil" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
-                <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mon Profil & Sécurité</h2>
+                <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mon Profil & Forfait</h2>
                 
+                <!-- BOUTON RECHARGE DÉPLACÉ ICI -->
+                <button onclick="ouvrirModalRecharge()" class="w-full bg-slate-950 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl text-center shadow-lg transition-colors flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-wallet text-2xl text-emerald-400"></i>
+                    <div class="text-left">
+                        <h3 class="text-[11px] font-black uppercase text-slate-200">Recharger Mon Forfait</h3>
+                        <p class="text-[9px] text-slate-400 mt-0.5">Envoyer des fonds sur votre compte partenaire</p>
+                    </div>
+                </button>
+
                 <div class="bg-slate-950/80 backdrop-blur p-5 rounded-2xl border border-slate-800 space-y-3 shadow-xl">
                     <h3 class="text-xs font-black uppercase text-indigo-400 flex items-center gap-2 border-b border-slate-800 pb-2">
                         <i class="fa-solid fa-shield-halved"></i> Mes Identifiants
@@ -350,6 +349,11 @@
                 </div>
 
                 <div class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800 space-y-3 shadow-md">
+                    <!-- BOUTON SUPPORT WHATSAPP AJOUTÉ ICI -->
+                    <a href="https://wa.me/243000000000" target="_blank" class="w-full bg-green-500/10 border border-green-500/30 hover:bg-green-500/20 text-green-400 font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition-colors">
+                        <i class="fa-brands fa-whatsapp text-lg"></i> Contacter le Support
+                    </a>
+
                     <button onclick="ouvrirModalCGU()" class="w-full bg-slate-900 border border-slate-800 hover:border-emerald-500 text-slate-300 font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition-colors">
                         <i class="fa-solid fa-file-contract text-emerald-400"></i> Consulter les CGU
                     </button>
@@ -390,23 +394,17 @@
                 </div>
                 
                 <div class="space-y-3">
-                    <!-- CHOIX DE LA CIBLE DE RECHARGE -->
                     <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-850 space-y-2">
                         <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Compte Cible</label>
                         <select id="recharge-mode" onchange="basculerSelectVehiculeRecharge()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-bold focus:outline-none focus:border-emerald-500">
                             <option value="flotte">Flotte Complète</option>
                             <option value="unitaire">Véhicule Spécifique</option>
                         </select>
-                        
                         <div id="bloc-recharge-vehicule" class="hidden mt-2 border-t border-slate-800 pt-2">
                             <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Sélectionner le Véhicule</label>
-                            <select id="recharge-vehicule-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-mono text-[10px] focus:outline-none focus:border-emerald-500">
-                                <!-- Peuplé dynamiquement -->
-                            </select>
+                            <select id="recharge-vehicule-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-mono text-[10px] focus:outline-none focus:border-emerald-500"></select>
                         </div>
                     </div>
-
-                    <!-- SAISIE LIBRE DU MONTANT -->
                     <div class="bg-slate-950 p-4 rounded-2xl border border-emerald-500/30 space-y-1 shadow-inner">
                         <label class="block text-[10px] text-emerald-400 uppercase font-black text-center mb-2">Montant à transférer</label>
                         <div class="flex items-center gap-2">
@@ -414,8 +412,6 @@
                             <span class="text-slate-400 font-black text-lg">CDF</span>
                         </div>
                     </div>
-
-                    <!-- CHOIX DU MOYEN DE PAIEMENT -->
                     <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-850 text-xs font-mono text-slate-300">
                         <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Réseau de Paiement</label>
                         <select id="recharge-numero" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-emerald-400 font-bold focus:outline-none focus:border-emerald-500">
@@ -426,9 +422,7 @@
                         </select>
                     </div>
                 </div>
-                <button onclick="declarerPaiementForfait()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs transition-colors shadow-lg mt-2">
-                    Transférer les fonds
-                </button>
+                <button onclick="declarerPaiementForfait()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs transition-colors shadow-lg mt-2">Transférer les fonds</button>
             </div>
         </div>
 
@@ -449,311 +443,165 @@
 
     <!-- LOGIQUE JAVASCRIPT CONNECTÉE AU SERVEUR DIGITALOCEAN -->
     <script>
-        // --- CONFIGURATION SUPABASE & SOCKET ---
         const supabaseUrl = 'https://vbriworyscymnmtzzdny.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
         const SERVEUR_URL = "http://134.209.116.89:3000";
-        const socket = io(SERVEUR_URL, {
-            transports: ['websocket'],
-            reconnection: true
-        });
+        const socket = io(SERVEUR_URL, { transports: ['websocket'], reconnection: true });
 
-        // Structure d'accueil pour les véhicules
-        let client = {
-            nom: "Dolce",
-            tel: "0965647819",
-            vehicules: []
-        };
+        let client = { nom: "Dolce", tel: "0965647819", vehicules: [] };
+        let map = null; let busMarker = null;
 
-        let map = null;
-        let busMarker = null;
-        let chartPartenaireInstance = null;
+        const POLES_KINSHASA = [
+            { nom: "Matadi Kibala", lat: -4.4361, lng: 15.2605 },
+            { nom: "UPN", lat: -4.3942, lng: 15.2755 },
+            { nom: "Delvaux", lat: -4.3755, lng: 15.2801 },
+            { nom: "Kintambo Magasin", lat: -4.3411, lng: 15.2655 },
+            { nom: "Gare Centrale", lat: -4.3075, lng: 15.3125 }
+        ];
 
-        // --- NOUVEAU : FORMULE DE CALCUL DE DISTANCE GPS (HAVERSINE) ---
+        let MATRICE_TARIFS = [
+            { org: "Matadi Kibala", dst: "Gare Centrale", tarif: 2500 },
+            { org: "Matadi Kibala", dst: "UPN", tarif: 1000 },
+            { org: "UPN", dst: "Delvaux", tarif: 500 },
+            { org: "UPN", dst: "Kintambo Magasin", tarif: 1000 },
+            { org: "Delvaux", dst: "Kintambo Magasin", tarif: 500 },
+            { org: "UPN", dst: "Gare Centrale", tarif: 2000 },
+            { org: "Delvaux", dst: "Gare Centrale", tarif: 1500 },
+            { org: "Kintambo Magasin", dst: "Gare Centrale", tarif: 1000 }
+        ];
+
         function calculerDistanceGPS(lat1, lon1, lat2, lon2) {
-            const R = 6371; // Rayon de la Terre en km
+            const R = 6371; 
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                      Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c; // Retourne la distance en kilomètres
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
         }
 
-        // --- INITIALISATION DE LA FLOTTE ULTRA-ROBUSTE ---
+        function trouverPoleActuel(lat, lng) {
+            for (let pole of POLES_KINSHASA) {
+                if (calculerDistanceGPS(lat, lng, pole.lat, pole.lng) <= 0.250) { return pole.nom; }
+            }
+            return null; 
+        }
+
         async function chargerDernieresPositions() {
             try {
-                const txtStatut = document.getElementById('last-update-text');
-                txtStatut.textContent = "Connexion à la base de données...";
-                
-                if (!window.supabase) {
-                    txtStatut.textContent = "Erreur: Librairie Supabase non chargée.";
-                    console.error("Supabase est introuvable. Vérifiez votre connexion internet.");
-                    return;
-                }
-
-                const { data, error } = await supabaseClient
-                    .from('transvision_positions_gps')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(100);
-
-                if (error) {
-                    txtStatut.textContent = "Erreur d'accès à la table.";
-                    console.error("Erreur API Supabase :", error.message);
-                    return; 
-                }
-
-                if (data && data.length > 0) {
+                if (!window.supabase) return;
+                const { data, error } = await supabaseClient.from('transvision_positions_gps').select('*').order('created_at', { ascending: false }).limit(100);
+                if (data) {
                     const vehiculesTrouves = {};
-                    
-                    data.forEach(pos => {
-                        if (pos.imei && pos.latitude && pos.longitude) {
-                            if (!vehiculesTrouves[pos.imei]) {
-                                vehiculesTrouves[pos.imei] = pos;
-                            }
-                        }
-                    });
+                    data.forEach(pos => { if (pos.imei && pos.latitude && pos.longitude) { if (!vehiculesTrouves[pos.imei]) vehiculesTrouves[pos.imei] = pos; } });
 
                     Object.values(vehiculesTrouves).forEach(pos => {
                         const imeiStr = String(pos.imei);
                         client.vehicules.push({
-                            plaque: `Tracker ${imeiStr.slice(-4)}`,
-                            type: "Traceur GPS",
-                            places: 14,
-                            imei: imeiStr,
-                            rotationsJour: 0,
-                            tarif: 1500,
-                            itineraire: "Kinshasa",
-                            distanceReference: 5.0, // <-- Itinéraire par défaut 5km
-                            lat: pos.latitude,
-                            lng: pos.longitude,
-                            moteurCoupe: false,
-                            carburantJour: 0,
-                            kmJour: 0,
-                            entretien: "OK"
+                            plaque: `Tracker ${imeiStr.slice(-4)}`, type: "Traceur GPS", places: 14, imei: imeiStr,
+                            lat: pos.latitude, lng: pos.longitude, moteurCoupe: false, carburantJour: 0, kmJour: 0,
+                            dernierPoleConnu: null, recetteBruteReelle: 0, tronconsValides: 0 
                         });
                     });
                     
                     majSelecteurMap();
                     const sel = document.getElementById('select-vehicule-map');
-                    if (sel && sel.value !== "none") {
-                        initMapEtCentrer(parseInt(sel.value));
-                    }
-                    
-                    txtStatut.textContent = `Historique chargé (${client.vehicules.length} véhicule(s)).`;
-                } else {
-                    txtStatut.textContent = "Historique vide. En attente de direct...";
+                    if (sel && sel.value !== "none") initMapEtCentrer(parseInt(sel.value));
                 }
-            } catch (err) {
-                console.error("❌ Crash inattendu de la fonction de chargement :", err);
-                document.getElementById('last-update-text').textContent = "Erreur de chargement (Voir console).";
-            }
+            } catch (err) { console.error("Erreur", err); }
         }
 
-
-        // --- GESTION DES ÉVÉNEMENTS SOCKET (LIVE) & CALCULS ---
-        socket.on('connect', () => {
-            console.log("Connecté au serveur DigitalOcean !");
-            document.getElementById('statut-serveur-voyant').classList.replace('bg-rose-500', 'bg-emerald-400');
-            document.getElementById('statut-serveur-texte').textContent = "Serveur Connecté";
-            document.getElementById('statut-serveur-texte').classList.replace('text-rose-400', 'text-emerald-400');
-        });
-
-        socket.on('disconnect', () => {
-            console.log("Déconnecté du serveur !");
-            document.getElementById('statut-serveur-voyant').classList.replace('bg-emerald-400', 'bg-rose-500');
-            document.getElementById('statut-serveur-texte').textContent = "Serveur Déconnecté";
-            document.getElementById('statut-serveur-texte').classList.replace('text-emerald-400', 'text-rose-400');
-        });
-
-        // MISE À JOUR MAJEURE ICI : CALCUL DES KILOMÈTRES ET DES ROTATIONS
         socket.on('nouvelle_position', (data) => {
-            console.log("📍 Nouvelle position reçue (LIVE) :", data);
-            
             const now = new Date();
-            document.getElementById('last-update-text').textContent = `Mise à jour en direct : ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+            document.getElementById('last-update-text').textContent = `Live : ${now.toLocaleTimeString()}`;
 
             let vehiculeIndex = client.vehicules.findIndex(v => v.imei === data.imei);
             
-            if (vehiculeIndex === -1) {
-                // Nouveau véhicule détecté
-                client.vehicules.push({
-                    plaque: data.plaque || `Nouveau ${data.imei.slice(-4)}`,
-                    type: "Traceur GPS",
-                    places: 14,
-                    imei: data.imei,
-                    rotationsJour: 0,
-                    tarif: 1500,
-                    itineraire: "Kinshasa",
-                    distanceReference: 5.0, // <-- L'itinéraire de base fait 5 km
-                    lat: data.lat,
-                    lng: data.lng,
-                    moteurCoupe: false,
-                    carburantJour: 0,
-                    kmJour: 0,
-                    entretien: "OK"
-                });
-                vehiculeIndex = client.vehicules.length - 1;
-                majSelecteurMap();
-            } else {
-                // VÉHICULE CONNU : CALCUL DES DISTANCES ET DEMI-TERRAINS
+            if (vehiculeIndex !== -1) {
                 let v = client.vehicules[vehiculeIndex];
                 
-                // 1. Calcul de la distance parcourue depuis la DERNIÈRE position reçue
                 let distanceParcourue = calculerDistanceGPS(v.lat, v.lng, data.lat, data.lng);
-                
-                // On filtre les sauts GPS aberrants (ex: + de 2km en 20 secondes)
-                if (distanceParcourue > 0.005 && distanceParcourue < 2) {
-                    
-                    // Ajout au compteur kilométrique de la journée
-                    v.kmJour += distanceParcourue;
-                    
-                    // Calcul de la consommation (Estimation : 12 Litres / 100km)
-                    v.carburantJour = v.kmJour * 0.12; 
-                    
-                    // CALCUL DES ROTATIONS & DEMI-TERRAINS
-                    // Un demi-terrain = la moitié de la distance de référence (ex: 2.5km pour une ligne de 5km)
-                    let distDemiTerrain = (v.distanceReference || 5.0) / 2;
-                    
-                    // On compte combien de tranches de demi-terrain le véhicule a fait
-                    let nbTranches = Math.floor(v.kmJour / distDemiTerrain);
-                    
-                    // On convertit en rotations (ex: 3 tranches = 1.5 rotations)
-                    v.rotationsJour = nbTranches / 2; 
+                if (distanceParcourue > 0.002 && distanceParcourue < 2) {
+                    v.kmJour += distanceParcourue; v.carburantJour = v.kmJour * 0.12; 
                 }
 
-                // 2. On met à jour les coordonnées pour le prochain calcul
-                v.lat = data.lat;
-                v.lng = data.lng;
+                const poleDetecte = trouverPoleActuel(data.lat, data.lng);
+
+                if (poleDetecte && (data.vitesse || 0) < 10) {
+                    if (v.dernierPoleConnu === null) {
+                        v.dernierPoleConnu = poleDetecte;
+                    } 
+                    else if (v.dernierPoleConnu !== poleDetecte) {
+                        const poleA = v.dernierPoleConnu;
+                        const poleB = poleDetecte;
+                        
+                        let tarifCourse = 1000; 
+                        for(let tarifObj of MATRICE_TARIFS) {
+                            if ((tarifObj.org === poleA && tarifObj.dst === poleB) || (tarifObj.org === poleB && tarifObj.dst === poleA)) {
+                                tarifCourse = tarifObj.tarif; break;
+                            }
+                        }
+
+                        v.recetteBruteReelle += (tarifCourse * v.places);
+                        v.tronconsValides += 1;
+                        v.dernierPoleConnu = poleB;
+                    }
+                }
+
+                v.lat = data.lat; v.lng = data.lng;
             }
 
-            // Mise à jour de la carte si le véhicule est sélectionné
             const selectMap = document.getElementById('select-vehicule-map');
             if (selectMap && selectMap.value == vehiculeIndex) {
-                if(busMarker && map) {
-                    const newLatLng = new L.LatLng(data.lat, data.lng);
-                    busMarker.setLatLng(newLatLng);
-                    map.panTo(newLatLng);
-                } else {
-                    initMapEtCentrer(vehiculeIndex);
-                }
+                if(busMarker && map) { busMarker.setLatLng(new L.LatLng(data.lat, data.lng)); map.panTo([data.lat, data.lng]); } else { initMapEtCentrer(vehiculeIndex); }
             }
-
-            // Rafraîchir silencieusement les rapports si on est sur l'onglet Rapport ou Analyse
-            genererRapportFinancier(getJoursFiltre('fin'), document.getElementById('filtre-fin-vehicule').value);
-            genererRapportTechnique(getJoursFiltre('tech'), document.getElementById('filtre-tech-vehicule').value);
+            genererRapportFinancier(); genererRapportTechnique();
         });
-
-
-        // --- GESTION DES FILTRES DE DATE ---
-        function initFiltresDates() {
-            const today = new Date();
-            const strToday = today.toISOString().split('T')[0];
-
-            ['fin', 'tech'].forEach(prefix => {
-                const elStart = document.getElementById(`date-debut-${prefix}`);
-                const elEnd = document.getElementById(`date-fin-${prefix}`);
-                if(elStart) elStart.value = strToday;
-                if(elEnd) elEnd.value = strToday;
-            });
-        }
-
-        function getJoursFiltre(prefix) {
-            const d1 = new Date(document.getElementById(`date-debut-${prefix}`).value);
-            const d2 = new Date(document.getElementById(`date-fin-${prefix}`).value);
-            if (isNaN(d1) || isNaN(d2)) return 1;
-            const diffTime = d2 - d1;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-            return diffDays < 0 ? 0 : (diffDays === 0 ? 1 : diffDays + 1);
-        }
 
         function peuplerSelecteursFiltre() {
             const selFin = document.getElementById('filtre-fin-vehicule');
             const selTech = document.getElementById('filtre-tech-vehicule');
-            const selRecharge = document.getElementById('recharge-vehicule-select');
-            
             if(selFin) selFin.innerHTML = '<option value="all">Tous les véhicules</option>';
             if(selTech) selTech.innerHTML = '<option value="all">Tous les véhicules</option>';
-            if(selRecharge) selRecharge.innerHTML = '';
-
             client.vehicules.forEach((v, i) => {
                 const opt = `<option value="${i}">${v.plaque}</option>`;
                 if(selFin) selFin.insertAdjacentHTML('beforeend', opt);
                 if(selTech) selTech.insertAdjacentHTML('beforeend', opt);
-                if(selRecharge) selRecharge.insertAdjacentHTML('beforeend', opt);
             });
         }
 
-        // --- MOTEUR D'AFFICHAGE & NAVIGATION ---
         function genererToutesLesVues() {
             document.getElementById('lbl-nom-partenaire').textContent = client.nom;
             document.getElementById('prof-tel').value = client.tel;
-            
-            initFiltresDates();
-            peuplerSelecteursFiltre();
-            majSelecteurMap();
-            genererRapportFinancier(1, 'all'); 
-            genererRapportTechnique(1, 'all');
+            peuplerSelecteursFiltre(); majSelecteurMap(); genererRapportFinancier(); genererRapportTechnique();
         }
 
         function changerOnglet(idOnglet, boutonActif) {
             document.querySelectorAll('.class-onglet').forEach(ong => ong.classList.add('hidden'));
-            
-            const target = document.getElementById(idOnglet);
-            if(target) target.classList.remove('hidden');
-            
-            document.querySelectorAll('.btn-nav').forEach(btn => { 
-                btn.classList.remove('text-emerald-400'); 
-                btn.classList.add('text-slate-500'); 
-            });
-            if(boutonActif) {
-                boutonActif.classList.remove('text-slate-500'); 
-                boutonActif.classList.add('text-emerald-400');
+            document.getElementById(idOnglet).classList.remove('hidden');
+            document.querySelectorAll('.btn-nav').forEach(btn => { btn.classList.remove('text-emerald-400'); btn.classList.add('text-slate-500'); });
+            if(boutonActif) { boutonActif.classList.remove('text-slate-500'); boutonActif.classList.add('text-emerald-400'); }
+            if (idOnglet === 'onglet-flotte') {
+                const sel = document.getElementById('select-vehicule-map');
+                initMapEtCentrer(sel && sel.value !== "none" ? parseInt(sel.value) : 0);
+                if (map) map.invalidateSize();
             }
-
-            setTimeout(() => {
-                if (idOnglet === 'onglet-flotte') {
-                    const sel = document.getElementById('select-vehicule-map');
-                    initMapEtCentrer(sel && sel.value !== "none" ? parseInt(sel.value) : 0);
-                    if (map) map.invalidateSize();
-                } 
-                else if (idOnglet === 'onglet-rapport') { appliquerFiltreFinancier(); }
-                else if (idOnglet === 'onglet-analyse') { appliquerFiltreTechnique(); }
-            }, 50);
         }
 
-        // --- VUE : FLOTTE / CARTE (LEAFLET MAP) ---
         function majSelecteurMap() {
             const sel = document.getElementById('select-vehicule-map');
             if(!sel) return;
             sel.innerHTML = "";
-            
-            if(client.vehicules.length === 0) {
-                sel.insertAdjacentHTML('beforeend', `<option value="none">Aucun véhicule détecté</option>`);
-                return;
-            }
-            client.vehicules.forEach((v, i) => sel.insertAdjacentHTML('beforeend', `<option value="${i}">${v.plaque} (${v.type})</option>`));
+            if(client.vehicules.length === 0) { sel.insertAdjacentHTML('beforeend', `<option value="none">Aucun véhicule détecté</option>`); return; }
+            client.vehicules.forEach((v, i) => sel.insertAdjacentHTML('beforeend', `<option value="${i}">${v.plaque}</option>`));
         }
 
         function initMapEtCentrer(index) {
             const mapContainer = document.getElementById('map-container');
             if (!mapContainer || mapContainer.offsetParent === null) return;
-
-            let lat = -4.3215;
-            let lng = 15.3115;
-            let label = "En attente de connexion...";
-
+            let lat = -4.3215; let lng = 15.3115; let label = "En attente...";
             const v = client.vehicules[index];
-            if(v) {
-                lat = v.lat;
-                lng = v.lng;
-                label = `<b>${v.plaque}</b><br>IMEI: ${v.imei}`;
-            }
-
+            if(v) { lat = v.lat; lng = v.lng; label = `<b>${v.plaque}</b>`; }
             if(!map) {
                 map = L.map('map-container').setView([lat, lng], 14);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
@@ -762,136 +610,55 @@
             busMarker = L.marker([lat, lng]).addTo(map).bindPopup(label).openPopup();
             map.setView([lat, lng], 14);
         }
-        function centrerSurVehicule(indexStr) { 
-            if (indexStr !== "none") initMapEtCentrer(parseInt(indexStr)); 
-        }
+        function centrerSurVehicule(indexStr) { if (indexStr !== "none") initMapEtCentrer(parseInt(indexStr)); }
 
-        // --- VUE : NOUVEAU VÉHICULE ---
-        function enregistrerVehiculeSaisi() {
-            const plaque = document.getElementById('add-plaque').value.trim();
-            const type = document.getElementById('add-type').value.trim();
-            const places = parseInt(document.getElementById('add-places').value) || 0;
-            const origine = document.getElementById('add-origine').value.trim();
-            const dest = document.getElementById('add-destination').value.trim();
-            const tarif = parseInt(document.getElementById('add-tarif').value) || 0;
-            const imei = document.getElementById('add-imei').value.trim();
+        function appliquerFiltreFinancier() { genererRapportFinancier(); }
 
-            if (!plaque || !type || !origine || !dest || !imei) { 
-                alert("Veuillez remplir au moins la Plaque, le Modèle, l'Origine, la Destination et l'IMEI."); 
-                return; 
-            }
-
-            const itineraire = `${origine} — ${dest}`;
-            
-            client.vehicules.push({ plaque, type, places, imei, rotationsJour: 0, tarif, itineraire, lat: -4.32, lng: 15.31, moteurCoupe: false, carburantJour: 0, kmJour: 0, entretien: "Nouveau" });
-            
-            document.getElementById('add-plaque').value = ""; document.getElementById('add-type').value = "";
-            document.getElementById('add-places').value = ""; document.getElementById('add-tarif').value = "";
-            document.getElementById('add-origine').value = ""; document.getElementById('add-destination').value = "";
-            document.getElementById('add-imei').value = "";
-            
-            alert(`✅ Véhicule ${plaque} enregistré sur le tronçon : ${itineraire}`);
-            genererToutesLesVues();
-            changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
-        }
-
-        // --- VUE : RAPPORT FINANCIER (AVEC FILTRES) ---
-        function appliquerFiltreFinancier() {
-            const jours = getJoursFiltre('fin');
-            const vehiculeIdx = document.getElementById('filtre-fin-vehicule').value;
-            if (jours <= 0) { alert("Période invalide."); return; }
-            genererRapportFinancier(jours, vehiculeIdx);
-        }
-
-        function genererRapportFinancier(joursFiltre, cibleIdx) {
+        function genererRapportFinancier() {
             let totalCDF = 0; let totalRot = 0;
             const list = document.getElementById('fin-vehicules-list');
             if(list) list.innerHTML = "";
 
+            const cibleIdx = document.getElementById('filtre-fin-vehicule') ? document.getElementById('filtre-fin-vehicule').value : 'all';
             let vehiculesCibles = client.vehicules;
             if (cibleIdx !== 'all') { vehiculesCibles = [client.vehicules[parseInt(cibleIdx)]]; }
 
             vehiculesCibles.forEach(v => {
-                const rotPeriode = v.rotationsJour * joursFiltre;
-                const gainPeriode = rotPeriode * v.places * v.tarif;
+                const gainReel = v.recetteBruteReelle || 0;
+                const troncons = v.tronconsValides || 0;
                 
-                totalCDF += gainPeriode; totalRot += rotPeriode;
+                totalCDF += gainReel; totalRot += troncons;
                 
                 if(list) {
                     list.insertAdjacentHTML('beforeend', `
                         <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
                             <div class="flex justify-between items-center">
-                                <h4 class="font-black text-slate-200">${v.plaque} <span class="text-[9px] font-normal text-slate-500 bg-slate-900 px-1.5 py-0.5 rounded ml-1">${v.type}</span></h4>
-                                <span class="font-black text-emerald-400">${gainPeriode.toLocaleString()} CDF</span>
+                                <h4 class="font-black text-slate-200">${v.plaque}</h4>
+                                <span class="font-black text-emerald-400">${gainReel.toLocaleString()} CDF</span>
                             </div>
-                            <div class="flex gap-4 text-[10px] text-slate-400 font-mono">
-                                <span><i class="fa-solid fa-rotate text-indigo-400"></i> ${rotPeriode} rotations</span>
-                                <span><i class="fa-solid fa-users text-sky-400"></i> ${v.tarif} FC/pl</span>
+                            <div class="flex justify-between text-[10px] text-slate-400 font-mono">
+                                <span><i class="fa-solid fa-route text-indigo-400"></i> ${troncons} tronçon(s) validé(s)</span>
+                                <span>Position Réf: <strong class="text-indigo-400">${v.dernierPoleConnu || 'En Mouvement'}</strong></span>
                             </div>
-                            <p class="text-[9px] text-slate-500 truncate"><i class="fa-solid fa-route"></i> ${v.itineraire}</p>
                         </div>`);
                 }
             });
 
             const txtRecettes = document.getElementById('txt-total-recettes');
             if(txtRecettes) txtRecettes.textContent = totalCDF.toLocaleString() + " CDF";
-            
             const txtRotations = document.getElementById('txt-total-rotations');
             if(txtRotations) txtRotations.textContent = totalRot;
-            
-            initialiserGraphiqueRapport(joursFiltre, totalCDF);
         }
 
-        function initialiserGraphiqueRapport(joursFiltre, totalAffiche) {
-            const canvas = document.getElementById('chart-recettes-partenaire');
-            if (!canvas || canvas.offsetParent === null) return; 
+        function appliquerFiltreTechnique() { genererRapportTechnique(); }
 
-            if (chartPartenaireInstance) chartPartenaireInstance.destroy();
-            
-            let dataGains = []; let labels = [];
-            const gainMoyenJour = totalAffiche / joursFiltre;
-
-            if (joursFiltre === 1) {
-                labels = ['Aujourd\'hui']; dataGains = [totalAffiche];
-            } else if (joursFiltre <= 7) {
-                for(let i=1; i<=joursFiltre; i++) {
-                    labels.push(`J-${joursFiltre - i + 1}`);
-                    dataGains.push(gainMoyenJour * (0.8 + Math.random() * 0.4));
-                }
-            } else {
-                labels = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'];
-                dataGains = [totalAffiche * 0.2, totalAffiche * 0.3, totalAffiche * 0.25, totalAffiche * 0.25];
-            }
-
-            const ctx = canvas.getContext('2d');
-            chartPartenaireInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{ label: 'Gains (CDF)', data: dataGains, backgroundColor: '#10b981', borderRadius: 4 }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-                    scales: { x: { display: joursFiltre <= 7 }, y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 9 } } } }
-                }
-            });
-        }
-
-        // --- VUE : ANALYSE TECHNIQUE (AVEC FILTRES) ---
-        function appliquerFiltreTechnique() {
-            const jours = getJoursFiltre('tech');
-            const vehiculeIdx = document.getElementById('filtre-tech-vehicule').value;
-            if (jours <= 0) { alert("Période invalide."); return; }
-            genererRapportTechnique(jours, vehiculeIdx);
-        }
-
-        function genererRapportTechnique(joursFiltre, cibleIdx) {
+        function genererRapportTechnique() {
             const list = document.getElementById('tech-vehicules-list');
             if(!list) return;
             list.innerHTML = "";
-            
+            const cibleIdx = document.getElementById('filtre-tech-vehicule') ? document.getElementById('filtre-tech-vehicule').value : 'all';
             let vehiculesCibles = client.vehicules;
-            if (cibleIdx && cibleIdx !== 'all') { vehiculesCibles = [client.vehicules[parseInt(cibleIdx)]]; }
+            if (cibleIdx !== 'all') { vehiculesCibles = [client.vehicules[parseInt(cibleIdx)]]; }
 
             vehiculesCibles.forEach((v) => {
                 const origineIndex = client.vehicules.indexOf(v);
@@ -899,22 +666,17 @@
                     ? `<button onclick="basculerMoteur(${origineIndex}, false)" class="w-full bg-emerald-500/20 text-emerald-400 font-bold py-2 rounded text-[10px] uppercase mt-2"><i class="fa-solid fa-unlock"></i> Restaurer Moteur</button>`
                     : `<button onclick="basculerMoteur(${origineIndex}, true)" class="w-full bg-rose-500/20 text-rose-400 font-bold py-2 rounded text-[10px] uppercase mt-2"><i class="fa-solid fa-lock"></i> Couper Moteur (Urgence)</button>`;
 
-                const couleurEntretien = v.entretien.includes("Alerte") ? 'text-rose-400 animate-pulse' : 'text-emerald-400';
-                
-                const consoPeriode = (v.carburantJour * joursFiltre).toFixed(1);
-                // Afficher le kilométrage avec 1 chiffre après la virgule
-                const kmPeriode = (v.kmJour * joursFiltre).toFixed(1);
+                const consoPeriode = (v.carburantJour || 0).toFixed(1);
+                const kmPeriode = (v.kmJour || 0).toFixed(1);
 
                 list.insertAdjacentHTML('beforeend', `
                     <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
-                        <h4 class="font-black text-slate-200">${v.plaque} <span class="text-[9px] font-mono text-slate-500 float-right">IMEI: ${v.imei}</span></h4>
+                        <h4 class="font-black text-slate-200">${v.plaque}</h4>
                         <div class="grid grid-cols-2 gap-y-2 gap-x-1 text-[9px] font-mono bg-slate-900 p-2.5 rounded border border-slate-800">
                             <p>📡 GPS: <span class="text-emerald-400">Fort</span></p>
-                            <p>🔋 Batt: <span class="text-emerald-400">12.6V</span></p>
                             <p>⛽ Conso: <span class="text-sky-400 font-bold">${consoPeriode} L</span></p>
                             <p>🛣️ Dist: <span class="text-sky-400 font-bold">${kmPeriode} km</span></p>
-                            <p class="col-span-2">🛠️ Maint: <span class="${couleurEntretien} font-bold truncate block">${v.entretien}</span></p>
-                            <p class="col-span-2">⚡ Moteur: <span class="${v.moteurCoupe ? 'text-rose-400 font-bold' : 'text-emerald-400'}">${v.moteurCoupe ? 'COUPÉ' : 'ON'}</span></p>
+                            <p>📍 Pôle: <span class="text-indigo-400 font-bold">${v.dernierPoleConnu || '...'}</span></p>
                         </div>
                         ${btnMoteur}
                     </div>`);
@@ -923,38 +685,23 @@
 
         function basculerMoteur(i, couper) {
             client.vehicules[i].moteurCoupe = couper;
-            
             socket.emit('commande_moteur', { imei: client.vehicules[i].imei, couper: couper });
-            
-            alert(`📡 Commande envoyée au serveur. Moteur ${couper ? 'coupé' : 'restauré'} pour le véhicule ${client.vehicules[i].plaque}.`);
+            alert(`📡 Commande envoyée. Moteur ${couper ? 'coupé' : 'restauré'} pour le véhicule ${client.vehicules[i].plaque}.`);
             appliquerFiltreTechnique(); 
         }
 
-        // --- PROFIL & SÉCURITÉ ---
         function majIdentifiants() {
             const newPin = document.getElementById('prof-pin-new').value;
-            if(newPin && newPin.length >= 4) {
-                alert("✅ Code PIN de sécurité mis à jour.");
-                document.getElementById('prof-pin-new').value = "";
-            } else { alert("❌ Le PIN doit contenir au moins 4 caractères."); }
+            if(newPin && newPin.length >= 4) { alert("✅ Code PIN mis à jour."); document.getElementById('prof-pin-new').value = ""; } else { alert("❌ PIN invalide."); }
         }
 
-        // --- HORLOGE FORFAIT 23H59 & RECHARGE LIBRE ---
         function actualiserCompteARebours23h59() {
             const now = new Date(); const finJour = new Date(); finJour.setHours(23, 59, 59, 999);
             const resteMs = finJour - now;
             const display = document.getElementById('timer-compte-rebours');
             if(!display) return;
-
-            if (resteMs <= 0) { 
-                display.textContent = "00:00:00"; 
-                display.classList.replace('text-slate-100', 'text-rose-400');
-                return; 
-            }
-            
-            const h = Math.floor(resteMs / 3600000); 
-            const m = Math.floor((resteMs % 3600000) / 60000); 
-            const s = Math.floor((resteMs % 60000) / 1000);
+            if (resteMs <= 0) { display.textContent = "00:00:00"; display.classList.replace('text-slate-100', 'text-rose-400'); return; }
+            const h = Math.floor(resteMs / 3600000); const m = Math.floor((resteMs % 3600000) / 60000); const s = Math.floor((resteMs % 60000) / 1000);
             display.textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
         }
         setInterval(actualiserCompteARebours23h59, 1000);
@@ -962,56 +709,25 @@
         function basculerSelectVehiculeRecharge() {
             const mode = document.getElementById('recharge-mode').value;
             const blocSelect = document.getElementById('bloc-recharge-vehicule');
-            if (mode === 'flotte') {
-                blocSelect.classList.add('hidden');
-            } else {
-                blocSelect.classList.remove('hidden');
-            }
+            if (mode === 'flotte') { blocSelect.classList.add('hidden'); } else { blocSelect.classList.remove('hidden'); }
         }
 
         function declarerPaiementForfait() {
             const montant = parseInt(document.getElementById('input-montant-libre').value);
-            if (!montant || montant <= 0) {
-                alert("❌ Veuillez saisir un montant valide (ex: 2000).");
-                return;
-            }
-
-            const num = document.getElementById('recharge-numero');
-            const reseau = num.options[num.selectedIndex].text;
-            const mode = document.getElementById('recharge-mode').value;
-            
-            let cible = "la flotte complète";
-            if (mode === 'unitaire' && client.vehicules.length > 0) {
-                const indexVehicule = document.getElementById('recharge-vehicule-select').value;
-                cible = `le véhicule ${client.vehicules[indexVehicule].plaque}`;
-            }
-
-            alert(`🛰️ Demande de transfert de ${montant.toLocaleString()} CDF pour ${cible}.\nTransaction via ${reseau} en cours de traitement.`);
-            
+            if (!montant || montant <= 0) { alert("❌ Saisir un montant."); return; }
+            alert(`🛰️ Demande de transfert de ${montant} CDF en cours.`);
             document.getElementById('input-montant-libre').value = "";
             fermerModalRecharge();
         }
 
-        function ouvrirModalRecharge() { 
-            peuplerSelecteursFiltre();
-            basculerSelectVehiculeRecharge();
-            document.getElementById('modal-recharge-partenaire').classList.remove('hidden'); 
-        }
-        function fermerModalRecharge() { 
-            document.getElementById('modal-recharge-partenaire').classList.add('hidden'); 
-        }
+        function ouvrirModalRecharge() { peuplerSelecteursFiltre(); basculerSelectVehiculeRecharge(); document.getElementById('modal-recharge-partenaire').classList.remove('hidden'); }
+        function fermerModalRecharge() { document.getElementById('modal-recharge-partenaire').classList.add('hidden'); }
 
         function basculerVueAuth(mode) {
             if(mode === 'login') {
-                document.getElementById('form-connexion').classList.remove('hidden'); 
-                document.getElementById('form-inscription').classList.add('hidden');
-                document.getElementById('tab-btn-login').className = "py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950";
-                document.getElementById('tab-btn-register').className = "py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200";
+                document.getElementById('form-connexion').classList.remove('hidden'); document.getElementById('form-inscription').classList.add('hidden');
             } else {
-                document.getElementById('form-connexion').classList.add('hidden'); 
-                document.getElementById('form-inscription').classList.remove('hidden');
-                document.getElementById('tab-btn-register').className = "py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950";
-                document.getElementById('tab-btn-login').className = "py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200";
+                document.getElementById('form-connexion').classList.add('hidden'); document.getElementById('form-inscription').classList.remove('hidden');
             }
         }
         
@@ -1023,20 +739,11 @@
 
         function executerConnexionPartenaire() { 
             naviguerVers('app-proprietaire'); 
-            
-            chargerDernieresPositions().then(() => {
-                genererToutesLesVues(); 
-                actualiserCompteARebours23h59(); 
-                changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
-            });
+            chargerDernieresPositions().then(() => { genererToutesLesVues(); actualiserCompteARebours23h59(); changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]); });
         }
 
         function declencherDeconnexion() { naviguerVers('page-auth'); }
-
-        function ouvrirModalCGU() { 
-            document.getElementById('zone-texte-cgu').textContent = "CONDITIONS DU FORFAIT PRÉPAYÉ TRANSVISION :\n\n1. OBLIGATION DE PRÉ-PAIEMENT :\nLe client doit impérativement payer son forfait avant le début de ses rotations.\n\n2. FENÊTRE JOURNALIÈRE (5H00 — 23H59) :\nLe forfait journalier s'applique uniquement pour la journée en cours. Quelle que soit l'heure où le paiement est validé, il expire à 23h59 précises le jour même sans report.\n\nGlobal Tech Solutions SARL."; 
-            document.getElementById('modal-cgu').classList.remove('hidden'); 
-        }
+        function ouvrirModalCGU() { document.getElementById('modal-cgu').classList.remove('hidden'); }
         function fermerModalCGU() { document.getElementById('modal-cgu').classList.add('hidden'); }
 
         naviguerVers('page-auth');
