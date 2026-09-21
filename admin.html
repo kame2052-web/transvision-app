@@ -19,7 +19,6 @@
         .page-fade { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         #map-admin-suivi { height: 500px; width: 100%; border-radius: 1rem; z-index: 10; }
-        /* NOUVEAU FILTRE CARTE : Dark mode propre et lisible */
         .leaflet-tile { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
         .leaflet-container { background: #020617 !important; }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(100deg); cursor: pointer; }
@@ -61,7 +60,7 @@
     <!-- 2. CORPS ADMIN -->
     <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
         <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
-            <span class="text-xs font-bold text-indigo-400">Central Control Panel v15.5 Geofence</span>
+            <span class="text-xs font-bold text-indigo-400">Central Control Panel v15.6 Geofence</span>
             <div class="flex gap-2 text-[10px] font-mono">
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 flex items-center gap-1">Central DO : <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="admin-server-dot"></span><span class="text-emerald-400 font-bold" id="admin-server-text">En Ligne</span></span>
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Historique : <span class="text-sky-400 font-bold" id="admin-historique-statut">Chargement...</span></span>
@@ -159,6 +158,13 @@
                             <h2 class="text-xl font-black text-slate-100">👤 Base des Partenaires</h2>
                             <p class="text-xs text-slate-400">Gérez les comptes, vérifiez les identifiants et validez les recharges.</p>
                         </div>
+                        
+                        <!-- NOUVEAU : BARRE DE RECHERCHE PARTENAIRES -->
+                        <div class="relative w-full sm:w-64">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+                            <input type="text" id="recherche-partenaire" onkeyup="rechercherPartenaire()" class="w-full bg-slate-900 border border-slate-800 rounded-xl py-2 pl-9 pr-3 text-[10px] text-slate-200 focus:outline-none focus:border-indigo-500 font-bold" placeholder="Rechercher par nom ou numéro...">
+                        </div>
+
                         <div class="flex bg-slate-950 p-1.5 rounded-xl border border-slate-850 text-[10px] font-bold">
                             <button onclick="filtrerPartenairesContrat('tous')" class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-200">Tous</button>
                             <button onclick="filtrerPartenairesContrat('commercial')" class="px-3 py-1.5 rounded-lg text-indigo-400 hover:bg-slate-900"><i class="fa-solid fa-bus mr-1"></i> Commercial</button>
@@ -178,13 +184,31 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-850 text-slate-300 print-text" id="table-partenaires-body">
+                                <!-- Ligne Exemple -->
                                 <tr class="item-partenaire-row" data-contrat="commercial">
-                                    <td class="py-3 font-black text-slate-200">Dolce<br><span class="text-[9px] font-normal text-slate-500">0965647819</span></td>
+                                    <td class="py-3 font-black text-slate-200 partenaire-nom">Dolce<br><span class="text-[9px] font-normal text-slate-500 partenaire-tel">0965647819</span></td>
                                     <td class="py-3"><span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-black text-[10px] uppercase">Commercial</span></td>
                                     <td class="py-3 text-center font-bold font-mono text-indigo-400">1 Véh.</td>
                                     <td class="py-3 text-center font-mono"><span id="jours-dolce" class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-lg font-black text-[10px]">Actif</span></td>
                                     <td class="py-3 text-right no-print">
                                         <select onchange="executerActionPartenaire('Dolce', '0965647819', '0000', 'solde-dolce', 'jours-dolce', this)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 focus:outline-none focus:border-indigo-500">
+                                            <option value="">-- Actions --</option>
+                                            <option value="recharger" class="text-emerald-400">💸 Valider Recharge</option>
+                                            <option value="voir_id" class="text-sky-400">👁️ Voir Identifiants</option>
+                                            <option value="activer" class="text-emerald-500">🟢 Activer Compte</option>
+                                            <option value="suspendre" class="text-amber-500">🟠 Suspendre</option>
+                                            <option value="supprimer" class="text-rose-500">🔴 Supprimer Compte</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <!-- Autre Ligne Exemple pour tester la recherche -->
+                                <tr class="item-partenaire-row" data-contrat="personnel">
+                                    <td class="py-3 font-black text-slate-200 partenaire-nom">Bamba<br><span class="text-[9px] font-normal text-slate-500 partenaire-tel">0812345678</span></td>
+                                    <td class="py-3"><span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded font-black text-[10px] uppercase">Personnel</span></td>
+                                    <td class="py-3 text-center font-bold font-mono text-rose-400">2 Véh.</td>
+                                    <td class="py-3 text-center font-mono"><span id="jours-bamba" class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded-lg font-black text-[10px]">Expiré</span></td>
+                                    <td class="py-3 text-right no-print">
+                                        <select onchange="executerActionPartenaire('Bamba', '0812345678', '0000', 'solde-bamba', 'jours-bamba', this)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 focus:outline-none focus:border-indigo-500">
                                             <option value="">-- Actions --</option>
                                             <option value="recharger" class="text-emerald-400">💸 Valider Recharge</option>
                                             <option value="voir_id" class="text-sky-400">👁️ Voir Identifiants</option>
@@ -394,8 +418,10 @@
                         <option value="flotte">Flotte Complète</option>
                         <option value="unitaire">Véhicule Spécifique</option>
                     </select>
+                    
                     <div id="bloc-admin-recharge-vehicule" class="hidden mt-2 border-t border-slate-800 pt-2">
                         <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Sélectionner le Véhicule</label>
+                        <!-- CE SELECT EST DÉSORMAIS PEUPLÉ DYNAMIQUEMENT PAR LES VRAIS VÉHICULES -->
                         <select id="admin-recharge-vehicule-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-mono text-[10px] focus:outline-none focus:border-emerald-500"></select>
                     </div>
                 </div>
@@ -484,8 +510,11 @@
 
                     Object.values(vehiculesUniques).forEach(pos => {
                         flotteGlobale.push({
-                            imei: String(pos.imei), plaque: `TRK-${String(pos.imei).slice(-4)}`, places: 14,
-                            lat: pos.latitude, lng: pos.longitude, derniereCo: new Date(pos.created_at || Date.now()),
+                            imei: String(pos.imei),
+                            plaque: `TRK-${String(pos.imei).slice(-4)}`,
+                            places: 14,
+                            lat: pos.latitude, lng: pos.longitude,
+                            derniereCo: new Date(pos.created_at || Date.now()),
                             kmJour: 0, dernierPoleConnu: null, tronconsValides: 0, recetteBruteReelle: 0
                         });
                     });
@@ -577,8 +606,6 @@
         let chartClientsTypesInstance = null;
         let chartCommunesPartInstance = null;
 
-        const cguDefaut = `CONDITIONS GÉNÉRALES D'UTILISATION (CGU) — TRANSVISION\nÉditées par Global Tech Solutions SARL\n\n1. OBJET DU SERVICE :\nTransVision fournit aux partenaires transporteurs et propriétaires privés une plateforme de supervision télématique par balises SinoTrack.`;
-
         window.addEventListener('DOMContentLoaded', () => {
             const today = new Date();
             const lastWeek = new Date(today);
@@ -599,7 +626,7 @@
 
         function chargerCGUAdmin() {
             const el = document.getElementById('cfg-cgu-texte');
-            if (el) el.value = localStorage.getItem('transvision_cgu') || cguDefaut;
+            if (el) el.value = localStorage.getItem('transvision_cgu') || "CONDITIONS GÉNÉRALES D'UTILISATION (CGU)";
         }
 
         function sauvegarderCGUAdmin() {
@@ -635,6 +662,7 @@
             document.getElementById(idPage).classList.remove('hidden');
             document.querySelectorAll('.nav-link-admin').forEach(l => { l.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"; });
             boutonClique.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/10 nav-link-admin";
+            
             if (idPage === 'page-stats-croisees') { setTimeout(initialiserGraphiquesAdmin, 100); }
             if (idPage === 'page-suivi') { setTimeout(initMapAdmin, 50); }
         }
@@ -699,10 +727,32 @@
             afficherItinerairesAdmin();
         }
 
+        // --- NOUVEAU : FONCTION DE RECHERCHE PARTENAIRE ---
+        function rechercherPartenaire() {
+            const input = document.getElementById('recherche-partenaire').value.toLowerCase();
+            const rows = document.querySelectorAll('.item-partenaire-row');
+            
+            rows.forEach(row => {
+                const nom = row.querySelector('.partenaire-nom').textContent.toLowerCase();
+                const tel = row.querySelector('.partenaire-tel').textContent.toLowerCase();
+                if (nom.includes(input) || tel.includes(input)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function filtrerPartenairesContrat(type) {
+            document.querySelectorAll('.item-partenaire-row').forEach(row => {
+                if(type === 'tous' || row.getAttribute('data-contrat') === type) { row.classList.remove('hidden'); } else { row.classList.add('hidden'); }
+            });
+        }
+
         function executerActionPartenaire(nom, tel, pin, idSolde, idJours, selectElem) {
             const action = selectElem.value;
             if(!action) return;
-            if (action === 'recharger') { document.getElementById('modal-recharge-flexible').classList.remove('hidden'); } 
+            if (action === 'recharger') { ouvrirModalRechargeFlexible(nom, idSolde, idJours); } 
             else if (action === 'voir_id') { alert(`👁️ IDENTIFIANTS\nNom: ${nom}\nTél: ${tel}\nPIN: ${pin}`); }
             else if (action === 'activer') { alert(`🟢 Le compte de ${nom} a été réactivé.`); }
             else if (action === 'suspendre') { if(confirm(`⚠️ Suspendre l'accès de ${nom} ?`)) alert(`🟠 Compte suspendu.`); }
@@ -710,10 +760,35 @@
             selectElem.value = ""; 
         }
 
-        function fermerModalRechargeFlexible() { document.getElementById('modal-recharge-flexible').classList.add('hidden'); }
+        function ouvrirModalRechargeFlexible(nom, idSolde, idJours) {
+            ciblePartenaire = { nom, idSolde, idJours };
+            document.getElementById('nom-partenaire-cible').textContent = nom;
+            document.getElementById('input-credit-fixer').value = ""; 
+            
+            // NOUVEAU : PEUPLER LES VÉHICULES DYNAMIQUEMENT
+            const selVehicules = document.getElementById('admin-recharge-vehicule-select');
+            selVehicules.innerHTML = "";
+            if (flotteGlobale.length === 0) {
+                selVehicules.innerHTML = `<option value="ALL">Aucun véhicule enregistré dans la base</option>`;
+            } else {
+                flotteGlobale.forEach((v, index) => {
+                    selVehicules.insertAdjacentHTML('beforeend', `<option value="${index}">${v.plaque} (IMEI: ${v.imei})</option>`);
+                });
+            }
+
+            basculerSelectVehiculeAdmin();
+            document.getElementById('modal-recharge-flexible').classList.remove('hidden');
+        }
+
+        function basculerSelectVehiculeAdmin() {
+            const mode = document.getElementById('admin-recharge-mode').value;
+            const blocSelect = document.getElementById('bloc-admin-recharge-vehicule');
+            if (mode === 'flotte') { blocSelect.classList.add('hidden'); } else { blocSelect.classList.remove('hidden'); }
+        }
+
+        function fermerModalRechargeFlexible() { document.getElementById('modal-recharge-flexible').classList.add('hidden'); ciblePartenaire = null;}
         function appliquerRechargeFlexible() { alert("✅ Validation réussie !"); fermerModalRechargeFlexible(); }
         function modifierAccesPropresAdmin() { alert("✅ Vos accès Super Admin ont été mis à jour avec succès !"); }
-        function filtrerPartenairesContrat(type) { document.querySelectorAll('.item-partenaire-row').forEach(row => { if(type === 'tous' || row.getAttribute('data-contrat') === type) { row.classList.remove('hidden'); } else { row.classList.add('hidden'); } }); }
 
         // --- FONCTIONS RESTAURÉES POUR LA TRÉSORERIE ET LES STATISTIQUES ---
         function executerVirementMobileMoneyAdmin() {
@@ -731,17 +806,13 @@
         function majFiltreDate(type) {
             const d1 = document.getElementById(`date-debut-${type}`).value;
             const d2 = document.getElementById(`date-fin-${type}`).value;
-            
-            if (new Date(d1) > new Date(d2)) { alert("Période invalide."); return; }
-            
+            if (new Date(d1) > new Date(d2)) { alert("Période invalide. La date de début doit être antérieure à la date de fin."); return; }
             const coef = 0.5 + Math.random(); 
             if (type === 'treso') {
                 const newTresor = 850000 * coef;
                 document.getElementById('txt-tresor').textContent = newTresor.toLocaleString('fr-FR', {maximumFractionDigits:0}) + " CDF";
                 document.getElementById('txt-commissions').textContent = (145500 * coef).toLocaleString('fr-FR', {maximumFractionDigits:0}) + " CDF";
-            } else if (type === 'stats') {
-                initialiserGraphiquesAdmin(); 
-            }
+            } else if (type === 'stats') { initialiserGraphiquesAdmin(); }
             alert(`✅ Données mises à jour pour la période sélectionnée.`);
         }
 
@@ -774,7 +845,6 @@
             }
         }
 
-        // --- CHARGEMENT DYNAMIQUE DES NUMÉROS DE L'ADMIN ---
         function chargerNumerosAdmin() {
             document.getElementById('cfg-whatsapp').value = localStorage.getItem('tv_whatsapp') || "243810000000";
             document.getElementById('cfg-mpesa').value = localStorage.getItem('tv_mpesa') || "+243 812 000 000";
@@ -789,7 +859,6 @@
             localStorage.setItem('tv_orange', document.getElementById('cfg-orange').value.trim());
             alert("✅ Les numéros de paiement et de support ont été mis à jour !");
         }
-
     </script>
 </body>
 </html>
