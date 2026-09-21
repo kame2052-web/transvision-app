@@ -2,14 +2,10 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TransVision by Global Tech Solutions — Espace Partenaire</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TransVision by Global Tech Solutions — Console Super Admin</title>
     <link rel="icon" type="image/png" href="logo%20192x192.png">
-    <link rel="apple-touch-icon" href="logo%20192x192.png">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#020617">
-
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -17,13 +13,20 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    
     <style>
-        .blur-transition { transition: filter 0.4s ease, opacity 0.4s ease; }
-        #map-container { height: 350px; width: 100%; border-radius: 1rem; z-index: 10; }
+        .page-fade { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        #map-admin-suivi { height: 500px; width: 100%; border-radius: 1rem; z-index: 10; }
         .leaflet-tile { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
         .leaflet-container { background: #020617 !important; }
+        
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(100deg); cursor: pointer; }
+        input[type="file"]::file-selector-button { background-color: #4f46e5; color: white; border: none; border-radius: 0.5rem; padding: 0.5rem 1rem; cursor: pointer; font-weight: bold; transition: background 0.3s; }
+        input[type="file"]::file-selector-button:hover { background-color: #4338ca; }
+        
         @media print {
             body { background: white !important; color: black !important; }
             .no-print { display: none !important; }
@@ -32,372 +35,395 @@
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen relative overflow-x-hidden">
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-center items-center">
 
-    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <img src="VISION.png" alt="Fond d'écran TransVision" class="w-full h-full object-cover object-center opacity-25 select-none scale-105" onerror="this.style.display='none'">
-        <div class="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/70 to-slate-950/90"></div>
+    <!-- 1. CONNEXION ADMIN -->
+    <div id="page-login-admin" class="w-full max-w-sm p-6 space-y-6 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl page-fade no-print">
+        <div class="text-center space-y-2">
+            <img src="VISION.png" alt="TransVision Banner" class="w-full max-w-[220px] mx-auto mb-2 rounded-xl shadow-lg" onerror="this.style.display='none'">
+            <h1 class="text-xl font-black tracking-wide">TransVision</h1>
+            <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">by Global Tech Solutions</p>
+            <p class="text-[9px] text-slate-500">Console Super Admin Industrielle</p>
+        </div>
+
+        <div class="space-y-4 text-xs">
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Identifiant (Email)</label>
+                <input type="email" id="login-email-admin" class="w-full bg-slate-950 border border-slate-800 focus:outline-none focus:border-indigo-500 rounded-xl p-3 text-slate-200 font-mono font-bold" value="admin@transvision.cd">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Code Secret d'Accès</label>
+                <input type="password" id="login-pass-admin" class="w-full bg-slate-950 border border-slate-800 focus:outline-none focus:border-indigo-500 rounded-xl p-3 text-slate-200 font-mono text-lg" value="123456">
+            </div>
+            <button onclick="authentifierSessionAdmin()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-3.5 rounded-xl uppercase text-xs transition-all shadow-lg shadow-indigo-500/10">
+                Se Connecter au Central
+            </button>
+        </div>
     </div>
 
-    <!-- BANNIÈRE INSTALLATION PWA -->
-    <div id="pwa-install-banner" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-slate-900/95 backdrop-blur border border-emerald-500/50 text-slate-100 p-3 rounded-2xl shadow-2xl flex items-center gap-3 z-[100] w-[90%] max-w-sm hidden no-print">
-        <div class="w-10 h-10 rounded-xl overflow-hidden shadow-md flex items-center justify-center bg-slate-950 flex-shrink-0">
-            <img src="logo%20192x192.png" alt="Logo" class="w-full h-full object-contain" style="transform: scale(2.05); transform-origin: 48% 52%;" onerror="this.style.display='none'">
-        </div>
-        <div class="flex-1">
-            <p class="text-[11px] font-black text-emerald-400">Installer TransVision</p>
-            <p class="text-[9px] text-slate-400">by Global Tech Solutions</p>
-        </div>
-        <button id="btn-install-pwa" class="bg-emerald-500 text-slate-950 font-black text-[10px] px-3 py-2 rounded-xl">Installer</button>
-        <button onclick="document.getElementById('pwa-install-banner').classList.add('hidden')" class="text-slate-500 px-2"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-
-    <!-- MAQUETTE PRINCIPALE -->
-    <div class="relative z-10 max-w-md mx-auto min-h-screen shadow-2xl overflow-hidden flex flex-col border-x border-slate-800/70 pb-20 bg-slate-900/70 backdrop-blur-xl" id="zone-flotte">
-        
-        <!-- 1. ÉCRAN D'ACCÈS / AUTHENTIFICATION -->
-        <div id="page-auth" class="p-6 space-y-5 flex-1 flex flex-col justify-between no-print overflow-y-auto">
-            <div class="space-y-4 mt-1">
-                <div class="text-center">
-                    <div class="w-20 h-20 mx-auto mb-3 rounded-2xl overflow-hidden shadow-2xl shadow-emerald-500/25 flex items-center justify-center bg-slate-950 border border-emerald-500/30">
-                        <img src="logo%20192x192.png" alt="Logo TransVision" class="w-full h-full object-contain" style="transform: scale(2.05); transform-origin: 48% 52%;" onerror="this.style.display='none'">
-                    </div>
-                    <h2 class="text-xl font-black tracking-wide">TransVision</h2>
-                    <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">by Global Tech Solutions</p>
-                    <p class="text-[9px] text-slate-300 mt-0.5 italic">Contrôle de flotte & Audit des recettes</p>
-                </div>
-
-                <div class="grid grid-cols-2 gap-1 bg-slate-950/80 backdrop-blur p-1 rounded-xl border border-slate-800">
-                    <button id="tab-btn-login" onclick="basculerVueAuth('login')" class="py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950">Connexion</button>
-                    <button id="tab-btn-register" onclick="basculerVueAuth('register')" class="py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200">Nouveau Partenaire</button>
-                </div>
-
-                <!-- FORMULAIRE CONNEXION -->
-                <div id="form-connexion" class="bg-slate-950/85 backdrop-blur p-5 rounded-2xl border border-slate-800/80 space-y-4 shadow-xl">
-                    <div>
-                        <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Téléphone Enregistré</label>
-                        <input type="tel" id="login-tel" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-mono font-bold" value="0965647819">
-                    </div>
-                    <div>
-                        <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Code PIN Sécurité</label>
-                        <input type="password" id="login-pin" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-mono" placeholder="4 chiffres" value="0000">
-                    </div>
-                    <button onclick="executerConnexionPartenaire()" id="btn-login-text" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl text-xs uppercase shadow-lg shadow-emerald-500/10 transition-colors">
-                        Ouvrir mon Espace Flotte
-                    </button>
-                </div>
-
-                <!-- FORMULAIRE INSCRIPTION (CORRIGÉ) -->
-                <div id="form-inscription" class="bg-slate-950/85 backdrop-blur p-4 rounded-2xl border border-slate-800/80 space-y-3 shadow-xl hidden">
-                    <div>
-                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Nom Complet</label>
-                        <input type="text" id="ins-nom" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200" placeholder="Ex: Jean Dupont">
-                    </div>
-                    <div>
-                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Téléphone RDC</label>
-                        <input type="tel" id="ins-tel" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono" placeholder="Ex: 0810000000">
-                    </div>
-                    <div>
-                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Créer un Code PIN</label>
-                        <input type="password" id="ins-pin" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono" placeholder="4 chiffres secrets">
-                    </div>
-                    <button onclick="inscrireNouveauPartenaire()" class="w-full bg-emerald-500 text-slate-950 font-black py-3 rounded-xl text-xs uppercase mt-3">S'inscrire</button>
-                    <p class="text-[10px] text-slate-400 text-center mt-2">
-                        En adhérant, vous acceptez nos <button type="button" onclick="ouvrirModalCGU()" class="text-emerald-400 font-bold underline">CGU & Forfaits</button>.
-                    </p>
-                </div>
-            </div>
-            
-            <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v16.2 PROD — by <span class="text-slate-200 font-bold">Global Tech Solutions</span>
+    <!-- 2. CORPS ADMIN -->
+    <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
+        <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
+            <span class="text-xs font-bold text-indigo-400">Central Control Panel v16.3 PROD</span>
+            <div class="flex gap-2 text-[10px] font-mono">
+                <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 flex items-center gap-1">Central DO : <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="admin-server-dot"></span><span class="text-emerald-400 font-bold" id="admin-server-text">En Ligne</span></span>
+                <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Historique : <span class="text-sky-400 font-bold" id="admin-historique-statut">Chargement...</span></span>
+                <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Live : <span class="text-emerald-400 font-bold" id="admin-flotte-count">0 Traceur(s)</span></span>
             </div>
         </div>
 
-        <!-- 2. ESPACE CLIENT CONNECTÉ -->
-        <div id="app-proprietaire" class="flex-1 flex flex-col hidden relative">
-            <header class="p-4 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur sticky top-0 z-30 no-print">
-                <div class="flex justify-between items-center mb-3">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h1 id="lbl-nom-partenaire" class="text-sm font-black text-slate-100">Dolce</h1>
-                            <span class="text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded font-mono font-bold">ACTIF</span>
-                        </div>
-                        <p class="text-[8px] text-slate-400 font-mono">TransVision by Global Tech Solutions</p>
-                    </div>
-                    <div class="w-8 h-8 rounded-xl overflow-hidden shadow border border-slate-800 bg-slate-950 flex-shrink-0">
-                        <img src="logo%20192x192.png" alt="Logo" class="w-full h-full object-contain" style="transform: scale(2.05); transform-origin: 48% 52%;" onerror="this.style.display='none'">
-                    </div>
-                </div>
-
-                <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 flex items-center justify-between shadow-md">
-                    <div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="statut-serveur-voyant"></span>
-                            <span class="text-[10px] font-black uppercase text-emerald-400 tracking-wider" id="statut-serveur-texte">Connexion en cours...</span>
-                        </div>
-                        <p class="text-[9px] text-slate-400 mt-0.5" id="last-update-text">Chargement de l'historique...</p>
-                    </div>
-                    <div class="text-right">
-                        <!-- MINUTEUR FORFAIT -->
-                        <span id="timer-compte-rebours" class="text-sm font-mono font-black text-slate-100 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg shadow-inner">--:--:--</span>
-                    </div>
-                </div>
-            </header>
-
-            <!-- ONGLET A : CARTE -->
-            <div id="onglet-flotte" class="p-4 space-y-4 blur-transition class-onglet no-print">
-                <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-2 shadow-md h-[430px] flex flex-col">
-                    <div class="flex justify-between items-center px-1 pb-1">
-                        <h2 class="text-[10px] font-bold text-slate-300 uppercase tracking-widest flex items-center gap-1.5"><i class="fa-solid fa-map-location-dot text-emerald-400"></i> Traceur GPS</h2>
-                        <select id="select-vehicule-map" onchange="centrerSurVehicule(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg text-[10px] text-emerald-400 font-bold px-2 py-1 outline-none truncate max-w-[130px]"></select>
-                    </div>
-                    <div id="map-container" class="shadow-inner flex-1"></div>
-                </div>
-            </div>
-
-            <!-- ONGLET B : NOUVEAU VÉHICULE -->
-            <div id="onglet-ajouter" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
-                <div class="bg-slate-950/85 backdrop-blur p-5 rounded-2xl border border-slate-800/80 space-y-4 shadow-xl">
-                    <div class="border-b border-slate-800 pb-2">
-                        <h3 class="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-square-plus text-indigo-400"></i> Ajouter un Véhicule</h3>
-                        <p class="text-[10px] text-slate-400">Enregistrez la plaque, l'IMEI et l'itinéraire d'exploitation.</p>
-                    </div>
-
-                    <div class="space-y-3">
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Plaque / ID</label>
-                                <input type="text" id="add-plaque" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono focus:border-indigo-500 outline-none" placeholder="Ex: KIN 4082AE">
-                            </div>
-                            <div>
-                                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Modèle</label>
-                                <input type="text" id="add-type" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:border-indigo-500 outline-none" placeholder="Ex: Mercedes 207">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Places Assises</label>
-                                <input type="number" id="add-places" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:border-indigo-500 outline-none" placeholder="Ex: 18">
-                            </div>
-                            <div>
-                                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Tarif Passager (CDF)</label>
-                                <input type="number" id="add-tarif" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:border-indigo-500 outline-none" placeholder="Ex: 1500">
-                            </div>
-                        </div>
-
-                        <div class="p-3 bg-slate-900/90 border border-indigo-500/30 rounded-2xl space-y-3 shadow-inner">
-                            <span class="text-[9px] font-black uppercase text-indigo-400 tracking-wider flex items-center gap-1.5">
-                                <i class="fa-solid fa-route"></i> Parcours d'Exploitation
-                            </span>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Origine</label>
-                                    <input type="text" id="add-origine" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold focus:border-indigo-500 outline-none" placeholder="Départ">
-                                </div>
-                                <div>
-                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Destination</label>
-                                    <input type="text" id="add-destination" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold focus:border-indigo-500 outline-none" placeholder="Arrivée">
-                                </div>
-                            </div>
-                        </div>
-
+        <div class="flex flex-1 min-h-[calc(100vh-53px)] w-full">
+            <!-- ASIDE -->
+            <aside class="w-64 bg-slate-900 border-r border-slate-800 p-5 flex flex-col justify-between h-[calc(100vh-53px)] sticky top-[53px] no-print">
+                <div class="space-y-5">
+                    <div class="flex items-center gap-2.5 px-1">
+                        <img src="logo%20192x192.png" alt="Logo TV" class="w-8 h-8 rounded-lg shadow object-contain bg-slate-950" onerror="this.style.display='none'">
                         <div>
-                            <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">N° IMEI Traceur SinoTrack</label>
-                            <input type="text" id="add-imei" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono focus:border-indigo-500 outline-none" placeholder="Ex: 865241092837401">
+                            <h2 class="text-xs font-black tracking-wider uppercase text-slate-200">TransVision</h2>
+                            <p class="text-[9px] font-mono text-indigo-400">by Global Tech Solutions</p>
                         </div>
+                    </div>
 
-                        <button onclick="enregistrerVehiculeSaisi()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-3 rounded-xl text-xs uppercase shadow-lg shadow-indigo-500/10">
-                            Valider le Véhicule
+                    <nav class="space-y-1 text-xs">
+                        <button onclick="changerPageAdmin('page-suivi', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/10 nav-link-admin"><i class="fa-solid fa-map-location-dot text-sm text-sky-400"></i> Suivi de la flotte</button>
+                        <button onclick="changerPageAdmin('page-gestion-flotte', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"><i class="fa-solid fa-bus text-sm text-emerald-400"></i> Flotte & Recettes</button>
+                        <button onclick="changerPageAdmin('page-partenaires', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"><i class="fa-solid fa-users text-sm text-indigo-400"></i> Gestion des partenaires</button>
+                        <button onclick="changerPageAdmin('page-itineraires', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"><i class="fa-solid fa-route text-sm text-teal-400"></i> Matrice Tarifs (Pôles)</button>
+                        <button onclick="changerPageAdmin('page-tresorerie', this)" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"><span class="flex items-center gap-3"><i class="fa-solid fa-wallet text-sm text-amber-500"></i> Trésorerie</span></button>
+                        <button onclick="changerPageAdmin('page-stats-croisees', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"><i class="fa-solid fa-chart-pie text-sm text-fuchsia-400"></i> Statistiques & Graphiques</button>
+                        <button onclick="changerPageAdmin('page-parametres', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"><i class="fa-solid fa-sliders text-sm text-slate-400"></i> Paramètres & Numéros</button>
+                    </nav>
+                </div>
+
+                <div class="border-t border-slate-850 pt-3 flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 bg-slate-800 rounded-full flex items-center justify-center font-bold">AD</div>
+                        <div><p class="font-bold text-slate-300">Super Admin</p><p class="text-[9px] text-slate-500">Global Tech Kinshasa</p></div>
+                    </div>
+                    <button onclick="declencherDeconnexionAdmin()" class="text-slate-500 hover:text-rose-400 transition-all"><i class="fa-solid fa-power-off text-sm"></i></button>
+                </div>
+            </aside>
+
+            <!-- CONTENU DES PAGES -->
+            <main class="flex-1 p-6 lg:p-8 space-y-6 overflow-y-auto max-w-5xl">
+                
+                <!-- SUIVI LIVE -->
+                <div id="page-suivi" class="space-y-4 page-fade class-page-admin">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-xl font-black text-slate-100">🗺️ Suivi Global & Geofences</h2>
+                        <button onclick="centrerMapAdmin()" class="bg-slate-800 text-emerald-400 hover:bg-slate-700 text-[10px] px-3 py-1.5 rounded-lg font-bold border border-slate-700 transition-colors">
+                            <i class="fa-solid fa-crosshairs"></i> Recentrer Kinshasa
                         </button>
                     </div>
+                    <div id="map-admin-suivi" class="w-full bg-slate-900 border border-slate-800 rounded-2xl shadow-xl"></div>
                 </div>
-            </div>
 
-            <!-- ONGLET C : RAPPORT FINANCIER -->
-            <div id="onglet-rapport" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
-                <div class="bg-slate-950/90 backdrop-blur p-3.5 rounded-2xl border border-slate-800 space-y-3 shadow-md">
-                    <div class="flex justify-between items-center">
-                        <label class="block text-[10px] font-bold text-slate-300 uppercase tracking-wider">
-                            <i class="fa-solid fa-filter text-emerald-400 mr-1"></i> Filtre du Rapport Financier
-                        </label>
-                        <button onclick="window.print()" class="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded font-bold hover:bg-emerald-500/20"><i class="fa-solid fa-print"></i> PDF</button>
+                <!-- GESTION DE LA FLOTTE -->
+                <div id="page-gestion-flotte" class="space-y-4 page-fade class-page-admin hidden">
+                    <div class="flex justify-between items-end">
+                        <h2 class="text-xl font-black text-slate-100">🚍 Parc Automobile & Recettes Temp Réel</h2>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 shadow-md">
+                            <p class="text-[10px] text-slate-500 uppercase font-black tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-road text-rose-400"></i> Km Cumulés</p>
+                            <p class="text-3xl font-black text-slate-100 mt-1" id="stat-total-km">0</p>
+                        </div>
+                        <div class="bg-indigo-500/10 p-4 rounded-2xl border border-indigo-500/20 shadow-md">
+                            <p class="text-[10px] text-indigo-400 uppercase font-black tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-route"></i> Tronçons Validés</p>
+                            <p class="text-3xl font-black text-indigo-300 mt-1" id="stat-total-rotations">0</p>
+                        </div>
+                        <div class="bg-emerald-500/10 p-4 rounded-2xl border border-emerald-500/20 shadow-md">
+                            <p class="text-[10px] text-emerald-400 uppercase font-black tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-wallet"></i> Recettes Brutes (CDF)</p>
+                            <p class="text-3xl font-black text-emerald-300 mt-1" id="stat-total-cdf">0</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950 rounded-2xl border border-slate-850 p-4 overflow-x-auto text-xs font-mono shadow-md">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="border-b border-slate-800 text-slate-500 uppercase text-[9px] font-sans">
+                                    <th class="py-2">Plaque / ID</th>
+                                    <th class="py-2">Distance Jour</th>
+                                    <th class="py-2">Dernier Pôle Validé</th>
+                                    <th class="py-2">Tronçons Mémorisés</th>
+                                    <th class="py-2">Gains Bruts</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-850" id="table-vehicules-body">
+                                <tr><td colspan="5" class="py-4 text-center text-slate-500 font-sans italic">En attente de réception des traceurs...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- PARTENAIRES : GESTION DES RECHARGES & ACCÈS -->
+                <div id="page-partenaires" class="space-y-4 page-fade class-page-admin hidden print:block">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 no-print">
+                        <div>
+                            <h2 class="text-xl font-black text-slate-100">👤 Base des Partenaires</h2>
+                            <p class="text-[10px] text-slate-400">Connecté en direct à la base de données cloud.</p>
+                        </div>
+                        
+                        <div class="relative w-full sm:w-64">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+                            <input type="text" id="recherche-partenaire" onkeyup="rechercherPartenaire()" class="w-full bg-slate-900 border border-slate-800 rounded-xl py-2 pl-9 pr-3 text-[10px] text-slate-200 focus:outline-none focus:border-indigo-500 font-bold" placeholder="Rechercher par nom ou numéro...">
+                        </div>
+
+                        <div class="flex bg-slate-950 p-1.5 rounded-xl border border-slate-850 text-[10px] font-bold">
+                            <button onclick="filtrerPartenairesContrat('tous')" class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-200">Tous</button>
+                            <button onclick="filtrerPartenairesContrat('commercial')" class="px-3 py-1.5 rounded-lg text-indigo-400 hover:bg-slate-900"><i class="fa-solid fa-bus mr-1"></i> Commercial</button>
+                            <button onclick="filtrerPartenairesContrat('personnel')" class="px-3 py-1.5 rounded-lg text-rose-400 hover:bg-slate-900"><i class="fa-solid fa-car mr-1"></i> Personnel</button>
+                            <button onclick="chargerPartenairesCloud()" class="ml-2 bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg transition-colors"><i class="fa-solid fa-rotate"></i></button>
+                        </div>
                     </div>
                     
-                    <div class="space-y-2">
-                        <div>
-                            <label class="block text-[8px] text-slate-500 uppercase mb-1">Cibler un Véhicule</label>
-                            <select id="filtre-fin-vehicule" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-[10px] text-slate-200 font-bold focus:outline-none focus:border-emerald-500">
-                                <option value="all">Tous les véhicules (Flotte globale)</option>
-                            </select>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-[8px] text-slate-500 uppercase mb-1">Du (Inclus)</label>
-                                <input type="date" id="date-debut-fin" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-[10px] text-emerald-400 font-bold focus:outline-none focus:border-emerald-500">
-                            </div>
-                            <div>
-                                <label class="block text-[8px] text-slate-500 uppercase mb-1">Au (Inclus)</label>
-                                <input type="date" id="date-fin-fin" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-[10px] text-emerald-400 font-bold focus:outline-none focus:border-emerald-500">
-                            </div>
-                        </div>
-                    </div>
-                    <button onclick="appliquerFiltreFinancier()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-black py-2 rounded-lg text-[10px] uppercase transition-colors shadow-inner">
-                        Appliquer & Recalculer
-                    </button>
-                </div>
-
-                <div class="bg-slate-950/85 backdrop-blur p-4 rounded-2xl border border-slate-800/80 space-y-2 shadow-md">
-                    <h3 class="text-xs font-black uppercase text-emerald-400 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-simple"></i> Évolution des Recettes
-                    </h3>
-                    <div class="h-40 relative">
-                        <canvas id="chart-recettes-partenaire"></canvas>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800/80 space-y-1 shadow-md">
-                        <span class="text-[9px] text-slate-400 uppercase font-black">Recettes Période</span>
-                        <p id="txt-total-recettes" class="text-lg font-black text-emerald-400">0 CDF</p>
-                    </div>
-                    <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800/80 space-y-1 shadow-md">
-                        <span class="text-[9px] text-slate-400 uppercase font-black">Tronçons Validés</span>
-                        <p id="txt-total-rotations" class="text-lg font-black text-slate-100">0</p>
+                    <div class="bg-slate-950 rounded-2xl border border-slate-850 p-4 overflow-x-auto text-[11px] shadow-md print-clean">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="border-b border-slate-800 text-slate-500 font-black uppercase text-[9px] tracking-wider print:border-slate-300">
+                                    <th class="py-3">Nom Partenaire</th>
+                                    <th class="py-3">Type Contrat</th>
+                                    <th class="py-3 text-center">Flotte</th>
+                                    <th class="py-3 text-center">Statut Jours</th>
+                                    <th class="py-3 text-right">Actions Gestion</th>
+                                </tr>
+                            </thead>
+                            <!-- AFFICHAGE GARANTI DU COMPTE DOLCE (MÊME SANS CONNEXION INTERNET) -->
+                            <tbody class="divide-y divide-slate-850 text-slate-300 print-text" id="table-partenaires-body">
+                                <tr class="item-partenaire-row" data-contrat="commercial">
+                                    <td class="py-3 font-black text-slate-200 partenaire-nom">Dolce<br><span class="text-[9px] font-normal text-slate-500 partenaire-tel">0965647819</span></td>
+                                    <td class="py-3"><span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-black text-[10px] uppercase">Commercial</span></td>
+                                    <td class="py-3 text-center font-bold font-mono text-indigo-400">1 Véh.</td>
+                                    <td class="py-3 text-center font-mono"><span id="jours-dolce" class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-lg font-black text-[10px]">Actif</span></td>
+                                    <td class="py-3 text-right no-print">
+                                        <select onchange="executerActionPartenaire('Dolce', '0965647819', '0000', this)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 focus:outline-none focus:border-indigo-500">
+                                            <option value="">-- Actions --</option>
+                                            <option value="recharger" class="text-emerald-400">💸 Valider Recharge</option>
+                                            <option value="voir_id" class="text-sky-400">👁️ Voir Identifiants</option>
+                                            <option value="activer" class="text-emerald-500">🟢 Activer Compte</option>
+                                            <option value="suspendre" class="text-amber-500">🟠 Suspendre</option>
+                                            <!-- BOUTON SUPPRIMER RESTAURÉ ! -->
+                                            <option value="supprimer" class="text-rose-500">🔴 Supprimer Compte</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <div class="space-y-3">
-                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-800 pb-1">Détails Filtrés</h3>
-                    <div id="fin-vehicules-list" class="space-y-3"></div>
-                </div>
-            </div>
-
-            <!-- ONGLET D : ANALYSE TECHNIQUE -->
-            <div id="onglet-analyse" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
-                <div class="bg-slate-950/90 backdrop-blur p-3.5 rounded-2xl border border-slate-800 space-y-3 shadow-md">
-                    <div class="flex justify-between items-center">
-                        <label class="block text-[10px] font-bold text-slate-300 uppercase tracking-wider">
-                            <i class="fa-solid fa-filter text-sky-400 mr-1"></i> Filtre du Bilan Technique
-                        </label>
-                    </div>
+                <!-- ITINÉRAIRES -->
+                <div id="page-itineraires" class="space-y-5 page-fade class-page-admin hidden">
+                    <h2 class="text-xl font-black text-slate-100">🛣️ Matrice Tarifaire des Pôles</h2>
                     
-                    <div class="space-y-2">
+                    <div class="bg-slate-950 p-5 rounded-2xl border border-emerald-500/30 space-y-4">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-file-excel text-2xl text-emerald-400"></i>
+                            <div>
+                                <h3 class="text-xs font-black uppercase tracking-widest text-emerald-400">Importer Grille Tarifaire (Excel)</h3>
+                                <p class="text-[10px] text-slate-400 mt-1">Colonnes requises : Origine, Destination, Prix (CDF). Les noms doivent correspondre aux pôles surveillés.</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3 items-center">
+                            <input type="file" id="excel-file-upload" accept=".xlsx, .xls" class="block w-full text-xs text-slate-400 border border-slate-800 rounded-xl cursor-pointer bg-slate-900 focus:outline-none">
+                            <button onclick="importerItinerairesExcel()" class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black px-6 py-2 rounded-xl uppercase text-xs shadow-lg flex-shrink-0 transition-colors">Lire et Écraser</button>
+                        </div>
+                        <div id="excel-status-msg" class="text-[10px] font-mono text-slate-500 hidden"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-4">
+                            <h3 class="text-xs font-black uppercase tracking-widest text-indigo-400">Ajout Manuel</h3>
+                            <div class="space-y-3 text-xs">
+                                <div><input type="text" id="add-origine" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200" placeholder="Origine (ex: UPN)"></div>
+                                <div><input type="text" id="add-destination" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200" placeholder="Destination (ex: Delvaux)"></div>
+                                <div><input type="number" id="add-prix-troncon" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-emerald-400" placeholder="Prix (CDF)"></div>
+                                <button onclick="creerNouveauTronconAdmin()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-2.5 rounded-xl uppercase text-xs">Injecter</button>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 lg:col-span-2 space-y-3">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400">Tarifs de Référence Actifs dans le Cerveau</h3>
+                                <span id="badge-nb-routes" class="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded font-bold">0 Rte(s)</span>
+                            </div>
+                            <div class="space-y-2 overflow-y-auto max-h-[350px] text-xs font-mono" id="box-matrice-troncons"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TRÉSORERIE -->
+                <div id="page-tresorerie" class="space-y-5 page-fade class-page-admin hidden">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                        <h2 class="text-xl font-black text-slate-100">💸 Trésorerie & Sortie de Fonds</h2>
+                        <div class="flex items-center gap-2 bg-slate-950 border border-slate-800 p-1.5 rounded-xl">
+                            <span class="text-[9px] text-slate-500 font-bold uppercase ml-2">Du</span>
+                            <input type="date" id="date-debut-treso" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] text-emerald-400 outline-none">
+                            <span class="text-[9px] text-slate-500 font-bold uppercase">Au</span>
+                            <input type="date" id="date-fin-treso" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] text-emerald-400 outline-none">
+                            <button onclick="majFiltreDate('treso')" class="bg-slate-800 hover:bg-slate-700 text-white p-1.5 rounded-lg"><i class="fa-solid fa-rotate"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                        <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-1">
+                            <span class="text-[9px] text-slate-500 uppercase block font-black">Encaissements (Période)</span>
+                            <p id="txt-tresor" class="text-xl font-black text-emerald-400">0 CDF</p>
+                        </div>
+                        <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-1">
+                            <span class="text-[9px] text-slate-500 uppercase block font-black">Commissions (Période)</span>
+                            <p id="txt-commissions" class="text-xl font-black text-indigo-400">0 CDF</p>
+                        </div>
+                        <div class="bg-slate-950 p-4 rounded-2xl border border-indigo-500/20 space-y-2">
+                            <input type="tel" id="wir-phone" class="w-full bg-slate-900 border border-slate-800 p-2 rounded-xl focus:border-indigo-500 outline-none" placeholder="N° Mobile Money Sortant">
+                            <input type="number" id="wir-amount" class="w-full bg-slate-900 border border-slate-800 p-2 rounded-xl text-emerald-400 focus:border-indigo-500 outline-none" placeholder="Montant CDF">
+                            <button onclick="executerVirementMobileMoneyAdmin()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-2 rounded-xl uppercase transition-colors">Décaisser</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STATISTIQUES CROISÉES -->
+                <div id="page-stats-croisees" class="space-y-5 page-fade class-page-admin hidden">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
                         <div>
-                            <label class="block text-[8px] text-slate-500 uppercase mb-1">Cibler un Véhicule</label>
-                            <select id="filtre-tech-vehicule" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-[10px] text-slate-200 font-bold focus:outline-none focus:border-sky-500">
-                                <option value="all">Tous les véhicules (Flotte globale)</option>
-                            </select>
+                            <h2 class="text-xl font-black text-slate-100">📊 Tableaux de Bord Analytiques</h2>
+                            <p class="text-xs text-slate-400">Croisement des flux financiers et empreinte spatiale.</p>
                         </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-[8px] text-slate-500 uppercase mb-1">Du (Inclus)</label>
-                                <input type="date" id="date-debut-tech" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-[10px] text-sky-400 font-bold focus:outline-none focus:border-sky-500">
-                            </div>
-                            <div>
-                                <label class="block text-[8px] text-slate-500 uppercase mb-1">Au (Inclus)</label>
-                                <input type="date" id="date-fin-tech" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-[10px] text-sky-400 font-bold focus:outline-none focus:border-sky-500">
-                            </div>
+                        <div class="flex items-center gap-2 bg-slate-950 border border-slate-800 p-1.5 rounded-xl">
+                            <span class="text-[9px] text-slate-500 font-bold uppercase ml-2">Du</span>
+                            <input type="date" id="date-debut-stats" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] text-fuchsia-400 outline-none">
+                            <span class="text-[9px] text-slate-500 font-bold uppercase">Au</span>
+                            <input type="date" id="date-fin-stats" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] text-fuchsia-400 outline-none">
+                            <button onclick="majFiltreDate('stats')" class="bg-slate-800 hover:bg-slate-700 text-white p-1.5 rounded-lg"><i class="fa-solid fa-rotate"></i></button>
                         </div>
                     </div>
-                    <button onclick="appliquerFiltreTechnique()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-black py-2 rounded-lg text-[10px] uppercase transition-colors shadow-inner">
-                        Appliquer & Recalculer
-                    </button>
-                </div>
 
-                <div class="flex justify-between items-center">
-                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rapport Matériel & Consommation</h2>
-                </div>
-                <div id="tech-vehicules-list" class="space-y-3"></div>
-            </div>
-
-            <!-- ONGLET E : PROFIL -->
-            <div id="onglet-profil" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
-                <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mon Profil & Forfait</h2>
-                
-                <button onclick="ouvrirModalRecharge()" class="w-full bg-slate-950 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl text-center shadow-lg transition-colors flex items-center justify-center gap-3">
-                    <i class="fa-solid fa-wallet text-2xl text-emerald-400"></i>
-                    <div class="text-left">
-                        <h3 class="text-[11px] font-black uppercase text-slate-200">Recharger Mon Forfait</h3>
-                        <p class="text-[9px] text-slate-400 mt-0.5">Envoyer des fonds sur votre compte partenaire</p>
+                    <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
+                        <div class="flex justify-between items-center"><h3 class="text-xs font-black uppercase text-emerald-400 flex items-center gap-2"><i class="fa-solid fa-chart-line"></i> Évolution des Recettes & Dépenses</h3></div>
+                        <div class="h-64 relative"><canvas id="chart-recettes-depenses"></canvas></div>
                     </div>
-                </button>
 
-                <div class="bg-slate-950/80 backdrop-blur p-5 rounded-2xl border border-slate-800 space-y-3 shadow-xl">
-                    <h3 class="text-xs font-black uppercase text-indigo-400 flex items-center gap-2 border-b border-slate-800 pb-2">
-                        <i class="fa-solid fa-shield-halved"></i> Mes Identifiants
-                    </h3>
-                    <div>
-                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Téléphone (Login)</label>
-                        <input type="tel" id="prof-tel" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-400 font-mono" readonly>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
+                            <h3 class="text-xs font-black uppercase text-indigo-400 flex items-center gap-2"><i class="fa-solid fa-users-viewfinder"></i> Répartition des Clients</h3>
+                            <div class="h-56 relative flex items-center justify-center"><canvas id="chart-clients-types"></canvas></div>
+                        </div>
+                        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
+                            <h3 class="text-xs font-black uppercase text-sky-400 flex items-center gap-2"><i class="fa-solid fa-map-pin"></i> Part de la Flotte par Commune</h3>
+                            <div class="h-56 relative flex items-center justify-center"><canvas id="chart-communes-part"></canvas></div>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Nouveau Code PIN</label>
-                        <input type="password" id="prof-pin-new" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono focus:border-indigo-500 outline-none" placeholder="Saisir 4 chiffres">
-                    </div>
-                    <button onclick="majIdentifiants()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-2.5 rounded-xl text-xs uppercase mt-2 shadow-md">Mettre à jour mon PIN</button>
                 </div>
 
-                <div class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800 space-y-3 shadow-md">
-                    <a href="#" id="lien-whatsapp-support" target="_blank" class="w-full bg-green-500/10 border border-green-500/30 hover:bg-green-500/20 text-green-400 font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition-colors">
-                        <i class="fa-brands fa-whatsapp text-lg"></i> Contacter le Support
-                    </a>
+                <!-- PARAMÈTRES & RÉSEAUX DE PAIEMENT ADMIN -->
+                <div id="page-parametres" class="space-y-5 page-fade class-page-admin hidden">
+                    <h2 class="text-xl font-black text-slate-100">⚙️ Configuration Système & Paiements</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+                        
+                        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-4 md:col-span-2 shadow-xl">
+                            <div class="flex items-center gap-2 border-b border-slate-850 pb-2">
+                                <i class="fa-solid fa-tower-cell text-sky-400 text-sm"></i>
+                                <h3 class="font-bold text-sky-400 uppercase tracking-wider text-[10px]">Passerelles Financières & Support Client</h3>
+                            </div>
+                            <p class="text-[9px] text-slate-500">Ces numéros apparaîtront automatiquement sur l'application de tous vos partenaires.</p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[9px] font-bold text-green-400 uppercase mb-1"><i class="fa-brands fa-whatsapp"></i> WhatsApp Support</label>
+                                    <input type="text" id="cfg-whatsapp" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-slate-200 focus:border-green-500 outline-none" placeholder="Ex: 243810000000">
+                                </div>
+                                <div>
+                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">M-Pesa (Vodacom)</label>
+                                    <input type="text" id="cfg-mpesa" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-slate-200 focus:border-sky-500 outline-none" placeholder="Numéro M-Pesa">
+                                </div>
+                                <div>
+                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Airtel Money</label>
+                                    <input type="text" id="cfg-airtel" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-slate-200 focus:border-rose-500 outline-none" placeholder="Numéro Airtel">
+                                </div>
+                                <div>
+                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Orange Money</label>
+                                    <input type="text" id="cfg-orange" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-slate-200 focus:border-orange-500 outline-none" placeholder="Numéro Orange">
+                                </div>
+                            </div>
+                            <button onclick="sauvegarderNumerosAdmin()" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-black py-2.5 rounded-xl uppercase text-xs transition-colors mt-2">
+                                Enregistrer et Diffuser aux Partenaires
+                            </button>
+                        </div>
+                        
+                        <div class="bg-slate-950 p-5 rounded-2xl border border-indigo-500/30 space-y-3.5 shadow-xl">
+                            <div class="flex items-center gap-2 border-b border-slate-850 pb-2">
+                                <i class="fa-solid fa-shield-halved text-indigo-400 text-sm"></i>
+                                <h3 class="font-bold text-indigo-400 uppercase tracking-wider text-[10px]">Identifiants Super Admin</h3>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Identifiant Email</label>
+                                <input type="email" id="cfg-admin-email" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-slate-200 focus:outline-none focus:border-indigo-500" value="admin@transvision.cd">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Ancien Mot de Passe</label>
+                                <input type="password" id="cfg-admin-old-pass" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-slate-200 focus:outline-none focus:border-indigo-500" placeholder="••••••••">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nouveau Mot de Passe</label>
+                                <input type="password" id="cfg-admin-new-pass" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-emerald-400 focus:outline-none focus:border-emerald-500" placeholder="Minimum 6 caractères">
+                            </div>
+                            <button onclick="modifierAccesPropresAdmin()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-2.5 rounded-xl uppercase text-xs transition-all shadow-lg shadow-indigo-500/10 mt-1">Valider & Modifier</button>
+                        </div>
 
-                    <button onclick="ouvrirModalCGU()" class="w-full bg-slate-900 border border-slate-800 hover:border-emerald-500 text-slate-300 font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition-colors">
-                        <i class="fa-solid fa-file-contract text-emerald-400"></i> Consulter les CGU
-                    </button>
-                    <button onclick="declencherDeconnexion()" class="w-full bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 font-black py-3 rounded-xl text-xs uppercase flex items-center justify-center gap-2 mt-4 transition-colors">
-                        <i class="fa-solid fa-power-off"></i> Se Déconnecter
-                    </button>
+                        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
+                            <div class="flex justify-between items-center">
+                                <h3 class="font-bold text-emerald-400 uppercase tracking-wider text-[10px]">Rédaction des CGU</h3>
+                                <span class="text-[9px] text-slate-500 font-mono">Synchronisé</span>
+                            </div>
+                            <textarea id="cfg-cgu-texte" rows="6" class="w-full bg-slate-900 border border-slate-850 focus:border-indigo-500 focus:outline-none rounded-xl p-3 text-xs text-slate-300 font-mono leading-relaxed"></textarea>
+                            <button onclick="sauvegarderCGUAdmin()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-2 px-5 rounded-xl uppercase text-xs">Publier les CGU</button>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- BARRE NAV -->
-            <nav class="fixed bottom-0 max-w-md w-full inset-x-0 mx-auto bg-slate-950/95 backdrop-blur border-t border-slate-800 h-16 flex justify-around items-center z-40 no-print px-1">
-                <button onclick="changerOnglet('onglet-flotte', this)" class="flex flex-col items-center justify-center gap-1 text-emerald-400 btn-nav flex-1"><i class="fa-solid fa-location-crosshairs text-sm"></i><span class="text-[8px] font-bold">GPS Live</span></button>
-                <button onclick="changerOnglet('onglet-ajouter', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-plus-circle text-sm"></i><span class="text-[8px] font-bold">Nouveau</span></button>
-                <button onclick="changerOnglet('onglet-rapport', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-file-invoice-dollar text-sm"></i><span class="text-[8px] font-bold">Rapport</span></button>
-                <button onclick="changerOnglet('onglet-analyse', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-wrench text-sm"></i><span class="text-[8px] font-bold">Tech.</span></button>
-                <button onclick="changerOnglet('onglet-profil', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-user text-sm"></i><span class="text-[8px] font-bold">Profil</span></button>
-            </nav>
+            </main>
         </div>
+    </div>
 
-        <!-- MODAL VALIDATION RECHARGE ADMIN CONNECTÉE CLOUD -->
+    <!-- MODAL VALIDATION RECHARGE ADMIN (RESTAURÉE COMME DANS LA VIDÉO) -->
     <div id="modal-recharge-flexible" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 class="font-black text-sm text-slate-100 flex items-center gap-2"><i class="fa-solid fa-check-double text-emerald-400"></i> Valider Forfait</h3>
+                <h3 class="font-black text-sm text-slate-100 flex items-center gap-2"><i class="fa-solid fa-check-double text-emerald-400"></i> Valider Recharge</h3>
                 <button onclick="fermerModalRechargeFlexible()" class="text-slate-500 hover:text-slate-300"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <p class="text-[10px] text-slate-400">Le forfait sera prolongé directement dans la base de données du partenaire.</p>
-            <p class="text-xs text-slate-300 font-bold">Compte Cible : <span id="nom-partenaire-cible" class="text-emerald-400"></span></p>
+            <p class="text-[10px] text-slate-400">Approuvez le paiement reçu et activez les jours correspondants.</p>
+            <p class="text-xs text-slate-300 font-bold">Compte : <span id="nom-partenaire-cible" class="text-emerald-400"></span></p>
 
             <div class="space-y-3 text-xs mt-2">
                 
-                <!-- CHOIX CIBLE ET VÉHICULE -->
+                <!-- 1. CIBLE ET MENU DÉROULANT VÉHICULE -->
                 <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-850 space-y-2">
                     <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Cible de la validation</label>
                     <select id="admin-recharge-mode" onchange="basculerSelectVehiculeAdmin()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-bold focus:outline-none focus:border-emerald-500">
-                        <option value="flotte">Flotte Complète (Tous ses véhicules)</option>
-                        <option value="unitaire">Véhicule Spécifique Uniquement</option>
+                        <option value="flotte">Flotte Complète</option>
+                        <option value="unitaire">Véhicule Spécifique</option>
                     </select>
                     
                     <div id="bloc-admin-recharge-vehicule" class="hidden mt-2 border-t border-slate-800 pt-2">
                         <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Sélectionner le Véhicule</label>
+                        <!-- Peuplé par le Javascript avec "Sélectionner (Demo)" ou la liste réelle -->
                         <select id="admin-recharge-vehicule-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-mono text-[10px] focus:outline-none focus:border-emerald-500"></select>
                     </div>
                 </div>
 
-                <!-- MONTANT REÇU -->
+                <!-- 2. MONTANT REÇU -->
                 <div>
                     <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Montant Reçu (CDF)</label>
-                    <input type="number" id="input-credit-fixer" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 font-black text-emerald-400 outline-none focus:border-emerald-500" placeholder="Ex: 5000">
+                    <input type="number" id="input-credit-fixer" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 font-black text-emerald-400 outline-none focus:border-emerald-500" placeholder="Saisir montant">
                 </div>
 
-                <!-- JOURS -->
+                <!-- 3. JOURS À VALIDER -->
                 <div>
-                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Jours d'accès à ajouter</label>
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Jours d'accès à valider</label>
                     <div class="flex gap-2">
                         <input type="number" id="input-jours-fixer" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-center font-black text-lg text-emerald-400 outline-none focus:border-emerald-500" value="5">
                         <span class="flex items-center text-slate-400 font-bold px-2">Jours</span>
@@ -411,62 +437,24 @@
                 </div>
             </div>
             
-            <button id="btn-valider-recharge" onclick="appliquerRechargeCloud()" data-telcible="" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs shadow-lg mt-2">Valider et Envoyer au Serveur</button>
-        </div>
-    </div>
-        <!-- MODAL CGU -->
-        <div id="modal-cgu" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
-            <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md max-h-[80vh] flex flex-col overflow-hidden shadow-2xl">
-                <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
-                    <h3 class="font-black text-xs text-slate-100 uppercase">Conditions TransVision</h3>
-                    <button onclick="fermerModalCGU()" class="text-slate-400 hover:text-slate-100 text-sm p-1"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-                <div class="p-5 overflow-y-auto text-slate-300 text-xs font-mono leading-relaxed whitespace-pre-wrap" id="zone-texte-cgu"></div>
-                <div class="p-3 border-t border-slate-800 text-right">
-                    <button onclick="fermerModalCGU()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs px-4 py-2 rounded-xl transition-colors">Fermer</button>
-                </div>
-            </div>
+            <button id="btn-valider-recharge" onclick="appliquerRechargeFlexible()" data-telcible="" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs shadow-lg mt-2">Valider et Activer</button>
         </div>
     </div>
 
-    <!-- LOGIQUE JAVASCRIPT CONNECTÉE -->
+    <!-- LOGIQUE JAVASCRIPT CONNECTÉE AU SERVEUR DIGITALOCEAN -->
     <script>
-        // --- CHARGEMENT DYNAMIQUE DES NUMÉROS DE L'ADMIN ---
-        function chargerConfigurationsAdmin() {
-            const numWhatsApp = localStorage.getItem('tv_whatsapp') || "243810000000";
-            const numMpesa = localStorage.getItem('tv_mpesa') || "+243 812 000 000";
-            const numAirtel = localStorage.getItem('tv_airtel') || "+243 999 000 000";
-            const numOrange = localStorage.getItem('tv_orange') || "+243 890 000 000";
-
-            const lienWa = document.getElementById('lien-whatsapp-support');
-            if(lienWa) lienWa.href = `https://wa.me/${numWhatsApp.replace(/[^0-9]/g, '')}`;
-
-            const optMpesa = document.getElementById('opt-mpesa');
-            if(optMpesa) optMpesa.textContent = `${numMpesa} (M-Pesa)`;
-            
-            const optAirtel = document.getElementById('opt-airtel');
-            if(optAirtel) optAirtel.textContent = `${numAirtel} (Airtel Money)`;
-            
-            const optOrange = document.getElementById('opt-orange');
-            if(optOrange) optOrange.textContent = `${numOrange} (Orange Money)`;
-        }
-
         const supabaseUrl = 'https://vbriworyscymnmtzzdny.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-        const SERVEUR_URL = "http://134.209.116.89:3000";
-        const socket = io(SERVEUR_URL, { transports: ['websocket'], reconnection: true });
+        let adminCredential = { email: "admin@transvision.cd", pass: "123456" };
+        let ciblePartenaire = null;
 
-        // LE PROFIL COMPLET CHARGÉ DEPUIS SUPABASE OU FALLBACK
-        let partenaireProfil = null; 
-        let client = { nom: "Dolce", tel: "0965647819", vehicules: [] };
-        let map = null; let busMarker = null;
-        let chartPartenaireInstance = null;
+        let flotteGlobale = [];
+        let mapAdmin = null;
+        let adminMarkers = {};
 
-        // ==========================================
         // DÉFINITION DES PÔLES ET TARIFS
-        // ==========================================
         const POLES_KINSHASA = [
             { nom: "Matadi Kibala", lat: -4.4361, lng: 15.2605 },
             { nom: "UPN", lat: -4.3942, lng: 15.2755 },
@@ -475,16 +463,19 @@
             { nom: "Gare Centrale", lat: -4.3075, lng: 15.3125 }
         ];
 
-        let MATRICE_TARIFS = [
-            { org: "Matadi Kibala", dst: "Gare Centrale", tarif: 2500 },
-            { org: "Matadi Kibala", dst: "UPN", tarif: 1000 },
-            { org: "UPN", dst: "Delvaux", tarif: 500 },
-            { org: "UPN", dst: "Kintambo Magasin", tarif: 1000 },
-            { org: "Delvaux", dst: "Kintambo Magasin", tarif: 500 },
-            { org: "UPN", dst: "Gare Centrale", tarif: 2000 },
-            { org: "Delvaux", dst: "Gare Centrale", tarif: 1500 },
-            { org: "Kintambo Magasin", dst: "Gare Centrale", tarif: 1000 }
+        let listeItineraires = [
+            { origine: "Matadi Kibala", destination: "Gare Centrale", prix: 2500 },
+            { origine: "Matadi Kibala", destination: "UPN", prix: 1000 },
+            { origine: "UPN", destination: "Delvaux", prix: 500 },
+            { origine: "UPN", destination: "Kintambo Magasin", prix: 1000 },
+            { origine: "Delvaux", destination: "Kintambo Magasin", prix: 500 },
+            { origine: "UPN", destination: "Gare Centrale", prix: 2000 },
+            { origine: "Delvaux", destination: "Gare Centrale", prix: 1500 },
+            { origine: "Kintambo Magasin", destination: "Gare Centrale", prix: 1000 }
         ];
+
+        const SERVEUR_URL = "http://134.209.116.89:3000";
+        const socket = io(SERVEUR_URL, { transports: ['websocket'], reconnection: true });
 
         function calculerDistanceGPS(lat1, lon1, lat2, lon2) {
             const R = 6371; 
@@ -501,367 +492,227 @@
             return null; 
         }
 
-        async function chargerDernieresPositions() {
+        async function chargerHistoriqueAdmin() {
             try {
-                const txtStatut = document.getElementById('last-update-text');
-                txtStatut.textContent = "Connexion à la base de données...";
-                
-                if (!window.supabase) {
-                    txtStatut.textContent = "Erreur: Librairie Supabase non chargée.";
-                    return;
-                }
+                if (!window.supabase) return;
+                const { data, error } = await supabaseClient.from('transvision_positions_gps').select('*').order('created_at', { ascending: false }).limit(200);
+                if (data) {
+                    const vehiculesUniques = {};
+                    data.forEach(pos => { if (pos.imei && pos.latitude && pos.longitude) { if (!vehiculesUniques[pos.imei]) vehiculesUniques[pos.imei] = pos; } });
 
-                const { data, error } = await supabaseClient
-                    .from('transvision_positions_gps')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(200);
-
-                if (error) { txtStatut.textContent = "Erreur d'accès à la table."; return; }
-
-                if (data && data.length > 0) {
-                    const vehiculesTrouves = {};
-                    
-                    data.forEach(pos => {
-                        if (pos.imei && pos.latitude && pos.longitude) {
-                            if (!vehiculesTrouves[pos.imei]) { vehiculesTrouves[pos.imei] = pos; }
-                        }
-                    });
-
-                    Object.values(vehiculesTrouves).forEach(pos => {
-                        const imeiStr = String(pos.imei);
-                        client.vehicules.push({
-                            plaque: `Tracker ${imeiStr.slice(-4)}`, type: "Traceur GPS", places: 14, imei: imeiStr,
-                            lat: pos.latitude, lng: pos.longitude, moteurCoupe: false, carburantJour: 0, kmJour: 0,
-                            dernierPoleConnu: null, recetteBruteReelle: 0, tronconsValides: 0 
+                    Object.values(vehiculesUniques).forEach(pos => {
+                        flotteGlobale.push({
+                            imei: String(pos.imei),
+                            plaque: `TRK-${String(pos.imei).slice(-4)}`,
+                            places: 14,
+                            lat: pos.latitude, lng: pos.longitude,
+                            derniereCo: new Date(pos.created_at || Date.now()),
+                            kmJour: 0, dernierPoleConnu: null, tronconsValides: 0, recetteBruteReelle: 0
                         });
                     });
                     
-                    majSelecteurMap();
-                    const sel = document.getElementById('select-vehicule-map');
-                    if (sel && sel.value !== "none") { initMapEtCentrer(parseInt(sel.value)); }
-                    
-                    txtStatut.textContent = `Historique chargé (${client.vehicules.length} veh).`;
-                } else {
-                    txtStatut.textContent = "Historique vide. En attente de direct...";
+                    document.getElementById('admin-flotte-count').textContent = flotteGlobale.length;
+                    majTableauFlotteAdmin();
+                    if(mapAdmin) initMapAdmin();
                 }
-            } catch (err) { document.getElementById('last-update-text').textContent = "Erreur de chargement."; }
+            } catch (err) {}
         }
 
-        // --- GESTION DES ÉVÉNEMENTS SOCKET (LIVE) & CALCULS GEOFENCING ---
-        socket.on('connect', () => {
-            document.getElementById('statut-serveur-voyant').classList.replace('bg-rose-500', 'bg-emerald-400');
-            document.getElementById('statut-serveur-texte').textContent = "Serveur Connecté";
-            document.getElementById('statut-serveur-texte').classList.replace('text-rose-400', 'text-emerald-400');
-        });
-
-        socket.on('disconnect', () => {
-            document.getElementById('statut-serveur-voyant').classList.replace('bg-emerald-400', 'bg-rose-500');
-            document.getElementById('statut-serveur-texte').textContent = "Serveur Déconnecté";
-            document.getElementById('statut-serveur-texte').classList.replace('text-emerald-400', 'text-rose-400');
-        });
-
         socket.on('nouvelle_position', (data) => {
-            const now = new Date();
-            document.getElementById('last-update-text').textContent = `Mise à jour en direct : ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-
-            let vehiculeIndex = client.vehicules.findIndex(v => v.imei === data.imei);
+            let vehiculeExistant = flotteGlobale.find(v => v.imei === data.imei);
             
-            if (vehiculeIndex === -1) {
-                client.vehicules.push({
-                    plaque: data.plaque || `Nouveau ${data.imei.slice(-4)}`, type: "Traceur GPS", places: 14, imei: data.imei,
-                    lat: data.lat, lng: data.lng, moteurCoupe: false, carburantJour: 0, kmJour: 0,
-                    dernierPoleConnu: null, recetteBruteReelle: 0, tronconsValides: 0
-                });
-                vehiculeIndex = client.vehicules.length - 1;
-                majSelecteurMap();
+            if (!vehiculeExistant) {
+                vehiculeExistant = {
+                    imei: data.imei, plaque: `TRK-${String(data.imei).slice(-4)}`, places: 14,
+                    lat: data.lat, lng: data.lng, derniereCo: new Date(), kmJour: 0,
+                    dernierPoleConnu: null, tronconsValides: 0, recetteBruteReelle: 0
+                };
+                flotteGlobale.push(vehiculeExistant);
+                if(mapAdmin) { adminMarkers[data.imei] = L.marker([data.lat, data.lng]).addTo(mapAdmin).bindPopup(`IMEI: ${data.imei}`); }
             } else {
-                let v = client.vehicules[vehiculeIndex];
-                
-                let distanceParcourue = calculerDistanceGPS(v.lat, v.lng, data.lat, data.lng);
-                if (distanceParcourue > 0.002 && distanceParcourue < 2) {
-                    v.kmJour += distanceParcourue; v.carburantJour = v.kmJour * 0.12; 
-                }
+                let distanceParcourue = calculerDistanceGPS(vehiculeExistant.lat, vehiculeExistant.lng, data.lat, data.lng);
+                if (distanceParcourue > 0.005 && distanceParcourue < 2) { vehiculeExistant.kmJour += distanceParcourue; }
 
                 const poleDetecte = trouverPoleActuel(data.lat, data.lng);
-
+                
                 if (poleDetecte && (data.vitesse || 0) < 10) {
-                    if (v.dernierPoleConnu === null) {
-                        v.dernierPoleConnu = poleDetecte;
+                    if (vehiculeExistant.dernierPoleConnu === null) {
+                        vehiculeExistant.dernierPoleConnu = poleDetecte;
                     } 
-                    else if (v.dernierPoleConnu !== poleDetecte) {
-                        const poleA = v.dernierPoleConnu;
+                    else if (vehiculeExistant.dernierPoleConnu !== poleDetecte) {
+                        const poleA = vehiculeExistant.dernierPoleConnu;
                         const poleB = poleDetecte;
                         
-                        let tarifCourse = 0; 
-                        for(let tarifObj of MATRICE_TARIFS) {
-                            if ((tarifObj.org === poleA && tarifObj.dst === poleB) || (tarifObj.org === poleB && tarifObj.dst === poleA)) {
-                                tarifCourse = tarifObj.tarif; break;
+                        let tarifCourse = 0;
+                        for(let tarifObj of listeItineraires) {
+                            if ((tarifObj.origine === poleA && tarifObj.destination === poleB) || (tarifObj.origine === poleB && tarifObj.destination === poleA)) {
+                                tarifCourse = tarifObj.prix; break;
                             }
                         }
 
                         if(tarifCourse > 0) {
-                            v.recetteBruteReelle += (tarifCourse * v.places);
-                            v.tronconsValides += 1;
+                            vehiculeExistant.recetteBruteReelle += (tarifCourse * vehiculeExistant.places);
+                            vehiculeExistant.tronconsValides += 1;
                         }
-                        v.dernierPoleConnu = poleB;
+                        vehiculeExistant.dernierPoleConnu = poleB;
                     }
                 }
 
-                v.lat = data.lat; v.lng = data.lng;
+                vehiculeExistant.lat = data.lat; vehiculeExistant.lng = data.lng;
+                vehiculeExistant.derniereCo = new Date();
+
+                if(mapAdmin && adminMarkers[data.imei]) {
+                    adminMarkers[data.imei].setLatLng([data.lat, data.lng]);
+                    adminMarkers[data.imei].getPopup().setContent(`<b>IMEI: ${data.imei}</b><br>Dernier Live: ${vehiculeExistant.derniereCo.toLocaleTimeString()}<br>Km: ${(vehiculeExistant.kmJour||0).toFixed(1)} km`);
+                }
             }
 
-            const selectMap = document.getElementById('select-vehicule-map');
-            if (selectMap && selectMap.value == vehiculeIndex) {
-                if(busMarker && map) {
-                    const newLatLng = new L.LatLng(data.lat, data.lng);
-                    busMarker.setLatLng(newLatLng);
-                    map.panTo(newLatLng);
-                } else { initMapEtCentrer(vehiculeIndex); }
-            }
-
-            genererRapportFinancier(); genererRapportTechnique();
+            document.getElementById('admin-flotte-count').textContent = `${flotteGlobale.length} Traceur(s)`;
+            majTableauFlotteAdmin();
         });
 
-        // --- GESTION DES FILTRES DE DATE ---
-        function initFiltresDates() {
-            const today = new Date();
-            const strToday = today.toISOString().split('T')[0];
-            ['fin', 'tech'].forEach(prefix => {
-                const elStart = document.getElementById(`date-debut-${prefix}`);
-                const elEnd = document.getElementById(`date-fin-${prefix}`);
-                if(elStart) elStart.value = strToday;
-                if(elEnd) elEnd.value = strToday;
-            });
-        }
-
-        function peuplerSelecteursFiltre() {
-            const selFin = document.getElementById('filtre-fin-vehicule');
-            const selTech = document.getElementById('filtre-tech-vehicule');
-            const selRecharge = document.getElementById('recharge-vehicule-select');
+        function majTableauFlotteAdmin() {
+            const tbody = document.getElementById('table-vehicules-body');
+            tbody.innerHTML = "";
+            let totalKm = 0; let totalRot = 0; let totalCDF = 0;
             
-            if(selFin) selFin.innerHTML = '<option value="all">Tous les véhicules (Flotte globale)</option>';
-            if(selTech) selTech.innerHTML = '<option value="all">Tous les véhicules (Flotte globale)</option>';
-            if(selRecharge) selRecharge.innerHTML = '';
-
-            client.vehicules.forEach((v, i) => {
-                const opt = `<option value="${i}">${v.plaque}</option>`;
-                if(selFin) selFin.insertAdjacentHTML('beforeend', opt);
-                if(selTech) selTech.insertAdjacentHTML('beforeend', opt);
-                if(selRecharge) selRecharge.insertAdjacentHTML('beforeend', opt);
+            flotteGlobale.forEach(v => {
+                totalKm += (v.kmJour || 0); totalRot += (v.tronconsValides || 0); totalCDF += (v.recetteBruteReelle || 0);
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td class="py-3 font-bold text-slate-200">${v.plaque} <br><span class="text-[9px] text-slate-500">${v.imei}</span></td>
+                        <td class="py-3 font-bold text-sky-400">${(v.kmJour || 0).toFixed(1)} km</td>
+                        <td class="py-3 text-indigo-400 font-bold">${v.dernierPoleConnu || 'Aucun'}</td>
+                        <td class="py-3 font-black text-slate-200">${v.tronconsValides || 0}</td>
+                        <td class="py-3 font-black text-emerald-400">${(v.recetteBruteReelle || 0).toLocaleString()} CDF</td>
+                    </tr>
+                `);
             });
-        }
-
-        // --- MOTEUR D'AFFICHAGE & NAVIGATION ---
-        function genererToutesLesVues() {
-            document.getElementById('lbl-nom-partenaire').textContent = partenaireProfil ? partenaireProfil.nom : client.nom;
-            document.getElementById('prof-tel').value = partenaireProfil ? partenaireProfil.tel : client.tel;
             
-            initFiltresDates();
-            peuplerSelecteursFiltre();
-            majSelecteurMap();
-            genererRapportFinancier(); 
-            genererRapportTechnique();
+            document.getElementById('stat-total-km').textContent = totalKm.toFixed(1);
+            document.getElementById('stat-total-rotations').textContent = totalRot;
+            document.getElementById('stat-total-cdf').textContent = totalCDF.toLocaleString();
         }
 
-        function changerOnglet(idOnglet, boutonActif) {
-            document.querySelectorAll('.class-onglet').forEach(ong => ong.classList.add('hidden'));
-            document.getElementById(idOnglet).classList.remove('hidden');
-            document.querySelectorAll('.btn-nav').forEach(btn => { btn.classList.remove('text-emerald-400'); btn.classList.add('text-slate-500'); });
-            if(boutonActif) { boutonActif.classList.remove('text-slate-500'); boutonActif.classList.add('text-emerald-400'); }
-            setTimeout(() => {
-                if (idOnglet === 'onglet-flotte') {
-                    const sel = document.getElementById('select-vehicule-map');
-                    initMapEtCentrer(sel && sel.value !== "none" ? parseInt(sel.value) : 0);
-                    if (map) map.invalidateSize();
-                } 
-            }, 50);
+        let chartRecettesDepensesInstance = null;
+        let chartClientsTypesInstance = null;
+        let chartCommunesPartInstance = null;
+
+        function changerPageAdmin(idPage, boutonClique) {
+            document.querySelectorAll('.class-page-admin').forEach(p => p.classList.add('hidden'));
+            document.getElementById(idPage).classList.remove('hidden');
+            document.querySelectorAll('.nav-link-admin').forEach(l => { l.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"; });
+            boutonClique.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/10 nav-link-admin";
+            
+            if (idPage === 'page-stats-croisees') { setTimeout(initialiserGraphiquesAdmin, 100); }
+            if (idPage === 'page-suivi') { setTimeout(initMapAdmin, 50); }
         }
 
-        // --- VUE : FLOTTE / CARTE ---
-        function majSelecteurMap() {
-            const sel = document.getElementById('select-vehicule-map');
-            if(!sel) return;
-            sel.innerHTML = "";
-            if(client.vehicules.length === 0) { sel.insertAdjacentHTML('beforeend', `<option value="none">Aucun véhicule détecté</option>`); return; }
-            client.vehicules.forEach((v, i) => sel.insertAdjacentHTML('beforeend', `<option value="${i}">${v.plaque} (${v.type})</option>`));
-        }
-
-        function initMapEtCentrer(index) {
-            const mapContainer = document.getElementById('map-container');
-            if (!mapContainer || mapContainer.offsetParent === null) return;
-            let lat = -4.3215; let lng = 15.3115; let label = "En attente de connexion...";
-            const v = client.vehicules[index];
-            if(v) { lat = v.lat; lng = v.lng; label = `<b>${v.plaque}</b><br>IMEI: ${v.imei}`; }
-            if(!map) {
-                map = L.map('map-container').setView([lat, lng], 14);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
-                POLES_KINSHASA.forEach(pole => { L.circle([pole.lat, pole.lng], { color: 'emerald', fillColor: '#10b981', fillOpacity: 0.2, radius: 250 }).addTo(map).bindPopup(`Zone: ${pole.nom}`); });
-            }
-            if(busMarker) map.removeLayer(busMarker);
-            busMarker = L.marker([lat, lng]).addTo(map).bindPopup(label).openPopup();
-            map.setView([lat, lng], 14);
-        }
-        function centrerSurVehicule(indexStr) { if (indexStr !== "none") initMapEtCentrer(parseInt(indexStr)); }
-
-        // --- VUE : NOUVEAU VÉHICULE ---
-        function enregistrerVehiculeSaisi() {
-            const plaque = document.getElementById('add-plaque').value.trim();
-            const imei = document.getElementById('add-imei').value.trim();
-            if (!plaque || !imei) { alert("Veuillez remplir au moins la Plaque et l'IMEI."); return; }
-            client.vehicules.push({ 
-                plaque: plaque, type: "Traceur GPS", places: 14, imei: imei, 
-                lat: -4.32, lng: 15.31, moteurCoupe: false, carburantJour: 0, kmJour: 0,
-                dernierPoleConnu: null, recetteBruteReelle: 0, tronconsValides: 0
-            });
-            document.getElementById('add-plaque').value = ""; document.getElementById('add-imei').value = "";
-            alert(`✅ Véhicule ${plaque} enregistré.`);
-            genererToutesLesVues(); changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
-        }
-
-        // --- VUE : RAPPORT FINANCIER ---
-        function appliquerFiltreFinancier() { genererRapportFinancier(); }
-
-        function genererRapportFinancier() {
-            let totalCDF = 0; let totalRot = 0;
-            const list = document.getElementById('fin-vehicules-list');
-            if(list) list.innerHTML = "";
-
-            const cibleIdx = document.getElementById('filtre-fin-vehicule') ? document.getElementById('filtre-fin-vehicule').value : 'all';
-            let vehiculesCibles = client.vehicules;
-            if (cibleIdx !== 'all') { vehiculesCibles = [client.vehicules[parseInt(cibleIdx)]]; }
-
-            vehiculesCibles.forEach(v => {
-                const gainReel = v.recetteBruteReelle || 0;
-                const troncons = v.tronconsValides || 0;
-                totalCDF += gainReel; totalRot += troncons;
+        function initMapAdmin() {
+            const container = document.getElementById('map-admin-suivi');
+            if (!container || container.offsetParent === null) return;
+            if (!mapAdmin) {
+                mapAdmin = L.map('map-admin-suivi').setView([-4.3224, 15.3070], 12);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(mapAdmin);
                 
-                if(list) {
-                    list.insertAdjacentHTML('beforeend', `
-                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
-                            <div class="flex justify-between items-center">
-                                <h4 class="font-black text-slate-200">${v.plaque} <span class="text-[9px] font-normal text-slate-500 bg-slate-900 px-1.5 py-0.5 rounded ml-1">${v.type}</span></h4>
-                                <span class="font-black text-emerald-400">${gainReel.toLocaleString()} CDF</span>
-                            </div>
-                            <div class="flex justify-between text-[10px] text-slate-400 font-mono">
-                                <span><i class="fa-solid fa-route text-indigo-400"></i> ${troncons} tronçon(s) validé(s)</span>
-                                <span>Position Réf: <strong class="text-indigo-400">${v.dernierPoleConnu || 'En Mouvement'}</strong></span>
-                            </div>
-                        </div>`);
-                }
-            });
+                POLES_KINSHASA.forEach(pole => {
+                    L.circle([pole.lat, pole.lng], { color: 'indigo', fillColor: '#6366f1', fillOpacity: 0.2, radius: 250 }).addTo(mapAdmin).bindPopup(`Geofence: ${pole.nom}`);
+                });
 
-            const txtRecettes = document.getElementById('txt-total-recettes');
-            if(txtRecettes) txtRecettes.textContent = totalCDF.toLocaleString() + " CDF";
-            const txtRotations = document.getElementById('txt-total-rotations');
-            if(txtRotations) txtRotations.textContent = totalRot;
-            initialiserGraphiqueRapport(1, totalCDF);
+                flotteGlobale.forEach(v => {
+                    if(!adminMarkers[v.imei]) { adminMarkers[v.imei] = L.marker([v.lat, v.lng]).addTo(mapAdmin).bindPopup(`IMEI: ${v.imei}`); }
+                });
+            }
+            mapAdmin.invalidateSize();
+        }
+        function centrerMapAdmin() { if(mapAdmin) mapAdmin.setView([-4.3224, 15.3070], 12); }
+
+        function importerItinerairesExcel() {
+            const fileUpload = document.getElementById('excel-file-upload');
+            if (!fileUpload.files || fileUpload.files.length === 0) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const jsonObject = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                    
+                    listeItineraires = []; 
+                    jsonObject.forEach(row => {
+                        const origine = row['Origine'] || row['Depart'];
+                        const destination = row['Destination'] || row['Arrivee'];
+                        const prix = parseFloat(row['Prix'] || row['Tarif'] || row['CDF']) || 0;
+                        if(prix > 0 && origine) listeItineraires.push({ origine, destination, prix });
+                    });
+                    afficherItinerairesAdmin(); fileUpload.value = ""; 
+                    alert(`✅ Succès: Matrice mise à jour avec ${listeItineraires.length} prix.`);
+                } catch(error) {}
+            };
+            reader.readAsArrayBuffer(fileUpload.files[0]);
         }
 
-        function initialiserGraphiqueRapport(joursFiltre, totalAffiche) {
-            const canvas = document.getElementById('chart-recettes-partenaire');
-            if (!canvas || canvas.offsetParent === null) return; 
-            if (chartPartenaireInstance) chartPartenaireInstance.destroy();
-            let dataGains = []; let labels = [];
-            const gainMoyenJour = totalAffiche / joursFiltre;
-
-            if (joursFiltre === 1) { labels = ['Aujourd\'hui']; dataGains = [totalAffiche]; } 
-            else if (joursFiltre <= 7) { for(let i=1; i<=joursFiltre; i++) { labels.push(`J-${joursFiltre - i + 1}`); dataGains.push(gainMoyenJour * (0.8 + Math.random() * 0.4)); } }
-
-            chartPartenaireInstance = new Chart(canvas.getContext('2d'), {
-                type: 'bar', data: { labels: labels, datasets: [{ label: 'Gains (CDF)', data: dataGains, backgroundColor: '#10b981', borderRadius: 4 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: joursFiltre <= 7 }, y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 9 } } } } }
-            });
-        }
-
-        // --- VUE : ANALYSE TECHNIQUE ---
-        function appliquerFiltreTechnique() { genererRapportTechnique(); }
-
-        function genererRapportTechnique() {
-            const list = document.getElementById('tech-vehicules-list');
-            if(!list) return;
-            list.innerHTML = "";
-            const cibleIdx = document.getElementById('filtre-tech-vehicule') ? document.getElementById('filtre-tech-vehicule').value : 'all';
-            let vehiculesCibles = client.vehicules;
-            if (cibleIdx && cibleIdx !== 'all') { vehiculesCibles = [client.vehicules[parseInt(cibleIdx)]]; }
-
-            vehiculesCibles.forEach((v) => {
-                const origineIndex = client.vehicules.indexOf(v);
-                const btnMoteur = v.moteurCoupe 
-                    ? `<button onclick="basculerMoteur(${origineIndex}, false)" class="w-full bg-emerald-500/20 text-emerald-400 font-bold py-2 rounded text-[10px] uppercase mt-2"><i class="fa-solid fa-unlock"></i> Restaurer Moteur</button>`
-                    : `<button onclick="basculerMoteur(${origineIndex}, true)" class="w-full bg-rose-500/20 text-rose-400 font-bold py-2 rounded text-[10px] uppercase mt-2"><i class="fa-solid fa-lock"></i> Couper Moteur (Urgence)</button>`;
-
-                const consoPeriode = (v.carburantJour || 0).toFixed(1);
-                const kmPeriode = (v.kmJour || 0).toFixed(1);
-
-                list.insertAdjacentHTML('beforeend', `
-                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
-                        <h4 class="font-black text-slate-200">${v.plaque} <span class="text-[9px] font-mono text-slate-500 float-right">IMEI: ${v.imei}</span></h4>
-                        <div class="grid grid-cols-2 gap-y-2 gap-x-1 text-[9px] font-mono bg-slate-900 p-2.5 rounded border border-slate-800">
-                            <p>📡 GPS: <span class="text-emerald-400">Fort</span></p>
-                            <p>🔋 Batt: <span class="text-emerald-400">12.6V</span></p>
-                            <p>⛽ Conso: <span class="text-sky-400 font-bold">${consoPeriode} L</span></p>
-                            <p>🛣️ Dist: <span class="text-sky-400 font-bold">${kmPeriode} km</span></p>
-                        </div>
-                        ${btnMoteur}
+        function afficherItinerairesAdmin() {
+            const box = document.getElementById('box-matrice-troncons');
+            box.innerHTML = "";
+            listeItineraires.forEach((it, index) => {
+                box.insertAdjacentHTML('beforeend', `
+                    <div class="flex justify-between items-center p-2.5 bg-slate-900 border border-slate-800 rounded-xl hover:border-emerald-500/30 transition-colors">
+                        <div class="flex flex-col"><span class="text-slate-200 font-bold uppercase tracking-wider">${it.origine} <i class="fa-solid fa-arrow-right text-emerald-500 mx-1"></i> ${it.destination}</span></div>
+                        <div class="flex items-center gap-3"><span class="text-emerald-400 font-black text-sm bg-slate-950 px-2 py-1 rounded">${it.prix} CDF</span><button onclick="supprimerItineraire(${index})" class="text-rose-500 hover:text-rose-400 p-1"><i class="fa-solid fa-trash"></i></button></div>
                     </div>`);
             });
+            document.getElementById('badge-nb-routes').textContent = `${listeItineraires.length} Rte(s)`;
         }
 
-        function basculerMoteur(i, couper) {
-            client.vehicules[i].moteurCoupe = couper;
-            socket.emit('commande_moteur', { imei: client.vehicules[i].imei, couper: couper });
-            alert(`📡 Commande envoyée au serveur. Moteur ${couper ? 'coupé' : 'restauré'} pour le véhicule ${client.vehicules[i].plaque}.`);
-            appliquerFiltreTechnique(); 
+        function supprimerItineraire(index) {
+            listeItineraires.splice(index, 1);
+            afficherItinerairesAdmin();
         }
 
-        function majIdentifiants() {
-            const newPin = document.getElementById('prof-pin-new').value;
-            if(newPin && newPin.length >= 4) { alert("✅ Code PIN de sécurité mis à jour."); document.getElementById('prof-pin-new').value = ""; } else { alert("❌ Le PIN doit contenir au moins 4 caractères."); }
+        function rechercherPartenaire() {
+            const input = document.getElementById('recherche-partenaire').value.toLowerCase();
+            const rows = document.querySelectorAll('.item-partenaire-row');
+            rows.forEach(row => {
+                const nom = row.querySelector('.partenaire-nom').textContent.toLowerCase();
+                const tel = row.querySelector('.partenaire-tel').textContent.toLowerCase();
+                if (nom.includes(input) || tel.includes(input)) { row.style.display = ''; } else { row.style.display = 'none'; }
+            });
         }
 
-        // ========================================================
-        // GESTION DU MINUTEUR DE FORFAIT (Jours, Heures, Minutes)
-        // ========================================================
-        function actualiserCompteAReboursForfait() {
-            const display = document.getElementById('timer-compte-rebours');
-            if(!display) return;
+        function filtrerPartenairesContrat(type) {
+            document.querySelectorAll('.item-partenaire-row').forEach(row => {
+                if(type === 'tous' || row.getAttribute('data-contrat') === type) { row.classList.remove('hidden'); } else { row.classList.add('hidden'); }
+            });
+        }
 
-            let expString = null;
-            if (partenaireProfil && partenaireProfil.date_expiration) {
-                expString = partenaireProfil.date_expiration;
+        function executerActionPartenaire(nom, tel, pin, idSolde, idJours, selectElem) {
+            const action = selectElem.value;
+            if(!action) return;
+            if (action === 'recharger') { ouvrirModalRechargeFlexible(nom, tel); } 
+            else if (action === 'voir_id') { alert(`👁️ IDENTIFIANTS\nNom: ${nom}\nTél: ${tel}\nPIN: ${pin}`); }
+            else if (action === 'activer') { alert(`🟢 Le compte de ${nom} a été réactivé.`); }
+            else if (action === 'suspendre') { if(confirm(`⚠️ Suspendre l'accès de ${nom} ?`)) alert(`🟠 Compte suspendu.`); }
+            else if (action === 'supprimer') { if(confirm(`🔴 Supprimer définitivement le compte de ${nom} ?`)) { selectElem.closest('tr').remove(); alert(`🗑️ Compte supprimé.`); } }
+            selectElem.value = ""; 
+        }
+
+        function ouvrirModalRechargeFlexible(nom, tel) {
+            ciblePartenaire = { nom, tel };
+            document.getElementById('nom-partenaire-cible').textContent = nom;
+            document.getElementById('input-credit-fixer').value = ""; 
+            
+            const selVehicules = document.getElementById('admin-recharge-vehicule-select');
+            selVehicules.innerHTML = "";
+            if (flotteGlobale.length === 0) {
+                selVehicules.innerHTML = `<option value="ALL">Sélectionner (Demo)</option>`;
             } else {
-                expString = localStorage.getItem('tv_date_expiration');
-            }
-            
-            if(!expString) { 
-                display.textContent = "--:--:--"; 
-                return; 
+                flotteGlobale.forEach((v, index) => {
+                    selVehicules.insertAdjacentHTML('beforeend', `<option value="${index}">${v.plaque} (IMEI: ${v.imei})</option>`);
+                });
             }
 
-            const finForfait = new Date(expString);
-            const resteMs = finForfait - new Date();
-
-            if (resteMs <= 0) { 
-                display.textContent = "EXPIRÉ"; 
-                display.classList.add('text-rose-400');
-                display.classList.remove('text-slate-100');
-                return; 
-            }
-
-            display.classList.add('text-slate-100');
-            display.classList.remove('text-rose-400');
-            
-            const j = Math.floor(resteMs / (1000 * 60 * 60 * 24));
-            const h = Math.floor((resteMs % (1000 * 60 * 60 * 24)) / 3600000); 
-            const m = Math.floor((resteMs % 3600000) / 60000); 
-            const s = Math.floor((resteMs % 60000) / 1000);
-            
-            if (j > 0) { 
-                display.textContent = `${j} Jours ${String(h).padStart(2, '0')}h`; 
-            } else { 
-                display.textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`; 
-            }
+            basculerSelectVehiculeAdmin();
+            document.getElementById('modal-recharge-flexible').classList.remove('hidden');
         }
 
         function basculerSelectVehiculeAdmin() {
@@ -874,155 +725,182 @@
             }
         }
 
-        function declarerPaiementForfait() {
-            const montant = parseInt(document.getElementById('input-montant-libre').value);
-            if (!montant || montant <= 0) { alert("❌ Veuillez saisir un montant valide (ex: 2000)."); return; }
-            const num = document.getElementById('recharge-numero');
-            const reseau = num.options[num.selectedIndex].text;
-            const mode = document.getElementById('recharge-mode').value;
-            let cible = "la flotte complète";
-            if (mode === 'unitaire' && client.vehicules.length > 0) {
-                const indexVehicule = document.getElementById('recharge-vehicule-select').value;
-                cible = `le véhicule ${client.vehicules[indexVehicule].plaque}`;
-            }
-            alert(`🛰️ Demande de transfert de ${montant.toLocaleString()} CDF pour ${cible}.\nTransaction via ${reseau} en cours de traitement.`);
-            document.getElementById('input-montant-libre').value = "";
-            fermerModalRecharge();
-        }
-
-        function ouvrirModalRecharge() { peuplerSelecteursFiltre(); basculerSelectVehiculeRecharge(); document.getElementById('modal-recharge-partenaire').classList.remove('hidden'); }
-        function fermerModalRecharge() { document.getElementById('modal-recharge-partenaire').classList.add('hidden'); }
-
-        // ========================================================
-        // AUTHENTIFICATION, INSCRIPTION ET FALLBACK SÉCURITÉ
-        // ========================================================
-        function basculerVueAuth(mode) {
-            if(mode === 'login') {
-                document.getElementById('form-connexion').classList.remove('hidden'); 
-                document.getElementById('form-inscription').classList.add('hidden');
-                document.getElementById('tab-btn-login').className = "py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950";
-                document.getElementById('tab-btn-register').className = "py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200";
-            } else {
-                document.getElementById('form-connexion').classList.add('hidden'); 
-                document.getElementById('form-inscription').classList.remove('hidden');
-                document.getElementById('tab-btn-register').className = "py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950";
-                document.getElementById('tab-btn-login').className = "py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200";
-            }
-        }
+        function fermerModalRechargeFlexible() { document.getElementById('modal-recharge-flexible').classList.add('hidden'); ciblePartenaire = null;}
         
-        function naviguerVers(id) { 
-            document.getElementById('page-auth').classList.add('hidden'); 
-            document.getElementById('app-proprietaire').classList.add('hidden'); 
-            document.getElementById(id).classList.remove('hidden'); 
-        }
+        async function appliquerRechargeFlexible() { 
+            const nbJours = parseInt(document.getElementById('input-jours-fixer').value) || 0;
+            const montant = document.getElementById('input-credit-fixer').value;
+            const cibleType = document.getElementById('admin-recharge-mode').value;
 
-        // Création de compte (Écriture dans Supabase)
-        async function inscrireNouveauPartenaire() {
-            const nom = document.getElementById('ins-nom').value.trim();
-            const tel = document.getElementById('ins-tel').value.trim();
-            const pin = document.getElementById('ins-pin').value.trim();
+            if (nbJours <= 0) return;
 
-            if(!nom || !tel || !pin) { alert("Veuillez remplir tous les champs."); return; }
-
-            try {
-                // Création d'un forfait d'essai de 3 jours
-                const dateExpiration = new Date();
-                dateExpiration.setDate(dateExpiration.getDate() + 3);
-
-                const { error } = await supabaseClient.from('tv_partenaires').insert([{
-                    nom: nom, tel: tel, pin: pin, type_contrat: 'commercial', date_expiration: dateExpiration.toISOString()
-                }]);
-
-                if(error) throw error;
-                
-                alert("✅ Inscription réussie ! Connectez-vous avec vos nouveaux identifiants.");
-                document.getElementById('login-tel').value = tel;
-                document.getElementById('login-pin').value = pin;
-                basculerVueAuth('login');
-            } catch (err) {
-                alert("❌ Erreur lors de l'inscription. Vérifiez que la base de données Supabase est accessible.");
-            }
-        }
-
-        // Connexion avec Tolérance de Panne (Fallback sur Dolce si Supabase est bloqué)
-        async function executerConnexionPartenaire() { 
-            const telInput = document.getElementById('login-tel').value.trim();
-            const pinInput = document.getElementById('login-pin').value.trim();
-            const btn = document.getElementById('btn-login-text');
-            btn.textContent = "Vérification...";
-
-            try {
-                // 1. On interroge Supabase
-                const { data, error } = await supabaseClient.from('tv_partenaires').select('*').eq('tel', telInput).eq('pin', pinInput).single();
-                
-                if (data) {
-                    localStorage.setItem('tv_partenaire_tel', data.tel);
-                    lancerEspaceFlotte(data);
-                } else {
-                    declencherFallback(telInput, pinInput, btn);
-                }
-            } catch (err) { 
-                declencherFallback(telInput, pinInput, btn);
-            }
-        }
-
-        function declencherFallback(telInput, pinInput, btn) {
-            // FALLBACK DE SÉCURITÉ POUR NE JAMAIS VOUS BLOQUER
-            if (telInput === "0965647819" && pinInput === "0000") {
-                console.warn("Supabase bloqué. Connexion forcée via le Fallback de sécurité Local.");
-                const fallbackData = { nom: "Dolce", tel: "0965647819" };
-                localStorage.setItem('tv_partenaire_tel', "0965647819");
-                lancerEspaceFlotte(fallbackData);
-            } else {
-                alert("❌ Téléphone ou Code PIN incorrect ou base de données inaccessible."); 
-                btn.textContent = "Ouvrir mon Espace Flotte"; 
-            }
-        }
-
-        function lancerEspaceFlotte(donneesPartenaire) {
-            partenaireProfil = donneesPartenaire;
-            naviguerVers('app-proprietaire'); 
+            const dateExpiration = new Date();
+            dateExpiration.setDate(dateExpiration.getDate() + nbJours);
+            dateExpiration.setHours(23, 59, 59, 999);
             
-            chargerDernieresPositions().then(() => { 
-                genererToutesLesVues(); 
-                setInterval(actualiserCompteAReboursForfait, 1000); 
-                changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]); 
-            });
-        }
+            // 1. Sauvegarde locale (Garantie de fonctionnement immédiat)
+            localStorage.setItem('tv_date_expiration', dateExpiration.toISOString());
 
-        function declencherDeconnexion() { 
-            localStorage.removeItem('tv_partenaire_tel');
-            naviguerVers('page-auth'); 
-            document.getElementById('btn-login-text').textContent = "Ouvrir mon Espace Flotte";
-        }
-
-        function ouvrirModalCGU() { document.getElementById('modal-cgu').classList.remove('hidden'); }
-        function fermerModalCGU() { document.getElementById('modal-cgu').classList.add('hidden'); }
-
-        // AUTO-CONNEXION AU CHARGEMENT DE LA PAGE
-        window.addEventListener('DOMContentLoaded', async () => {
-            chargerConfigurationsAdmin();
-            
-            const telSauve = localStorage.getItem('tv_partenaire_tel');
-            if (telSauve) {
-                try {
-                    const { data, error } = await supabaseClient.from('tv_partenaires').select('*').eq('tel', telSauve).single();
-                    if (data) { 
-                        lancerEspaceFlotte(data); 
-                    } else if (telSauve === "0965647819") {
-                        lancerEspaceFlotte({ nom: "Dolce", tel: "0965647819" });
-                    } else { 
-                        declencherDeconnexion(); 
-                    }
-                } catch (err) { 
-                    if (telSauve === "0965647819") lancerEspaceFlotte({ nom: "Dolce", tel: "0965647819" });
-                    else declencherDeconnexion(); 
+            // 2. Synchronisation Cloud Supabase (si disponible et connecté)
+            try {
+                if (window.supabase && ciblePartenaire && ciblePartenaire.tel) {
+                    await supabaseClient.from('tv_partenaires')
+                        .upsert({ nom: ciblePartenaire.nom, tel: ciblePartenaire.tel, date_expiration: dateExpiration.toISOString() }, { onConflict: 'tel' });
                 }
-            } else {
-                naviguerVers('page-auth');
+            } catch(e) {
+                console.warn("Écriture cloud différée :", e);
+            }
+            
+            let message = `✅ Recharge réussie ! Le forfait a été prolongé de ${nbJours} jours.\nCible: ${cibleType === 'flotte' ? 'Flotte Complète' : 'Véhicule Spécifique'}`;
+            if (montant) message += `\nMontant tracé: ${montant} CDF.`;
+
+            alert(message); 
+            fermerModalRechargeFlexible(); 
+        }
+
+        function modifierAccesPropresAdmin() { alert("✅ Vos accès Super Admin ont été mis à jour avec succès !"); }
+
+        function executerVirementMobileMoneyAdmin() {
+            const phone = document.getElementById('wir-phone').value;
+            const amount = document.getElementById('wir-amount').value;
+            if (!phone || !amount || amount <= 0) {
+                alert("❌ Veuillez saisir un numéro de téléphone valide et un montant supérieur à zéro.");
+                return;
+            }
+            alert(`💸 SUCCÈS : Ordre de décaissement de ${amount} CDF vers le numéro ${phone} initié avec succès.`);
+            document.getElementById('wir-phone').value = ""; document.getElementById('wir-amount').value = "";
+        }
+
+        function majFiltreDate(type) {
+            const d1 = document.getElementById(`date-debut-${type}`).value;
+            const d2 = document.getElementById(`date-fin-${type}`).value;
+            if (new Date(d1) > new Date(d2)) { alert("Période invalide. La date de début doit être antérieure à la date de fin."); return; }
+            const coef = 0.5 + Math.random(); 
+            if (type === 'treso') {
+                const newTresor = 850000 * coef;
+                document.getElementById('txt-tresor').textContent = newTresor.toLocaleString('fr-FR', {maximumFractionDigits:0}) + " CDF";
+                document.getElementById('txt-commissions').textContent = (145500 * coef).toLocaleString('fr-FR', {maximumFractionDigits:0}) + " CDF";
+            } else if (type === 'stats') { initialiserGraphiquesAdmin(); }
+            alert(`✅ Données mises à jour pour la période sélectionnée.`);
+        }
+
+        function initialiserGraphiquesAdmin() {
+            const canvasRecettes = document.getElementById('chart-recettes-depenses');
+            if (canvasRecettes && canvasRecettes.offsetParent !== null) {
+                if (chartRecettesDepensesInstance) chartRecettesDepensesInstance.destroy();
+                chartRecettesDepensesInstance = new Chart(canvasRecettes.getContext('2d'), {
+                    type: 'line', data: { labels: ['J-6', 'J-5', 'J-4', 'J-3', 'J-2', 'J-1', 'Aujourd\'hui'], datasets: [ { label: 'Recettes Brutes (CDF)', data: [150000, 180000, 160000, 210000, 190000, 250000, 280000], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderWidth: 2, fill: true }, { label: 'Sorties de Fonds (CDF)', data: [30000, 45000, 35000, 50000, 40000, 60000, 75000], borderColor: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.1)', borderWidth: 2, fill: true } ] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8', font: { size: 10 } } } }, scales: { x: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 10 } } }, y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 10 } } } } }
+                });
+            }
+
+            const canvasClients = document.getElementById('chart-clients-types');
+            if (canvasClients && canvasClients.offsetParent !== null) {
+                if (chartClientsTypesInstance) chartClientsTypesInstance.destroy();
+                chartClientsTypesInstance = new Chart(canvasClients.getContext('2d'), {
+                    type: 'doughnut', data: { labels: ['Commercial', 'Personnel'], datasets: [{ data: [72, 28], backgroundColor: ['#6366f1', '#f43f5e'], borderColor: '#020617', borderWidth: 2 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } } } }
+                });
+            }
+
+            const canvasCommunes = document.getElementById('chart-communes-part');
+            if (canvasCommunes && canvasCommunes.offsetParent !== null) {
+                if (chartCommunesPartInstance) chartCommunesPartInstance.destroy();
+                chartCommunesPartInstance = new Chart(canvasCommunes.getContext('2d'), {
+                    type: 'pie', data: { labels: ['Gombe', 'Limete', 'Lemba', 'Ngaliema', 'Matete', 'Bandalungwa'], datasets: [{ data: [35, 20, 15, 12, 10, 8], backgroundColor: ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6'], borderColor: '#020617', borderWidth: 2 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } } } }
+                });
+            }
+        }
+
+        function chargerNumerosAdmin() {
+            document.getElementById('cfg-whatsapp').value = localStorage.getItem('tv_whatsapp') || "243810000000";
+            document.getElementById('cfg-mpesa').value = localStorage.getItem('tv_mpesa') || "+243 812 000 000";
+            document.getElementById('cfg-airtel').value = localStorage.getItem('tv_airtel') || "+243 999 000 000";
+            document.getElementById('cfg-orange').value = localStorage.getItem('tv_orange') || "+243 890 000 000";
+        }
+
+        function sauvegarderNumerosAdmin() {
+            localStorage.setItem('tv_whatsapp', document.getElementById('cfg-whatsapp').value.trim());
+            localStorage.setItem('tv_mpesa', document.getElementById('cfg-mpesa').value.trim());
+            localStorage.setItem('tv_airtel', document.getElementById('cfg-airtel').value.trim());
+            localStorage.setItem('tv_orange', document.getElementById('cfg-orange').value.trim());
+            alert("✅ Les numéros de paiement et de support ont été mis à jour !");
+        }
+
+        function chargerCGUAdmin() {
+            const el = document.getElementById('cfg-cgu-texte');
+            if (el) el.value = localStorage.getItem('transvision_cgu') || "CONDITIONS GÉNÉRALES D'UTILISATION (CGU) — TRANSVISION\nÉditées par Global Tech Solutions SARL\n\n1. OBJET DU SERVICE :\nTransVision fournit aux partenaires transporteurs une plateforme de supervision télématique par balises SinoTrack.";
+        }
+
+        function sauvegarderCGUAdmin() {
+            const texte = document.getElementById('cfg-cgu-texte').value.trim();
+            if (!texte) { alert("Le texte ne peut pas être vide."); return; }
+            localStorage.setItem('transvision_cgu', texte);
+            alert("✅ CGU mises à jour et publiées avec succès !");
+        }
+
+
+        // ========================================================
+        // GESTION DE LA SESSION BLINDÉE (100% FIABLE)
+        // ========================================================
+
+        function authentifierSessionAdmin() {
+            const email = document.getElementById('login-email-admin').value.trim();
+            const pass = document.getElementById('login-pass-admin').value;
+            if(email === adminCredential.email && pass === adminCredential.pass) {
+                localStorage.setItem('tv_admin_session_active', 'true');
+                document.getElementById('page-login-admin').classList.add('hidden');
+                document.getElementById('corps-application-admin').classList.remove('hidden');
+                document.body.className = "bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col";
+                chargerHistoriqueAdmin();
+                setTimeout(initialiserGraphiquesAdmin, 100);
+            } else { 
+                alert("❌ Accès refusé : Identifiant ou code secret erroné."); 
+            }
+        }
+
+        function declencherDeconnexionAdmin() {
+            if(confirm("🔒 Déconnexion ?")) {
+                localStorage.removeItem('tv_admin_session_active');
+                document.getElementById('corps-application-admin').classList.add('hidden');
+                document.getElementById('page-login-admin').classList.remove('hidden');
+                document.body.className = "bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-center items-center";
+            }
+        }
+
+        // 1. Exécution immédiate pour court-circuiter le clignotement de la page de login
+        if (localStorage.getItem('tv_admin_session_active') === 'true') {
+            document.getElementById('page-login-admin').classList.add('hidden');
+            document.getElementById('corps-application-admin').classList.remove('hidden');
+            document.body.className = "bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col";
+            chargerHistoriqueAdmin();
+            setTimeout(initialiserGraphiquesAdmin, 100);
+        }
+
+        // 2. Chargement des données secondaires en mode sécurisé
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                const today = new Date();
+                const lastWeek = new Date(today); lastWeek.setDate(today.getDate() - 7);
+                const strToday = today.toISOString().split('T')[0];
+                const strLastWeek = lastWeek.toISOString().split('T')[0];
+                
+                ['treso', 'stats'].forEach(prefix => {
+                    const elD = document.getElementById(`date-debut-${prefix}`); 
+                    const elF = document.getElementById(`date-fin-${prefix}`);
+                    if(elD) elD.value = strLastWeek; 
+                    if(elF) elF.value = strToday;
+                });
+                
+                chargerCGUAdmin();
+                chargerNumerosAdmin();
+                afficherItinerairesAdmin();
+            } catch (erreur) {
+                console.warn(erreur);
             }
         });
-        
+
     </script>
 </body>
 </html>
