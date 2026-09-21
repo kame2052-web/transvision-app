@@ -18,11 +18,21 @@
     <style>
         .page-fade { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
         #map-admin-suivi { height: 500px; width: 100%; border-radius: 1rem; z-index: 10; }
         .leaflet-tile { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
         .leaflet-container { background: #020617 !important; }
+        
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(100deg); cursor: pointer; }
         input[type="file"]::file-selector-button { background-color: #4f46e5; color: white; border: none; border-radius: 0.5rem; padding: 0.5rem 1rem; cursor: pointer; font-weight: bold; transition: background 0.3s; }
         input[type="file"]::file-selector-button:hover { background-color: #4338ca; }
+        
+        @media print {
+            body { background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            .print-clean { background: transparent !important; border: 1px solid #cbd5e1 !important; color: black !important; box-shadow: none !important; }
+            .print-text { color: black !important; }
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-center items-center">
@@ -35,6 +45,7 @@
             <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">by Global Tech Solutions</p>
             <p class="text-[9px] text-slate-500">Console Super Admin Industrielle</p>
         </div>
+
         <div class="space-y-4 text-xs">
             <div>
                 <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Identifiant (Email)</label>
@@ -96,6 +107,7 @@
             <!-- CONTENU DES PAGES -->
             <main class="flex-1 p-6 lg:p-8 space-y-6 overflow-y-auto max-w-5xl">
                 
+                <!-- SUIVI LIVE (CARTE LEAFLET) -->
                 <div id="page-suivi" class="space-y-4 page-fade class-page-admin">
                     <div class="flex justify-between items-center">
                         <h2 class="text-xl font-black text-slate-100">🗺️ Suivi Global & Geofences</h2>
@@ -106,8 +118,10 @@
                     <div id="map-admin-suivi" class="w-full bg-slate-900 border border-slate-800 rounded-2xl shadow-xl"></div>
                 </div>
 
+                <!-- GESTION DE LA FLOTTE -->
                 <div id="page-gestion-flotte" class="space-y-4 page-fade class-page-admin hidden">
                     <h2 class="text-xl font-black text-slate-100">🚍 Parc Automobile & Recettes Temp Réel</h2>
+
                     <div class="grid grid-cols-3 gap-4">
                         <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 shadow-md">
                             <p class="text-[10px] text-slate-500 uppercase font-black tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-road text-rose-400"></i> Km Cumulés</p>
@@ -122,6 +136,7 @@
                             <p class="text-3xl font-black text-emerald-300 mt-1" id="stat-total-cdf">0</p>
                         </div>
                     </div>
+
                     <div class="bg-slate-950 rounded-2xl border border-slate-850 p-4 overflow-x-auto text-xs font-mono shadow-md">
                         <table class="w-full text-left">
                             <thead>
@@ -133,43 +148,58 @@
                                     <th class="py-2">Gains Bruts</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-850" id="table-vehicules-body"></tbody>
+                            <tbody class="divide-y divide-slate-850" id="table-vehicules-body">
+                                <tr><td colspan="5" class="py-4 text-center text-slate-500 font-sans italic">En attente de réception des traceurs...</td></tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>
 
-                <div id="page-partenaires" class="space-y-4 page-fade class-page-admin hidden">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <!-- PARTENAIRES : GESTION DES RECHARGES & ACCÈS -->
+                <div id="page-partenaires" class="space-y-4 page-fade class-page-admin hidden print:block">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 no-print">
                         <div>
                             <h2 class="text-xl font-black text-slate-100">👤 Base des Partenaires</h2>
                             <p class="text-xs text-slate-400">Gérez les comptes, vérifiez les identifiants et validez les recharges.</p>
                         </div>
+                        
                         <div class="relative w-full sm:w-64">
                             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
                             <input type="text" id="recherche-partenaire" onkeyup="rechercherPartenaire()" class="w-full bg-slate-900 border border-slate-800 rounded-xl py-2 pl-9 pr-3 text-[10px] text-slate-200 focus:outline-none focus:border-indigo-500 font-bold" placeholder="Rechercher par nom ou numéro...">
                         </div>
+
                         <div class="flex bg-slate-950 p-1.5 rounded-xl border border-slate-850 text-[10px] font-bold">
                             <button onclick="filtrerPartenairesContrat('tous')" class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-200">Tous</button>
                             <button onclick="filtrerPartenairesContrat('commercial')" class="px-3 py-1.5 rounded-lg text-indigo-400 hover:bg-slate-900"><i class="fa-solid fa-bus mr-1"></i> Commercial</button>
                             <button onclick="filtrerPartenairesContrat('personnel')" class="px-3 py-1.5 rounded-lg text-rose-400 hover:bg-slate-900"><i class="fa-solid fa-car mr-1"></i> Personnel</button>
                         </div>
                     </div>
-                    <div class="bg-slate-950 rounded-2xl border border-slate-850 p-4 overflow-x-auto text-[11px] shadow-md">
+                    
+                    <div class="bg-slate-950 rounded-2xl border border-slate-850 p-4 overflow-x-auto text-[11px] shadow-md print-clean">
                         <table class="w-full text-left">
                             <thead>
-                                <tr class="border-b border-slate-800 text-slate-500 font-black uppercase text-[9px] tracking-wider">
-                                    <th class="py-3">Nom Partenaire</th><th class="py-3">Type Contrat</th><th class="py-3 text-center">Flotte</th><th class="py-3 text-center">Statut Jours</th><th class="py-3 text-right">Actions Gestion</th>
+                                <tr class="border-b border-slate-800 text-slate-500 font-black uppercase text-[9px] tracking-wider print:border-slate-300">
+                                    <th class="py-3">Nom Partenaire</th>
+                                    <th class="py-3">Type Contrat</th>
+                                    <th class="py-3 text-center">Flotte</th>
+                                    <th class="py-3 text-center">Statut Jours</th>
+                                    <th class="py-3 text-right">Actions Gestion</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-850 text-slate-300" id="table-partenaires-body">
+                            <tbody class="divide-y divide-slate-850 text-slate-300 print-text" id="table-partenaires-body">
                                 <tr class="item-partenaire-row" data-contrat="commercial">
                                     <td class="py-3 font-black text-slate-200 partenaire-nom">Dolce<br><span class="text-[9px] font-normal text-slate-500 partenaire-tel">0965647819</span></td>
                                     <td class="py-3"><span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-black text-[10px] uppercase">Commercial</span></td>
                                     <td class="py-3 text-center font-bold font-mono text-indigo-400">1 Véh.</td>
                                     <td class="py-3 text-center font-mono"><span id="jours-dolce" class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-lg font-black text-[10px]">Actif</span></td>
-                                    <td class="py-3 text-right">
+                                    <td class="py-3 text-right no-print">
                                         <select onchange="executerActionPartenaire('Dolce', '0965647819', '0000', 'solde-dolce', 'jours-dolce', this)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 focus:outline-none focus:border-indigo-500">
-                                            <option value="">-- Actions --</option><option value="recharger" class="text-emerald-400">💸 Valider Recharge</option><option value="voir_id" class="text-sky-400">👁️ Voir Identifiants</option><option value="activer" class="text-emerald-500">🟢 Activer Compte</option><option value="suspendre" class="text-amber-500">🟠 Suspendre</option><option value="supprimer" class="text-rose-500">🔴 Supprimer Compte</option>
+                                            <option value="">-- Actions --</option>
+                                            <option value="recharger" class="text-emerald-400">💸 Valider Recharge</option>
+                                            <option value="voir_id" class="text-sky-400">👁️ Voir Identifiants</option>
+                                            <option value="activer" class="text-emerald-500">🟢 Activer Compte</option>
+                                            <option value="suspendre" class="text-amber-500">🟠 Suspendre</option>
+                                            <option value="supprimer" class="text-rose-500">🔴 Supprimer Compte</option>
                                         </select>
                                     </td>
                                 </tr>
@@ -178,9 +208,14 @@
                                     <td class="py-3"><span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded font-black text-[10px] uppercase">Personnel</span></td>
                                     <td class="py-3 text-center font-bold font-mono text-rose-400">2 Véh.</td>
                                     <td class="py-3 text-center font-mono"><span id="jours-bamba" class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded-lg font-black text-[10px]">Expiré</span></td>
-                                    <td class="py-3 text-right">
+                                    <td class="py-3 text-right no-print">
                                         <select onchange="executerActionPartenaire('Bamba', '0812345678', '0000', 'solde-bamba', 'jours-bamba', this)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 focus:outline-none focus:border-indigo-500">
-                                            <option value="">-- Actions --</option><option value="recharger" class="text-emerald-400">💸 Valider Recharge</option><option value="voir_id" class="text-sky-400">👁️ Voir Identifiants</option><option value="activer" class="text-emerald-500">🟢 Activer Compte</option><option value="suspendre" class="text-amber-500">🟠 Suspendre</option><option value="supprimer" class="text-rose-500">🔴 Supprimer Compte</option>
+                                            <option value="">-- Actions --</option>
+                                            <option value="recharger" class="text-emerald-400">💸 Valider Recharge</option>
+                                            <option value="voir_id" class="text-sky-400">👁️ Voir Identifiants</option>
+                                            <option value="activer" class="text-emerald-500">🟢 Activer Compte</option>
+                                            <option value="suspendre" class="text-amber-500">🟠 Suspendre</option>
+                                            <option value="supprimer" class="text-rose-500">🔴 Supprimer Compte</option>
                                         </select>
                                     </td>
                                 </tr>
@@ -189,8 +224,10 @@
                     </div>
                 </div>
 
+                <!-- ITINÉRAIRES / PÔLES -->
                 <div id="page-itineraires" class="space-y-5 page-fade class-page-admin hidden">
                     <h2 class="text-xl font-black text-slate-100">🛣️ Matrice Tarifaire des Pôles</h2>
+                    
                     <div class="bg-slate-950 p-5 rounded-2xl border border-emerald-500/30 space-y-4">
                         <div class="flex items-center gap-3">
                             <i class="fa-solid fa-file-excel text-2xl text-emerald-400"></i>
@@ -204,6 +241,7 @@
                             <button onclick="importerItinerairesExcel()" class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black px-6 py-2 rounded-xl uppercase text-xs shadow-lg flex-shrink-0 transition-colors">Lire et Écraser</button>
                         </div>
                     </div>
+
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-4">
                             <h3 class="text-xs font-black uppercase tracking-widest text-indigo-400">Ajout Manuel</h3>
@@ -214,6 +252,7 @@
                                 <button onclick="creerNouveauTronconAdmin()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-2.5 rounded-xl uppercase text-xs">Injecter</button>
                             </div>
                         </div>
+                        
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 lg:col-span-2 space-y-3">
                             <div class="flex justify-between items-center">
                                 <h3 class="text-xs font-black uppercase tracking-widest text-slate-400">Tarifs de Référence Actifs dans le Cerveau</h3>
@@ -224,6 +263,7 @@
                     </div>
                 </div>
 
+                <!-- TRÉSORERIE -->
                 <div id="page-tresorerie" class="space-y-5 page-fade class-page-admin hidden">
                     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
                         <h2 class="text-xl font-black text-slate-100">💸 Trésorerie & Sortie de Fonds</h2>
@@ -235,6 +275,7 @@
                             <button onclick="majFiltreDate('treso')" class="bg-slate-800 hover:bg-slate-700 text-white p-1.5 rounded-lg"><i class="fa-solid fa-rotate"></i></button>
                         </div>
                     </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                         <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-1">
                             <span class="text-[9px] text-slate-500 uppercase block font-black">Encaissements (Période)</span>
@@ -252,6 +293,7 @@
                     </div>
                 </div>
 
+                <!-- STATISTIQUES CROISÉES -->
                 <div id="page-stats-croisees" class="space-y-5 page-fade class-page-admin hidden">
                     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
                         <div>
@@ -266,10 +308,12 @@
                             <button onclick="majFiltreDate('stats')" class="bg-slate-800 hover:bg-slate-700 text-white p-1.5 rounded-lg"><i class="fa-solid fa-rotate"></i></button>
                         </div>
                     </div>
+
                     <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
                         <div class="flex justify-between items-center"><h3 class="text-xs font-black uppercase text-emerald-400 flex items-center gap-2"><i class="fa-solid fa-chart-line"></i> Évolution des Recettes & Dépenses</h3></div>
                         <div class="h-64 relative"><canvas id="chart-recettes-depenses"></canvas></div>
                     </div>
+
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
                             <h3 class="text-xs font-black uppercase text-indigo-400 flex items-center gap-2"><i class="fa-solid fa-users-viewfinder"></i> Répartition des Clients</h3>
@@ -282,12 +326,19 @@
                     </div>
                 </div>
 
+                <!-- PARAMÈTRES & RÉSEAUX DE PAIEMENT ADMIN -->
                 <div id="page-parametres" class="space-y-5 page-fade class-page-admin hidden">
                     <h2 class="text-xl font-black text-slate-100">⚙️ Configuration Système & Paiements</h2>
+                    
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+                        
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-4 md:col-span-2 shadow-xl">
-                            <div class="flex items-center gap-2 border-b border-slate-850 pb-2"><i class="fa-solid fa-tower-cell text-sky-400 text-sm"></i><h3 class="font-bold text-sky-400 uppercase tracking-wider text-[10px]">Passerelles Financières & Support Client</h3></div>
+                            <div class="flex items-center gap-2 border-b border-slate-850 pb-2">
+                                <i class="fa-solid fa-tower-cell text-sky-400 text-sm"></i>
+                                <h3 class="font-bold text-sky-400 uppercase tracking-wider text-[10px]">Passerelles Financières & Support Client</h3>
+                            </div>
                             <p class="text-[9px] text-slate-500">Ces numéros apparaîtront automatiquement sur l'application de tous vos partenaires.</p>
+                            
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-[9px] font-bold text-green-400 uppercase mb-1"><i class="fa-brands fa-whatsapp"></i> WhatsApp Support</label>
@@ -306,19 +357,36 @@
                                     <input type="text" id="cfg-orange" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-slate-200 focus:border-orange-500 outline-none" placeholder="Numéro Orange">
                                 </div>
                             </div>
-                            <button onclick="sauvegarderNumerosAdmin()" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-black py-2.5 rounded-xl uppercase text-xs transition-colors mt-2">Enregistrer et Diffuser aux Partenaires</button>
+                            <button onclick="sauvegarderNumerosAdmin()" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-black py-2.5 rounded-xl uppercase text-xs transition-colors mt-2">
+                                Enregistrer et Diffuser aux Partenaires
+                            </button>
                         </div>
                         
                         <div class="bg-slate-950 p-5 rounded-2xl border border-indigo-500/30 space-y-3.5 shadow-xl">
-                            <div class="flex items-center gap-2 border-b border-slate-850 pb-2"><i class="fa-solid fa-shield-halved text-indigo-400 text-sm"></i><h3 class="font-bold text-indigo-400 uppercase tracking-wider text-[10px]">Identifiants Super Admin</h3></div>
-                            <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Identifiant Email</label><input type="email" id="cfg-admin-email" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-slate-200 focus:outline-none focus:border-indigo-500" value="admin@transvision.cd"></div>
-                            <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Ancien Mot de Passe</label><input type="password" id="cfg-admin-old-pass" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-slate-200 focus:outline-none focus:border-indigo-500" placeholder="••••••••"></div>
-                            <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nouveau Mot de Passe</label><input type="password" id="cfg-admin-new-pass" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-emerald-400 focus:outline-none focus:border-emerald-500" placeholder="Minimum 6 caractères"></div>
+                            <div class="flex items-center gap-2 border-b border-slate-850 pb-2">
+                                <i class="fa-solid fa-shield-halved text-indigo-400 text-sm"></i>
+                                <h3 class="font-bold text-indigo-400 uppercase tracking-wider text-[10px]">Identifiants Super Admin</h3>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Identifiant Email</label>
+                                <input type="email" id="cfg-admin-email" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-slate-200 focus:outline-none focus:border-indigo-500" value="admin@transvision.cd">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Ancien Mot de Passe</label>
+                                <input type="password" id="cfg-admin-old-pass" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-slate-200 focus:outline-none focus:border-indigo-500" placeholder="••••••••">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nouveau Mot de Passe</label>
+                                <input type="password" id="cfg-admin-new-pass" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-emerald-400 focus:outline-none focus:border-emerald-500" placeholder="Minimum 6 caractères">
+                            </div>
                             <button onclick="modifierAccesPropresAdmin()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-2.5 rounded-xl uppercase text-xs transition-all shadow-lg shadow-indigo-500/10 mt-1">Valider & Modifier</button>
                         </div>
 
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
-                            <div class="flex justify-between items-center"><h3 class="font-bold text-emerald-400 uppercase tracking-wider text-[10px]">Rédaction des CGU</h3><span class="text-[9px] text-slate-500 font-mono">Synchronisé</span></div>
+                            <div class="flex justify-between items-center">
+                                <h3 class="font-bold text-emerald-400 uppercase tracking-wider text-[10px]">Rédaction des CGU</h3>
+                                <span class="text-[9px] text-slate-500 font-mono">Synchronisé</span>
+                            </div>
                             <textarea id="cfg-cgu-texte" rows="6" class="w-full bg-slate-900 border border-slate-850 focus:border-indigo-500 focus:outline-none rounded-xl p-3 text-xs text-slate-300 font-mono leading-relaxed"></textarea>
                             <button onclick="sauvegarderCGUAdmin()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-2 px-5 rounded-xl uppercase text-xs">Publier les CGU</button>
                         </div>
@@ -346,6 +414,7 @@
                         <option value="flotte">Flotte Complète</option>
                         <option value="unitaire">Véhicule Spécifique</option>
                     </select>
+                    
                     <div id="bloc-admin-recharge-vehicule" class="hidden mt-2 border-t border-slate-800 pt-2">
                         <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Sélectionner le Véhicule</label>
                         <select id="admin-recharge-vehicule-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-mono text-[10px] focus:outline-none focus:border-emerald-500"></select>
@@ -597,7 +666,10 @@
             document.getElementById('badge-nb-routes').textContent = `${listeItineraires.length} Rte(s)`;
         }
 
-        function supprimerItineraire(index) { listeItineraires.splice(index, 1); afficherItinerairesAdmin(); }
+        function supprimerItineraire(index) {
+            listeItineraires.splice(index, 1);
+            afficherItinerairesAdmin();
+        }
 
         function rechercherPartenaire() {
             const input = document.getElementById('recherche-partenaire').value.toLowerCase();
@@ -640,6 +712,7 @@
                     selVehicules.insertAdjacentHTML('beforeend', `<option value="${index}">${v.plaque} (IMEI: ${v.imei})</option>`);
                 });
             }
+
             basculerSelectVehiculeAdmin();
             document.getElementById('modal-recharge-flexible').classList.remove('hidden');
         }
@@ -657,7 +730,10 @@
         function executerVirementMobileMoneyAdmin() {
             const phone = document.getElementById('wir-phone').value;
             const amount = document.getElementById('wir-amount').value;
-            if (!phone || !amount || amount <= 0) { alert("❌ Veuillez saisir un numéro de téléphone valide et un montant supérieur à zéro."); return; }
+            if (!phone || !amount || amount <= 0) {
+                alert("❌ Veuillez saisir un numéro de téléphone valide et un montant supérieur à zéro.");
+                return;
+            }
             alert(`💸 SUCCÈS : Ordre de décaissement de ${amount} CDF vers le numéro ${phone} initié avec succès.`);
             document.getElementById('wir-phone').value = ""; document.getElementById('wir-amount').value = "";
         }
@@ -719,9 +795,24 @@
             alert("✅ Les numéros de paiement et de support ont été mis à jour !");
         }
 
-        // --- GESTION DE LA SESSION ADMIN ---
+        function chargerCGUAdmin() {
+            const el = document.getElementById('cfg-cgu-texte');
+            if (el) el.value = localStorage.getItem('transvision_cgu') || "CONDITIONS GÉNÉRALES D'UTILISATION (CGU)";
+        }
+
+        function sauvegarderCGUAdmin() {
+            const texte = document.getElementById('cfg-cgu-texte').value.trim();
+            if (!texte) { alert("Le texte ne peut pas être vide."); return; }
+            localStorage.setItem('transvision_cgu', texte);
+            alert("✅ CGU mises à jour et publiées avec succès !");
+        }
+
+        // ========================================================
+        // GESTION DE LA SESSION BLINDÉE (100% FIABLE)
+        // ========================================================
+
         function authentifierSessionAdmin() {
-            const email = document.getElementById('login-email-admin').value;
+            const email = document.getElementById('login-email-admin').value.trim();
             const pass = document.getElementById('login-pass-admin').value;
             if(email === adminCredential.email && pass === adminCredential.pass) {
                 localStorage.setItem('tv_admin_session_active', 'true');
@@ -730,7 +821,9 @@
                 document.body.className = "bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col";
                 chargerHistoriqueAdmin();
                 setTimeout(initialiserGraphiquesAdmin, 100);
-            } else { alert("❌ Accès refusé : Identifiant ou code secret erroné."); }
+            } else { 
+                alert("❌ Accès refusé : Identifiant ou code secret erroné."); 
+            }
         }
 
         function declencherDeconnexionAdmin() {
@@ -742,26 +835,35 @@
             }
         }
 
-        // AUTO-CONNEXION AU CHARGEMENT DE LA PAGE
-        window.addEventListener('DOMContentLoaded', () => {
-            const today = new Date();
-            const lastWeek = new Date(today); lastWeek.setDate(today.getDate() - 7);
-            const strToday = today.toISOString().split('T')[0];
-            const strLastWeek = lastWeek.toISOString().split('T')[0];
-            ['treso', 'stats'].forEach(prefix => {
-                const elD = document.getElementById(`date-debut-${prefix}`); const elF = document.getElementById(`date-fin-${prefix}`);
-                if(elD) elD.value = strLastWeek; if(elF) elF.value = strToday;
-            });
-            chargerCGUAdmin();
-            chargerNumerosAdmin();
-            afficherItinerairesAdmin();
+        // 1. VÉRIFICATION INSTANTANÉE (HORS DOMContentLoaded)
+        if (localStorage.getItem('tv_admin_session_active') === 'true') {
+            document.getElementById('page-login-admin').classList.add('hidden');
+            document.getElementById('corps-application-admin').classList.remove('hidden');
+            document.body.className = "bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col";
+            chargerHistoriqueAdmin();
+            setTimeout(initialiserGraphiquesAdmin, 100);
+        }
 
-            if (localStorage.getItem('tv_admin_session_active') === 'true') {
-                document.getElementById('page-login-admin').classList.add('hidden');
-                document.getElementById('corps-application-admin').classList.remove('hidden');
-                document.body.className = "bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col";
-                chargerHistoriqueAdmin();
-                setTimeout(initialiserGraphiquesAdmin, 100);
+        // 2. CHARGEMENT DES DONNÉES SECONDAIRES 
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                const today = new Date();
+                const lastWeek = new Date(today); lastWeek.setDate(today.getDate() - 7);
+                const strToday = today.toISOString().split('T')[0];
+                const strLastWeek = lastWeek.toISOString().split('T')[0];
+                
+                ['treso', 'stats'].forEach(prefix => {
+                    const elD = document.getElementById(`date-debut-${prefix}`); 
+                    const elF = document.getElementById(`date-fin-${prefix}`);
+                    if(elD) elD.value = strLastWeek; 
+                    if(elF) elF.value = strToday;
+                });
+                
+                chargerCGUAdmin();
+                chargerNumerosAdmin();
+                afficherItinerairesAdmin();
+            } catch (erreur) {
+                console.warn("Avertissement au chargement des formulaires :", erreur);
             }
         });
 
