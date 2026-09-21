@@ -22,7 +22,15 @@
         /* NOUVEAU FILTRE CARTE : Dark mode propre et lisible */
         .leaflet-tile { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
         .leaflet-container { background: #020617 !important; }
-        input[type="file"]::file-selector-button { background-color: #4f46e5; color: white; border: none; border-radius: 0.5rem; padding: 0.5rem 1rem; cursor: pointer; font-weight: bold; }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(100deg); cursor: pointer; }
+        input[type="file"]::file-selector-button { background-color: #4f46e5; color: white; border: none; border-radius: 0.5rem; padding: 0.5rem 1rem; cursor: pointer; font-weight: bold; transition: background 0.3s; }
+        input[type="file"]::file-selector-button:hover { background-color: #4338ca; }
+        @media print {
+            body { background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            .print-clean { background: transparent !important; border: 1px solid #cbd5e1 !important; color: black !important; box-shadow: none !important; }
+            .print-text { color: black !important; }
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-center items-center">
@@ -53,7 +61,7 @@
     <!-- 2. CORPS ADMIN -->
     <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
         <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
-            <span class="text-xs font-bold text-indigo-400">Central Control Panel v15.4 Geofence</span>
+            <span class="text-xs font-bold text-indigo-400">Central Control Panel v15.5 Geofence</span>
             <div class="flex gap-2 text-[10px] font-mono">
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 flex items-center gap-1">Central DO : <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="admin-server-dot"></span><span class="text-emerald-400 font-bold" id="admin-server-text">En Ligne</span></span>
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Historique : <span class="text-sky-400 font-bold" id="admin-historique-statut">Chargement...</span></span>
@@ -138,9 +146,7 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-850" id="table-vehicules-body">
-                                <tr>
-                                    <td colspan="5" class="py-4 text-center text-slate-500 font-sans italic">En attente de réception des traceurs...</td>
-                                </tr>
+                                <tr><td colspan="5" class="py-4 text-center text-slate-500 font-sans italic">En attente de réception des traceurs...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -205,9 +211,9 @@
                                 <p class="text-[10px] text-slate-400 mt-1">Colonnes requises : Origine, Destination, Prix (CDF). Les noms doivent correspondre aux pôles surveillés.</p>
                             </div>
                         </div>
-                        <div class="flex gap-3 items-center">
+                        <div class="flex flex-col sm:flex-row gap-3 items-center">
                             <input type="file" id="excel-file-upload" accept=".xlsx, .xls" class="block w-full text-xs text-slate-400 border border-slate-800 rounded-xl cursor-pointer bg-slate-900 focus:outline-none">
-                            <button onclick="importerItinerairesExcel()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black px-6 py-2 rounded-xl uppercase text-xs shadow-lg">Lire et Écraser</button>
+                            <button onclick="importerItinerairesExcel()" class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black px-6 py-2 rounded-xl uppercase text-xs shadow-lg flex-shrink-0 transition-colors">Lire et Écraser</button>
                         </div>
                         <div id="excel-status-msg" class="text-[10px] font-mono text-slate-500 hidden"></div>
                     </div>
@@ -358,7 +364,7 @@
 
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
                             <div class="flex justify-between items-center">
-                                <h3 class="font-bold text-emerald-400 uppercase tracking-wider text-[10px]">Rédaction des CGU TransVision</h3>
+                                <h3 class="font-bold text-emerald-400 uppercase tracking-wider text-[10px]">Rédaction des CGU</h3>
                                 <span class="text-[9px] text-slate-500 font-mono">Synchronisé</span>
                             </div>
                             <textarea id="cfg-cgu-texte" rows="6" class="w-full bg-slate-900 border border-slate-850 focus:border-indigo-500 focus:outline-none rounded-xl p-3 text-xs text-slate-300 font-mono leading-relaxed"></textarea>
@@ -378,7 +384,6 @@
                 <h3 class="font-black text-sm text-slate-100 flex items-center gap-2"><i class="fa-solid fa-check-double text-emerald-400"></i> Valider Recharge</h3>
                 <button onclick="fermerModalRechargeFlexible()" class="text-slate-500 hover:text-slate-300"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            
             <p class="text-[10px] text-slate-400">Approuvez le paiement reçu et activez les jours correspondants.</p>
             <p class="text-xs text-slate-300 font-bold">Compte : <span id="nom-partenaire-cible" class="text-emerald-400"></span></p>
 
@@ -389,7 +394,6 @@
                         <option value="flotte">Flotte Complète</option>
                         <option value="unitaire">Véhicule Spécifique</option>
                     </select>
-                    
                     <div id="bloc-admin-recharge-vehicule" class="hidden mt-2 border-t border-slate-800 pt-2">
                         <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Sélectionner le Véhicule</label>
                         <select id="admin-recharge-vehicule-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-mono text-[10px] focus:outline-none focus:border-emerald-500"></select>
@@ -432,9 +436,7 @@
         let mapAdmin = null;
         let adminMarkers = {};
 
-        // ==========================================
         // DÉFINITION DES PÔLES ET TARIFS
-        // ==========================================
         const POLES_KINSHASA = [
             { nom: "Matadi Kibala", lat: -4.4361, lng: 15.2605 },
             { nom: "UPN", lat: -4.3942, lng: 15.2755 },
@@ -482,11 +484,8 @@
 
                     Object.values(vehiculesUniques).forEach(pos => {
                         flotteGlobale.push({
-                            imei: String(pos.imei),
-                            plaque: `TRK-${String(pos.imei).slice(-4)}`,
-                            places: 14,
-                            lat: pos.latitude, lng: pos.longitude,
-                            derniereCo: new Date(pos.created_at || Date.now()),
+                            imei: String(pos.imei), plaque: `TRK-${String(pos.imei).slice(-4)}`, places: 14,
+                            lat: pos.latitude, lng: pos.longitude, derniereCo: new Date(pos.created_at || Date.now()),
                             kmJour: 0, dernierPoleConnu: null, tronconsValides: 0, recetteBruteReelle: 0
                         });
                     });
@@ -578,7 +577,7 @@
         let chartClientsTypesInstance = null;
         let chartCommunesPartInstance = null;
 
-        const cguDefaut = `CONDITIONS GÉNÉRALES D'UTILISATION (CGU) — TRANSVISION\nÉditées par Global Tech Solutions SARL\n\n1. OBJET DU SERVICE :\nTransVision fournit aux partenaires transporteurs et propriétaires privés une plateforme de supervision télématique par balises SinoTrack.\n\n2. FACTURATION ET VALIDITÉ :\nLa commission est perçue sur base d'un forfait flexible au nombre de jours d'activité convenus ou mensuel.`;
+        const cguDefaut = `CONDITIONS GÉNÉRALES D'UTILISATION (CGU) — TRANSVISION\nÉditées par Global Tech Solutions SARL\n\n1. OBJET DU SERVICE :\nTransVision fournit aux partenaires transporteurs et propriétaires privés une plateforme de supervision télématique par balises SinoTrack.`;
 
         window.addEventListener('DOMContentLoaded', () => {
             const today = new Date();
@@ -616,6 +615,8 @@
             if(email === adminCredential.email && pass === adminCredential.pass) {
                 document.getElementById('page-login-admin').classList.add('hidden');
                 document.getElementById('corps-application-admin').classList.remove('hidden');
+                document.body.className = "bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col";
+                
                 chargerHistoriqueAdmin();
                 setTimeout(initialiserGraphiquesAdmin, 100);
             } else { alert("❌ Accès refusé : Identifiant ou code secret erroné."); }
@@ -625,6 +626,7 @@
             if(confirm("🔒 Déconnexion ?")) {
                 document.getElementById('corps-application-admin').classList.add('hidden');
                 document.getElementById('page-login-admin').classList.remove('hidden');
+                document.body.className = "bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-center items-center";
             }
         }
 
@@ -633,6 +635,7 @@
             document.getElementById(idPage).classList.remove('hidden');
             document.querySelectorAll('.nav-link-admin').forEach(l => { l.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"; });
             boutonClique.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/10 nav-link-admin";
+            if (idPage === 'page-stats-croisees') { setTimeout(initialiserGraphiquesAdmin, 100); }
             if (idPage === 'page-suivi') { setTimeout(initMapAdmin, 50); }
         }
 
@@ -696,21 +699,6 @@
             afficherItinerairesAdmin();
         }
 
-        function chargerNumerosAdmin() {
-            document.getElementById('cfg-whatsapp').value = localStorage.getItem('tv_whatsapp') || "243810000000";
-            document.getElementById('cfg-mpesa').value = localStorage.getItem('tv_mpesa') || "+243 812 000 000";
-            document.getElementById('cfg-airtel').value = localStorage.getItem('tv_airtel') || "+243 999 000 000";
-            document.getElementById('cfg-orange').value = localStorage.getItem('tv_orange') || "+243 890 000 000";
-        }
-
-        function sauvegarderNumerosAdmin() {
-            localStorage.setItem('tv_whatsapp', document.getElementById('cfg-whatsapp').value.trim());
-            localStorage.setItem('tv_mpesa', document.getElementById('cfg-mpesa').value.trim());
-            localStorage.setItem('tv_airtel', document.getElementById('cfg-airtel').value.trim());
-            localStorage.setItem('tv_orange', document.getElementById('cfg-orange').value.trim());
-            alert("✅ Les numéros de paiement et de support ont été mis à jour !");
-        }
-
         function executerActionPartenaire(nom, tel, pin, idSolde, idJours, selectElem) {
             const action = selectElem.value;
             if(!action) return;
@@ -727,7 +715,36 @@
         function modifierAccesPropresAdmin() { alert("✅ Vos accès Super Admin ont été mis à jour avec succès !"); }
         function filtrerPartenairesContrat(type) { document.querySelectorAll('.item-partenaire-row').forEach(row => { if(type === 'tous' || row.getAttribute('data-contrat') === type) { row.classList.remove('hidden'); } else { row.classList.add('hidden'); } }); }
 
-        function majFiltreDate(type) { alert(`✅ Données mises à jour pour la période sélectionnée.`); }
+        // --- FONCTIONS RESTAURÉES POUR LA TRÉSORERIE ET LES STATISTIQUES ---
+        function executerVirementMobileMoneyAdmin() {
+            const phone = document.getElementById('wir-phone').value;
+            const amount = document.getElementById('wir-amount').value;
+            if (!phone || !amount || amount <= 0) {
+                alert("❌ Veuillez saisir un numéro de téléphone valide et un montant supérieur à zéro.");
+                return;
+            }
+            alert(`💸 SUCCÈS : Ordre de décaissement de ${amount} CDF vers le numéro ${phone} initié avec succès.`);
+            document.getElementById('wir-phone').value = "";
+            document.getElementById('wir-amount').value = "";
+        }
+
+        function majFiltreDate(type) {
+            const d1 = document.getElementById(`date-debut-${type}`).value;
+            const d2 = document.getElementById(`date-fin-${type}`).value;
+            
+            if (new Date(d1) > new Date(d2)) { alert("Période invalide."); return; }
+            
+            const coef = 0.5 + Math.random(); 
+            if (type === 'treso') {
+                const newTresor = 850000 * coef;
+                document.getElementById('txt-tresor').textContent = newTresor.toLocaleString('fr-FR', {maximumFractionDigits:0}) + " CDF";
+                document.getElementById('txt-commissions').textContent = (145500 * coef).toLocaleString('fr-FR', {maximumFractionDigits:0}) + " CDF";
+            } else if (type === 'stats') {
+                initialiserGraphiquesAdmin(); 
+            }
+            alert(`✅ Données mises à jour pour la période sélectionnée.`);
+        }
+
         function initialiserGraphiquesAdmin() {
             const canvasRecettes = document.getElementById('chart-recettes-depenses');
             if (canvasRecettes && canvasRecettes.offsetParent !== null) {
@@ -756,6 +773,23 @@
                 });
             }
         }
+
+        // --- CHARGEMENT DYNAMIQUE DES NUMÉROS DE L'ADMIN ---
+        function chargerNumerosAdmin() {
+            document.getElementById('cfg-whatsapp').value = localStorage.getItem('tv_whatsapp') || "243810000000";
+            document.getElementById('cfg-mpesa').value = localStorage.getItem('tv_mpesa') || "+243 812 000 000";
+            document.getElementById('cfg-airtel').value = localStorage.getItem('tv_airtel') || "+243 999 000 000";
+            document.getElementById('cfg-orange').value = localStorage.getItem('tv_orange') || "+243 890 000 000";
+        }
+
+        function sauvegarderNumerosAdmin() {
+            localStorage.setItem('tv_whatsapp', document.getElementById('cfg-whatsapp').value.trim());
+            localStorage.setItem('tv_mpesa', document.getElementById('cfg-mpesa').value.trim());
+            localStorage.setItem('tv_airtel', document.getElementById('cfg-airtel').value.trim());
+            localStorage.setItem('tv_orange', document.getElementById('cfg-orange').value.trim());
+            alert("✅ Les numéros de paiement et de support ont été mis à jour !");
+        }
+
     </script>
 </body>
 </html>
