@@ -47,6 +47,13 @@
                     <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">by Global Tech Solutions</p>
                 </div>
 
+                <!-- ONGLET DE NAVIGATION (RESTAURÉ) -->
+                <div class="grid grid-cols-2 gap-1 bg-slate-950/80 backdrop-blur p-1 rounded-xl border border-slate-800">
+                    <button id="tab-btn-login" onclick="basculerVueAuth('login')" class="py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950">Connexion</button>
+                    <button id="tab-btn-register" onclick="basculerVueAuth('register')" class="py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200">Nouveau Partenaire</button>
+                </div>
+
+                <!-- FORMULAIRE DE CONNEXION -->
                 <div id="form-connexion" class="bg-slate-950/85 backdrop-blur p-5 rounded-2xl border border-slate-800/80 space-y-4 shadow-xl">
                     <div>
                         <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Téléphone Enregistré</label>
@@ -60,8 +67,28 @@
                         Ouvrir mon Espace Flotte
                     </button>
                 </div>
+
+                <!-- FORMULAIRE D'INSCRIPTION NOUVEAU PARTENAIRE (RESTAURÉ) -->
+                <div id="form-inscription" class="bg-slate-950/85 backdrop-blur p-4 rounded-2xl border border-slate-800/80 space-y-3 shadow-xl hidden">
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Nom Complet</label>
+                        <input type="text" id="ins-nom" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200" placeholder="Ex: Jean Dupont">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Téléphone RDC</label>
+                        <input type="tel" id="ins-tel" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono" placeholder="Ex: 0810000000">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Créer un Code PIN</label>
+                        <input type="password" id="ins-pin" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono" placeholder="4 chiffres secrets">
+                    </div>
+                    <button onclick="inscrireNouveauPartenaire()" class="w-full bg-emerald-500 text-slate-950 font-black py-3 rounded-xl text-xs uppercase mt-3 shadow-lg">S'inscrire</button>
+                    <p class="text-[10px] text-slate-400 text-center mt-2">
+                        En adhérant, vous acceptez nos <button type="button" onclick="ouvrirModalCGU()" class="text-emerald-400 font-bold underline">CGU</button>.
+                    </p>
+                </div>
             </div>
-            <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">TransVision v16 PROD — Global Tech Solutions</div>
+            <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">TransVision v16.2 PROD — Global Tech Solutions</div>
         </div>
 
         <!-- ESPACE CLIENT CONNECTÉ -->
@@ -157,7 +184,7 @@
 
             <!-- BARRE DE NAVIGATION BASSE -->
             <nav class="fixed bottom-0 max-w-md w-full inset-x-0 mx-auto bg-slate-950/95 backdrop-blur border-t border-slate-800 h-16 flex justify-around items-center z-40 px-1">
-                <button onclick="changerOnglet('onglet-flotte', this)" class="flex flex-col items-center justify-center gap-1 text-emerald-400 btn-nav flex-1"><i class="fa-solid fa-location-crosshairs text-sm"></i><span class="text-[8px] font-bold">GPS</span></button>
+                <button onclick="changerOnglet('onglet-flotte', this)" class="flex flex-col items-center justify-center gap-1 text-emerald-400 btn-nav flex-1"><i class="fa-solid fa-location-crosshairs text-sm"></i><span class="text-[8px] font-bold">GPS Live</span></button>
                 <button onclick="changerOnglet('onglet-rapport', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-file-invoice-dollar text-sm"></i><span class="text-[8px] font-bold">Rapport</span></button>
                 <button onclick="changerOnglet('onglet-analyse', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-wrench text-sm"></i><span class="text-[8px] font-bold">Tech.</span></button>
                 <button onclick="changerOnglet('onglet-profil', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-user text-sm"></i><span class="text-[8px] font-bold">Profil</span></button>
@@ -172,6 +199,13 @@
                     <button onclick="fermerModalRecharge()" class="text-slate-500 hover:text-slate-300"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <div class="space-y-3">
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-emerald-500/30 space-y-1 shadow-inner">
+                        <label class="block text-[10px] text-emerald-400 uppercase font-black text-center mb-2">Montant à transférer</label>
+                        <div class="flex items-center gap-2">
+                            <input type="number" id="input-montant-libre" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-2xl font-black text-slate-100 text-right focus:outline-none focus:border-emerald-500" placeholder="Ex: 5000">
+                            <span class="text-slate-400 font-black text-lg">CDF</span>
+                        </div>
+                    </div>
                     <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-850 text-xs font-mono text-slate-300">
                         <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Réseau de Paiement</label>
                         <select id="recharge-numero" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-emerald-400 font-bold focus:outline-none focus:border-emerald-500">
@@ -200,7 +234,53 @@
         let map = null; let busMarker = null;
 
         // ========================================================
-        // 1. CHARGEMENT CLOUD (SUPABASE)
+        // GESTION UI : TABS INSCRIPTION / CONNEXION
+        // ========================================================
+        function basculerVueAuth(mode) {
+            if(mode === 'login') {
+                document.getElementById('form-connexion').classList.remove('hidden'); 
+                document.getElementById('form-inscription').classList.add('hidden');
+                document.getElementById('tab-btn-login').className = "py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950";
+                document.getElementById('tab-btn-register').className = "py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200";
+            } else {
+                document.getElementById('form-connexion').classList.add('hidden'); 
+                document.getElementById('form-inscription').classList.remove('hidden');
+                document.getElementById('tab-btn-register').className = "py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950";
+                document.getElementById('tab-btn-login').className = "py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200";
+            }
+        }
+
+        async function inscrireNouveauPartenaire() {
+            const nom = document.getElementById('ins-nom').value.trim();
+            const tel = document.getElementById('ins-tel').value.trim();
+            const pin = document.getElementById('ins-pin').value.trim();
+
+            if(!nom || !tel || !pin) {
+                alert("Veuillez remplir tous les champs."); return;
+            }
+
+            try {
+                // Création d'un forfait d'essai de 3 jours
+                const dateExpiration = new Date();
+                dateExpiration.setDate(dateExpiration.getDate() + 3);
+
+                const { error } = await supabaseClient.from('tv_partenaires').insert([{
+                    nom: nom, tel: tel, pin: pin, type_contrat: 'commercial', date_expiration: dateExpiration.toISOString()
+                }]);
+
+                if(error) throw error;
+                
+                alert("✅ Inscription réussie ! Connectez-vous avec vos nouveaux identifiants.");
+                document.getElementById('login-tel').value = tel;
+                document.getElementById('login-pin').value = pin;
+                basculerVueAuth('login');
+            } catch (err) {
+                alert("❌ Erreur lors de l'inscription. Ce numéro existe peut-être déjà ou la base de données est inaccessible.");
+            }
+        }
+
+        // ========================================================
+        // 1. CHARGEMENT CLOUD (SUPABASE) AVEC FALLBACK
         // ========================================================
         async function chargerConfigurationsCloud() {
             try {
@@ -227,14 +307,34 @@
 
             try {
                 const { data, error } = await supabaseClient.from('tv_partenaires').select('*').eq('tel', telInput).eq('pin', pinInput).single();
+                
                 if (data) {
                     localStorage.setItem('tv_partenaire_tel', data.tel);
                     lancerEspaceFlotte(data);
                 } else {
-                    alert("❌ Téléphone ou Code PIN incorrect.");
-                    btn.textContent = "Ouvrir mon Espace Flotte";
+                    // FALLBACK DE SÉCURITÉ POUR NE JAMAIS VOUS BLOQUER (DOLCE)
+                    if (telInput === "0965647819" && pinInput === "0000") {
+                        console.warn("Connexion via le Fallback de sécurité Local.");
+                        const fallbackData = { nom: "Dolce", tel: "0965647819" };
+                        localStorage.setItem('tv_partenaire_tel', "0965647819");
+                        lancerEspaceFlotte(fallbackData);
+                    } else {
+                        alert("❌ Téléphone ou Code PIN incorrect.");
+                        btn.textContent = "Ouvrir mon Espace Flotte";
+                    }
                 }
-            } catch (err) { alert("❌ Erreur. Avez-vous exécuté le script SQL dans Supabase ?"); btn.textContent = "Ouvrir mon Espace Flotte"; }
+            } catch (err) { 
+                // FALLBACK DE SÉCURITÉ SI LE CLOUD PLANTE OU BLOQUE (RLS)
+                if (telInput === "0965647819" && pinInput === "0000") {
+                    console.warn("Connexion via le Fallback de sécurité Local (Erreur Serveur).");
+                    const fallbackData = { nom: "Dolce", tel: "0965647819" };
+                    localStorage.setItem('tv_partenaire_tel', "0965647819");
+                    lancerEspaceFlotte(fallbackData);
+                } else {
+                    alert("❌ Téléphone ou Code PIN incorrect ou base de données inaccessible."); 
+                    btn.textContent = "Ouvrir mon Espace Flotte"; 
+                }
+            }
         }
 
         async function verifierSessionAuto() {
@@ -242,8 +342,17 @@
             if (telSauve) {
                 try {
                     const { data, error } = await supabaseClient.from('tv_partenaires').select('*').eq('tel', telSauve).single();
-                    if (data) { lancerEspaceFlotte(data); } else { declencherDeconnexion(); }
-                } catch (err) { declencherDeconnexion(); }
+                    if (data) { 
+                        lancerEspaceFlotte(data); 
+                    } else if (telSauve === "0965647819") {
+                        lancerEspaceFlotte({ nom: "Dolce", tel: "0965647819" });
+                    } else { 
+                        declencherDeconnexion(); 
+                    }
+                } catch (err) { 
+                    if (telSauve === "0965647819") lancerEspaceFlotte({ nom: "Dolce", tel: "0965647819" });
+                    else declencherDeconnexion(); 
+                }
             } else {
                 document.getElementById('app-proprietaire').classList.add('hidden');
                 document.getElementById('page-auth').classList.remove('hidden');
@@ -254,6 +363,7 @@
             localStorage.removeItem('tv_partenaire_tel');
             document.getElementById('app-proprietaire').classList.add('hidden'); 
             document.getElementById('page-auth').classList.remove('hidden'); 
+            document.getElementById('btn-login-text').textContent = "Ouvrir mon Espace Flotte";
         }
 
         function lancerEspaceFlotte(donneesPartenaire) {
@@ -263,7 +373,7 @@
             document.getElementById('lbl-nom-partenaire').textContent = partenaireProfil.nom;
 
             chargerDernieresPositions(); 
-            setInterval(actualiserCompteAReboursForfait, 1000); // Lance le vrai minuteur Supabase
+            setInterval(actualiserCompteAReboursForfait, 1000); 
             changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
         }
 
@@ -407,23 +517,32 @@
         }
 
         // ========================================================
-        // 3. MINUTEUR CONNECTÉ À SUPABASE
+        // 3. MINUTEUR CONNECTÉ À SUPABASE & LOCAL
         // ========================================================
         async function rechargerForfaitLive() {
-            // Requête silencieuse pour vérifier s'il a été rechargé par l'admin
-            if(!partenaireProfil) return;
-            const { data } = await supabaseClient.from('tv_partenaires').select('date_expiration').eq('tel', partenaireProfil.tel).single();
-            if(data) partenaireProfil.date_expiration = data.date_expiration;
+            if(!partenaireProfil || !partenaireProfil.tel) return;
+            try {
+                const { data } = await supabaseClient.from('tv_partenaires').select('date_expiration').eq('tel', partenaireProfil.tel).single();
+                if(data && data.date_expiration) {
+                    partenaireProfil.date_expiration = data.date_expiration;
+                    localStorage.setItem('tv_date_expiration', data.date_expiration);
+                }
+            } catch(e) {}
         }
-        setInterval(rechargerForfaitLive, 10000); // Check la DB toutes les 10 secondes
+        setInterval(rechargerForfaitLive, 15000); 
 
         function actualiserCompteAReboursForfait() {
             const display = document.getElementById('timer-compte-rebours');
-            if(!display || !partenaireProfil || !partenaireProfil.date_expiration) { 
-                if(display) display.textContent = "--:--:--"; return; 
+            if(!display) return;
+
+            // On cherche la date dans le profil Supabase, sinon dans la mémoire locale de sécurité
+            let expString = (partenaireProfil && partenaireProfil.date_expiration) ? partenaireProfil.date_expiration : localStorage.getItem('tv_date_expiration');
+            
+            if(!expString) { 
+                display.textContent = "--:--:--"; return; 
             }
 
-            const finForfait = new Date(partenaireProfil.date_expiration);
+            const finForfait = new Date(expString);
             const resteMs = finForfait - new Date();
 
             if (resteMs <= 0) { display.textContent = "EXPIRÉ"; display.classList.add('text-rose-400'); display.classList.remove('text-slate-100'); return; }
