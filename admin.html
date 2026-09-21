@@ -64,7 +64,7 @@
     <!-- 2. CORPS ADMIN -->
     <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
         <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
-            <span class="text-xs font-bold text-indigo-400">Central Control Panel v15.6 Geofence</span>
+            <span class="text-xs font-bold text-indigo-400">Central Control Panel v15.7 Geofence</span>
             <div class="flex gap-2 text-[10px] font-mono">
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 flex items-center gap-1">Central DO : <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="admin-server-dot"></span><span class="text-emerald-400 font-bold" id="admin-server-text">En Ligne</span></span>
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Historique : <span class="text-sky-400 font-bold" id="admin-historique-statut">Chargement...</span></span>
@@ -186,6 +186,7 @@
                                     <th class="py-3 text-right">Actions Gestion</th>
                                 </tr>
                             </thead>
+                            <!-- ICI NOUS N'AVONS PLUS QUE DOLCE, BAMBA A ÉTÉ SUPPRIMÉ -->
                             <tbody class="divide-y divide-slate-850 text-slate-300 print-text" id="table-partenaires-body">
                                 <tr class="item-partenaire-row" data-contrat="commercial">
                                     <td class="py-3 font-black text-slate-200 partenaire-nom">Dolce<br><span class="text-[9px] font-normal text-slate-500 partenaire-tel">0965647819</span></td>
@@ -203,28 +204,12 @@
                                         </select>
                                     </td>
                                 </tr>
-                                <tr class="item-partenaire-row" data-contrat="personnel">
-                                    <td class="py-3 font-black text-slate-200 partenaire-nom">Bamba<br><span class="text-[9px] font-normal text-slate-500 partenaire-tel">0812345678</span></td>
-                                    <td class="py-3"><span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded font-black text-[10px] uppercase">Personnel</span></td>
-                                    <td class="py-3 text-center font-bold font-mono text-rose-400">2 Véh.</td>
-                                    <td class="py-3 text-center font-mono"><span id="jours-bamba" class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded-lg font-black text-[10px]">Expiré</span></td>
-                                    <td class="py-3 text-right no-print">
-                                        <select onchange="executerActionPartenaire('Bamba', '0812345678', '0000', 'solde-bamba', 'jours-bamba', this)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 focus:outline-none focus:border-indigo-500">
-                                            <option value="">-- Actions --</option>
-                                            <option value="recharger" class="text-emerald-400">💸 Valider Recharge</option>
-                                            <option value="voir_id" class="text-sky-400">👁️ Voir Identifiants</option>
-                                            <option value="activer" class="text-emerald-500">🟢 Activer Compte</option>
-                                            <option value="suspendre" class="text-amber-500">🟠 Suspendre</option>
-                                            <option value="supprimer" class="text-rose-500">🔴 Supprimer Compte</option>
-                                        </select>
-                                    </td>
-                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- ITINÉRAIRES / PÔLES -->
+                <!-- ITINÉRAIRES / PÔLES AVEC IMPORT EXCEL -->
                 <div id="page-itineraires" class="space-y-5 page-fade class-page-admin hidden">
                     <h2 class="text-xl font-black text-slate-100">🛣️ Matrice Tarifaire des Pôles</h2>
                     
@@ -240,6 +225,7 @@
                             <input type="file" id="excel-file-upload" accept=".xlsx, .xls" class="block w-full text-xs text-slate-400 border border-slate-800 rounded-xl cursor-pointer bg-slate-900 focus:outline-none">
                             <button onclick="importerItinerairesExcel()" class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black px-6 py-2 rounded-xl uppercase text-xs shadow-lg flex-shrink-0 transition-colors">Lire et Écraser</button>
                         </div>
+                        <div id="excel-status-msg" class="text-[10px] font-mono text-slate-500 hidden"></div>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -457,6 +443,7 @@
         let mapAdmin = null;
         let adminMarkers = {};
 
+        // DÉFINITION DES PÔLES ET TARIFS
         const POLES_KINSHASA = [
             { nom: "Matadi Kibala", lat: -4.4361, lng: 15.2605 },
             { nom: "UPN", lat: -4.3942, lng: 15.2755 },
@@ -807,20 +794,25 @@
             alert("✅ CGU mises à jour et publiées avec succès !");
         }
 
+
         // ========================================================
         // GESTION DE LA SESSION BLINDÉE (100% FIABLE)
         // ========================================================
+
+        function demarrerSessionAdmin() {
+            document.getElementById('page-login-admin').classList.add('hidden');
+            document.getElementById('corps-application-admin').classList.remove('hidden');
+            document.body.className = "bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col";
+            chargerHistoriqueAdmin();
+            setTimeout(initialiserGraphiquesAdmin, 100);
+        }
 
         function authentifierSessionAdmin() {
             const email = document.getElementById('login-email-admin').value.trim();
             const pass = document.getElementById('login-pass-admin').value;
             if(email === adminCredential.email && pass === adminCredential.pass) {
                 localStorage.setItem('tv_admin_session_active', 'true');
-                document.getElementById('page-login-admin').classList.add('hidden');
-                document.getElementById('corps-application-admin').classList.remove('hidden');
-                document.body.className = "bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col";
-                chargerHistoriqueAdmin();
-                setTimeout(initialiserGraphiquesAdmin, 100);
+                demarrerSessionAdmin();
             } else { 
                 alert("❌ Accès refusé : Identifiant ou code secret erroné."); 
             }
@@ -835,16 +827,12 @@
             }
         }
 
-        // 1. VÉRIFICATION INSTANTANÉE (HORS DOMContentLoaded)
+        // 1. Exécution immédiate pour court-circuiter le clignotement de la page de login
         if (localStorage.getItem('tv_admin_session_active') === 'true') {
-            document.getElementById('page-login-admin').classList.add('hidden');
-            document.getElementById('corps-application-admin').classList.remove('hidden');
-            document.body.className = "bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col";
-            chargerHistoriqueAdmin();
-            setTimeout(initialiserGraphiquesAdmin, 100);
+            demarrerSessionAdmin();
         }
 
-        // 2. CHARGEMENT DES DONNÉES SECONDAIRES 
+        // 2. Chargement des données secondaires en mode sécurisé
         window.addEventListener('DOMContentLoaded', () => {
             try {
                 const today = new Date();
@@ -862,8 +850,8 @@
                 chargerCGUAdmin();
                 chargerNumerosAdmin();
                 afficherItinerairesAdmin();
-            } catch (erreur) {
-                console.warn("Avertissement au chargement des formulaires :", erreur);
+            } catch(erreur) {
+                console.warn("Avertissement mineur :", erreur);
             }
         });
 
