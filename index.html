@@ -24,8 +24,9 @@
 
     <style>
         .blur-transition { transition: filter 0.4s ease, opacity 0.4s ease; }
-        #map-container { height: 350px; width: 100%; border-radius: 1rem; z-index: 10; } /* Hauteur augmentée pour remplir l'écran */
-        .leaflet-tile { filter: brightness(0.8) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3); }
+        #map-container { height: 350px; width: 100%; border-radius: 1rem; z-index: 10; }
+        /* NOUVEAU FILTRE CARTE : Dark mode propre et très lisible */
+        .leaflet-tile { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
         .leaflet-container { background: #020617 !important; }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(100deg); cursor: pointer; }
         @media print {
@@ -114,7 +115,7 @@
             </div>
             
             <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v15.2 — by <span class="text-slate-200 font-bold">Global Tech Solutions</span>
+                TransVision v15.5 — by <span class="text-slate-200 font-bold">Global Tech Solutions</span>
             </div>
         </div>
 
@@ -271,7 +272,7 @@
                         <p id="txt-total-recettes" class="text-lg font-black text-emerald-400">0 CDF</p>
                     </div>
                     <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800/80 space-y-1 shadow-md">
-                        <span class="text-[9px] text-slate-400 uppercase font-black">Rotations Période</span>
+                        <span class="text-[9px] text-slate-400 uppercase font-black">Tronçons Validés</span>
                         <p id="txt-total-rotations" class="text-lg font-black text-slate-100">0</p>
                     </div>
                 </div>
@@ -324,7 +325,6 @@
             <div id="onglet-profil" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
                 <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mon Profil & Forfait</h2>
                 
-                <!-- BOUTON RECHARGE DÉPLACÉ ICI -->
                 <button onclick="ouvrirModalRecharge()" class="w-full bg-slate-950 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl text-center shadow-lg transition-colors flex items-center justify-center gap-3">
                     <i class="fa-solid fa-wallet text-2xl text-emerald-400"></i>
                     <div class="text-left">
@@ -349,8 +349,8 @@
                 </div>
 
                 <div class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800 space-y-3 shadow-md">
-                    <!-- BOUTON SUPPORT WHATSAPP AJOUTÉ ICI -->
-                    <a href="https://wa.me/243000000000" target="_blank" class="w-full bg-green-500/10 border border-green-500/30 hover:bg-green-500/20 text-green-400 font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition-colors">
+                    <!-- LIEN WHATSAPP DYNAMIQUE -->
+                    <a href="#" id="lien-whatsapp-support" target="_blank" class="w-full bg-green-500/10 border border-green-500/30 hover:bg-green-500/20 text-green-400 font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition-colors">
                         <i class="fa-brands fa-whatsapp text-lg"></i> Contacter le Support
                     </a>
 
@@ -394,17 +394,23 @@
                 </div>
                 
                 <div class="space-y-3">
+                    <!-- CHOIX DE LA CIBLE DE RECHARGE -->
                     <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-850 space-y-2">
                         <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Compte Cible</label>
                         <select id="recharge-mode" onchange="basculerSelectVehiculeRecharge()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-bold focus:outline-none focus:border-emerald-500">
                             <option value="flotte">Flotte Complète</option>
                             <option value="unitaire">Véhicule Spécifique</option>
                         </select>
+                        
                         <div id="bloc-recharge-vehicule" class="hidden mt-2 border-t border-slate-800 pt-2">
                             <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Sélectionner le Véhicule</label>
-                            <select id="recharge-vehicule-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-mono text-[10px] focus:outline-none focus:border-emerald-500"></select>
+                            <select id="recharge-vehicule-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-mono text-[10px] focus:outline-none focus:border-emerald-500">
+                                <!-- Peuplé dynamiquement -->
+                            </select>
                         </div>
                     </div>
+
+                    <!-- SAISIE LIBRE DU MONTANT -->
                     <div class="bg-slate-950 p-4 rounded-2xl border border-emerald-500/30 space-y-1 shadow-inner">
                         <label class="block text-[10px] text-emerald-400 uppercase font-black text-center mb-2">Montant à transférer</label>
                         <div class="flex items-center gap-2">
@@ -412,17 +418,20 @@
                             <span class="text-slate-400 font-black text-lg">CDF</span>
                         </div>
                     </div>
+
+                    <!-- CHOIX DU MOYEN DE PAIEMENT DYNAMIQUE -->
                     <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-850 text-xs font-mono text-slate-300">
                         <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Réseau de Paiement</label>
                         <select id="recharge-numero" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-emerald-400 font-bold focus:outline-none focus:border-emerald-500">
-                            <option value="mpesa">+243 812 000 000 (M-Pesa)</option>
-                            <option value="airtel">+243 999 000 000 (Airtel Money)</option>
-                            <option value="orange">+243 890 000 000 (Orange Money)</option>
-                            <option value="afrimoney">+243 850 000 000 (Afrimoney)</option>
+                            <option value="mpesa" id="opt-mpesa">M-Pesa</option>
+                            <option value="airtel" id="opt-airtel">Airtel Money</option>
+                            <option value="orange" id="opt-orange">Orange Money</option>
                         </select>
                     </div>
                 </div>
-                <button onclick="declarerPaiementForfait()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs transition-colors shadow-lg mt-2">Transférer les fonds</button>
+                <button onclick="declarerPaiementForfait()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs transition-colors shadow-lg mt-2">
+                    Transférer les fonds
+                </button>
             </div>
         </div>
 
@@ -443,175 +452,404 @@
 
     <!-- LOGIQUE JAVASCRIPT CONNECTÉE AU SERVEUR DIGITALOCEAN -->
     <script>
+        // --- CHARGEMENT DYNAMIQUE DES NUMÉROS DE L'ADMIN ---
+        function chargerConfigurationsAdmin() {
+            const numWhatsApp = localStorage.getItem('tv_whatsapp') || "243810000000";
+            const numMpesa = localStorage.getItem('tv_mpesa') || "+243 812 000 000";
+            const numAirtel = localStorage.getItem('tv_airtel') || "+243 999 000 000";
+            const numOrange = localStorage.getItem('tv_orange') || "+243 890 000 000";
+
+            const lienWa = document.getElementById('lien-whatsapp-support');
+            if(lienWa) lienWa.href = `https://wa.me/${numWhatsApp.replace(/[^0-9]/g, '')}`;
+
+            const optMpesa = document.getElementById('opt-mpesa');
+            if(optMpesa) optMpesa.textContent = `${numMpesa} (M-Pesa)`;
+            
+            const optAirtel = document.getElementById('opt-airtel');
+            if(optAirtel) optAirtel.textContent = `${numAirtel} (Airtel Money)`;
+            
+            const optOrange = document.getElementById('opt-orange');
+            if(optOrange) optOrange.textContent = `${numOrange} (Orange Money)`;
+        }
+
+        // --- CONFIGURATION SUPABASE & SOCKET ---
         const supabaseUrl = 'https://vbriworyscymnmtzzdny.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
         const SERVEUR_URL = "http://134.209.116.89:3000";
-        const socket = io(SERVEUR_URL, { transports: ['websocket'], reconnection: true });
+        const socket = io(SERVEUR_URL, {
+            transports: ['websocket'],
+            reconnection: true
+        });
 
-        let client = { nom: "Dolce", tel: "0965647819", vehicules: [] };
-        let map = null; let busMarker = null;
+        // Structure d'accueil pour les véhicules
+        let client = {
+            nom: "Dolce",
+            tel: "0965647819",
+            vehicules: []
+        };
 
+        let map = null;
+        let busMarker = null;
+        let chartPartenaireInstance = null;
+
+        // ==========================================
+        // DÉFINITION DES PÔLES ET TARIFS
+        // ==========================================
         const POLES_KINSHASA = [
             { nom: "Matadi Kibala", lat: -4.4361, lng: 15.2605 },
             { nom: "UPN", lat: -4.3942, lng: 15.2755 },
             { nom: "Delvaux", lat: -4.3755, lng: 15.2801 },
             { nom: "Kintambo Magasin", lat: -4.3411, lng: 15.2655 },
-            { nom: "Gare Centrale", lat: -4.3075, lng: 15.3125 }
+            { nom: "Gare Centrale / Marché Central", lat: -4.3075, lng: 15.3125 }
         ];
 
         let MATRICE_TARIFS = [
-            { org: "Matadi Kibala", dst: "Gare Centrale", tarif: 2500 },
+            { org: "Matadi Kibala", dst: "Gare Centrale / Marché Central", tarif: 2500 },
             { org: "Matadi Kibala", dst: "UPN", tarif: 1000 },
             { org: "UPN", dst: "Delvaux", tarif: 500 },
             { org: "UPN", dst: "Kintambo Magasin", tarif: 1000 },
             { org: "Delvaux", dst: "Kintambo Magasin", tarif: 500 },
-            { org: "UPN", dst: "Gare Centrale", tarif: 2000 },
-            { org: "Delvaux", dst: "Gare Centrale", tarif: 1500 },
-            { org: "Kintambo Magasin", dst: "Gare Centrale", tarif: 1000 }
+            { org: "UPN", dst: "Gare Centrale / Marché Central", tarif: 2000 },
+            { org: "Delvaux", dst: "Gare Centrale / Marché Central", tarif: 1500 },
+            { org: "Kintambo Magasin", dst: "Gare Centrale / Marché Central", tarif: 1000 }
         ];
 
+        // --- FORMULE DE CALCUL DE DISTANCE GPS (HAVERSINE) ---
         function calculerDistanceGPS(lat1, lon1, lat2, lon2) {
-            const R = 6371; 
+            const R = 6371; // Rayon de la Terre en km
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c; // Retourne la distance en kilomètres
         }
 
+        // --- GEOFENCING : DÉTECTION DU PÔLE ---
         function trouverPoleActuel(lat, lng) {
             for (let pole of POLES_KINSHASA) {
-                if (calculerDistanceGPS(lat, lng, pole.lat, pole.lng) <= 0.250) { return pole.nom; }
+                if (calculerDistanceGPS(lat, lng, pole.lat, pole.lng) <= 0.250) {
+                    return pole.nom;
+                }
             }
             return null; 
         }
 
+        // --- INITIALISATION DE LA FLOTTE ---
         async function chargerDernieresPositions() {
             try {
-                if (!window.supabase) return;
-                const { data, error } = await supabaseClient.from('transvision_positions_gps').select('*').order('created_at', { ascending: false }).limit(100);
-                if (data) {
+                const txtStatut = document.getElementById('last-update-text');
+                txtStatut.textContent = "Connexion à la base de données...";
+                
+                if (!window.supabase) {
+                    txtStatut.textContent = "Erreur: Librairie Supabase non chargée.";
+                    console.error("Supabase est introuvable. Vérifiez votre connexion internet.");
+                    return;
+                }
+
+                const { data, error } = await supabaseClient
+                    .from('transvision_positions_gps')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(100);
+
+                if (error) {
+                    txtStatut.textContent = "Erreur d'accès à la table.";
+                    console.error("Erreur API Supabase :", error.message);
+                    return; 
+                }
+
+                if (data && data.length > 0) {
                     const vehiculesTrouves = {};
-                    data.forEach(pos => { if (pos.imei && pos.latitude && pos.longitude) { if (!vehiculesTrouves[pos.imei]) vehiculesTrouves[pos.imei] = pos; } });
+                    
+                    data.forEach(pos => {
+                        if (pos.imei && pos.latitude && pos.longitude) {
+                            if (!vehiculesTrouves[pos.imei]) {
+                                vehiculesTrouves[pos.imei] = pos;
+                            }
+                        }
+                    });
 
                     Object.values(vehiculesTrouves).forEach(pos => {
                         const imeiStr = String(pos.imei);
                         client.vehicules.push({
-                            plaque: `Tracker ${imeiStr.slice(-4)}`, type: "Traceur GPS", places: 14, imei: imeiStr,
-                            lat: pos.latitude, lng: pos.longitude, moteurCoupe: false, carburantJour: 0, kmJour: 0,
-                            dernierPoleConnu: null, recetteBruteReelle: 0, tronconsValides: 0 
+                            plaque: `Tracker ${imeiStr.slice(-4)}`,
+                            type: "Traceur GPS", places: 14, imei: imeiStr,
+                            lat: pos.latitude, lng: pos.longitude,
+                            moteurCoupe: false, carburantJour: 0, kmJour: 0, entretien: "OK",
+                            // Nouvelles variables de Geofencing
+                            dernierPoleConnu: null, 
+                            recetteBruteReelle: 0,  
+                            tronconsValides: 0 
                         });
                     });
                     
                     majSelecteurMap();
                     const sel = document.getElementById('select-vehicule-map');
-                    if (sel && sel.value !== "none") initMapEtCentrer(parseInt(sel.value));
+                    if (sel && sel.value !== "none") {
+                        initMapEtCentrer(parseInt(sel.value));
+                    }
+                    
+                    txtStatut.textContent = `Historique chargé (${client.vehicules.length} véhicule(s)).`;
+                } else {
+                    txtStatut.textContent = "Historique vide. En attente de direct...";
                 }
-            } catch (err) { console.error("Erreur", err); }
+            } catch (err) {
+                console.error("❌ Crash inattendu de la fonction de chargement :", err);
+                document.getElementById('last-update-text').textContent = "Erreur de chargement (Voir console).";
+            }
         }
 
+
+        // --- GESTION DES ÉVÉNEMENTS SOCKET (LIVE) & CALCULS GEOFENCING ---
+        socket.on('connect', () => {
+            console.log("Connecté au serveur DigitalOcean !");
+            document.getElementById('statut-serveur-voyant').classList.replace('bg-rose-500', 'bg-emerald-400');
+            document.getElementById('statut-serveur-texte').textContent = "Serveur Connecté";
+            document.getElementById('statut-serveur-texte').classList.replace('text-rose-400', 'text-emerald-400');
+        });
+
+        socket.on('disconnect', () => {
+            console.log("Déconnecté du serveur !");
+            document.getElementById('statut-serveur-voyant').classList.replace('bg-emerald-400', 'bg-rose-500');
+            document.getElementById('statut-serveur-texte').textContent = "Serveur Déconnecté";
+            document.getElementById('statut-serveur-texte').classList.replace('text-emerald-400', 'text-rose-400');
+        });
+
         socket.on('nouvelle_position', (data) => {
+            console.log("📍 Nouvelle position reçue (LIVE) :", data);
+            
             const now = new Date();
-            document.getElementById('last-update-text').textContent = `Live : ${now.toLocaleTimeString()}`;
+            document.getElementById('last-update-text').textContent = `Mise à jour en direct : ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
 
             let vehiculeIndex = client.vehicules.findIndex(v => v.imei === data.imei);
             
-            if (vehiculeIndex !== -1) {
+            if (vehiculeIndex === -1) {
+                // Nouveau véhicule détecté
+                client.vehicules.push({
+                    plaque: data.plaque || `Nouveau ${data.imei.slice(-4)}`,
+                    type: "Traceur GPS", places: 14, imei: data.imei,
+                    lat: data.lat, lng: data.lng,
+                    moteurCoupe: false, carburantJour: 0, kmJour: 0, entretien: "OK",
+                    dernierPoleConnu: null, recetteBruteReelle: 0, tronconsValides: 0
+                });
+                vehiculeIndex = client.vehicules.length - 1;
+                majSelecteurMap();
+            } else {
                 let v = client.vehicules[vehiculeIndex];
                 
+                // 1. Calcul de la distance parcourue continue
                 let distanceParcourue = calculerDistanceGPS(v.lat, v.lng, data.lat, data.lng);
                 if (distanceParcourue > 0.002 && distanceParcourue < 2) {
-                    v.kmJour += distanceParcourue; v.carburantJour = v.kmJour * 0.12; 
+                    v.kmJour += distanceParcourue;
+                    v.carburantJour = v.kmJour * 0.12; 
                 }
 
+                // ==========================================
+                // 2. GEOFENCING TARIFAIRE : L'IA DE ROTATION
+                // ==========================================
                 const poleDetecte = trouverPoleActuel(data.lat, data.lng);
 
+                // Si le véhicule est dans une zone d'arrêt
                 if (poleDetecte && (data.vitesse || 0) < 10) {
+                    
                     if (v.dernierPoleConnu === null) {
+                        // Premier contact avec un pôle dans la journée
                         v.dernierPoleConnu = poleDetecte;
                     } 
                     else if (v.dernierPoleConnu !== poleDetecte) {
+                        // BINGO ! Trajet validé entre Pôle A et Pôle B
                         const poleA = v.dernierPoleConnu;
                         const poleB = poleDetecte;
                         
-                        let tarifCourse = 1000; 
+                        let tarifCourse = 1000; // Tarif de secours
                         for(let tarifObj of MATRICE_TARIFS) {
-                            if ((tarifObj.org === poleA && tarifObj.dst === poleB) || (tarifObj.org === poleB && tarifObj.dst === poleA)) {
-                                tarifCourse = tarifObj.tarif; break;
+                            if ((tarifObj.org === poleA && tarifObj.dst === poleB) || 
+                                (tarifObj.org === poleB && tarifObj.dst === poleA)) {
+                                tarifCourse = tarifObj.tarif;
+                                break;
                             }
                         }
 
+                        // Ajout à la comptabilité
                         v.recetteBruteReelle += (tarifCourse * v.places);
                         v.tronconsValides += 1;
+
+                        // On définit le nouveau point de départ
                         v.dernierPoleConnu = poleB;
                     }
                 }
 
-                v.lat = data.lat; v.lng = data.lng;
+                // 3. Maj coordonnées
+                v.lat = data.lat;
+                v.lng = data.lng;
             }
 
+            // Mise à jour de la carte si le véhicule est sélectionné
             const selectMap = document.getElementById('select-vehicule-map');
             if (selectMap && selectMap.value == vehiculeIndex) {
-                if(busMarker && map) { busMarker.setLatLng(new L.LatLng(data.lat, data.lng)); map.panTo([data.lat, data.lng]); } else { initMapEtCentrer(vehiculeIndex); }
+                if(busMarker && map) {
+                    const newLatLng = new L.LatLng(data.lat, data.lng);
+                    busMarker.setLatLng(newLatLng);
+                    map.panTo(newLatLng);
+                } else {
+                    initMapEtCentrer(vehiculeIndex);
+                }
             }
-            genererRapportFinancier(); genererRapportTechnique();
+
+            // Rafraîchir les rapports silencieusement
+            genererRapportFinancier();
+            genererRapportTechnique();
         });
+
+
+        // --- GESTION DES FILTRES DE DATE ---
+        function initFiltresDates() {
+            const today = new Date();
+            const strToday = today.toISOString().split('T')[0];
+
+            ['fin', 'tech'].forEach(prefix => {
+                const elStart = document.getElementById(`date-debut-${prefix}`);
+                const elEnd = document.getElementById(`date-fin-${prefix}`);
+                if(elStart) elStart.value = strToday;
+                if(elEnd) elEnd.value = strToday;
+            });
+        }
+
+        function getJoursFiltre(prefix) {
+            const d1 = new Date(document.getElementById(`date-debut-${prefix}`).value);
+            const d2 = new Date(document.getElementById(`date-fin-${prefix}`).value);
+            if (isNaN(d1) || isNaN(d2)) return 1;
+            const diffTime = d2 - d1;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+            return diffDays < 0 ? 0 : (diffDays === 0 ? 1 : diffDays + 1);
+        }
 
         function peuplerSelecteursFiltre() {
             const selFin = document.getElementById('filtre-fin-vehicule');
             const selTech = document.getElementById('filtre-tech-vehicule');
-            if(selFin) selFin.innerHTML = '<option value="all">Tous les véhicules</option>';
-            if(selTech) selTech.innerHTML = '<option value="all">Tous les véhicules</option>';
+            const selRecharge = document.getElementById('recharge-vehicule-select');
+            
+            if(selFin) selFin.innerHTML = '<option value="all">Tous les véhicules (Flotte globale)</option>';
+            if(selTech) selTech.innerHTML = '<option value="all">Tous les véhicules (Flotte globale)</option>';
+            if(selRecharge) selRecharge.innerHTML = '';
+
             client.vehicules.forEach((v, i) => {
                 const opt = `<option value="${i}">${v.plaque}</option>`;
                 if(selFin) selFin.insertAdjacentHTML('beforeend', opt);
                 if(selTech) selTech.insertAdjacentHTML('beforeend', opt);
+                if(selRecharge) selRecharge.insertAdjacentHTML('beforeend', opt);
             });
         }
 
+        // --- MOTEUR D'AFFICHAGE & NAVIGATION ---
         function genererToutesLesVues() {
             document.getElementById('lbl-nom-partenaire').textContent = client.nom;
             document.getElementById('prof-tel').value = client.tel;
-            peuplerSelecteursFiltre(); majSelecteurMap(); genererRapportFinancier(); genererRapportTechnique();
+            
+            initFiltresDates();
+            peuplerSelecteursFiltre();
+            majSelecteurMap();
+            genererRapportFinancier(); 
+            genererRapportTechnique();
         }
 
         function changerOnglet(idOnglet, boutonActif) {
             document.querySelectorAll('.class-onglet').forEach(ong => ong.classList.add('hidden'));
-            document.getElementById(idOnglet).classList.remove('hidden');
-            document.querySelectorAll('.btn-nav').forEach(btn => { btn.classList.remove('text-emerald-400'); btn.classList.add('text-slate-500'); });
-            if(boutonActif) { boutonActif.classList.remove('text-slate-500'); boutonActif.classList.add('text-emerald-400'); }
-            if (idOnglet === 'onglet-flotte') {
-                const sel = document.getElementById('select-vehicule-map');
-                initMapEtCentrer(sel && sel.value !== "none" ? parseInt(sel.value) : 0);
-                if (map) map.invalidateSize();
+            
+            const target = document.getElementById(idOnglet);
+            if(target) target.classList.remove('hidden');
+            
+            document.querySelectorAll('.btn-nav').forEach(btn => { 
+                btn.classList.remove('text-emerald-400'); 
+                btn.classList.add('text-slate-500'); 
+            });
+            if(boutonActif) {
+                boutonActif.classList.remove('text-slate-500'); 
+                boutonActif.classList.add('text-emerald-400');
             }
+
+            setTimeout(() => {
+                if (idOnglet === 'onglet-flotte') {
+                    const sel = document.getElementById('select-vehicule-map');
+                    initMapEtCentrer(sel && sel.value !== "none" ? parseInt(sel.value) : 0);
+                    if (map) map.invalidateSize();
+                } 
+            }, 50);
         }
 
+        // --- VUE : FLOTTE / CARTE (LEAFLET MAP) ---
         function majSelecteurMap() {
             const sel = document.getElementById('select-vehicule-map');
             if(!sel) return;
             sel.innerHTML = "";
-            if(client.vehicules.length === 0) { sel.insertAdjacentHTML('beforeend', `<option value="none">Aucun véhicule détecté</option>`); return; }
-            client.vehicules.forEach((v, i) => sel.insertAdjacentHTML('beforeend', `<option value="${i}">${v.plaque}</option>`));
+            
+            if(client.vehicules.length === 0) {
+                sel.insertAdjacentHTML('beforeend', `<option value="none">Aucun véhicule détecté</option>`);
+                return;
+            }
+            client.vehicules.forEach((v, i) => sel.insertAdjacentHTML('beforeend', `<option value="${i}">${v.plaque} (${v.type})</option>`));
         }
 
         function initMapEtCentrer(index) {
             const mapContainer = document.getElementById('map-container');
             if (!mapContainer || mapContainer.offsetParent === null) return;
-            let lat = -4.3215; let lng = 15.3115; let label = "En attente...";
+
+            let lat = -4.3215;
+            let lng = 15.3115;
+            let label = "En attente de connexion...";
+
             const v = client.vehicules[index];
-            if(v) { lat = v.lat; lng = v.lng; label = `<b>${v.plaque}</b>`; }
+            if(v) {
+                lat = v.lat;
+                lng = v.lng;
+                label = `<b>${v.plaque}</b><br>IMEI: ${v.imei}`;
+            }
+
             if(!map) {
                 map = L.map('map-container').setView([lat, lng], 14);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
+                
+                // Dessiner les Geofences sur la carte pour aider visuellement
+                POLES_KINSHASA.forEach(pole => {
+                    L.circle([pole.lat, pole.lng], { color: 'emerald', fillColor: '#10b981', fillOpacity: 0.2, radius: 250 })
+                     .addTo(map).bindPopup(`Zone: ${pole.nom}`);
+                });
             }
             if(busMarker) map.removeLayer(busMarker);
             busMarker = L.marker([lat, lng]).addTo(map).bindPopup(label).openPopup();
             map.setView([lat, lng], 14);
         }
-        function centrerSurVehicule(indexStr) { if (indexStr !== "none") initMapEtCentrer(parseInt(indexStr)); }
+        function centrerSurVehicule(indexStr) { 
+            if (indexStr !== "none") initMapEtCentrer(parseInt(indexStr)); 
+        }
 
+        // --- VUE : NOUVEAU VÉHICULE ---
+        function enregistrerVehiculeSaisi() {
+            const plaque = document.getElementById('add-plaque').value.trim();
+            const imei = document.getElementById('add-imei').value.trim();
+
+            if (!plaque || !imei) { 
+                alert("Veuillez remplir au moins la Plaque et l'IMEI."); 
+                return; 
+            }
+            
+            client.vehicules.push({ 
+                plaque: plaque, type: "Traceur GPS", places: 14, imei: imei, 
+                lat: -4.32, lng: 15.31, moteurCoupe: false, carburantJour: 0, kmJour: 0, entretien: "Nouveau",
+                dernierPoleConnu: null, recetteBruteReelle: 0, tronconsValides: 0
+            });
+            
+            document.getElementById('add-plaque').value = ""; document.getElementById('add-imei').value = "";
+            alert(`✅ Véhicule ${plaque} enregistré.`);
+            genererToutesLesVues();
+            changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
+        }
+
+        // --- VUE : RAPPORT FINANCIER (AVEC GEOFENCING) ---
         function appliquerFiltreFinancier() { genererRapportFinancier(); }
 
         function genererRapportFinancier() {
@@ -633,7 +871,7 @@
                     list.insertAdjacentHTML('beforeend', `
                         <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
                             <div class="flex justify-between items-center">
-                                <h4 class="font-black text-slate-200">${v.plaque}</h4>
+                                <h4 class="font-black text-slate-200">${v.plaque} <span class="text-[9px] font-normal text-slate-500 bg-slate-900 px-1.5 py-0.5 rounded ml-1">${v.type}</span></h4>
                                 <span class="font-black text-emerald-400">${gainReel.toLocaleString()} CDF</span>
                             </div>
                             <div class="flex justify-between text-[10px] text-slate-400 font-mono">
@@ -646,19 +884,56 @@
 
             const txtRecettes = document.getElementById('txt-total-recettes');
             if(txtRecettes) txtRecettes.textContent = totalCDF.toLocaleString() + " CDF";
+            
             const txtRotations = document.getElementById('txt-total-rotations');
             if(txtRotations) txtRotations.textContent = totalRot;
+            
+            initialiserGraphiqueRapport(1, totalCDF);
         }
 
+        function initialiserGraphiqueRapport(joursFiltre, totalAffiche) {
+            const canvas = document.getElementById('chart-recettes-partenaire');
+            if (!canvas || canvas.offsetParent === null) return; 
+
+            if (chartPartenaireInstance) chartPartenaireInstance.destroy();
+            
+            let dataGains = []; let labels = [];
+            const gainMoyenJour = totalAffiche / joursFiltre;
+
+            if (joursFiltre === 1) {
+                labels = ['Aujourd\'hui']; dataGains = [totalAffiche];
+            } else if (joursFiltre <= 7) {
+                for(let i=1; i<=joursFiltre; i++) {
+                    labels.push(`J-${joursFiltre - i + 1}`);
+                    dataGains.push(gainMoyenJour * (0.8 + Math.random() * 0.4));
+                }
+            }
+
+            const ctx = canvas.getContext('2d');
+            chartPartenaireInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{ label: 'Gains (CDF)', data: dataGains, backgroundColor: '#10b981', borderRadius: 4 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                    scales: { x: { display: joursFiltre <= 7 }, y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 9 } } } }
+                }
+            });
+        }
+
+        // --- VUE : ANALYSE TECHNIQUE ---
         function appliquerFiltreTechnique() { genererRapportTechnique(); }
 
         function genererRapportTechnique() {
             const list = document.getElementById('tech-vehicules-list');
             if(!list) return;
             list.innerHTML = "";
+            
             const cibleIdx = document.getElementById('filtre-tech-vehicule') ? document.getElementById('filtre-tech-vehicule').value : 'all';
             let vehiculesCibles = client.vehicules;
-            if (cibleIdx !== 'all') { vehiculesCibles = [client.vehicules[parseInt(cibleIdx)]]; }
+            if (cibleIdx && cibleIdx !== 'all') { vehiculesCibles = [client.vehicules[parseInt(cibleIdx)]]; }
 
             vehiculesCibles.forEach((v) => {
                 const origineIndex = client.vehicules.indexOf(v);
@@ -671,12 +946,12 @@
 
                 list.insertAdjacentHTML('beforeend', `
                     <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
-                        <h4 class="font-black text-slate-200">${v.plaque}</h4>
+                        <h4 class="font-black text-slate-200">${v.plaque} <span class="text-[9px] font-mono text-slate-500 float-right">IMEI: ${v.imei}</span></h4>
                         <div class="grid grid-cols-2 gap-y-2 gap-x-1 text-[9px] font-mono bg-slate-900 p-2.5 rounded border border-slate-800">
                             <p>📡 GPS: <span class="text-emerald-400">Fort</span></p>
+                            <p>🔋 Batt: <span class="text-emerald-400">12.6V</span></p>
                             <p>⛽ Conso: <span class="text-sky-400 font-bold">${consoPeriode} L</span></p>
                             <p>🛣️ Dist: <span class="text-sky-400 font-bold">${kmPeriode} km</span></p>
-                            <p>📍 Pôle: <span class="text-indigo-400 font-bold">${v.dernierPoleConnu || '...'}</span></p>
                         </div>
                         ${btnMoteur}
                     </div>`);
@@ -686,15 +961,17 @@
         function basculerMoteur(i, couper) {
             client.vehicules[i].moteurCoupe = couper;
             socket.emit('commande_moteur', { imei: client.vehicules[i].imei, couper: couper });
-            alert(`📡 Commande envoyée. Moteur ${couper ? 'coupé' : 'restauré'} pour le véhicule ${client.vehicules[i].plaque}.`);
+            alert(`📡 Commande envoyée au serveur. Moteur ${couper ? 'coupé' : 'restauré'} pour le véhicule ${client.vehicules[i].plaque}.`);
             appliquerFiltreTechnique(); 
         }
 
+        // --- PROFIL & SÉCURITÉ ---
         function majIdentifiants() {
             const newPin = document.getElementById('prof-pin-new').value;
-            if(newPin && newPin.length >= 4) { alert("✅ Code PIN mis à jour."); document.getElementById('prof-pin-new').value = ""; } else { alert("❌ PIN invalide."); }
+            if(newPin && newPin.length >= 4) { alert("✅ Code PIN de sécurité mis à jour."); document.getElementById('prof-pin-new').value = ""; } else { alert("❌ Le PIN doit contenir au moins 4 caractères."); }
         }
 
+        // --- HORLOGE FORFAIT 23H59 & RECHARGE LIBRE ---
         function actualiserCompteARebours23h59() {
             const now = new Date(); const finJour = new Date(); finJour.setHours(23, 59, 59, 999);
             const resteMs = finJour - now;
@@ -714,8 +991,10 @@
 
         function declarerPaiementForfait() {
             const montant = parseInt(document.getElementById('input-montant-libre').value);
-            if (!montant || montant <= 0) { alert("❌ Saisir un montant."); return; }
-            alert(`🛰️ Demande de transfert de ${montant} CDF en cours.`);
+            if (!montant || montant <= 0) { alert("❌ Veuillez saisir un montant valide."); return; }
+            const num = document.getElementById('recharge-numero');
+            const reseau = num.options[num.selectedIndex].text;
+            alert(`🛰️ Demande de transfert de ${montant.toLocaleString()} CDF en cours via ${reseau}.`);
             document.getElementById('input-montant-libre').value = "";
             fermerModalRecharge();
         }
@@ -723,11 +1002,18 @@
         function ouvrirModalRecharge() { peuplerSelecteursFiltre(); basculerSelectVehiculeRecharge(); document.getElementById('modal-recharge-partenaire').classList.remove('hidden'); }
         function fermerModalRecharge() { document.getElementById('modal-recharge-partenaire').classList.add('hidden'); }
 
+        // --- LOGIQUE GLOBALE AUTHENTIFICATION ---
         function basculerVueAuth(mode) {
             if(mode === 'login') {
-                document.getElementById('form-connexion').classList.remove('hidden'); document.getElementById('form-inscription').classList.add('hidden');
+                document.getElementById('form-connexion').classList.remove('hidden'); 
+                document.getElementById('form-inscription').classList.add('hidden');
+                document.getElementById('tab-btn-login').className = "py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950";
+                document.getElementById('tab-btn-register').className = "py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200";
             } else {
-                document.getElementById('form-connexion').classList.add('hidden'); document.getElementById('form-inscription').classList.remove('hidden');
+                document.getElementById('form-connexion').classList.add('hidden'); 
+                document.getElementById('form-inscription').classList.remove('hidden');
+                document.getElementById('tab-btn-register').className = "py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950";
+                document.getElementById('tab-btn-login').className = "py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200";
             }
         }
         
@@ -746,6 +1032,8 @@
         function ouvrirModalCGU() { document.getElementById('modal-cgu').classList.remove('hidden'); }
         function fermerModalCGU() { document.getElementById('modal-cgu').classList.add('hidden'); }
 
+        // Lancement initial
+        window.addEventListener('DOMContentLoaded', chargerConfigurationsAdmin);
         naviguerVers('page-auth');
     </script>
 </body>
