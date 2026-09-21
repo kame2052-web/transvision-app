@@ -5,27 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TransVision by Global Tech Solutions — Espace Partenaire</title>
     
-    <!-- PWA & Métadonnées -->
     <link rel="icon" type="image/png" href="logo%20192x192.png">
     <link rel="apple-touch-icon" href="logo%20192x192.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#020617">
 
-    <!-- Tailwind CSS, FontAwesome, Leaflet, Chart.js, Socket.IO & Supabase -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Moteur de communication avec le serveur DigitalOcean -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <!-- Client Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         .blur-transition { transition: filter 0.4s ease, opacity 0.4s ease; }
         #map-container { height: 350px; width: 100%; border-radius: 1rem; z-index: 10; }
-        /* NOUVEAU FILTRE CARTE : Dark mode propre et très lisible */
         .leaflet-tile { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
         .leaflet-container { background: #020617 !important; }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(100deg); cursor: pointer; }
@@ -39,7 +34,6 @@
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans min-h-screen relative overflow-x-hidden">
 
-    <!-- FOND D'ÉCRAN VISION.PNG PLEIN ÉCRAN FLUIDE -->
     <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <img src="VISION.png" alt="Fond d'écran TransVision" class="w-full h-full object-cover object-center opacity-25 select-none scale-105" onerror="this.style.display='none'">
         <div class="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/70 to-slate-950/90"></div>
@@ -78,7 +72,6 @@
                     <button id="tab-btn-register" onclick="basculerVueAuth('register')" class="py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200">Nouveau Partenaire</button>
                 </div>
 
-                <!-- FORMULAIRE CONNEXION -->
                 <div id="form-connexion" class="bg-slate-950/85 backdrop-blur p-5 rounded-2xl border border-slate-800/80 space-y-4 shadow-xl">
                     <div>
                         <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Téléphone Enregistré</label>
@@ -93,7 +86,6 @@
                     </button>
                 </div>
 
-                <!-- FORMULAIRE INSCRIPTION -->
                 <div id="form-inscription" class="bg-slate-950/85 backdrop-blur p-4 rounded-2xl border border-slate-800/80 space-y-3 shadow-xl hidden">
                     <div>
                         <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Nom Complet</label>
@@ -121,7 +113,6 @@
 
         <!-- 2. ESPACE CLIENT CONNECTÉ -->
         <div id="app-proprietaire" class="flex-1 flex flex-col hidden relative">
-            
             <header class="p-4 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur sticky top-0 z-30 no-print">
                 <div class="flex justify-between items-center mb-3">
                     <div>
@@ -478,17 +469,10 @@
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
         const SERVEUR_URL = "http://134.209.116.89:3000";
-        const socket = io(SERVEUR_URL, {
-            transports: ['websocket'],
-            reconnection: true
-        });
+        const socket = io(SERVEUR_URL, { transports: ['websocket'], reconnection: true });
 
         // Structure d'accueil pour les véhicules
-        let client = {
-            nom: "Dolce",
-            tel: "0965647819",
-            vehicules: []
-        };
+        let client = { nom: "Dolce", tel: "0965647819", vehicules: [] };
 
         let map = null;
         let busMarker = null;
@@ -518,22 +502,17 @@
 
         // --- FORMULE DE CALCUL DE DISTANCE GPS (HAVERSINE) ---
         function calculerDistanceGPS(lat1, lon1, lat2, lon2) {
-            const R = 6371; // Rayon de la Terre en km
+            const R = 6371; 
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                      Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c; // Retourne la distance en kilomètres
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
         }
 
         // --- GEOFENCING : DÉTECTION DU PÔLE ---
         function trouverPoleActuel(lat, lng) {
             for (let pole of POLES_KINSHASA) {
-                if (calculerDistanceGPS(lat, lng, pole.lat, pole.lng) <= 0.250) {
-                    return pole.nom;
-                }
+                if (calculerDistanceGPS(lat, lng, pole.lat, pole.lng) <= 0.250) { return pole.nom; }
             }
             return null; 
         }
@@ -546,7 +525,6 @@
                 
                 if (!window.supabase) {
                     txtStatut.textContent = "Erreur: Librairie Supabase non chargée.";
-                    console.error("Supabase est introuvable. Vérifiez votre connexion internet.");
                     return;
                 }
 
@@ -554,86 +532,62 @@
                     .from('transvision_positions_gps')
                     .select('*')
                     .order('created_at', { ascending: false })
-                    .limit(100);
+                    .limit(200);
 
-                if (error) {
-                    txtStatut.textContent = "Erreur d'accès à la table.";
-                    console.error("Erreur API Supabase :", error.message);
-                    return; 
-                }
+                if (error) { txtStatut.textContent = "Erreur d'accès à la table."; return; }
 
                 if (data && data.length > 0) {
                     const vehiculesTrouves = {};
                     
                     data.forEach(pos => {
                         if (pos.imei && pos.latitude && pos.longitude) {
-                            if (!vehiculesTrouves[pos.imei]) {
-                                vehiculesTrouves[pos.imei] = pos;
-                            }
+                            if (!vehiculesTrouves[pos.imei]) { vehiculesTrouves[pos.imei] = pos; }
                         }
                     });
 
                     Object.values(vehiculesTrouves).forEach(pos => {
                         const imeiStr = String(pos.imei);
                         client.vehicules.push({
-                            plaque: `Tracker ${imeiStr.slice(-4)}`,
-                            type: "Traceur GPS", places: 14, imei: imeiStr,
-                            lat: pos.latitude, lng: pos.longitude,
-                            moteurCoupe: false, carburantJour: 0, kmJour: 0, entretien: "OK",
-                            // Nouvelles variables de Geofencing
-                            dernierPoleConnu: null, 
-                            recetteBruteReelle: 0,  
-                            tronconsValides: 0 
+                            plaque: `Tracker ${imeiStr.slice(-4)}`, type: "Traceur GPS", places: 14, imei: imeiStr,
+                            lat: pos.latitude, lng: pos.longitude, moteurCoupe: false, carburantJour: 0, kmJour: 0, entretien: "OK",
+                            dernierPoleConnu: null, recetteBruteReelle: 0, tronconsValides: 0 
                         });
                     });
                     
                     majSelecteurMap();
                     const sel = document.getElementById('select-vehicule-map');
-                    if (sel && sel.value !== "none") {
-                        initMapEtCentrer(parseInt(sel.value));
-                    }
+                    if (sel && sel.value !== "none") { initMapEtCentrer(parseInt(sel.value)); }
                     
                     txtStatut.textContent = `Historique chargé (${client.vehicules.length} véhicule(s)).`;
                 } else {
                     txtStatut.textContent = "Historique vide. En attente de direct...";
                 }
-            } catch (err) {
-                console.error("❌ Crash inattendu de la fonction de chargement :", err);
-                document.getElementById('last-update-text').textContent = "Erreur de chargement (Voir console).";
-            }
+            } catch (err) { document.getElementById('last-update-text').textContent = "Erreur de chargement (Voir console)."; }
         }
-
 
         // --- GESTION DES ÉVÉNEMENTS SOCKET (LIVE) & CALCULS GEOFENCING ---
         socket.on('connect', () => {
-            console.log("Connecté au serveur DigitalOcean !");
             document.getElementById('statut-serveur-voyant').classList.replace('bg-rose-500', 'bg-emerald-400');
             document.getElementById('statut-serveur-texte').textContent = "Serveur Connecté";
             document.getElementById('statut-serveur-texte').classList.replace('text-rose-400', 'text-emerald-400');
         });
 
         socket.on('disconnect', () => {
-            console.log("Déconnecté du serveur !");
             document.getElementById('statut-serveur-voyant').classList.replace('bg-emerald-400', 'bg-rose-500');
             document.getElementById('statut-serveur-texte').textContent = "Serveur Déconnecté";
             document.getElementById('statut-serveur-texte').classList.replace('text-emerald-400', 'text-rose-400');
         });
 
         socket.on('nouvelle_position', (data) => {
-            console.log("📍 Nouvelle position reçue (LIVE) :", data);
-            
             const now = new Date();
             document.getElementById('last-update-text').textContent = `Mise à jour en direct : ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
 
             let vehiculeIndex = client.vehicules.findIndex(v => v.imei === data.imei);
             
             if (vehiculeIndex === -1) {
-                // Nouveau véhicule détecté
                 client.vehicules.push({
-                    plaque: data.plaque || `Nouveau ${data.imei.slice(-4)}`,
-                    type: "Traceur GPS", places: 14, imei: data.imei,
-                    lat: data.lat, lng: data.lng,
-                    moteurCoupe: false, carburantJour: 0, kmJour: 0, entretien: "OK",
+                    plaque: data.plaque || `Nouveau ${data.imei.slice(-4)}`, type: "Traceur GPS", places: 14, imei: data.imei,
+                    lat: data.lat, lng: data.lng, moteurCoupe: false, carburantJour: 0, kmJour: 0, entretien: "OK",
                     dernierPoleConnu: null, recetteBruteReelle: 0, tronconsValides: 0
                 });
                 vehiculeIndex = client.vehicules.length - 1;
@@ -641,68 +595,50 @@
             } else {
                 let v = client.vehicules[vehiculeIndex];
                 
-                // 1. Calcul de la distance parcourue continue
                 let distanceParcourue = calculerDistanceGPS(v.lat, v.lng, data.lat, data.lng);
                 if (distanceParcourue > 0.002 && distanceParcourue < 2) {
-                    v.kmJour += distanceParcourue;
-                    v.carburantJour = v.kmJour * 0.12; 
+                    v.kmJour += distanceParcourue; v.carburantJour = v.kmJour * 0.12; 
                 }
 
-                // ==========================================
-                // 2. GEOFENCING TARIFAIRE : L'IA DE ROTATION
-                // ==========================================
+                // GEOFENCING TARIFAIRE : L'IA DE ROTATION
                 const poleDetecte = trouverPoleActuel(data.lat, data.lng);
 
-                // Si le véhicule est dans une zone d'arrêt
                 if (poleDetecte && (data.vitesse || 0) < 10) {
-                    
                     if (v.dernierPoleConnu === null) {
-                        // Premier contact avec un pôle dans la journée
                         v.dernierPoleConnu = poleDetecte;
                     } 
                     else if (v.dernierPoleConnu !== poleDetecte) {
-                        // BINGO ! Trajet validé entre Pôle A et Pôle B
                         const poleA = v.dernierPoleConnu;
                         const poleB = poleDetecte;
                         
-                        let tarifCourse = 1000; // Tarif de secours
+                        let tarifCourse = 0; 
                         for(let tarifObj of MATRICE_TARIFS) {
-                            if ((tarifObj.org === poleA && tarifObj.dst === poleB) || 
-                                (tarifObj.org === poleB && tarifObj.dst === poleA)) {
-                                tarifCourse = tarifObj.tarif;
-                                break;
+                            if ((tarifObj.org === poleA && tarifObj.dst === poleB) || (tarifObj.org === poleB && tarifObj.dst === poleA)) {
+                                tarifCourse = tarifObj.tarif; break;
                             }
                         }
 
-                        // Ajout à la comptabilité
-                        v.recetteBruteReelle += (tarifCourse * v.places);
-                        v.tronconsValides += 1;
-
-                        // On définit le nouveau point de départ
+                        if(tarifCourse > 0) {
+                            v.recetteBruteReelle += (tarifCourse * v.places);
+                            v.tronconsValides += 1;
+                        }
                         v.dernierPoleConnu = poleB;
                     }
                 }
 
-                // 3. Maj coordonnées
-                v.lat = data.lat;
-                v.lng = data.lng;
+                v.lat = data.lat; v.lng = data.lng;
             }
 
-            // Mise à jour de la carte si le véhicule est sélectionné
             const selectMap = document.getElementById('select-vehicule-map');
             if (selectMap && selectMap.value == vehiculeIndex) {
                 if(busMarker && map) {
                     const newLatLng = new L.LatLng(data.lat, data.lng);
                     busMarker.setLatLng(newLatLng);
                     map.panTo(newLatLng);
-                } else {
-                    initMapEtCentrer(vehiculeIndex);
-                }
+                } else { initMapEtCentrer(vehiculeIndex); }
             }
 
-            // Rafraîchir les rapports silencieusement
-            genererRapportFinancier();
-            genererRapportTechnique();
+            genererRapportFinancier(); genererRapportTechnique();
         });
 
 
@@ -710,7 +646,6 @@
         function initFiltresDates() {
             const today = new Date();
             const strToday = today.toISOString().split('T')[0];
-
             ['fin', 'tech'].forEach(prefix => {
                 const elStart = document.getElementById(`date-debut-${prefix}`);
                 const elEnd = document.getElementById(`date-fin-${prefix}`);
@@ -759,19 +694,9 @@
 
         function changerOnglet(idOnglet, boutonActif) {
             document.querySelectorAll('.class-onglet').forEach(ong => ong.classList.add('hidden'));
-            
-            const target = document.getElementById(idOnglet);
-            if(target) target.classList.remove('hidden');
-            
-            document.querySelectorAll('.btn-nav').forEach(btn => { 
-                btn.classList.remove('text-emerald-400'); 
-                btn.classList.add('text-slate-500'); 
-            });
-            if(boutonActif) {
-                boutonActif.classList.remove('text-slate-500'); 
-                boutonActif.classList.add('text-emerald-400');
-            }
-
+            document.getElementById(idOnglet).classList.remove('hidden');
+            document.querySelectorAll('.btn-nav').forEach(btn => { btn.classList.remove('text-emerald-400'); btn.classList.add('text-slate-500'); });
+            if(boutonActif) { boutonActif.classList.remove('text-slate-500'); boutonActif.classList.add('text-emerald-400'); }
             setTimeout(() => {
                 if (idOnglet === 'onglet-flotte') {
                     const sel = document.getElementById('select-vehicule-map');
@@ -781,75 +706,48 @@
             }, 50);
         }
 
-        // --- VUE : FLOTTE / CARTE (LEAFLET MAP) ---
+        // --- VUE : FLOTTE / CARTE ---
         function majSelecteurMap() {
             const sel = document.getElementById('select-vehicule-map');
             if(!sel) return;
             sel.innerHTML = "";
-            
-            if(client.vehicules.length === 0) {
-                sel.insertAdjacentHTML('beforeend', `<option value="none">Aucun véhicule détecté</option>`);
-                return;
-            }
+            if(client.vehicules.length === 0) { sel.insertAdjacentHTML('beforeend', `<option value="none">Aucun véhicule détecté</option>`); return; }
             client.vehicules.forEach((v, i) => sel.insertAdjacentHTML('beforeend', `<option value="${i}">${v.plaque} (${v.type})</option>`));
         }
 
         function initMapEtCentrer(index) {
             const mapContainer = document.getElementById('map-container');
             if (!mapContainer || mapContainer.offsetParent === null) return;
-
-            let lat = -4.3215;
-            let lng = 15.3115;
-            let label = "En attente de connexion...";
-
+            let lat = -4.3215; let lng = 15.3115; let label = "En attente de connexion...";
             const v = client.vehicules[index];
-            if(v) {
-                lat = v.lat;
-                lng = v.lng;
-                label = `<b>${v.plaque}</b><br>IMEI: ${v.imei}`;
-            }
-
+            if(v) { lat = v.lat; lng = v.lng; label = `<b>${v.plaque}</b><br>IMEI: ${v.imei}`; }
             if(!map) {
                 map = L.map('map-container').setView([lat, lng], 14);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
-                
-                // Dessiner les Geofences sur la carte pour aider visuellement
-                POLES_KINSHASA.forEach(pole => {
-                    L.circle([pole.lat, pole.lng], { color: 'emerald', fillColor: '#10b981', fillOpacity: 0.2, radius: 250 })
-                     .addTo(map).bindPopup(`Zone: ${pole.nom}`);
-                });
+                POLES_KINSHASA.forEach(pole => { L.circle([pole.lat, pole.lng], { color: 'emerald', fillColor: '#10b981', fillOpacity: 0.2, radius: 250 }).addTo(map).bindPopup(`Zone: ${pole.nom}`); });
             }
             if(busMarker) map.removeLayer(busMarker);
             busMarker = L.marker([lat, lng]).addTo(map).bindPopup(label).openPopup();
             map.setView([lat, lng], 14);
         }
-        function centrerSurVehicule(indexStr) { 
-            if (indexStr !== "none") initMapEtCentrer(parseInt(indexStr)); 
-        }
+        function centrerSurVehicule(indexStr) { if (indexStr !== "none") initMapEtCentrer(parseInt(indexStr)); }
 
         // --- VUE : NOUVEAU VÉHICULE ---
         function enregistrerVehiculeSaisi() {
             const plaque = document.getElementById('add-plaque').value.trim();
             const imei = document.getElementById('add-imei').value.trim();
-
-            if (!plaque || !imei) { 
-                alert("Veuillez remplir au moins la Plaque et l'IMEI."); 
-                return; 
-            }
-            
+            if (!plaque || !imei) { alert("Veuillez remplir au moins la Plaque et l'IMEI."); return; }
             client.vehicules.push({ 
                 plaque: plaque, type: "Traceur GPS", places: 14, imei: imei, 
                 lat: -4.32, lng: 15.31, moteurCoupe: false, carburantJour: 0, kmJour: 0, entretien: "Nouveau",
                 dernierPoleConnu: null, recetteBruteReelle: 0, tronconsValides: 0
             });
-            
             document.getElementById('add-plaque').value = ""; document.getElementById('add-imei').value = "";
             alert(`✅ Véhicule ${plaque} enregistré.`);
-            genererToutesLesVues();
-            changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
+            genererToutesLesVues(); changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
         }
 
-        // --- VUE : RAPPORT FINANCIER (AVEC GEOFENCING) ---
+        // --- VUE : RAPPORT FINANCIER ---
         function appliquerFiltreFinancier() { genererRapportFinancier(); }
 
         function genererRapportFinancier() {
@@ -864,7 +762,6 @@
             vehiculesCibles.forEach(v => {
                 const gainReel = v.recetteBruteReelle || 0;
                 const troncons = v.tronconsValides || 0;
-                
                 totalCDF += gainReel; totalRot += troncons;
                 
                 if(list) {
@@ -884,42 +781,24 @@
 
             const txtRecettes = document.getElementById('txt-total-recettes');
             if(txtRecettes) txtRecettes.textContent = totalCDF.toLocaleString() + " CDF";
-            
             const txtRotations = document.getElementById('txt-total-rotations');
             if(txtRotations) txtRotations.textContent = totalRot;
-            
             initialiserGraphiqueRapport(1, totalCDF);
         }
 
         function initialiserGraphiqueRapport(joursFiltre, totalAffiche) {
             const canvas = document.getElementById('chart-recettes-partenaire');
             if (!canvas || canvas.offsetParent === null) return; 
-
             if (chartPartenaireInstance) chartPartenaireInstance.destroy();
-            
             let dataGains = []; let labels = [];
             const gainMoyenJour = totalAffiche / joursFiltre;
 
-            if (joursFiltre === 1) {
-                labels = ['Aujourd\'hui']; dataGains = [totalAffiche];
-            } else if (joursFiltre <= 7) {
-                for(let i=1; i<=joursFiltre; i++) {
-                    labels.push(`J-${joursFiltre - i + 1}`);
-                    dataGains.push(gainMoyenJour * (0.8 + Math.random() * 0.4));
-                }
-            }
+            if (joursFiltre === 1) { labels = ['Aujourd\'hui']; dataGains = [totalAffiche]; } 
+            else if (joursFiltre <= 7) { for(let i=1; i<=joursFiltre; i++) { labels.push(`J-${joursFiltre - i + 1}`); dataGains.push(gainMoyenJour * (0.8 + Math.random() * 0.4)); } }
 
-            const ctx = canvas.getContext('2d');
-            chartPartenaireInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{ label: 'Gains (CDF)', data: dataGains, backgroundColor: '#10b981', borderRadius: 4 }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-                    scales: { x: { display: joursFiltre <= 7 }, y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 9 } } } }
-                }
+            chartPartenaireInstance = new Chart(canvas.getContext('2d'), {
+                type: 'bar', data: { labels: labels, datasets: [{ label: 'Gains (CDF)', data: dataGains, backgroundColor: '#10b981', borderRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: joursFiltre <= 7 }, y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 9 } } } } }
             });
         }
 
@@ -930,7 +809,6 @@
             const list = document.getElementById('tech-vehicules-list');
             if(!list) return;
             list.innerHTML = "";
-            
             const cibleIdx = document.getElementById('filtre-tech-vehicule') ? document.getElementById('filtre-tech-vehicule').value : 'all';
             let vehiculesCibles = client.vehicules;
             if (cibleIdx && cibleIdx !== 'all') { vehiculesCibles = [client.vehicules[parseInt(cibleIdx)]]; }
@@ -965,13 +843,11 @@
             appliquerFiltreTechnique(); 
         }
 
-        // --- PROFIL & SÉCURITÉ ---
         function majIdentifiants() {
             const newPin = document.getElementById('prof-pin-new').value;
             if(newPin && newPin.length >= 4) { alert("✅ Code PIN de sécurité mis à jour."); document.getElementById('prof-pin-new').value = ""; } else { alert("❌ Le PIN doit contenir au moins 4 caractères."); }
         }
 
-        // --- HORLOGE FORFAIT 23H59 & RECHARGE LIBRE ---
         function actualiserCompteARebours23h59() {
             const now = new Date(); const finJour = new Date(); finJour.setHours(23, 59, 59, 999);
             const resteMs = finJour - now;
@@ -991,10 +867,16 @@
 
         function declarerPaiementForfait() {
             const montant = parseInt(document.getElementById('input-montant-libre').value);
-            if (!montant || montant <= 0) { alert("❌ Veuillez saisir un montant valide."); return; }
+            if (!montant || montant <= 0) { alert("❌ Veuillez saisir un montant valide (ex: 2000)."); return; }
             const num = document.getElementById('recharge-numero');
             const reseau = num.options[num.selectedIndex].text;
-            alert(`🛰️ Demande de transfert de ${montant.toLocaleString()} CDF en cours via ${reseau}.`);
+            const mode = document.getElementById('recharge-mode').value;
+            let cible = "la flotte complète";
+            if (mode === 'unitaire' && client.vehicules.length > 0) {
+                const indexVehicule = document.getElementById('recharge-vehicule-select').value;
+                cible = `le véhicule ${client.vehicules[indexVehicule].plaque}`;
+            }
+            alert(`🛰️ Demande de transfert de ${montant.toLocaleString()} CDF pour ${cible}.\nTransaction via ${reseau} en cours de traitement.`);
             document.getElementById('input-montant-libre').value = "";
             fermerModalRecharge();
         }
@@ -1002,16 +884,13 @@
         function ouvrirModalRecharge() { peuplerSelecteursFiltre(); basculerSelectVehiculeRecharge(); document.getElementById('modal-recharge-partenaire').classList.remove('hidden'); }
         function fermerModalRecharge() { document.getElementById('modal-recharge-partenaire').classList.add('hidden'); }
 
-        // --- LOGIQUE GLOBALE AUTHENTIFICATION ---
         function basculerVueAuth(mode) {
             if(mode === 'login') {
-                document.getElementById('form-connexion').classList.remove('hidden'); 
-                document.getElementById('form-inscription').classList.add('hidden');
+                document.getElementById('form-connexion').classList.remove('hidden'); document.getElementById('form-inscription').classList.add('hidden');
                 document.getElementById('tab-btn-login').className = "py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950";
                 document.getElementById('tab-btn-register').className = "py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200";
             } else {
-                document.getElementById('form-connexion').classList.add('hidden'); 
-                document.getElementById('form-inscription').classList.remove('hidden');
+                document.getElementById('form-connexion').classList.add('hidden'); document.getElementById('form-inscription').classList.remove('hidden');
                 document.getElementById('tab-btn-register').className = "py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950";
                 document.getElementById('tab-btn-login').className = "py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200";
             }
@@ -1032,7 +911,6 @@
         function ouvrirModalCGU() { document.getElementById('modal-cgu').classList.remove('hidden'); }
         function fermerModalCGU() { document.getElementById('modal-cgu').classList.add('hidden'); }
 
-        // Lancement initial
         window.addEventListener('DOMContentLoaded', chargerConfigurationsAdmin);
         naviguerVers('page-auth');
     </script>
