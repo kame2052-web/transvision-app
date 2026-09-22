@@ -21,7 +21,7 @@
     <style>
         .blur-transition { transition: filter 0.4s ease, opacity 0.4s ease; }
         #map-container { height: 350px; width: 100%; border-radius: 1rem; z-index: 10; }
-        /* Style clair CartoDB sans filtre d'inversion */
+        /* Style clair sans aucun filtre d'inversion */
         .leaflet-tile { filter: none !important; }
         .leaflet-container { background: #f8fafc !important; }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(100deg); cursor: pointer; }
@@ -110,7 +110,7 @@
             </div>
             
             <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v16.6 PROD — Global Tech Solutions
+                TransVision v16.7 PROD — Global Tech Solutions
             </div>
         </div>
 
@@ -362,7 +362,7 @@
             </nav>
         </div>
 
-        <!-- MODAL RECHARGE CLIENT (RESTAURÉ ET FONCTIONNEL) -->
+        <!-- MODAL RECHARGE CLIENT -->
         <div id="modal-recharge-partenaire" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
             <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
                 <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -674,10 +674,9 @@
             if(v) { lat = v.lat; lng = v.lng; label = `<b>${v.plaque}</b><br>IMEI: ${v.imei}`; }
             if(!map) {
                 map = L.map('map-container').setView([lat, lng], 14);
-                // Tuiles claires haute lisibilité CartoDB Voyager
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                    attribution: '&copy; OpenStreetMap &copy; CARTO',
-                    subdomains: 'abcd',
+                // Tuiles OpenStreetMap officielles libres et sans filigrane
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors',
                     maxZoom: 19
                 }).addTo(map);
                 POLES_KINSHASA.forEach(pole => { L.circle([pole.lat, pole.lng], { color: '#059669', fillColor: '#10b981', fillOpacity: 0.2, radius: 250 }).addTo(map).bindPopup(`Zone: ${pole.nom}`); });
@@ -685,6 +684,7 @@
             if(busMarker) map.removeLayer(busMarker);
             busMarker = L.marker([lat, lng]).addTo(map).bindPopup(label).openPopup();
             map.setView([lat, lng], 14);
+            setTimeout(() => { map.invalidateSize(); }, 200);
         }
         function centrerSurVehicule(indexStr) { if (indexStr !== "none") initMapEtCentrer(parseInt(indexStr)); }
 
