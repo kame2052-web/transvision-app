@@ -21,7 +21,6 @@
     <style>
         .blur-transition { transition: filter 0.4s ease, opacity 0.4s ease; }
         
-        /* Carte Google Maps occupant toute la hauteur sans espace noir */
         #map-container { 
             height: 100%; 
             min-height: 520px; 
@@ -30,7 +29,7 @@
             z-index: 10; 
         }
         .leaflet-tile { filter: none !important; }
-        .leaflet-container { background: #e5e3df !important; } /* Teinte de fond classique Google Maps */
+        .leaflet-container { background: #e5e3df !important; }
         
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(100deg); cursor: pointer; }
         @media print {
@@ -51,7 +50,7 @@
     <!-- BANNIÈRE INSTALLATION PWA -->
     <div id="pwa-install-banner" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-slate-900/95 backdrop-blur border border-emerald-500/50 text-slate-100 p-3 rounded-2xl shadow-2xl flex items-center gap-3 z-[100] w-[90%] max-w-sm hidden no-print">
         <div class="w-10 h-10 rounded-xl overflow-hidden shadow-md flex items-center justify-center bg-slate-950 flex-shrink-0">
-            <img src="logo%20192x192.png" alt="Logo" class="w-full h-full object-contain" style="transform: scale(2.05); transform-origin: 48% 52%;" onerror="this.style.display='none'">
+            <img src="logo%20192x192.png" alt="Logo" class="w-full h-full object-contain scale-[2.05]" onerror="this.style.display='none'">
         </div>
         <div class="flex-1">
             <p class="text-[11px] font-black text-emerald-400">Installer TransVision</p>
@@ -118,7 +117,7 @@
             </div>
             
             <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v17.0 PROD — Global Tech Solutions
+                TransVision v17.1 PROD — Global Tech Solutions
             </div>
         </div>
 
@@ -147,13 +146,12 @@
                         <p class="text-[9px] text-slate-400 mt-0.5" id="last-update-text">Chargement de l'historique...</p>
                     </div>
                     <div class="text-right">
-                        <!-- MINUTEUR ACTIF DU FORFAIT -->
                         <span id="timer-compte-rebours" class="text-sm font-mono font-black text-slate-100 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg shadow-inner">--:--:--</span>
                     </div>
                 </div>
             </header>
 
-            <!-- ONGLET A : CARTE GOOGLE MAPS PLEINE HAUTEUR (ESPACE NOIR TOTALEMENT COMBLE) -->
+            <!-- ONGLET A : CARTE GOOGLE MAPS PLEINE HAUTEUR -->
             <div id="onglet-flotte" class="p-2 flex-1 flex flex-col blur-transition class-onglet no-print min-h-[calc(100vh-170px)]">
                 <div class="bg-slate-950 p-2.5 rounded-2xl border border-slate-800 flex-1 flex flex-col space-y-2 shadow-md">
                     <div class="flex justify-between items-center px-1 pb-1">
@@ -162,7 +160,6 @@
                         </h2>
                         <select id="select-vehicule-map" onchange="centrerSurVehicule(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg text-[10px] text-emerald-400 font-bold px-2 py-1 outline-none truncate max-w-[150px]"></select>
                     </div>
-                    <!-- CONTENEUR CARTE ETIRÉ SUR TOUT L'ECRAN -->
                     <div id="map-container" class="shadow-inner flex-1 w-full border border-slate-800 rounded-xl overflow-hidden"></div>
                 </div>
             </div>
@@ -205,11 +202,11 @@
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
                                     <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Origine</label>
-                                    <input type="text" id="add-origine" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold focus:border-indigo-500 outline-none" placeholder="Ex: Kintambo Magasin" value="Kintambo Magasin">
+                                    <input type="text" id="add-origine" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold focus:border-indigo-500 outline-none" value="Kintambo Magasin">
                                 </div>
                                 <div>
                                     <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Destination</label>
-                                    <input type="text" id="add-destination" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold focus:border-indigo-500 outline-none" placeholder="Ex: Delvaux" value="Delvaux">
+                                    <input type="text" id="add-destination" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold focus:border-indigo-500 outline-none" value="Delvaux">
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 gap-2 pt-1">
@@ -236,7 +233,7 @@
                 </div>
             </div>
 
-            <!-- ONGLET C : RAPPORT FINANCIER PAR DISTANCE D'ITINÉRAIRE -->
+            <!-- ONGLET C : RAPPORT FINANCIER PAR DISTANCE -->
             <div id="onglet-rapport" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
                 <div class="bg-slate-950/90 backdrop-blur p-3.5 rounded-2xl border border-slate-800 space-y-3 shadow-md">
                     <div class="flex justify-between items-center">
@@ -344,6 +341,75 @@
             </nav>
         </div>
 
+        <!-- NOUVELLE MODAL : MODIFIER L'ITINÉRAIRE D'UN VÉHICULE -->
+        <div id="modal-modifier-itineraire" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                    <h3 class="font-black text-sm text-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square text-sky-400"></i> Modifier la Ligne du Véhicule
+                    </h3>
+                    <button onclick="fermerModalModifierItineraire()" class="text-slate-500 hover:text-slate-300"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+
+                <p class="text-[10px] text-slate-400">Sélectionnez une ligne officielle de Kinshasa ou personnalisez vos distances et tarifs.</p>
+                <p class="text-xs text-slate-300 font-bold">Véhicule ciblé : <span id="mod-vehicule-nom" class="text-emerald-400"></span></p>
+
+                <div class="space-y-3 text-xs">
+                    <!-- CHOIX RAPIDE DEPUIS LA MATRICE EXCEL -->
+                    <div>
+                        <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Lignes Officielles (Raccourci Excel)</label>
+                        <select id="mod-select-ligne-rapide" onchange="appliquerLignePredefinie(this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-sky-400 font-bold outline-none focus:border-sky-500">
+                            <option value="">-- Choisir une ligne officielle --</option>
+                            <option value="0">Kintambo Magasin ➔ Delvaux (4.2 km / 1 000 FC)</option>
+                            <option value="1">Kingasani Pascal ➔ Route Mokali (4.5 km / 1 500 FC)</option>
+                            <option value="2">Kingasani Pascal ➔ Mikondo (3.0 km / 500 FC)</option>
+                            <option value="3">Kingasani Pascal ➔ Aéroport N'djili (5.5 km / 500 FC)</option>
+                            <option value="4">Kintambo Magasin ➔ Pompage (4.8 km / 1 000 FC)</option>
+                            <option value="5">L'UPN ➔ Rond Point Victoire (9.5 km / 1 000 FC)</option>
+                            <option value="6">Gare Centrale ➔ U.P.N. (12.5 km / 3 000 FC)</option>
+                            <option value="7">Marché Central ➔ Matadi Kibala (16.5 km / 2 000 FC)</option>
+                            <option value="8">Marché Selembao ➔ U.P.N. (5.5 km / 1 000 FC)</option>
+                            <option value="9">Bandal Moulaert ➔ Gare Centrale (6.8 km / 500 FC)</option>
+                        </select>
+                    </div>
+
+                    <!-- CHAMPS ÉDITABLES -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Origine</label>
+                            <input type="text" id="mod-origine" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-slate-200 font-bold focus:border-sky-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Destination</label>
+                            <input type="text" id="mod-destination" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-slate-200 font-bold focus:border-sky-500 outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Distance Directe (km)</label>
+                            <input type="number" step="0.1" id="mod-dist-direct" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-emerald-400 font-mono font-bold focus:border-emerald-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Distance Déviée (km)</label>
+                            <input type="number" step="0.1" id="mod-dist-deviee" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-amber-400 font-mono font-bold focus:border-amber-500 outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Tarif Passager (CDF)</label>
+                        <input type="number" id="mod-tarif" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-slate-200 font-mono font-bold focus:border-indigo-500 outline-none">
+                    </div>
+                </div>
+
+                <input type="hidden" id="mod-vehicule-index" value="">
+
+                <button onclick="sauvegarderModificationItineraire()" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs transition-colors shadow-lg mt-2">
+                    Enregistrer et Appliquer la Ligne
+                </button>
+            </div>
+        </div>
+
         <!-- MODAL RECHARGE CLIENT -->
         <div id="modal-recharge-partenaire" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
             <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
@@ -435,7 +501,20 @@
         let chartPartenaireInstance = null;
         let dernierPointId = null;
 
-        // CALCUL DE LA DISTANCE ORTHODROMIQUE (KM)
+        // MATRICE DES LIGNES POPULAIRES ISSUES DU FICHIER EXCEL POUR SÉLECTION RAPIDE
+        const LIGNES_PREDEFINIES = [
+            { origine: "KINTAMBO MAGASIN", destination: "DELVAUX", tarif: 1000, distDirect: 4.2, distDeviee: 5.0 },
+            { origine: "KINGASANI PASCAL", destination: "ROUTE MOKALI PONT MANGO", tarif: 1500, distDirect: 4.5, distDeviee: 5.3 },
+            { origine: "KINGASANI PASCAL", destination: "MIKONDO BOSAWA", tarif: 500, distDirect: 3.0, distDeviee: 3.6 },
+            { origine: "KINGASANI PASCAL", destination: "AEROPORT DE N'DJILI", tarif: 500, distDirect: 5.5, distDeviee: 6.2 },
+            { origine: "KINTAMBO MAGASIN", destination: "KINSUKA POMPAGE", tarif: 1000, distDirect: 4.8, distDeviee: 5.8 },
+            { origine: "L'UPN", destination: "ROND POINT VICTOIRE", tarif: 1000, distDirect: 9.5, distDeviee: 11.5 },
+            { origine: "CENTRE VILLE (GARE CENTRALE)", destination: "U.P.N.", tarif: 3000, distDirect: 12.5, distDeviee: 15.0 },
+            { origine: "MARCHE CENTRAL", destination: "MATADI KIBALA", tarif: 2000, distDirect: 16.5, distDeviee: 19.5 },
+            { origine: "MARCHE SELEMBAO", destination: "U.P.N.", tarif: 1000, distDirect: 5.5, distDeviee: 6.7 },
+            { origine: "BANDAL TSHIBANGU/MOULAERT", destination: "GARE CENTRALE", tarif: 500, distDirect: 6.8, distDeviee: 8.2 }
+        ];
+
         function calculerDistanceGPS(lat1, lon1, lat2, lon2) {
             const R = 6371; 
             const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -444,7 +523,6 @@
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
         }
 
-        // CALCUL DU CAP (DEGRÉS 0-360) POUR DÉTECTER LES DEMI-TOURS
         function calculerCap(lat1, lon1, lat2, lon2) {
             const y = Math.sin((lon2 - lon1) * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180);
             const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
@@ -474,26 +552,30 @@
                         }
                     });
 
+                    // Récupérer les personnalisations sauvegardées
+                    const customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
+
                     client.vehicules = [];
                     Object.values(vehiculesTrouves).forEach(pos => {
                         const imeiStr = String(pos.imei);
+                        const cfg = customConfig[imeiStr] || {};
+
                         client.vehicules.push({
-                            plaque: `Tracker ${imeiStr.slice(-4)}`, 
-                            type: "Traceur GPS", 
-                            places: 14, 
+                            plaque: cfg.plaque || `Tracker ${imeiStr.slice(-4)}`, 
+                            type: cfg.type || "Traceur GPS", 
+                            places: cfg.places || 14, 
                             imei: imeiStr,
                             lat: pos.latitude, 
                             lng: pos.longitude, 
                             moteurCoupe: false, 
                             carburantJour: 0, 
                             kmJour: 0,
-                            // MOTEUR D'ITINÉRAIRE PAR DISTANCE
-                            distDirect: 4.2,     // Distance approximative de la ligne (km)
-                            distDeviee: 5.0,     // Distance réelle déviée (km)
-                            kmCourse: 0,         // Kilomètres parcourus dans le tour en cours
-                            tarif: 1000,         // Tarif unitaire passager
-                            origine: "Kintambo Magasin",
-                            destination: "Delvaux",
+                            distDirect: cfg.distDirect || 4.2,
+                            distDeviee: cfg.distDeviee || 5.0,
+                            kmCourse: 0,
+                            tarif: cfg.tarif || 1000,
+                            origine: cfg.origine || "Kintambo Magasin",
+                            destination: cfg.destination || "Delvaux",
                             dernierCap: undefined,
                             secondesArret: 0,
                             recetteBruteReelle: 0, 
@@ -501,11 +583,10 @@
                         });
                     });
                     
-                    // Récupérer les 30 derniers points pour pré-tracer l'itinéraire du jour en bleu Google Navigation
-                    const premierVehiculeImei = client.vehicules[0]?.imei;
-                    if(premierVehiculeImei) {
+                    const premierImei = client.vehicules[0]?.imei;
+                    if(premierImei) {
                         const pointsHistoriques = data
-                            .filter(p => String(p.imei) === premierVehiculeImei)
+                            .filter(p => String(p.imei) === premierImei)
                             .reverse()
                             .map(p => [p.latitude, p.longitude]);
                         if(pointsHistoriques.length > 0) {
@@ -535,9 +616,6 @@
             document.getElementById('statut-serveur-texte').className = "text-[10px] font-black uppercase text-rose-400 tracking-wider";
         });
 
-        // ========================================================
-        // MOTEUR INTELLIGENT DE ROTATION PAR DISTANCE D'ITINÉRAIRE
-        // ========================================================
         function traiterNouvellePosition(data) {
             const now = new Date();
             document.getElementById('last-update-text').textContent = `Point reçu: ${now.toLocaleTimeString()}`;
@@ -575,13 +653,11 @@
                 
                 let distDelta = calculerDistanceGPS(v.lat, v.lng, data.lat, data.lng);
                 
-                // Filtre anti-saut GPS (ignore les micro-bruits < 2m et les bonds erratiques > 2km)
                 if (distDelta > 0.002 && distDelta < 2.0) {
                     v.kmJour += distDelta;
                     v.kmCourse = (v.kmCourse || 0) + distDelta;
                     v.carburantJour = v.kmJour * 0.12;
 
-                    // Calcul de l'orientation (cap)
                     const nouveauCap = calculerCap(v.lat, v.lng, data.lat, data.lng);
                     let diffCap = 0;
                     if (v.dernierCap !== undefined) {
@@ -596,25 +672,19 @@
 
                     let rotationValidee = false;
 
-                    // CAS A : Le véhicule atteint la distance maximale déviée (validation d'office)
                     if (v.kmCourse >= dDeviee) {
                         rotationValidee = true;
                     } 
-                    // CAS B : Le véhicule a parcouru au moins la distance directe sans déviation
-                    // ET présente les signes caractéristiques de fin de ligne :
                     else if (v.kmCourse >= dDirect) {
-                        // 1. Demi-tour franc (inversion de cap > 120° pour reprendre la route inverse)
                         if (diffCap >= 120) {
                             rotationValidee = true;
                         } 
-                        // 2. Arrêt continu de chargement passagers (vitesse nulle maintenue sans avancer)
                         else if ((data.vitesse || 0) < 5) {
                             v.secondesArret = (v.secondesArret || 0) + 10;
-                            if (v.secondesArret >= 40) { // arrêt prolongé typique de tête de ligne
+                            if (v.secondesArret >= 40) {
                                 rotationValidee = true;
                             }
                         } else {
-                            // En roulage dans un bouchon : pas d'arrêt prolongé, on ne valide pas prématurément
                             v.secondesArret = 0;
                         }
                     }
@@ -622,7 +692,7 @@
                     if (rotationValidee) {
                         v.tronconsValides = (v.tronconsValides || 0) + 1;
                         v.recetteBruteReelle = (v.recetteBruteReelle || 0) + gainParRotation;
-                        v.kmCourse = 0; // Remise à zéro pour mesurer la rotation suivante
+                        v.kmCourse = 0;
                         v.secondesArret = 0;
                     }
 
@@ -651,7 +721,6 @@
                         initMapEtCentrer(vehiculeIndex);
                     }
                     
-                    // TRACÉ EN DIRECT EN BLEU GOOGLE NAVIGATION
                     if (polylineTrace) {
                         polylineTrace.setLatLngs(tracePositions);
                     } else {
@@ -674,7 +743,6 @@
             traiterNouvellePosition(data);
         });
 
-        // DOUBLE ÉCOUTE TEMPS RÉEL SUR SUPABASE TOUTES LES 4 SECONDES
         async function sonderPositionsCloudEnContinu() {
             try {
                 if (!window.supabase) return;
@@ -759,9 +827,6 @@
             client.vehicules.forEach((v, i) => sel.insertAdjacentHTML('beforeend', `<option value="${i}">${v.plaque} (${v.type})</option>`));
         }
 
-        // ========================================================
-        // INITIALISATION DE LA CARTE GOOGLE MAPS PLEIN ÉCRAN
-        // ========================================================
         function initMapEtCentrer(index) {
             const mapContainer = document.getElementById('map-container');
             if (!mapContainer || mapContainer.offsetParent === null) return;
@@ -775,10 +840,7 @@
             }
             
             if(!map) {
-                // Centrage zoom renforcé niveau rue (16)
                 map = L.map('map-container').setView([lat, lng], 16);
-                
-                // Tuiles officielles Google Maps Roadmap
                 L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
                     maxZoom: 20,
                     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
@@ -796,7 +858,6 @@
             
             busMarker = L.marker([lat, lng]).addTo(map).bindPopup(popupTxt).openPopup();
             
-            // Tracé en bleu Google Navigation
             if (polylineTrace) map.removeLayer(polylineTrace);
             if(tracePositions.length > 1) {
                 polylineTrace = L.polyline(tracePositions, { 
@@ -851,7 +912,7 @@
             
             document.getElementById('add-plaque').value = ""; 
             document.getElementById('add-imei').value = "";
-            alert(`✅ Véhicule ${plaque} enregistré sur la ligne ${origine} ➔ ${destination} (${distDirect} km / dévié ${distDeviee} km).`);
+            alert(`✅ Véhicule ${plaque} enregistré sur la ligne ${origine} ➔ ${destination}.`);
             genererToutesLesVues(); 
             changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
         }
@@ -867,24 +928,29 @@
             let vehiculesCibles = client.vehicules;
             if (cibleIdx !== 'all') { vehiculesCibles = [client.vehicules[parseInt(cibleIdx)]]; }
 
-            vehiculesCibles.forEach(v => {
+            vehiculesCibles.forEach((v, idx) => {
                 const gainReel = v.recetteBruteReelle || 0;
                 const troncons = v.tronconsValides || 0;
                 totalCDF += gainReel; totalRot += troncons;
                 
+                const realIndex = client.vehicules.indexOf(v);
                 const progressionPct = Math.min(100, Math.round(((v.kmCourse || 0) / (v.distDirect || 4.2)) * 100));
 
                 if(list) {
                     list.insertAdjacentHTML('beforeend', `
                         <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2.5">
-                            <div class="flex justify-between items-center">
+                            <div class="flex justify-between items-start">
                                 <div>
                                     <h4 class="font-black text-slate-200">${v.plaque}</h4>
                                     <p class="text-[9px] text-sky-400 font-mono">${v.origine} ➔ ${v.destination} (${v.distDirect} km)</p>
                                 </div>
-                                <span class="font-black text-emerald-400 text-sm">${gainReel.toLocaleString()} CDF</span>
+                                <div class="text-right">
+                                    <span class="font-black text-emerald-400 text-sm">${gainReel.toLocaleString()} CDF</span>
+                                    <button onclick="ouvrirModalModifierItineraire(${realIndex})" class="block mt-1 text-[9px] text-sky-400 hover:text-sky-300 font-bold bg-slate-900 border border-slate-700 px-2 py-0.5 rounded ml-auto">
+                                        <i class="fa-solid fa-pen-to-square"></i> Modifier Ligne
+                                    </button>
+                                </div>
                             </div>
-                            <!-- Jauge de progression de la course en cours -->
                             <div class="space-y-1">
                                 <div class="flex justify-between text-[9px] text-slate-400 font-mono">
                                     <span>Course en cours: <strong>${(v.kmCourse || 0).toFixed(1)} km</strong></span>
@@ -895,7 +961,7 @@
                                 </div>
                             </div>
                             <div class="flex justify-between text-[10px] text-slate-400 font-mono pt-1 border-t border-slate-900">
-                                <span><i class="fa-solid fa-rotate text-indigo-400"></i> ${troncons} rotation(s) validée(s)</span>
+                                <span><i class="fa-solid fa-rotate text-indigo-400"></i> ${troncons} rotation(s)</span>
                                 <span>Total jour: <strong class="text-slate-200">${(v.kmJour || 0).toFixed(1)} km</strong></span>
                             </div>
                         </div>`);
@@ -930,24 +996,111 @@
             list.innerHTML = "";
             client.vehicules.forEach((v, origineIndex) => {
                 const btnMoteur = v.moteurCoupe 
-                    ? `<button onclick="basculerMoteur(${origineIndex}, false)" class="w-full bg-emerald-500/20 text-emerald-400 font-bold py-2 rounded text-[10px] uppercase mt-2"><i class="fa-solid fa-unlock"></i> Restaurer Moteur</button>`
-                    : `<button onclick="basculerMoteur(${origineIndex}, true)" class="w-full bg-rose-500/20 text-rose-400 font-bold py-2 rounded text-[10px] uppercase mt-2"><i class="fa-solid fa-lock"></i> Couper Moteur (Urgence)</button>`;
+                    ? `<button onclick="basculerMoteur(${origineIndex}, false)" class="flex-1 bg-emerald-500/20 text-emerald-400 font-bold py-2 rounded text-[10px] uppercase"><i class="fa-solid fa-unlock"></i> Restaurer</button>`
+                    : `<button onclick="basculerMoteur(${origineIndex}, true)" class="flex-1 bg-rose-500/20 text-rose-400 font-bold py-2 rounded text-[10px] uppercase"><i class="fa-solid fa-lock"></i> Couper</button>`;
 
                 const consoPeriode = (v.carburantJour || 0).toFixed(1);
                 const kmPeriode = (v.kmJour || 0).toFixed(1);
 
                 list.insertAdjacentHTML('beforeend', `
                     <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
-                        <h4 class="font-black text-slate-200">${v.plaque} <span class="text-[9px] font-mono text-slate-500 float-right">IMEI: ${v.imei}</span></h4>
+                        <div class="flex justify-between items-center">
+                            <h4 class="font-black text-slate-200">${v.plaque}</h4>
+                            <span class="text-[9px] font-mono text-slate-500">IMEI: ${v.imei}</span>
+                        </div>
+                        <p class="text-[9px] text-sky-400 font-mono">Ligne: ${v.origine} ➔ ${v.destination} (${v.distDirect} km)</p>
                         <div class="grid grid-cols-2 gap-y-2 gap-x-1 text-[9px] font-mono bg-slate-900 p-2.5 rounded border border-slate-800">
                             <p>📡 GPS: <span class="text-emerald-400">Opérationnel</span></p>
                             <p>🔋 Batt: <span class="text-emerald-400">12.6V</span></p>
                             <p>⛽ Conso: <span class="text-sky-400 font-bold">${consoPeriode} L</span></p>
                             <p>🛣️ Dist: <span class="text-sky-400 font-bold">${kmPeriode} km</span></p>
                         </div>
-                        ${btnMoteur}
+                        <div class="flex gap-2 pt-1">
+                            ${btnMoteur}
+                            <button onclick="ouvrirModalModifierItineraire(${origineIndex})" class="flex-1 bg-slate-800 hover:bg-slate-700 text-sky-400 border border-slate-700 font-bold py-2 rounded text-[10px] uppercase">
+                                <i class="fa-solid fa-pen-to-square"></i> Modifier Ligne
+                            </button>
+                        </div>
                     </div>`);
             });
+        }
+
+        // ========================================================
+        // LOGIQUE MODALE DE MODIFICATION D'ITINÉRAIRE
+        // ========================================================
+        function ouvrirModalModifierItineraire(index) {
+            const v = client.vehicules[index];
+            if (!v) return;
+
+            document.getElementById('mod-vehicule-index').value = index;
+            document.getElementById('mod-vehicule-nom').textContent = `${v.plaque} (${v.imei})`;
+            document.getElementById('mod-origine').value = v.origine || "Kintambo Magasin";
+            document.getElementById('mod-destination').value = v.destination || "Delvaux";
+            document.getElementById('mod-dist-direct').value = v.distDirect || 4.2;
+            document.getElementById('mod-dist-deviee').value = v.distDeviee || 5.0;
+            document.getElementById('mod-tarif').value = v.tarif || 1000;
+            document.getElementById('mod-select-ligne-rapide').value = "";
+
+            document.getElementById('modal-modifier-itineraire').classList.remove('hidden');
+        }
+
+        function fermerModalModifierItineraire() {
+            document.getElementById('modal-modifier-itineraire').classList.add('hidden');
+        }
+
+        function appliquerLignePredefinie(valeurIdx) {
+            if (valeurIdx === "" || !LIGNES_PREDEFINIES[valeurIdx]) return;
+            const l = LIGNES_PREDEFINIES[valeurIdx];
+            document.getElementById('mod-origine').value = l.origine;
+            document.getElementById('mod-destination').value = l.destination;
+            document.getElementById('mod-dist-direct').value = l.distDirect;
+            document.getElementById('mod-dist-deviee').value = l.distDeviee;
+            document.getElementById('mod-tarif').value = l.tarif;
+        }
+
+        function sauvegarderModificationItineraire() {
+            const index = parseInt(document.getElementById('mod-vehicule-index').value);
+            const v = client.vehicules[index];
+            if (!v) return;
+
+            const nouvelleOrigine = document.getElementById('mod-origine').value.trim();
+            const nouvelleDestination = document.getElementById('mod-destination').value.trim();
+            const nouvelleDistDirect = parseFloat(document.getElementById('mod-dist-direct').value) || 3.0;
+            const nouvelleDistDeviee = parseFloat(document.getElementById('mod-dist-deviee').value) || (nouvelleDistDirect * 1.2);
+            const nouveauTarif = parseInt(document.getElementById('mod-tarif').value) || 1000;
+
+            if (!nouvelleOrigine || !nouvelleDestination) {
+                alert("Veuillez remplir l'origine et la destination.");
+                return;
+            }
+
+            // Mise à jour de l'objet véhicule
+            v.origine = nouvelleOrigine;
+            v.destination = nouvelleDestination;
+            v.distDirect = nouvelleDistDirect;
+            v.distDeviee = nouvelleDistDeviee;
+            v.tarif = nouveauTarif;
+            v.kmCourse = 0; // Réinitialiser le compteur de course pour débuter la nouvelle ligne
+            v.secondesArret = 0;
+
+            // Sauvegarde dans le stockage local persistant
+            const customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
+            customConfig[v.imei] = {
+                plaque: v.plaque,
+                type: v.type,
+                places: v.places,
+                origine: v.origine,
+                destination: v.destination,
+                distDirect: v.distDirect,
+                distDeviee: v.distDeviee,
+                tarif: v.tarif
+            };
+            localStorage.setItem('tv_vehicules_custom', JSON.stringify(customConfig));
+
+            alert(`✅ Ligne mise à jour avec succès !\n${v.plaque} roule désormais sur : ${v.origine} ➔ ${v.destination} (${v.distDirect} km / dévié ${v.distDeviee} km à ${v.tarif} CDF).`);
+
+            fermerModalModifierItineraire();
+            genererToutesLesVues();
         }
 
         function basculerMoteur(i, couper) {
@@ -962,16 +1115,12 @@
             if(newPin && newPin.length >= 4) { alert("✅ Code PIN mis à jour."); document.getElementById('prof-pin-new').value = ""; } else { alert("❌ Le PIN doit contenir au moins 4 caractères."); }
         }
 
-        // ========================================================
-        // MINUTEUR DU FORFAIT FIABLE (NE RESTE JAMAIS À VIDE)
-        // ========================================================
         function actualiserCompteAReboursForfait() {
             const display = document.getElementById('timer-compte-rebours');
             if(!display) return;
 
             let expString = (partenaireProfil && partenaireProfil.date_expiration) ? partenaireProfil.date_expiration : localStorage.getItem('tv_date_expiration');
             
-            // Initialisation d'office d'une période active de 5 jours si absent
             if(!expString) { 
                 const def = new Date();
                 def.setDate(def.getDate() + 5);
