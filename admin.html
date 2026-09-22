@@ -19,9 +19,16 @@
         .page-fade { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
-        #map-admin-suivi { height: 500px; width: 100%; border-radius: 1rem; z-index: 10; }
-        .leaflet-tile { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
-        .leaflet-container { background: #020617 !important; }
+        /* CARTE PLEIN ÉCRAN CLAIRE HAUTE DÉFINITION */
+        #map-admin-suivi { 
+            height: calc(100vh - 210px); 
+            min-height: 600px; 
+            width: 100%; 
+            border-radius: 1.25rem; 
+            z-index: 10; 
+        }
+        .leaflet-tile { filter: none !important; }
+        .leaflet-container { background: #f8fafc !important; }
         
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(100deg); cursor: pointer; }
         input[type="file"]::file-selector-button { background-color: #4f46e5; color: white; border: none; border-radius: 0.5rem; padding: 0.5rem 1rem; cursor: pointer; font-weight: bold; transition: background 0.3s; }
@@ -64,7 +71,7 @@
     <!-- 2. CORPS ADMIN -->
     <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
         <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
-            <span class="text-xs font-bold text-indigo-400">Central Control Panel v16.5 PROD</span>
+            <span class="text-xs font-bold text-indigo-400">Central Control Panel v16.6 PROD</span>
             <div class="flex gap-2 text-[10px] font-mono">
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 flex items-center gap-1">Central DO : <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="admin-server-dot"></span><span class="text-emerald-400 font-bold" id="admin-server-text">En Ligne</span></span>
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Historique : <span class="text-sky-400 font-bold" id="admin-historique-statut">Chargement...</span></span>
@@ -104,8 +111,8 @@
                 </div>
             </aside>
 
-            <!-- CONTENU DES PAGES -->
-            <main class="flex-1 p-6 lg:p-8 space-y-6 overflow-y-auto max-w-5xl">
+            <!-- CONTENU PLEINE LARGEUR (w-full AU LIEU DE max-w-5xl) -->
+            <main class="flex-1 p-6 lg:p-8 space-y-6 overflow-y-auto w-full">
                 
                 <!-- SUIVI LIVE -->
                 <div id="page-suivi" class="space-y-4 page-fade class-page-admin">
@@ -115,7 +122,7 @@
                             <i class="fa-solid fa-crosshairs"></i> Recentrer Kinshasa
                         </button>
                     </div>
-                    <div id="map-admin-suivi" class="w-full bg-slate-900 border border-slate-800 rounded-2xl shadow-xl"></div>
+                    <div id="map-admin-suivi" class="border border-slate-800 shadow-xl"></div>
                 </div>
 
                 <!-- GESTION DE LA FLOTTE -->
@@ -201,7 +208,6 @@
                                             <option value="voir_id" class="text-sky-400">👁️ Voir Identifiants</option>
                                             <option value="activer" class="text-emerald-500">🟢 Activer Compte</option>
                                             <option value="suspendre" class="text-amber-500">🟠 Suspendre</option>
-                                            <!-- BOUTON SUPPRIMER RESTAURÉ ICI -->
                                             <option value="supprimer" class="text-rose-500">🔴 Supprimer Compte</option>
                                         </select>
                                     </td>
@@ -350,7 +356,7 @@
                         </div>
                         
                         <div class="bg-slate-950 p-5 rounded-2xl border border-indigo-500/30 space-y-3.5 shadow-xl">
-                            <div class="flex items-center gap-2 border-b border-slate-850 pb-2">
+                            <div class="flex items-center gap-2 border-b border-slate-800 pb-2">
                                 <i class="fa-solid fa-shield-halved text-indigo-400 text-sm"></i>
                                 <h3 class="font-bold text-indigo-400 uppercase tracking-wider text-[10px]">Identifiants Super Admin</h3>
                             </div>
@@ -369,12 +375,12 @@
                             <button onclick="modifierAccesPropresAdmin()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-2.5 rounded-xl uppercase text-xs transition-all shadow-lg shadow-indigo-500/10 mt-1">Valider & Modifier</button>
                         </div>
 
-                        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
-                            <div class="flex justify-between items-center border-b border-slate-850 pb-2">
+                        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-3">
+                            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
                                 <h3 class="font-bold text-emerald-400 uppercase tracking-wider text-[10px]">Rédaction des CGU</h3>
                                 <span class="text-[9px] text-slate-500 font-mono">Synchronisé</span>
                             </div>
-                            <textarea id="cfg-cgu-texte" rows="6" class="w-full bg-slate-900 border border-slate-850 focus:border-indigo-500 focus:outline-none rounded-xl p-3 text-xs text-slate-300 font-mono leading-relaxed"></textarea>
+                            <textarea id="cfg-cgu-texte" rows="6" class="w-full bg-slate-900 border border-slate-800 focus:border-indigo-500 focus:outline-none rounded-xl p-3 text-xs text-slate-300 font-mono leading-relaxed"></textarea>
                             <button onclick="sauvegarderCGUAdmin()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-2 px-5 rounded-xl uppercase text-xs transition-colors">Publier les CGU</button>
                         </div>
                     </div>
@@ -384,7 +390,7 @@
         </div>
     </div>
 
-    <!-- MODAL VALIDATION RECHARGE ADMIN (TOUS LES CHAMPS RESTAURÉS) -->
+    <!-- MODAL VALIDATION RECHARGE ADMIN -->
     <div id="modal-recharge-flexible" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -396,8 +402,6 @@
             <p class="text-xs text-slate-300 font-bold">Compte : <span id="nom-partenaire-cible" class="text-emerald-400"></span></p>
 
             <div class="space-y-3 text-xs mt-2">
-                
-                <!-- 1. CIBLE ET MENU DÉROULANT VÉHICULE -->
                 <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-850 space-y-2">
                     <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Cible de la validation</label>
                     <select id="admin-recharge-mode" onchange="basculerSelectVehiculeAdmin()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-bold focus:outline-none focus:border-emerald-500">
@@ -407,18 +411,15 @@
                     
                     <div id="bloc-admin-recharge-vehicule" class="hidden mt-2 border-t border-slate-800 pt-2">
                         <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Sélectionner le Véhicule</label>
-                        <!-- Peuplé par le Javascript avec les véhicules de la base de données -->
                         <select id="admin-recharge-vehicule-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-mono text-[10px] focus:outline-none focus:border-emerald-500"></select>
                     </div>
                 </div>
 
-                <!-- 2. MONTANT REÇU -->
                 <div>
                     <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Montant Reçu (CDF)</label>
                     <input type="number" id="input-credit-fixer" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 font-black text-emerald-400 outline-none focus:border-emerald-500" placeholder="Saisir montant">
                 </div>
 
-                <!-- 3. JOURS À VALIDER -->
                 <div>
                     <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Jours d'accès à valider</label>
                     <div class="flex gap-2">
@@ -451,7 +452,6 @@
         let mapAdmin = null;
         let adminMarkers = {};
 
-        // DÉFINITION DES PÔLES ET TARIFS
         const POLES_KINSHASA = [
             { nom: "Matadi Kibala", lat: -4.4361, lng: 15.2605 },
             { nom: "UPN", lat: -4.3942, lng: 15.2755 },
@@ -497,6 +497,7 @@
                     const vehiculesUniques = {};
                     data.forEach(pos => { if (pos.imei && pos.latitude && pos.longitude) { if (!vehiculesUniques[pos.imei]) vehiculesUniques[pos.imei] = pos; } });
 
+                    flotteGlobale = [];
                     Object.values(vehiculesUniques).forEach(pos => {
                         flotteGlobale.push({
                             imei: String(pos.imei),
@@ -508,7 +509,7 @@
                         });
                     });
                     
-                    document.getElementById('admin-flotte-count').textContent = flotteGlobale.length;
+                    document.getElementById('admin-flotte-count').textContent = `${flotteGlobale.length} Traceur(s)`;
                     majTableauFlotteAdmin();
                     if(mapAdmin) initMapAdmin();
                 }
@@ -528,7 +529,9 @@
                 if(mapAdmin) { adminMarkers[data.imei] = L.marker([data.lat, data.lng]).addTo(mapAdmin).bindPopup(`IMEI: ${data.imei}`); }
             } else {
                 let distanceParcourue = calculerDistanceGPS(vehiculeExistant.lat, vehiculeExistant.lng, data.lat, data.lng);
-                if (distanceParcourue > 0.005 && distanceParcourue < 2) { vehiculeExistant.kmJour += distanceParcourue; }
+                if (distanceParcourue > 0.005 && distanceParcourue < 2) { 
+                    vehiculeExistant.kmJour += distanceParcourue; 
+                }
 
                 const poleDetecte = trouverPoleActuel(data.lat, data.lng);
                 
@@ -610,10 +613,15 @@
             if (!container || container.offsetParent === null) return;
             if (!mapAdmin) {
                 mapAdmin = L.map('map-admin-suivi').setView([-4.3224, 15.3070], 12);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(mapAdmin);
+                // Tuiles claires haute définition CartoDB Voyager
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; OpenStreetMap &copy; CARTO',
+                    subdomains: 'abcd',
+                    maxZoom: 19
+                }).addTo(mapAdmin);
                 
                 POLES_KINSHASA.forEach(pole => {
-                    L.circle([pole.lat, pole.lng], { color: 'indigo', fillColor: '#6366f1', fillOpacity: 0.2, radius: 250 }).addTo(mapAdmin).bindPopup(`Geofence: ${pole.nom}`);
+                    L.circle([pole.lat, pole.lng], { color: '#4f46e5', fillColor: '#6366f1', fillOpacity: 0.2, radius: 250 }).addTo(mapAdmin).bindPopup(`Geofence: ${pole.nom}`);
                 });
 
                 flotteGlobale.forEach(v => {
@@ -743,20 +751,15 @@
             dateExpiration.setDate(dateExpiration.getDate() + nbJours);
             dateExpiration.setHours(23, 59, 59, 999);
             
-            // 1. Sauvegarde locale (Garantie de fonctionnement)
             localStorage.setItem('tv_date_expiration', dateExpiration.toISOString());
 
-            // 2. Synchronisation Cloud Supabase (si disponible)
             try {
                 if (window.supabase && ciblePartenaire && ciblePartenaire.tel) {
                     await supabaseClient.from('tv_partenaires')
                         .upsert({ nom: ciblePartenaire.nom, tel: ciblePartenaire.tel, date_expiration: dateExpiration.toISOString() }, { onConflict: 'tel' });
                 }
-            } catch(e) {
-                console.warn("Écriture cloud différée :", e);
-            }
+            } catch(e) {}
             
-            // 3. Message de confirmation détaillé
             let message = `✅ Recharge réussie ! Le forfait a été prolongé de ${nbJours} jours.\nCible : ${cibleType === 'flotte' ? 'Flotte Complète' : 'Véhicule Spécifique'}`;
             if (montant) message += `\nMontant tracé : ${montant} CDF.`;
 
@@ -846,11 +849,6 @@
             alert("✅ CGU mises à jour et publiées avec succès !");
         }
 
-
-        // ========================================================
-        // GESTION DE LA SESSION BLINDÉE (100% FIABLE)
-        // ========================================================
-
         function demarrerSessionAdmin() {
             document.getElementById('page-login-admin').classList.add('hidden');
             document.getElementById('corps-application-admin').classList.remove('hidden');
@@ -879,12 +877,10 @@
             }
         }
 
-        // 1. Exécution immédiate pour court-circuiter le clignotement de la page de login
         if (localStorage.getItem('tv_admin_session_active') === 'true') {
             demarrerSessionAdmin();
         }
 
-        // 2. Chargement des données secondaires en mode sécurisé
         window.addEventListener('DOMContentLoaded', () => {
             try {
                 const today = new Date();
