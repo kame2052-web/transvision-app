@@ -21,16 +21,16 @@
     <style>
         .blur-transition { transition: filter 0.4s ease, opacity 0.4s ease; }
         
-        /* Carte plein écran dynamique sans fond noir inutile */
+        /* Carte Google Maps occupant toute la hauteur sans espace noir */
         #map-container { 
             height: 100%; 
-            min-height: 480px; 
+            min-height: 520px; 
             width: 100%; 
             border-radius: 1rem; 
             z-index: 10; 
         }
         .leaflet-tile { filter: none !important; }
-        .leaflet-container { background: #f8fafc !important; }
+        .leaflet-container { background: #e5e3df !important; } /* Teinte de fond classique Google Maps */
         
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(100deg); cursor: pointer; }
         @media print {
@@ -118,7 +118,7 @@
             </div>
             
             <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v16.8 PROD — Global Tech Solutions
+                TransVision v17.0 PROD — Global Tech Solutions
             </div>
         </div>
 
@@ -148,19 +148,22 @@
                     </div>
                     <div class="text-right">
                         <!-- MINUTEUR ACTIF DU FORFAIT -->
-                        <span id="timer-compte-rebours" class="text-sm font-mono font-black text-slate-100 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg shadow-inner">Chargement...</span>
+                        <span id="timer-compte-rebours" class="text-sm font-mono font-black text-slate-100 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg shadow-inner">--:--:--</span>
                     </div>
                 </div>
             </header>
 
-            <!-- ONGLET A : CARTE ÉTIRÉE EN HAUTEUR (ESPACE NOIR COMBLÉ) -->
-            <div id="onglet-flotte" class="p-3 flex-1 flex flex-col blur-transition class-onglet no-print min-h-[calc(100vh-160px)]">
-                <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 flex-1 flex flex-col space-y-2 shadow-md">
+            <!-- ONGLET A : CARTE GOOGLE MAPS PLEINE HAUTEUR (ESPACE NOIR TOTALEMENT COMBLE) -->
+            <div id="onglet-flotte" class="p-2 flex-1 flex flex-col blur-transition class-onglet no-print min-h-[calc(100vh-170px)]">
+                <div class="bg-slate-950 p-2.5 rounded-2xl border border-slate-800 flex-1 flex flex-col space-y-2 shadow-md">
                     <div class="flex justify-between items-center px-1 pb-1">
-                        <h2 class="text-[10px] font-bold text-slate-300 uppercase tracking-widest flex items-center gap-1.5"><i class="fa-solid fa-map-location-dot text-emerald-400"></i> Traceur GPS Live</h2>
-                        <select id="select-vehicule-map" onchange="centrerSurVehicule(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg text-[10px] text-emerald-400 font-bold px-2 py-1 outline-none truncate max-w-[140px]"></select>
+                        <h2 class="text-[10px] font-bold text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
+                            <i class="fa-solid fa-map-location-dot text-sky-400"></i> Google Maps Live
+                        </h2>
+                        <select id="select-vehicule-map" onchange="centrerSurVehicule(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg text-[10px] text-emerald-400 font-bold px-2 py-1 outline-none truncate max-w-[150px]"></select>
                     </div>
-                    <div id="map-container" class="shadow-inner flex-1 w-full border border-slate-800 rounded-xl"></div>
+                    <!-- CONTENEUR CARTE ETIRÉ SUR TOUT L'ECRAN -->
+                    <div id="map-container" class="shadow-inner flex-1 w-full border border-slate-800 rounded-xl overflow-hidden"></div>
                 </div>
             </div>
 
@@ -169,7 +172,7 @@
                 <div class="bg-slate-950/85 backdrop-blur p-5 rounded-2xl border border-slate-800/80 space-y-4 shadow-xl">
                     <div class="border-b border-slate-800 pb-2">
                         <h3 class="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-square-plus text-indigo-400"></i> Ajouter un Véhicule</h3>
-                        <p class="text-[10px] text-slate-400">Enregistrez la plaque, l'IMEI et l'itinéraire d'exploitation.</p>
+                        <p class="text-[10px] text-slate-400">Enregistrez la plaque, l'IMEI et les paramètres kilométriques.</p>
                     </div>
 
                     <div class="space-y-3">
@@ -187,33 +190,43 @@
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Places Assises</label>
-                                <input type="number" id="add-places" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:border-indigo-500 outline-none" placeholder="Ex: 18">
+                                <input type="number" id="add-places" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:border-indigo-500 outline-none" value="14">
                             </div>
                             <div>
                                 <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Tarif Passager (CDF)</label>
-                                <input type="number" id="add-tarif" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:border-indigo-500 outline-none" placeholder="Ex: 1500">
+                                <input type="number" id="add-tarif" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:border-indigo-500 outline-none" value="1000">
                             </div>
                         </div>
 
                         <div class="p-3 bg-slate-900/90 border border-indigo-500/30 rounded-2xl space-y-3 shadow-inner">
                             <span class="text-[9px] font-black uppercase text-indigo-400 tracking-wider flex items-center gap-1.5">
-                                <i class="fa-solid fa-route"></i> Parcours d'Exploitation
+                                <i class="fa-solid fa-route"></i> Parcours d'Exploitation (Base de Calcul)
                             </span>
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
                                     <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Origine</label>
-                                    <input type="text" id="add-origine" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold focus:border-indigo-500 outline-none" placeholder="Départ">
+                                    <input type="text" id="add-origine" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold focus:border-indigo-500 outline-none" placeholder="Ex: Kintambo Magasin" value="Kintambo Magasin">
                                 </div>
                                 <div>
                                     <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Destination</label>
-                                    <input type="text" id="add-destination" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold focus:border-indigo-500 outline-none" placeholder="Arrivée">
+                                    <input type="text" id="add-destination" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold focus:border-indigo-500 outline-none" placeholder="Ex: Delvaux" value="Delvaux">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 pt-1">
+                                <div>
+                                    <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Distance Directe (km)</label>
+                                    <input type="number" step="0.1" id="add-dist-direct" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-emerald-400 font-mono font-bold focus:border-emerald-500 outline-none" value="4.2">
+                                </div>
+                                <div>
+                                    <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Distance Déviée (km)</label>
+                                    <input type="number" step="0.1" id="add-dist-deviee" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-amber-400 font-mono font-bold focus:border-amber-500 outline-none" value="5.0">
                                 </div>
                             </div>
                         </div>
 
                         <div>
                             <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">N° IMEI Traceur SinoTrack</label>
-                            <input type="text" id="add-imei" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono focus:border-indigo-500 outline-none" placeholder="Ex: 865241092837401">
+                            <input type="text" id="add-imei" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono focus:border-indigo-500 outline-none" placeholder="Ex: 357445101350102">
                         </div>
 
                         <button onclick="enregistrerVehiculeSaisi()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-3 rounded-xl text-xs uppercase shadow-lg shadow-indigo-500/10">
@@ -223,7 +236,7 @@
                 </div>
             </div>
 
-            <!-- ONGLET C : RAPPORT FINANCIER -->
+            <!-- ONGLET C : RAPPORT FINANCIER PAR DISTANCE D'ITINÉRAIRE -->
             <div id="onglet-rapport" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
                 <div class="bg-slate-950/90 backdrop-blur p-3.5 rounded-2xl border border-slate-800 space-y-3 shadow-md">
                     <div class="flex justify-between items-center">
@@ -240,25 +253,15 @@
                                 <option value="all">Tous les véhicules (Flotte globale)</option>
                             </select>
                         </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-[8px] text-slate-500 uppercase mb-1">Du (Inclus)</label>
-                                <input type="date" id="date-debut-fin" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-[10px] text-emerald-400 font-bold focus:outline-none focus:border-emerald-500">
-                            </div>
-                            <div>
-                                <label class="block text-[8px] text-slate-500 uppercase mb-1">Au (Inclus)</label>
-                                <input type="date" id="date-fin-fin" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-[10px] text-emerald-400 font-bold focus:outline-none focus:border-emerald-500">
-                            </div>
-                        </div>
                     </div>
                     <button onclick="appliquerFiltreFinancier()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-black py-2 rounded-lg text-[10px] uppercase transition-colors shadow-inner">
-                        Appliquer & Recalculer
+                        Actualiser les Recettes
                     </button>
                 </div>
 
                 <div class="bg-slate-950/85 backdrop-blur p-4 rounded-2xl border border-slate-800/80 space-y-2 shadow-md">
                     <h3 class="text-xs font-black uppercase text-emerald-400 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-simple"></i> Évolution des Recettes
+                        <i class="fa-solid fa-chart-simple"></i> Recettes Journalières Générées
                     </h3>
                     <div class="h-40 relative">
                         <canvas id="chart-recettes-partenaire"></canvas>
@@ -267,55 +270,25 @@
 
                 <div class="grid grid-cols-2 gap-3">
                     <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800/80 space-y-1 shadow-md">
-                        <span class="text-[9px] text-slate-400 uppercase font-black">Recettes Période</span>
+                        <span class="text-[9px] text-slate-400 uppercase font-black">Recettes Brutes</span>
                         <p id="txt-total-recettes" class="text-lg font-black text-emerald-400">0 CDF</p>
                     </div>
                     <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800/80 space-y-1 shadow-md">
-                        <span class="text-[9px] text-slate-400 uppercase font-black">Tronçons Validés</span>
+                        <span class="text-[9px] text-slate-400 uppercase font-black">Rotations Complètes</span>
                         <p id="txt-total-rotations" class="text-lg font-black text-slate-100">0</p>
                     </div>
                 </div>
 
                 <div class="space-y-3">
-                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-800 pb-1">Détails Filtrés</h3>
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-800 pb-1">Progression des Courses par Véhicule</h3>
                     <div id="fin-vehicules-list" class="space-y-3"></div>
                 </div>
             </div>
 
             <!-- ONGLET D : ANALYSE TECHNIQUE -->
             <div id="onglet-analyse" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
-                <div class="bg-slate-950/90 backdrop-blur p-3.5 rounded-2xl border border-slate-800 space-y-3 shadow-md">
-                    <div class="flex justify-between items-center">
-                        <label class="block text-[10px] font-bold text-slate-300 uppercase tracking-wider">
-                            <i class="fa-solid fa-filter text-sky-400 mr-1"></i> Filtre du Bilan Technique
-                        </label>
-                    </div>
-                    
-                    <div class="space-y-2">
-                        <div>
-                            <label class="block text-[8px] text-slate-500 uppercase mb-1">Cibler un Véhicule</label>
-                            <select id="filtre-tech-vehicule" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-[10px] text-slate-200 font-bold focus:outline-none focus:border-sky-500">
-                                <option value="all">Tous les véhicules (Flotte globale)</option>
-                            </select>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-[8px] text-slate-500 uppercase mb-1">Du (Inclus)</label>
-                                <input type="date" id="date-debut-tech" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-[10px] text-sky-400 font-bold focus:outline-none focus:border-sky-500">
-                            </div>
-                            <div>
-                                <label class="block text-[8px] text-slate-500 uppercase mb-1">Au (Inclus)</label>
-                                <input type="date" id="date-fin-tech" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-[10px] text-sky-400 font-bold focus:outline-none focus:border-sky-500">
-                            </div>
-                        </div>
-                    </div>
-                    <button onclick="appliquerFiltreTechnique()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-black py-2 rounded-lg text-[10px] uppercase transition-colors shadow-inner">
-                        Appliquer & Recalculer
-                    </button>
-                </div>
-
                 <div class="flex justify-between items-center">
-                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rapport Matériel & Consommation</h2>
+                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Diagnostic Matériel & Télématique</h2>
                 </div>
                 <div id="tech-vehicules-list" class="space-y-3"></div>
             </div>
@@ -462,25 +435,7 @@
         let chartPartenaireInstance = null;
         let dernierPointId = null;
 
-        const POLES_KINSHASA = [
-            { nom: "Matadi Kibala", lat: -4.4361, lng: 15.2605 },
-            { nom: "UPN", lat: -4.3942, lng: 15.2755 },
-            { nom: "Delvaux", lat: -4.3755, lng: 15.2801 },
-            { nom: "Kintambo Magasin", lat: -4.3411, lng: 15.2655 },
-            { nom: "Gare Centrale", lat: -4.3075, lng: 15.3125 }
-        ];
-
-        let MATRICE_TARIFS = [
-            { org: "Matadi Kibala", dst: "Gare Centrale", tarif: 2500 },
-            { org: "Matadi Kibala", dst: "UPN", tarif: 1000 },
-            { org: "UPN", dst: "Delvaux", tarif: 500 },
-            { org: "UPN", dst: "Kintambo Magasin", tarif: 1000 },
-            { org: "Delvaux", dst: "Kintambo Magasin", tarif: 500 },
-            { org: "UPN", dst: "Gare Centrale", tarif: 2000 },
-            { org: "Delvaux", dst: "Gare Centrale", tarif: 1500 },
-            { org: "Kintambo Magasin", dst: "Gare Centrale", tarif: 1000 }
-        ];
-
+        // CALCUL DE LA DISTANCE ORTHODROMIQUE (KM)
         function calculerDistanceGPS(lat1, lon1, lat2, lon2) {
             const R = 6371; 
             const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -489,11 +444,12 @@
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
         }
 
-        function trouverPoleActuel(lat, lng) {
-            for (let pole of POLES_KINSHASA) {
-                if (calculerDistanceGPS(lat, lng, pole.lat, pole.lng) <= 0.250) { return pole.nom; }
-            }
-            return null; 
+        // CALCUL DU CAP (DEGRÉS 0-360) POUR DÉTECTER LES DEMI-TOURS
+        function calculerCap(lat1, lon1, lat2, lon2) {
+            const y = Math.sin((lon2 - lon1) * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180);
+            const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
+                      Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos((lon2 - lon1) * Math.PI / 180);
+            return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
         }
 
         async function chargerDernieresPositions() {
@@ -522,12 +478,41 @@
                     Object.values(vehiculesTrouves).forEach(pos => {
                         const imeiStr = String(pos.imei);
                         client.vehicules.push({
-                            plaque: `Tracker ${imeiStr.slice(-4)}`, type: "Traceur GPS", places: 14, imei: imeiStr,
-                            lat: pos.latitude, lng: pos.longitude, moteurCoupe: false, carburantJour: 0, kmJour: 0,
-                            dernierPoleConnu: null, recetteBruteReelle: 0, tronconsValides: 0 
+                            plaque: `Tracker ${imeiStr.slice(-4)}`, 
+                            type: "Traceur GPS", 
+                            places: 14, 
+                            imei: imeiStr,
+                            lat: pos.latitude, 
+                            lng: pos.longitude, 
+                            moteurCoupe: false, 
+                            carburantJour: 0, 
+                            kmJour: 0,
+                            // MOTEUR D'ITINÉRAIRE PAR DISTANCE
+                            distDirect: 4.2,     // Distance approximative de la ligne (km)
+                            distDeviee: 5.0,     // Distance réelle déviée (km)
+                            kmCourse: 0,         // Kilomètres parcourus dans le tour en cours
+                            tarif: 1000,         // Tarif unitaire passager
+                            origine: "Kintambo Magasin",
+                            destination: "Delvaux",
+                            dernierCap: undefined,
+                            secondesArret: 0,
+                            recetteBruteReelle: 0, 
+                            tronconsValides: 0 
                         });
                     });
                     
+                    // Récupérer les 30 derniers points pour pré-tracer l'itinéraire du jour en bleu Google Navigation
+                    const premierVehiculeImei = client.vehicules[0]?.imei;
+                    if(premierVehiculeImei) {
+                        const pointsHistoriques = data
+                            .filter(p => String(p.imei) === premierVehiculeImei)
+                            .reverse()
+                            .map(p => [p.latitude, p.longitude]);
+                        if(pointsHistoriques.length > 0) {
+                            tracePositions = pointsHistoriques;
+                        }
+                    }
+
                     majSelecteurMap();
                     peuplerSelecteursFiltre();
                     const sel = document.getElementById('select-vehicule-map');
@@ -550,7 +535,9 @@
             document.getElementById('statut-serveur-texte').className = "text-[10px] font-black uppercase text-rose-400 tracking-wider";
         });
 
-        // TRAITEMENT UNIFIÉ D'UNE NOUVELLE POSITION (LIVE SOCKET OU POLLING)
+        // ========================================================
+        // MOTEUR INTELLIGENT DE ROTATION PAR DISTANCE D'ITINÉRAIRE
+        // ========================================================
         function traiterNouvellePosition(data) {
             const now = new Date();
             document.getElementById('last-update-text').textContent = `Point reçu: ${now.toLocaleTimeString()}`;
@@ -560,9 +547,25 @@
             
             if (vehiculeIndex === -1) {
                 client.vehicules.push({
-                    plaque: data.plaque || `Tracker ${data.imei.slice(-4)}`, type: "Traceur GPS", places: 14, imei: data.imei,
-                    lat: data.lat, lng: data.lng, moteurCoupe: false, carburantJour: 0, kmJour: 0,
-                    dernierPoleConnu: null, recetteBruteReelle: 0, tronconsValides: 0
+                    plaque: data.plaque || `Tracker ${data.imei.slice(-4)}`, 
+                    type: "Traceur GPS", 
+                    places: 14, 
+                    imei: data.imei,
+                    lat: data.lat, 
+                    lng: data.lng, 
+                    moteurCoupe: false, 
+                    carburantJour: 0, 
+                    kmJour: 0,
+                    distDirect: 4.2,
+                    distDeviee: 5.0,
+                    kmCourse: 0,
+                    tarif: 1000,
+                    origine: "Kintambo Magasin",
+                    destination: "Delvaux",
+                    dernierCap: undefined,
+                    secondesArret: 0,
+                    recetteBruteReelle: 0, 
+                    tronconsValides: 0
                 });
                 vehiculeIndex = client.vehicules.length - 1;
                 majSelecteurMap();
@@ -570,38 +573,62 @@
             } else {
                 let v = client.vehicules[vehiculeIndex];
                 
-                let distanceParcourue = calculerDistanceGPS(v.lat, v.lng, data.lat, data.lng);
-                if (distanceParcourue > 0.002 && distanceParcourue < 2) {
-                    v.kmJour += distanceParcourue; 
-                    v.carburantJour = v.kmJour * 0.12; 
-                }
+                let distDelta = calculerDistanceGPS(v.lat, v.lng, data.lat, data.lng);
+                
+                // Filtre anti-saut GPS (ignore les micro-bruits < 2m et les bonds erratiques > 2km)
+                if (distDelta > 0.002 && distDelta < 2.0) {
+                    v.kmJour += distDelta;
+                    v.kmCourse = (v.kmCourse || 0) + distDelta;
+                    v.carburantJour = v.kmJour * 0.12;
 
-                const poleDetecte = trouverPoleActuel(data.lat, data.lng);
-
-                if (poleDetecte && (data.vitesse || 0) < 10) {
-                    if (v.dernierPoleConnu === null) {
-                        v.dernierPoleConnu = poleDetecte;
-                    } 
-                    else if (v.dernierPoleConnu !== poleDetecte) {
-                        const poleA = v.dernierPoleConnu;
-                        const poleB = poleDetecte;
-                        
-                        let tarifCourse = 0; 
-                        for(let tarifObj of MATRICE_TARIFS) {
-                            if ((tarifObj.org === poleA && tarifObj.dst === poleB) || (tarifObj.org === poleB && tarifObj.dst === poleA)) {
-                                tarifCourse = tarifObj.tarif; break;
-                            }
-                        }
-
-                        if(tarifCourse > 0) {
-                            v.recetteBruteReelle += (tarifCourse * v.places);
-                            v.tronconsValides += 1;
-                        }
-                        v.dernierPoleConnu = poleB;
+                    // Calcul de l'orientation (cap)
+                    const nouveauCap = calculerCap(v.lat, v.lng, data.lat, data.lng);
+                    let diffCap = 0;
+                    if (v.dernierCap !== undefined) {
+                        diffCap = Math.abs(nouveauCap - v.dernierCap);
+                        if (diffCap > 180) diffCap = 360 - diffCap;
                     }
-                }
+                    v.dernierCap = nouveauCap;
 
-                v.lat = data.lat; v.lng = data.lng;
+                    const dDirect = v.distDirect || 4.2;
+                    const dDeviee = v.distDeviee || (dDirect * 1.2);
+                    const gainParRotation = (v.tarif || 1000) * (v.places || 14);
+
+                    let rotationValidee = false;
+
+                    // CAS A : Le véhicule atteint la distance maximale déviée (validation d'office)
+                    if (v.kmCourse >= dDeviee) {
+                        rotationValidee = true;
+                    } 
+                    // CAS B : Le véhicule a parcouru au moins la distance directe sans déviation
+                    // ET présente les signes caractéristiques de fin de ligne :
+                    else if (v.kmCourse >= dDirect) {
+                        // 1. Demi-tour franc (inversion de cap > 120° pour reprendre la route inverse)
+                        if (diffCap >= 120) {
+                            rotationValidee = true;
+                        } 
+                        // 2. Arrêt continu de chargement passagers (vitesse nulle maintenue sans avancer)
+                        else if ((data.vitesse || 0) < 5) {
+                            v.secondesArret = (v.secondesArret || 0) + 10;
+                            if (v.secondesArret >= 40) { // arrêt prolongé typique de tête de ligne
+                                rotationValidee = true;
+                            }
+                        } else {
+                            // En roulage dans un bouchon : pas d'arrêt prolongé, on ne valide pas prématurément
+                            v.secondesArret = 0;
+                        }
+                    }
+
+                    if (rotationValidee) {
+                        v.tronconsValides = (v.tronconsValides || 0) + 1;
+                        v.recetteBruteReelle = (v.recetteBruteReelle || 0) + gainParRotation;
+                        v.kmCourse = 0; // Remise à zéro pour mesurer la rotation suivante
+                        v.secondesArret = 0;
+                    }
+
+                    v.lat = data.lat; 
+                    v.lng = data.lng;
+                }
             }
 
             const selectMap = document.getElementById('select-vehicule-map');
@@ -612,15 +639,28 @@
                 if (map) {
                     if (busMarker) {
                         busMarker.setLatLng(targetPoint);
-                        busMarker.getPopup().setContent(`<b>Tracker ${data.imei.slice(-4)}</b><br>Vitesse : ${data.vitesse || 0} km/h<br>Direct : ${now.toLocaleTimeString()}`);
+                        const v = client.vehicules[vehiculeIndex];
+                        busMarker.getPopup().setContent(`
+                            <b>${v.plaque}</b><br>
+                            Ligne: ${v.origine} ➔ ${v.destination}<br>
+                            Vitesse: <b>${data.vitesse || 0} km/h</b><br>
+                            Course: <b>${v.kmCourse.toFixed(1)} / ${v.distDirect} km</b><br>
+                            Rotations: <b>${v.tronconsValides}</b> (${v.recetteBruteReelle.toLocaleString()} CDF)
+                        `);
                     } else {
                         initMapEtCentrer(vehiculeIndex);
                     }
                     
+                    // TRACÉ EN DIRECT EN BLEU GOOGLE NAVIGATION
                     if (polylineTrace) {
                         polylineTrace.setLatLngs(tracePositions);
                     } else {
-                        polylineTrace = L.polyline(tracePositions, { color: '#10b981', weight: 4, opacity: 0.85, dashArray: '6, 8' }).addTo(map);
+                        polylineTrace = L.polyline(tracePositions, { 
+                            color: '#1a73e8', 
+                            weight: 6, 
+                            opacity: 0.9, 
+                            lineJoin: 'round' 
+                        }).addTo(map);
                     }
                     map.panTo(targetPoint);
                 }
@@ -634,7 +674,7 @@
             traiterNouvellePosition(data);
         });
 
-        // RENFORCEMENT TEMPS RÉEL (SONDAGE ACTIF TOUTES LES 4 SECONDES)
+        // DOUBLE ÉCOUTE TEMPS RÉEL SUR SUPABASE TOUTES LES 4 SECONDES
         async function sonderPositionsCloudEnContinu() {
             try {
                 if (!window.supabase) return;
@@ -646,8 +686,9 @@
 
                 if (data && data.length > 0) {
                     const latest = data[0];
-                    if (latest.id !== dernierPointId) {
-                        dernierPointId = latest.id;
+                    const pointKey = latest.id ? latest.id : (latest.latitude + '_' + latest.longitude + '_' + latest.created_at);
+                    if (pointKey !== dernierPointId) {
+                        dernierPointId = pointKey;
                         traiterNouvellePosition({
                             imei: String(latest.imei),
                             lat: latest.latitude,
@@ -663,21 +704,15 @@
         function initFiltresDates() {
             const today = new Date();
             const strToday = today.toISOString().split('T')[0];
-            ['fin', 'tech'].forEach(prefix => {
-                const elStart = document.getElementById(`date-debut-${prefix}`);
-                const elEnd = document.getElementById(`date-fin-${prefix}`);
-                if(elStart) elStart.value = strToday;
-                if(elEnd) elEnd.value = strToday;
-            });
+            const sel = document.getElementById('filtre-fin-vehicule');
+            if(sel && sel.options.length <= 1) peuplerSelecteursFiltre();
         }
 
         function peuplerSelecteursFiltre() {
             const selFin = document.getElementById('filtre-fin-vehicule');
-            const selTech = document.getElementById('filtre-tech-vehicule');
             const selRecharge = document.getElementById('recharge-vehicule-select');
             
             if(selFin) selFin.innerHTML = '<option value="all">Tous les véhicules (Flotte globale)</option>';
-            if(selTech) selTech.innerHTML = '<option value="all">Tous les véhicules (Flotte globale)</option>';
             if(selRecharge) selRecharge.innerHTML = '';
 
             if (client.vehicules.length === 0 && selRecharge) {
@@ -686,7 +721,6 @@
                 client.vehicules.forEach((v, i) => {
                     const opt = `<option value="${i}">${v.plaque}</option>`;
                     if(selFin) selFin.insertAdjacentHTML('beforeend', opt);
-                    if(selTech) selTech.insertAdjacentHTML('beforeend', opt);
                     if(selRecharge) selRecharge.insertAdjacentHTML('beforeend', opt);
                 });
             }
@@ -725,6 +759,9 @@
             client.vehicules.forEach((v, i) => sel.insertAdjacentHTML('beforeend', `<option value="${i}">${v.plaque} (${v.type})</option>`));
         }
 
+        // ========================================================
+        // INITIALISATION DE LA CARTE GOOGLE MAPS PLEIN ÉCRAN
+        // ========================================================
         function initMapEtCentrer(index) {
             const mapContainer = document.getElementById('map-container');
             if (!mapContainer || mapContainer.offsetParent === null) return;
@@ -734,34 +771,41 @@
             if(v) { 
                 lat = v.lat; 
                 lng = v.lng; 
-                tracePositions = [[lat, lng]];
+                if (tracePositions.length === 0) tracePositions = [[lat, lng]];
             }
             
             if(!map) {
-                // Zoom renforcé à 16 (vue de rue)
+                // Centrage zoom renforcé niveau rue (16)
                 map = L.map('map-container').setView([lat, lng], 16);
                 
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap contributors',
-                    maxZoom: 19
+                // Tuiles officielles Google Maps Roadmap
+                L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+                    maxZoom: 20,
+                    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                    attribution: '&copy; Google Maps'
                 }).addTo(map);
-                
-                POLES_KINSHASA.forEach(pole => { 
-                    L.circle([pole.lat, pole.lng], { 
-                        color: '#059669', 
-                        fillColor: '#10b981', 
-                        fillOpacity: 0.2, 
-                        radius: 250 
-                    }).addTo(map).bindPopup(`Zone: ${pole.nom}`); 
-                });
             }
             
             if(busMarker) map.removeLayer(busMarker);
-            const popupTxt = v ? `<b>${v.plaque}</b><br>IMEI: ${v.imei}<br>Position temps réel` : "En attente...";
+            const popupTxt = v ? `
+                <b>${v.plaque}</b><br>
+                Ligne: ${v.origine} ➔ ${v.destination}<br>
+                Course: <b>${(v.kmCourse || 0).toFixed(1)} / ${v.distDirect} km</b><br>
+                Rotations: <b>${v.tronconsValides || 0}</b> (${(v.recetteBruteReelle || 0).toLocaleString()} CDF)
+            ` : "En attente...";
+            
             busMarker = L.marker([lat, lng]).addTo(map).bindPopup(popupTxt).openPopup();
             
+            // Tracé en bleu Google Navigation
             if (polylineTrace) map.removeLayer(polylineTrace);
-            polylineTrace = L.polyline(tracePositions, { color: '#10b981', weight: 4, opacity: 0.85, dashArray: '6, 8' }).addTo(map);
+            if(tracePositions.length > 1) {
+                polylineTrace = L.polyline(tracePositions, { 
+                    color: '#1a73e8', 
+                    weight: 6, 
+                    opacity: 0.9, 
+                    lineJoin: 'round' 
+                }).addTo(map);
+            }
 
             map.setView([lat, lng], 16);
             setTimeout(() => { map.invalidateSize(); }, 200);
@@ -774,15 +818,42 @@
         function enregistrerVehiculeSaisi() {
             const plaque = document.getElementById('add-plaque').value.trim();
             const imei = document.getElementById('add-imei').value.trim();
+            const origine = document.getElementById('add-origine').value.trim() || "Kintambo Magasin";
+            const destination = document.getElementById('add-destination').value.trim() || "Delvaux";
+            const distDirect = parseFloat(document.getElementById('add-dist-direct').value) || 4.2;
+            const distDeviee = parseFloat(document.getElementById('add-dist-deviee').value) || (distDirect * 1.2);
+            const places = parseInt(document.getElementById('add-places').value) || 14;
+            const tarif = parseInt(document.getElementById('add-tarif').value) || 1000;
+
             if (!plaque || !imei) { alert("Veuillez remplir au moins la Plaque et l'IMEI."); return; }
+            
             client.vehicules.push({ 
-                plaque: plaque, type: "Traceur GPS", places: 14, imei: imei, 
-                lat: -4.32, lng: 15.31, moteurCoupe: false, carburantJour: 0, kmJour: 0,
-                dernierPoleConnu: null, recetteBruteReelle: 0, tronconsValides: 0
+                plaque: plaque, 
+                type: document.getElementById('add-type').value || "Traceur GPS", 
+                places: places, 
+                imei: imei, 
+                lat: -4.32, 
+                lng: 15.31, 
+                moteurCoupe: false, 
+                carburantJour: 0, 
+                kmJour: 0,
+                distDirect: distDirect,
+                distDeviee: distDeviee,
+                kmCourse: 0,
+                tarif: tarif,
+                origine: origine,
+                destination: destination,
+                dernierCap: undefined,
+                secondesArret: 0,
+                recetteBruteReelle: 0, 
+                tronconsValides: 0
             });
-            document.getElementById('add-plaque').value = ""; document.getElementById('add-imei').value = "";
-            alert(`✅ Véhicule ${plaque} enregistré.`);
-            genererToutesLesVues(); changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
+            
+            document.getElementById('add-plaque').value = ""; 
+            document.getElementById('add-imei').value = "";
+            alert(`✅ Véhicule ${plaque} enregistré sur la ligne ${origine} ➔ ${destination} (${distDirect} km / dévié ${distDeviee} km).`);
+            genererToutesLesVues(); 
+            changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
         }
 
         function appliquerFiltreFinancier() { genererRapportFinancier(); }
@@ -801,16 +872,31 @@
                 const troncons = v.tronconsValides || 0;
                 totalCDF += gainReel; totalRot += troncons;
                 
+                const progressionPct = Math.min(100, Math.round(((v.kmCourse || 0) / (v.distDirect || 4.2)) * 100));
+
                 if(list) {
                     list.insertAdjacentHTML('beforeend', `
-                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2.5">
                             <div class="flex justify-between items-center">
-                                <h4 class="font-black text-slate-200">${v.plaque} <span class="text-[9px] font-normal text-slate-500 bg-slate-900 px-1.5 py-0.5 rounded ml-1">${v.type}</span></h4>
-                                <span class="font-black text-emerald-400">${gainReel.toLocaleString()} CDF</span>
+                                <div>
+                                    <h4 class="font-black text-slate-200">${v.plaque}</h4>
+                                    <p class="text-[9px] text-sky-400 font-mono">${v.origine} ➔ ${v.destination} (${v.distDirect} km)</p>
+                                </div>
+                                <span class="font-black text-emerald-400 text-sm">${gainReel.toLocaleString()} CDF</span>
                             </div>
-                            <div class="flex justify-between text-[10px] text-slate-400 font-mono">
-                                <span><i class="fa-solid fa-route text-indigo-400"></i> ${troncons} tronçon(s) validé(s)</span>
-                                <span>Position Réf: <strong class="text-indigo-400">${v.dernierPoleConnu || 'En Mouvement'}</strong></span>
+                            <!-- Jauge de progression de la course en cours -->
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-[9px] text-slate-400 font-mono">
+                                    <span>Course en cours: <strong>${(v.kmCourse || 0).toFixed(1)} km</strong></span>
+                                    <span>${progressionPct}%</span>
+                                </div>
+                                <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden border border-slate-800">
+                                    <div class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style="width: ${progressionPct}%"></div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between text-[10px] text-slate-400 font-mono pt-1 border-t border-slate-900">
+                                <span><i class="fa-solid fa-rotate text-indigo-400"></i> ${troncons} rotation(s) validée(s)</span>
+                                <span>Total jour: <strong class="text-slate-200">${(v.kmJour || 0).toFixed(1)} km</strong></span>
                             </div>
                         </div>`);
                 }
@@ -820,10 +906,10 @@
             if(txtRecettes) txtRecettes.textContent = totalCDF.toLocaleString() + " CDF";
             const txtRotations = document.getElementById('txt-total-rotations');
             if(txtRotations) txtRotations.textContent = totalRot;
-            initialiserGraphiqueRapport(1, totalCDF);
+            initialiserGraphiqueRapport(totalCDF);
         }
 
-        function initialiserGraphiqueRapport(joursFiltre, totalAffiche) {
+        function initialiserGraphiqueRapport(totalAffiche) {
             const canvas = document.getElementById('chart-recettes-partenaire');
             if (!canvas || canvas.offsetParent === null) return; 
             if (chartPartenaireInstance) chartPartenaireInstance.destroy();
@@ -842,12 +928,7 @@
             const list = document.getElementById('tech-vehicules-list');
             if(!list) return;
             list.innerHTML = "";
-            const cibleIdx = document.getElementById('filtre-tech-vehicule') ? document.getElementById('filtre-tech-vehicule').value : 'all';
-            let vehiculesCibles = client.vehicules;
-            if (cibleIdx && cibleIdx !== 'all') { vehiculesCibles = [client.vehicules[parseInt(cibleIdx)]]; }
-
-            vehiculesCibles.forEach((v) => {
-                const origineIndex = client.vehicules.indexOf(v);
+            client.vehicules.forEach((v, origineIndex) => {
                 const btnMoteur = v.moteurCoupe 
                     ? `<button onclick="basculerMoteur(${origineIndex}, false)" class="w-full bg-emerald-500/20 text-emerald-400 font-bold py-2 rounded text-[10px] uppercase mt-2"><i class="fa-solid fa-unlock"></i> Restaurer Moteur</button>`
                     : `<button onclick="basculerMoteur(${origineIndex}, true)" class="w-full bg-rose-500/20 text-rose-400 font-bold py-2 rounded text-[10px] uppercase mt-2"><i class="fa-solid fa-lock"></i> Couper Moteur (Urgence)</button>`;
@@ -882,7 +963,7 @@
         }
 
         // ========================================================
-        // MINUTEUR ACTIF EN TEMPS RÉEL (Jours, Heures, Minutes, Sec)
+        // MINUTEUR DU FORFAIT FIABLE (NE RESTE JAMAIS À VIDE)
         // ========================================================
         function actualiserCompteAReboursForfait() {
             const display = document.getElementById('timer-compte-rebours');
@@ -890,7 +971,7 @@
 
             let expString = (partenaireProfil && partenaireProfil.date_expiration) ? partenaireProfil.date_expiration : localStorage.getItem('tv_date_expiration');
             
-            // Si aucune expiration n'existe encore, on initialise automatiquement un forfait actif de 5 jours
+            // Initialisation d'office d'une période active de 5 jours si absent
             if(!expString) { 
                 const def = new Date();
                 def.setDate(def.getDate() + 5);
@@ -938,7 +1019,6 @@
         }
         setInterval(synchroniserForfaitCloud, 10000);
 
-        // --- GESTION DE LA FENÊTRE DE RECHARGE CLIENT ---
         function basculerSelectVehiculeRecharge() {
             const mode = document.getElementById('recharge-mode').value;
             const blocSelect = document.getElementById('bloc-recharge-vehicule');
@@ -963,7 +1043,7 @@
 
         function declarerPaiementForfait() {
             const montant = parseInt(document.getElementById('input-montant-libre').value);
-            if (!montant || montant <= 0) { alert("❌ Veuillez saisir un montant valide (ex: 2000)."); return; }
+            if (!montant || montant <= 0) { alert("❌ Veuillez saisir un montant valide."); return; }
             
             const num = document.getElementById('recharge-numero');
             const reseau = num.options[num.selectedIndex].text;
@@ -982,9 +1062,6 @@
             fermerModalRecharge();
         }
 
-        // ========================================================
-        // AUTHENTIFICATION, INSCRIPTION ET AUTO-CONNEXION
-        // ========================================================
         function basculerVueAuth(mode) {
             if(mode === 'login') {
                 document.getElementById('form-connexion').classList.remove('hidden'); 
