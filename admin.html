@@ -19,7 +19,6 @@
         .page-fade { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* CARTE PLEIN ÉCRAN CLAIRE HAUTE DÉFINITION GOOGLE MAPS */
         #map-admin-suivi { 
             height: calc(100vh - 195px); 
             min-height: 600px; 
@@ -71,7 +70,7 @@
     <!-- 2. CORPS ADMIN -->
     <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
         <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
-            <span class="text-xs font-bold text-indigo-400">Central Control Panel v17.0 PROD</span>
+            <span class="text-xs font-bold text-indigo-400">Central Control Panel v17.2 PROD</span>
             <div class="flex gap-2 text-[10px] font-mono">
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 flex items-center gap-1">Central DO : <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="admin-server-dot"></span><span class="text-emerald-400 font-bold" id="admin-server-text">En Ligne</span></span>
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Historique : <span class="text-sky-400 font-bold" id="admin-historique-statut">Chargement...</span></span>
@@ -154,7 +153,7 @@
                                 <tr class="border-b border-slate-800 text-slate-500 uppercase text-[9px] font-sans">
                                     <th class="py-2">Plaque / IMEI</th>
                                     <th class="py-2">Distance Jour</th>
-                                    <th class="py-2">Course en Cours</th>
+                                    <th class="py-2">Ligne Assignée (Temps Réel)</th>
                                     <th class="py-2">Rotations</th>
                                     <th class="py-2">Gains Bruts</th>
                                 </tr>
@@ -210,7 +209,6 @@
                                             <option value="voir_id" class="text-sky-400">👁️ Voir Identifiants</option>
                                             <option value="activer" class="text-emerald-500">🟢 Activer Compte</option>
                                             <option value="suspendre" class="text-amber-500">🟠 Suspendre</option>
-                                            <!-- BOUTON SUPPRIMER RESTAURÉ -->
                                             <option value="supprimer" class="text-rose-500">🔴 Supprimer Compte</option>
                                         </select>
                                     </td>
@@ -394,7 +392,7 @@
         </div>
     </div>
 
-    <!-- MODAL VALIDATION RECHARGE ADMIN (TOUTES OPTIONS RESTAURÉES) -->
+    <!-- MODAL VALIDATION RECHARGE ADMIN -->
     <div id="modal-recharge-flexible" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -464,7 +462,7 @@
             { origine: "KINGASANI PASCAL", destination: "ROUTE MOKALI PONT MANGO", prix: 1500, distDirect: 4.5, distDeviee: 5.3 },
             { origine: "KINGASANI PASCAL", destination: "MIKONDO BOSAWA", prix: 500, distDirect: 3.0, distDeviee: 3.6 },
             { origine: "KINGASANI PASCAL", destination: "AEROPORT DE N'DJILI", prix: 500, distDirect: 5.5, distDeviee: 6.2 },
-            { origine: "KINTAMBO MAGASIN", destination: "KINTAMBO CIMETIERE", prix: 1000, distDirect: 1.8, distDeviee: 2.3 },
+            { origine: "KINTAMBO MAGASIN", destination: "KINSUKA POMPAGE", prix: 1000, distDirect: 4.8, distDeviee: 5.8 },
             { origine: "MARCHE CENTRAL", destination: "MATADI KIBALA", prix: 2000, distDirect: 16.5, distDeviee: 19.5 },
             { origine: "L'UPN", destination: "ROND POINT VICTOIRE", prix: 1000, distDirect: 9.5, distDeviee: 11.5 },
             { origine: "CENTRE VILLE (GARE CENTRALE)", destination: "U.P.N.", prix: 3000, distDirect: 12.5, distDeviee: 15.0 }
@@ -472,6 +470,37 @@
 
         const SERVEUR_URL = "http://134.209.116.89:3000";
         const socket = io(SERVEUR_URL, { transports: ['websocket'], reconnection: true });
+
+        // CANAL SUPABASE TEMPS RÉEL ENTRE PARTENAIRE ET ADMIN
+        const channelSyncAdmin = supabaseClient.channel('transvision_flotte');
+        channelSyncAdmin.on('broadcast', { event: 'maj_ligne_vehicule' }, ({ payload }) => {
+            appliquerMajLigneEnDirect(payload);
+        }).subscribe();
+
+        socket.on('maj_ligne_vehicule', (payload) => {
+            appliquerMajLigneEnDirect(payload);
+        });
+
+        function appliquerMajLigneEnDirect(payload) {
+            let v = flotteGlobale.find(item => item.imei === payload.imei);
+            if (v) {
+                v.origine = payload.origine;
+                v.destination = payload.destination;
+                if (payload.distDirect) v.distDirect = payload.distDirect;
+                if (payload.distDeviee) v.distDeviee = payload.distDeviee;
+                if (payload.tarif) v.tarif = payload.tarif;
+                v.kmCourse = 0;
+            }
+            majTableauFlotteAdmin();
+            if (mapAdmin && adminMarkers[payload.imei]) {
+                adminMarkers[payload.imei].getPopup().setContent(`
+                    <b>${v ? v.plaque : payload.plaque}</b><br>
+                    IMEI: ${payload.imei}<br>
+                    Ligne en cours: <b>${payload.origine} ➔ ${payload.destination}</b><br>
+                    Rotations: <b>${v ? v.tronconsValides : 0}</b>
+                `);
+            }
+        }
 
         function calculerDistanceGPS(lat1, lon1, lat2, lon2) {
             const R = 6371; 
@@ -491,6 +520,19 @@
         async function chargerHistoriqueAdmin() {
             try {
                 if (!window.supabase) return;
+
+                // 1. Lire les affectations de lignes enregistrées dans Supabase tv_vehicules
+                let lignesConfig = {};
+                try {
+                    const { data: vehiculesConfig } = await supabaseClient.from('tv_vehicules').select('*');
+                    if (vehiculesConfig && vehiculesConfig.length > 0) {
+                        vehiculesConfig.forEach(cfg => {
+                            lignesConfig[String(cfg.imei)] = cfg;
+                        });
+                    }
+                } catch(e) {}
+
+                // 2. Charger les positions GPS
                 const { data, error } = await supabaseClient.from('transvision_positions_gps').select('*').order('created_at', { ascending: false }).limit(300);
                 if (data) {
                     const vehiculesUniques = {};
@@ -499,15 +541,17 @@
                     flotteGlobale = [];
                     Object.values(vehiculesUniques).forEach(pos => {
                         const imeiStr = String(pos.imei);
+                        const cfg = lignesConfig[imeiStr] || {};
+
                         flotteGlobale.push({
                             imei: imeiStr,
-                            plaque: `TRK-${imeiStr.slice(-4)}`,
+                            plaque: cfg.plaque || `TRK-${imeiStr.slice(-4)}`,
                             places: 14,
-                            tarif: 1000,
-                            origine: "Kintambo Magasin",
-                            destination: "Delvaux",
-                            distDirect: 4.2,
-                            distDeviee: 5.0,
+                            tarif: cfg.tarif || 1000,
+                            origine: cfg.origine || "Kintambo Magasin",
+                            destination: cfg.destination || "Delvaux",
+                            distDirect: cfg.dist_direct || 4.2,
+                            distDeviee: cfg.dist_deviee || 5.0,
                             kmCourse: 0,
                             dernierCap: undefined,
                             secondesArret: 0,
@@ -520,7 +564,6 @@
                         });
                     });
 
-                    // Pré-tracer l'historique de déplacement en Bleu Navigation
                     flotteGlobale.forEach(v => {
                         const pts = data
                             .filter(p => String(p.imei) === v.imei)
@@ -536,9 +579,6 @@
             } catch (err) {}
         }
 
-        // ========================================================
-        // GESTION CENTRALE DU MOUVEMENT TÉLÉMATIQUE (DISTANCE / CAP)
-        // ========================================================
         function traiterNouvellePositionAdmin(data) {
             let vehiculeExistant = flotteGlobale.find(v => v.imei === data.imei);
             const now = new Date();
@@ -623,8 +663,7 @@
                         adminMarkers[data.imei].getPopup().setContent(`
                             <b>${vehiculeExistant.plaque}</b><br>
                             IMEI: ${vehiculeExistant.imei}<br>
-                            Ligne: ${vehiculeExistant.origine} ➔ ${vehiculeExistant.destination}<br>
-                            Course: <b>${(vehiculeExistant.kmCourse || 0).toFixed(1)} / ${vehiculeExistant.distDirect} km</b><br>
+                            Ligne: <b>${vehiculeExistant.origine} ➔ ${vehiculeExistant.destination}</b><br>
                             Rotations: <b>${vehiculeExistant.tronconsValides}</b> (${vehiculeExistant.recetteBruteReelle.toLocaleString()} CDF)<br>
                             Dernier Live: ${vehiculeExistant.derniereCo.toLocaleTimeString()}
                         `);
@@ -634,7 +673,7 @@
                         adminPolylines[data.imei].setLatLngs(tracesFlotte[data.imei]);
                     } else {
                         adminPolylines[data.imei] = L.polyline(tracesFlotte[data.imei], {
-                            color: '#1a73e8', // Bleu officiel Google Navigation
+                            color: '#1a73e8',
                             weight: 6,
                             opacity: 0.9,
                             lineJoin: 'round'
@@ -651,7 +690,6 @@
             traiterNouvellePositionAdmin(data);
         });
 
-        // DOUBLE INTERROGATION TEMPS RÉEL (SUPABASE TOUTES LES 4 SECONDES)
         async function sonderPositionsCloudAdmin() {
             try {
                 if (!window.supabase) return;
@@ -693,9 +731,8 @@
                     <tr>
                         <td class="py-3 font-bold text-slate-200">${v.plaque} <br><span class="text-[9px] text-slate-500">${v.imei}</span></td>
                         <td class="py-3 font-bold text-sky-400">${(v.kmJour || 0).toFixed(1)} km</td>
-                        <td class="py-3 text-slate-300 font-mono">
-                            <span class="text-emerald-400 font-bold">${(v.kmCourse || 0).toFixed(1)}</span> / ${v.distDirect} km
-                            <div class="text-[9px] text-slate-500">${v.origine} ➔ ${v.destination}</div>
+                        <td class="py-3 text-slate-200 font-bold">
+                            <span class="text-sky-400">${v.origine}</span> ➔ <span class="text-emerald-400">${v.destination}</span>
                         </td>
                         <td class="py-3 font-black text-slate-200">${v.tronconsValides || 0}</td>
                         <td class="py-3 font-black text-emerald-400">${(v.recetteBruteReelle || 0).toLocaleString()} CDF</td>
@@ -722,9 +759,6 @@
             if (idPage === 'page-suivi') { setTimeout(initMapAdmin, 50); }
         }
 
-        // ========================================================
-        // INITIALISATION DE LA CARTE GOOGLE MAPS PLEIN ÉCRAN
-        // ========================================================
         function initMapAdmin() {
             const container = document.getElementById('map-admin-suivi');
             if (!container || container.offsetParent === null) return;
@@ -732,7 +766,6 @@
             if (!mapAdmin) {
                 mapAdmin = L.map('map-admin-suivi').setView([-4.3224, 15.3070], 13);
                 
-                // Tuiles officielles Google Maps Roadmap
                 L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
                     maxZoom: 20,
                     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
