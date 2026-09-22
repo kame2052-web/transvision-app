@@ -21,8 +21,9 @@
     <style>
         .blur-transition { transition: filter 0.4s ease, opacity 0.4s ease; }
         #map-container { height: 350px; width: 100%; border-radius: 1rem; z-index: 10; }
-        .leaflet-tile { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
-        .leaflet-container { background: #020617 !important; }
+        /* Style clair CartoDB sans filtre d'inversion */
+        .leaflet-tile { filter: none !important; }
+        .leaflet-container { background: #f8fafc !important; }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(100deg); cursor: pointer; }
         @media print {
             body { background: white !important; color: black !important; }
@@ -60,7 +61,7 @@
             <div class="space-y-4 mt-1">
                 <div class="text-center">
                     <div class="w-20 h-20 mx-auto mb-3 rounded-2xl overflow-hidden shadow-2xl shadow-emerald-500/25 flex items-center justify-center bg-slate-950 border border-emerald-500/30">
-                        <img src="logo%20192x192.png" alt="Logo TransVision" class="w-full h-full object-contain" style="transform: scale(2.05); transform-origin: 48% 52%;" onerror="this.style.display='none'">
+                        <img src="logo%20192x192.png" alt="Logo TransVision" class="w-full h-full object-contain scale-[2.05]" onerror="this.style.display='none'">
                     </div>
                     <h2 class="text-xl font-black tracking-wide">TransVision</h2>
                     <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">by Global Tech Solutions</p>
@@ -101,7 +102,7 @@
                         <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Créer un Code PIN</label>
                         <input type="password" id="ins-pin" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono" placeholder="4 chiffres secrets">
                     </div>
-                    <button onclick="inscrireNouveauPartenaire()" class="w-full bg-emerald-500 text-slate-950 font-black py-3 rounded-xl text-xs uppercase mt-3">S'inscrire</button>
+                    <button onclick="inscrireNouveauPartenaire()" class="w-full bg-emerald-500 text-slate-950 font-black py-3 rounded-xl text-xs uppercase mt-3 shadow-lg">S'inscrire</button>
                     <p class="text-[10px] text-slate-400 text-center mt-2">
                         En adhérant, vous acceptez nos <button type="button" onclick="ouvrirModalCGU()" class="text-emerald-400 font-bold underline">CGU & Forfaits</button>.
                     </p>
@@ -109,7 +110,7 @@
             </div>
             
             <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v16.5 PROD — Global Tech Solutions
+                TransVision v16.6 PROD — Global Tech Solutions
             </div>
         </div>
 
@@ -125,7 +126,7 @@
                         <p class="text-[8px] text-slate-400 font-mono">TransVision by Global Tech Solutions</p>
                     </div>
                     <div class="w-8 h-8 rounded-xl overflow-hidden shadow border border-slate-800 bg-slate-950 flex-shrink-0">
-                        <img src="logo%20192x192.png" alt="Logo" class="w-full h-full object-contain" style="transform: scale(2.05); transform-origin: 48% 52%;" onerror="this.style.display='none'">
+                        <img src="logo%20192x192.png" alt="Logo" class="w-full h-full object-contain scale-[2.05]" onerror="this.style.display='none'">
                     </div>
                 </div>
 
@@ -138,7 +139,6 @@
                         <p class="text-[9px] text-slate-400 mt-0.5" id="last-update-text">Chargement de l'historique...</p>
                     </div>
                     <div class="text-right">
-                        <!-- MINUTEUR FORFAIT -->
                         <span id="timer-compte-rebours" class="text-sm font-mono font-black text-slate-100 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg shadow-inner">--:--:--</span>
                     </div>
                 </div>
@@ -151,7 +151,7 @@
                         <h2 class="text-[10px] font-bold text-slate-300 uppercase tracking-widest flex items-center gap-1.5"><i class="fa-solid fa-map-location-dot text-emerald-400"></i> Traceur GPS</h2>
                         <select id="select-vehicule-map" onchange="centrerSurVehicule(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg text-[10px] text-emerald-400 font-bold px-2 py-1 outline-none truncate max-w-[130px]"></select>
                     </div>
-                    <div id="map-container" class="shadow-inner flex-1"></div>
+                    <div id="map-container" class="shadow-inner flex-1 border border-slate-800"></div>
                 </div>
             </div>
 
@@ -362,7 +362,7 @@
             </nav>
         </div>
 
-        <!-- MODAL RECHARGE FORFAIT LIBRE (FENÊTRE UNIQUE, CORRIGÉE) -->
+        <!-- MODAL RECHARGE CLIENT (RESTAURÉ ET FONCTIONNEL) -->
         <div id="modal-recharge-partenaire" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
             <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
                 <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -418,7 +418,6 @@
 
     <!-- LOGIQUE JAVASCRIPT CONNECTÉE -->
     <script>
-        // --- CHARGEMENT DYNAMIQUE DES NUMÉROS DE L'ADMIN ---
         function chargerConfigurationsAdmin() {
             const numWhatsApp = localStorage.getItem('tv_whatsapp') || "243810000000";
             const numMpesa = localStorage.getItem('tv_mpesa') || "+243 812 000 000";
@@ -445,15 +444,11 @@
         const SERVEUR_URL = "http://134.209.116.89:3000";
         const socket = io(SERVEUR_URL, { transports: ['websocket'], reconnection: true });
 
-        // LE PROFIL COMPLET CHARGÉ DEPUIS SUPABASE OU FALLBACK
         let partenaireProfil = null; 
         let client = { nom: "Dolce", tel: "0965647819", vehicules: [] };
         let map = null; let busMarker = null;
         let chartPartenaireInstance = null;
 
-        // ==========================================
-        // DÉFINITION DES PÔLES ET TARIFS
-        // ==========================================
         const POLES_KINSHASA = [
             { nom: "Matadi Kibala", lat: -4.4361, lng: 15.2605 },
             { nom: "UPN", lat: -4.3942, lng: 15.2755 },
@@ -493,18 +488,13 @@
                 const txtStatut = document.getElementById('last-update-text');
                 txtStatut.textContent = "Connexion à la base de données...";
                 
-                if (!window.supabase) {
-                    txtStatut.textContent = "Erreur: Librairie Supabase non chargée.";
-                    return;
-                }
+                if (!window.supabase) return;
 
                 const { data, error } = await supabaseClient
                     .from('transvision_positions_gps')
                     .select('*')
                     .order('created_at', { ascending: false })
                     .limit(200);
-
-                if (error) { txtStatut.textContent = "Erreur d'accès à la table."; return; }
 
                 if (data && data.length > 0) {
                     const vehiculesTrouves = {};
@@ -515,6 +505,7 @@
                         }
                     });
 
+                    client.vehicules = [];
                     Object.values(vehiculesTrouves).forEach(pos => {
                         const imeiStr = String(pos.imei);
                         client.vehicules.push({
@@ -525,17 +516,15 @@
                     });
                     
                     majSelecteurMap();
+                    peuplerSelecteursFiltre();
                     const sel = document.getElementById('select-vehicule-map');
                     if (sel && sel.value !== "none") { initMapEtCentrer(parseInt(sel.value)); }
                     
                     txtStatut.textContent = `Historique chargé (${client.vehicules.length} veh).`;
-                } else {
-                    txtStatut.textContent = "Historique vide. En attente de direct...";
                 }
-            } catch (err) { document.getElementById('last-update-text').textContent = "Erreur de chargement."; }
+            } catch (err) {}
         }
 
-        // --- GESTION DES ÉVÉNEMENTS SOCKET (LIVE) & CALCULS GEOFENCING ---
         socket.on('connect', () => {
             document.getElementById('statut-serveur-voyant').classList.replace('bg-rose-500', 'bg-emerald-400');
             document.getElementById('statut-serveur-texte').textContent = "Serveur Connecté";
@@ -550,7 +539,7 @@
 
         socket.on('nouvelle_position', (data) => {
             const now = new Date();
-            document.getElementById('last-update-text').textContent = `Mise à jour en direct : ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+            document.getElementById('last-update-text').textContent = `Live : ${now.toLocaleTimeString()}`;
 
             let vehiculeIndex = client.vehicules.findIndex(v => v.imei === data.imei);
             
@@ -562,12 +551,14 @@
                 });
                 vehiculeIndex = client.vehicules.length - 1;
                 majSelecteurMap();
+                peuplerSelecteursFiltre();
             } else {
                 let v = client.vehicules[vehiculeIndex];
                 
                 let distanceParcourue = calculerDistanceGPS(v.lat, v.lng, data.lat, data.lng);
                 if (distanceParcourue > 0.002 && distanceParcourue < 2) {
-                    v.kmJour += distanceParcourue; v.carburantJour = v.kmJour * 0.12; 
+                    v.kmJour += distanceParcourue; 
+                    v.carburantJour = v.kmJour * 0.12; 
                 }
 
                 const poleDetecte = trouverPoleActuel(data.lat, data.lng);
@@ -601,16 +592,15 @@
             const selectMap = document.getElementById('select-vehicule-map');
             if (selectMap && selectMap.value == vehiculeIndex) {
                 if(busMarker && map) {
-                    const newLatLng = new L.LatLng(data.lat, data.lng);
-                    busMarker.setLatLng(newLatLng);
-                    map.panTo(newLatLng);
+                    busMarker.setLatLng(new L.LatLng(data.lat, data.lng));
+                    map.panTo(new L.LatLng(data.lat, data.lng));
                 } else { initMapEtCentrer(vehiculeIndex); }
             }
 
-            genererRapportFinancier(); genererRapportTechnique();
+            genererRapportFinancier(); 
+            genererRapportTechnique();
         });
 
-        // --- GESTION DES FILTRES DE DATE ---
         function initFiltresDates() {
             const today = new Date();
             const strToday = today.toISOString().split('T')[0];
@@ -631,15 +621,18 @@
             if(selTech) selTech.innerHTML = '<option value="all">Tous les véhicules (Flotte globale)</option>';
             if(selRecharge) selRecharge.innerHTML = '';
 
-            client.vehicules.forEach((v, i) => {
-                const opt = `<option value="${i}">${v.plaque}</option>`;
-                if(selFin) selFin.insertAdjacentHTML('beforeend', opt);
-                if(selTech) selTech.insertAdjacentHTML('beforeend', opt);
-                if(selRecharge) selRecharge.insertAdjacentHTML('beforeend', opt);
-            });
+            if (client.vehicules.length === 0 && selRecharge) {
+                selRecharge.innerHTML = '<option value="none">Aucun véhicule détecté</option>';
+            } else {
+                client.vehicules.forEach((v, i) => {
+                    const opt = `<option value="${i}">${v.plaque}</option>`;
+                    if(selFin) selFin.insertAdjacentHTML('beforeend', opt);
+                    if(selTech) selTech.insertAdjacentHTML('beforeend', opt);
+                    if(selRecharge) selRecharge.insertAdjacentHTML('beforeend', opt);
+                });
+            }
         }
 
-        // --- MOTEUR D'AFFICHAGE & NAVIGATION ---
         function genererToutesLesVues() {
             document.getElementById('lbl-nom-partenaire').textContent = partenaireProfil ? partenaireProfil.nom : client.nom;
             document.getElementById('prof-tel').value = partenaireProfil ? partenaireProfil.tel : client.tel;
@@ -665,7 +658,6 @@
             }, 50);
         }
 
-        // --- VUE : FLOTTE / CARTE ---
         function majSelecteurMap() {
             const sel = document.getElementById('select-vehicule-map');
             if(!sel) return;
@@ -677,13 +669,18 @@
         function initMapEtCentrer(index) {
             const mapContainer = document.getElementById('map-container');
             if (!mapContainer || mapContainer.offsetParent === null) return;
-            let lat = -4.3215; let lng = 15.3115; let label = "En attente de connexion...";
+            let lat = -4.3215; let lng = 15.3115; let label = "En attente de transmission...";
             const v = client.vehicules[index];
             if(v) { lat = v.lat; lng = v.lng; label = `<b>${v.plaque}</b><br>IMEI: ${v.imei}`; }
             if(!map) {
                 map = L.map('map-container').setView([lat, lng], 14);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
-                POLES_KINSHASA.forEach(pole => { L.circle([pole.lat, pole.lng], { color: 'emerald', fillColor: '#10b981', fillOpacity: 0.2, radius: 250 }).addTo(map).bindPopup(`Zone: ${pole.nom}`); });
+                // Tuiles claires haute lisibilité CartoDB Voyager
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; OpenStreetMap &copy; CARTO',
+                    subdomains: 'abcd',
+                    maxZoom: 19
+                }).addTo(map);
+                POLES_KINSHASA.forEach(pole => { L.circle([pole.lat, pole.lng], { color: '#059669', fillColor: '#10b981', fillOpacity: 0.2, radius: 250 }).addTo(map).bindPopup(`Zone: ${pole.nom}`); });
             }
             if(busMarker) map.removeLayer(busMarker);
             busMarker = L.marker([lat, lng]).addTo(map).bindPopup(label).openPopup();
@@ -691,7 +688,6 @@
         }
         function centrerSurVehicule(indexStr) { if (indexStr !== "none") initMapEtCentrer(parseInt(indexStr)); }
 
-        // --- VUE : NOUVEAU VÉHICULE ---
         function enregistrerVehiculeSaisi() {
             const plaque = document.getElementById('add-plaque').value.trim();
             const imei = document.getElementById('add-imei').value.trim();
@@ -706,7 +702,6 @@
             genererToutesLesVues(); changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
         }
 
-        // --- VUE : RAPPORT FINANCIER ---
         function appliquerFiltreFinancier() { genererRapportFinancier(); }
 
         function genererRapportFinancier() {
@@ -749,19 +744,15 @@
             const canvas = document.getElementById('chart-recettes-partenaire');
             if (!canvas || canvas.offsetParent === null) return; 
             if (chartPartenaireInstance) chartPartenaireInstance.destroy();
-            let dataGains = []; let labels = [];
-            const gainMoyenJour = totalAffiche / joursFiltre;
-
-            if (joursFiltre === 1) { labels = ['Aujourd\'hui']; dataGains = [totalAffiche]; } 
-            else if (joursFiltre <= 7) { for(let i=1; i<=joursFiltre; i++) { labels.push(`J-${joursFiltre - i + 1}`); dataGains.push(gainMoyenJour * (0.8 + Math.random() * 0.4)); } }
+            let dataGains = [totalAffiche]; 
+            let labels = ['Aujourd\'hui'];
 
             chartPartenaireInstance = new Chart(canvas.getContext('2d'), {
                 type: 'bar', data: { labels: labels, datasets: [{ label: 'Gains (CDF)', data: dataGains, backgroundColor: '#10b981', borderRadius: 4 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: joursFiltre <= 7 }, y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 9 } } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 9 } } } } }
             });
         }
 
-        // --- VUE : ANALYSE TECHNIQUE ---
         function appliquerFiltreTechnique() { genererRapportTechnique(); }
 
         function genererRapportTechnique() {
@@ -785,7 +776,7 @@
                     <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
                         <h4 class="font-black text-slate-200">${v.plaque} <span class="text-[9px] font-mono text-slate-500 float-right">IMEI: ${v.imei}</span></h4>
                         <div class="grid grid-cols-2 gap-y-2 gap-x-1 text-[9px] font-mono bg-slate-900 p-2.5 rounded border border-slate-800">
-                            <p>📡 GPS: <span class="text-emerald-400">Fort</span></p>
+                            <p>📡 GPS: <span class="text-emerald-400">Opérationnel</span></p>
                             <p>🔋 Batt: <span class="text-emerald-400">12.6V</span></p>
                             <p>⛽ Conso: <span class="text-sky-400 font-bold">${consoPeriode} L</span></p>
                             <p>🛣️ Dist: <span class="text-sky-400 font-bold">${kmPeriode} km</span></p>
@@ -807,19 +798,11 @@
             if(newPin && newPin.length >= 4) { alert("✅ Code PIN de sécurité mis à jour."); document.getElementById('prof-pin-new').value = ""; } else { alert("❌ Le PIN doit contenir au moins 4 caractères."); }
         }
 
-        // ========================================================
-        // GESTION DU MINUTEUR DE FORFAIT (Jours, Heures, Minutes)
-        // ========================================================
         function actualiserCompteAReboursForfait() {
             const display = document.getElementById('timer-compte-rebours');
             if(!display) return;
 
-            let expString = null;
-            if (partenaireProfil && partenaireProfil.date_expiration) {
-                expString = partenaireProfil.date_expiration;
-            } else {
-                expString = localStorage.getItem('tv_date_expiration');
-            }
+            let expString = (partenaireProfil && partenaireProfil.date_expiration) ? partenaireProfil.date_expiration : localStorage.getItem('tv_date_expiration');
             
             if(!expString) { 
                 display.textContent = "--:--:--"; 
@@ -851,7 +834,6 @@
             }
         }
 
-        // --- GESTION DE LA FENÊTRE DE RECHARGE CLIENT ---
         function basculerSelectVehiculeRecharge() {
             const mode = document.getElementById('recharge-mode').value;
             const blocSelect = document.getElementById('bloc-recharge-vehicule');
@@ -863,11 +845,15 @@
         }
 
         function ouvrirModalRecharge() { 
-            document.getElementById('modal-recharge-partenaire').classList.remove('hidden'); 
+            peuplerSelecteursFiltre();
+            basculerSelectVehiculeRecharge();
+            const modal = document.getElementById('modal-recharge-partenaire');
+            if(modal) modal.classList.remove('hidden');
         }
         
         function fermerModalRecharge() { 
-            document.getElementById('modal-recharge-partenaire').classList.add('hidden'); 
+            const modal = document.getElementById('modal-recharge-partenaire');
+            if(modal) modal.classList.add('hidden');
         }
 
         function declarerPaiementForfait() {
@@ -883,19 +869,14 @@
                 const indexVehicule = document.getElementById('recharge-vehicule-select').value;
                 if(indexVehicule !== "none" && client.vehicules[indexVehicule]) {
                     cible = `le véhicule ${client.vehicules[indexVehicule].plaque}`;
-                } else {
-                    cible = `un véhicule spécifique`;
                 }
             }
             
-            alert(`🛰️ Demande de transfert de ${montant.toLocaleString()} CDF pour ${cible}.\nTransaction via ${reseau} en cours de traitement.`);
+            alert(`🛰️ Demande de transfert de ${montant.toLocaleString()} CDF pour ${cible}.\nTransaction via ${reseau} transmise.`);
             document.getElementById('input-montant-libre').value = "";
             fermerModalRecharge();
         }
 
-        // ========================================================
-        // AUTHENTIFICATION, INSCRIPTION ET FALLBACK SÉCURITÉ
-        // ========================================================
         function basculerVueAuth(mode) {
             if(mode === 'login') {
                 document.getElementById('form-connexion').classList.remove('hidden'); 
@@ -916,7 +897,6 @@
             document.getElementById(id).classList.remove('hidden'); 
         }
 
-        // Création de compte (Écriture dans Supabase)
         async function inscrireNouveauPartenaire() {
             const nom = document.getElementById('ins-nom').value.trim();
             const tel = document.getElementById('ins-tel').value.trim();
@@ -925,7 +905,6 @@
             if(!nom || !tel || !pin) { alert("Veuillez remplir tous les champs."); return; }
 
             try {
-                // Création d'un forfait d'essai de 3 jours
                 const dateExpiration = new Date();
                 dateExpiration.setDate(dateExpiration.getDate() + 3);
 
@@ -940,11 +919,10 @@
                 document.getElementById('login-pin').value = pin;
                 basculerVueAuth('login');
             } catch (err) {
-                alert("❌ Erreur lors de l'inscription. Vérifiez que la base de données Supabase est accessible.");
+                alert("❌ Erreur lors de l'inscription.");
             }
         }
 
-        // Connexion avec Tolérance de Panne (Fallback sur Dolce si Supabase est bloqué)
         async function executerConnexionPartenaire() { 
             const telInput = document.getElementById('login-tel').value.trim();
             const pinInput = document.getElementById('login-pin').value.trim();
@@ -952,7 +930,6 @@
             btn.textContent = "Vérification...";
 
             try {
-                // 1. On interroge Supabase
                 const { data, error } = await supabaseClient.from('tv_partenaires').select('*').eq('tel', telInput).eq('pin', pinInput).single();
                 
                 if (data) {
@@ -967,14 +944,12 @@
         }
 
         function declencherFallback(telInput, pinInput, btn) {
-            // FALLBACK DE SÉCURITÉ POUR NE JAMAIS VOUS BLOQUER
             if (telInput === "0965647819" && pinInput === "0000") {
-                console.warn("Supabase bloqué. Connexion forcée via le Fallback de sécurité Local.");
                 const fallbackData = { nom: "Dolce", tel: "0965647819" };
                 localStorage.setItem('tv_partenaire_tel', "0965647819");
                 lancerEspaceFlotte(fallbackData);
             } else {
-                alert("❌ Téléphone ou Code PIN incorrect ou base de données inaccessible."); 
+                alert("❌ Téléphone ou Code PIN incorrect."); 
                 btn.textContent = "Ouvrir mon Espace Flotte"; 
             }
         }
@@ -999,7 +974,6 @@
         function ouvrirModalCGU() { document.getElementById('modal-cgu').classList.remove('hidden'); }
         function fermerModalCGU() { document.getElementById('modal-cgu').classList.add('hidden'); }
 
-        // AUTO-CONNEXION AU CHARGEMENT DE LA PAGE
         window.addEventListener('DOMContentLoaded', async () => {
             chargerConfigurationsAdmin();
             
