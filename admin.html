@@ -19,16 +19,16 @@
         .page-fade { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* CARTE PLEIN ÉCRAN CLAIRE HAUTE DÉFINITION */
+        /* CARTE PLEIN ÉCRAN CLAIRE HAUTE DÉFINITION GOOGLE MAPS */
         #map-admin-suivi { 
-            height: calc(100vh - 210px); 
+            height: calc(100vh - 195px); 
             min-height: 600px; 
             width: 100%; 
             border-radius: 1.25rem; 
             z-index: 10; 
         }
         .leaflet-tile { filter: none !important; }
-        .leaflet-container { background: #f8fafc !important; }
+        .leaflet-container { background: #e5e3df !important; }
         
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(100deg); cursor: pointer; }
         input[type="file"]::file-selector-button { background-color: #4f46e5; color: white; border: none; border-radius: 0.5rem; padding: 0.5rem 1rem; cursor: pointer; font-weight: bold; transition: background 0.3s; }
@@ -71,7 +71,7 @@
     <!-- 2. CORPS ADMIN -->
     <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
         <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
-            <span class="text-xs font-bold text-indigo-400">Central Control Panel v16.7 PROD</span>
+            <span class="text-xs font-bold text-indigo-400">Central Control Panel v17.0 PROD</span>
             <div class="flex gap-2 text-[10px] font-mono">
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 flex items-center gap-1">Central DO : <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="admin-server-dot"></span><span class="text-emerald-400 font-bold" id="admin-server-text">En Ligne</span></span>
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Historique : <span class="text-sky-400 font-bold" id="admin-historique-statut">Chargement...</span></span>
@@ -111,24 +111,26 @@
                 </div>
             </aside>
 
-            <!-- CONTENU PLEINE LARGEUR -->
-            <main class="flex-1 p-6 lg:p-8 space-y-6 overflow-y-auto w-full">
+            <!-- CONTENU PLEINE LARGEUR SANS ESPACE NOIR -->
+            <main class="flex-1 p-5 space-y-5 overflow-y-auto w-full">
                 
-                <!-- SUIVI LIVE -->
-                <div id="page-suivi" class="space-y-4 page-fade class-page-admin">
+                <!-- SUIVI LIVE GOOGLE MAPS -->
+                <div id="page-suivi" class="space-y-3 page-fade class-page-admin">
                     <div class="flex justify-between items-center">
-                        <h2 class="text-xl font-black text-slate-100">🗺️ Suivi Global & Geofences</h2>
-                        <button onclick="centrerMapAdmin()" class="bg-slate-800 text-emerald-400 hover:bg-slate-700 text-[10px] px-3 py-1.5 rounded-lg font-bold border border-slate-700 transition-colors">
-                            <i class="fa-solid fa-crosshairs"></i> Recentrer Kinshasa
+                        <h2 class="text-lg font-black text-slate-100 flex items-center gap-2">
+                            <i class="fa-solid fa-location-crosshairs text-sky-400"></i> Suivi Télématique & Trajectoires Directes
+                        </h2>
+                        <button onclick="centrerMapAdmin()" class="bg-slate-800 text-sky-400 hover:bg-slate-700 text-[10px] px-3 py-1.5 rounded-lg font-bold border border-slate-700 transition-colors">
+                            <i class="fa-solid fa-crosshairs mr-1"></i> Recentrer Kinshasa
                         </button>
                     </div>
-                    <div id="map-admin-suivi" class="border border-slate-800 shadow-xl"></div>
+                    <div id="map-admin-suivi" class="border border-slate-800 shadow-2xl overflow-hidden"></div>
                 </div>
 
                 <!-- GESTION DE LA FLOTTE -->
                 <div id="page-gestion-flotte" class="space-y-4 page-fade class-page-admin hidden">
                     <div class="flex justify-between items-end">
-                        <h2 class="text-xl font-black text-slate-100">🚍 Parc Automobile & Recettes Temp Réel</h2>
+                        <h2 class="text-xl font-black text-slate-100">🚍 Parc Automobile & Recettes Temps Réel</h2>
                     </div>
 
                     <div class="grid grid-cols-3 gap-4">
@@ -137,7 +139,7 @@
                             <p class="text-3xl font-black text-slate-100 mt-1" id="stat-total-km">0</p>
                         </div>
                         <div class="bg-indigo-500/10 p-4 rounded-2xl border border-indigo-500/20 shadow-md">
-                            <p class="text-[10px] text-indigo-400 uppercase font-black tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-route"></i> Tronçons Validés</p>
+                            <p class="text-[10px] text-indigo-400 uppercase font-black tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-route"></i> Rotations Validées</p>
                             <p class="text-3xl font-black text-indigo-300 mt-1" id="stat-total-rotations">0</p>
                         </div>
                         <div class="bg-emerald-500/10 p-4 rounded-2xl border border-emerald-500/20 shadow-md">
@@ -150,10 +152,10 @@
                         <table class="w-full text-left">
                             <thead>
                                 <tr class="border-b border-slate-800 text-slate-500 uppercase text-[9px] font-sans">
-                                    <th class="py-2">Plaque / ID</th>
+                                    <th class="py-2">Plaque / IMEI</th>
                                     <th class="py-2">Distance Jour</th>
-                                    <th class="py-2">Dernier Pôle Validé</th>
-                                    <th class="py-2">Tronçons Mémorisés</th>
+                                    <th class="py-2">Course en Cours</th>
+                                    <th class="py-2">Rotations</th>
                                     <th class="py-2">Gains Bruts</th>
                                 </tr>
                             </thead>
@@ -208,6 +210,7 @@
                                             <option value="voir_id" class="text-sky-400">👁️ Voir Identifiants</option>
                                             <option value="activer" class="text-emerald-500">🟢 Activer Compte</option>
                                             <option value="suspendre" class="text-amber-500">🟠 Suspendre</option>
+                                            <!-- BOUTON SUPPRIMER RESTAURÉ -->
                                             <option value="supprimer" class="text-rose-500">🔴 Supprimer Compte</option>
                                         </select>
                                     </td>
@@ -226,7 +229,7 @@
                             <i class="fa-solid fa-file-excel text-2xl text-emerald-400"></i>
                             <div>
                                 <h3 class="text-xs font-black uppercase tracking-widest text-emerald-400">Importer Grille Tarifaire (Excel)</h3>
-                                <p class="text-[10px] text-slate-400 mt-1">Colonnes requises : Origine, Destination, Prix (CDF).</p>
+                                <p class="text-[10px] text-slate-400 mt-1">Colonnes requises : Origine, Destination, Prix (CDF), Distance Approx. (km), Distance Réelle Déviée (km).</p>
                             </div>
                         </div>
                         <div class="flex flex-col sm:flex-row gap-3 items-center">
@@ -242,13 +245,14 @@
                                 <div><input type="text" id="add-origine" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200" placeholder="Origine (ex: UPN)"></div>
                                 <div><input type="text" id="add-destination" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200" placeholder="Destination (ex: Delvaux)"></div>
                                 <div><input type="number" id="add-prix-troncon" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-emerald-400" placeholder="Prix (CDF)"></div>
+                                <div><input type="number" step="0.1" id="add-dist-troncon" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-sky-400" placeholder="Distance (km)"></div>
                                 <button onclick="creerNouveauTronconAdmin()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-2.5 rounded-xl uppercase text-xs">Injecter</button>
                             </div>
                         </div>
                         
                         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 lg:col-span-2 space-y-3">
                             <div class="flex justify-between items-center">
-                                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400">Tarifs de Référence Actifs</h3>
+                                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400">Tarifs et Distances Actifs</h3>
                                 <span id="badge-nb-routes" class="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded font-bold">0 Rte(s)</span>
                             </div>
                             <div class="space-y-2 overflow-y-auto max-h-[350px] text-xs font-mono" id="box-matrice-troncons"></div>
@@ -375,7 +379,7 @@
                             <button onclick="modifierAccesPropresAdmin()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-2.5 rounded-xl uppercase text-xs transition-all shadow-lg shadow-indigo-500/10 mt-1">Valider & Modifier</button>
                         </div>
 
-                        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
+                        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-3">
                             <div class="flex justify-between items-center border-b border-slate-800 pb-2">
                                 <h3 class="font-bold text-emerald-400 uppercase tracking-wider text-[10px]">Rédaction des CGU</h3>
                                 <span class="text-[9px] text-slate-500 font-mono">Synchronisé</span>
@@ -390,7 +394,7 @@
         </div>
     </div>
 
-    <!-- MODAL VALIDATION RECHARGE ADMIN -->
+    <!-- MODAL VALIDATION RECHARGE ADMIN (TOUTES OPTIONS RESTAURÉES) -->
     <div id="modal-recharge-flexible" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -451,24 +455,19 @@
         let flotteGlobale = [];
         let mapAdmin = null;
         let adminMarkers = {};
-
-        const POLES_KINSHASA = [
-            { nom: "Matadi Kibala", lat: -4.4361, lng: 15.2605 },
-            { nom: "UPN", lat: -4.3942, lng: 15.2755 },
-            { nom: "Delvaux", lat: -4.3755, lng: 15.2801 },
-            { nom: "Kintambo Magasin", lat: -4.3411, lng: 15.2655 },
-            { nom: "Gare Centrale", lat: -4.3075, lng: 15.3125 }
-        ];
+        let adminPolylines = {};
+        let tracesFlotte = {};
+        let dernierPointIdAdmin = null;
 
         let listeItineraires = [
-            { origine: "Matadi Kibala", destination: "Gare Centrale", prix: 2500 },
-            { origine: "Matadi Kibala", destination: "UPN", prix: 1000 },
-            { origine: "UPN", destination: "Delvaux", prix: 500 },
-            { origine: "UPN", destination: "Kintambo Magasin", prix: 1000 },
-            { origine: "Delvaux", destination: "Kintambo Magasin", prix: 500 },
-            { origine: "UPN", destination: "Gare Centrale", prix: 2000 },
-            { origine: "Delvaux", destination: "Gare Centrale", prix: 1500 },
-            { origine: "Kintambo Magasin", destination: "Gare Centrale", prix: 1000 }
+            { origine: "KINTAMBO MAGASIN", destination: "DELVAUX", prix: 1000, distDirect: 4.2, distDeviee: 5.0 },
+            { origine: "KINGASANI PASCAL", destination: "ROUTE MOKALI PONT MANGO", prix: 1500, distDirect: 4.5, distDeviee: 5.3 },
+            { origine: "KINGASANI PASCAL", destination: "MIKONDO BOSAWA", prix: 500, distDirect: 3.0, distDeviee: 3.6 },
+            { origine: "KINGASANI PASCAL", destination: "AEROPORT DE N'DJILI", prix: 500, distDirect: 5.5, distDeviee: 6.2 },
+            { origine: "KINTAMBO MAGASIN", destination: "KINTAMBO CIMETIERE", prix: 1000, distDirect: 1.8, distDeviee: 2.3 },
+            { origine: "MARCHE CENTRAL", destination: "MATADI KIBALA", prix: 2000, distDirect: 16.5, distDeviee: 19.5 },
+            { origine: "L'UPN", destination: "ROND POINT VICTOIRE", prix: 1000, distDirect: 9.5, distDeviee: 11.5 },
+            { origine: "CENTRE VILLE (GARE CENTRALE)", destination: "U.P.N.", prix: 3000, distDirect: 12.5, distDeviee: 15.0 }
         ];
 
         const SERVEUR_URL = "http://134.209.116.89:3000";
@@ -482,31 +481,52 @@
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
         }
 
-        function trouverPoleActuel(lat, lng) {
-            for (let pole of POLES_KINSHASA) {
-                if (calculerDistanceGPS(lat, lng, pole.lat, pole.lng) <= 0.250) { return pole.nom; }
-            }
-            return null; 
+        function calculerCap(lat1, lon1, lat2, lon2) {
+            const y = Math.sin((lon2 - lon1) * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180);
+            const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
+                      Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos((lon2 - lon1) * Math.PI / 180);
+            return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
         }
 
         async function chargerHistoriqueAdmin() {
             try {
                 if (!window.supabase) return;
-                const { data, error } = await supabaseClient.from('transvision_positions_gps').select('*').order('created_at', { ascending: false }).limit(200);
+                const { data, error } = await supabaseClient.from('transvision_positions_gps').select('*').order('created_at', { ascending: false }).limit(300);
                 if (data) {
                     const vehiculesUniques = {};
                     data.forEach(pos => { if (pos.imei && pos.latitude && pos.longitude) { if (!vehiculesUniques[pos.imei]) vehiculesUniques[pos.imei] = pos; } });
 
                     flotteGlobale = [];
                     Object.values(vehiculesUniques).forEach(pos => {
+                        const imeiStr = String(pos.imei);
                         flotteGlobale.push({
-                            imei: String(pos.imei),
-                            plaque: `TRK-${String(pos.imei).slice(-4)}`,
+                            imei: imeiStr,
+                            plaque: `TRK-${imeiStr.slice(-4)}`,
                             places: 14,
-                            lat: pos.latitude, lng: pos.longitude,
+                            tarif: 1000,
+                            origine: "Kintambo Magasin",
+                            destination: "Delvaux",
+                            distDirect: 4.2,
+                            distDeviee: 5.0,
+                            kmCourse: 0,
+                            dernierCap: undefined,
+                            secondesArret: 0,
+                            lat: pos.latitude, 
+                            lng: pos.longitude,
                             derniereCo: new Date(pos.created_at || Date.now()),
-                            kmJour: 0, dernierPoleConnu: null, tronconsValides: 0, recetteBruteReelle: 0
+                            kmJour: 0, 
+                            tronconsValides: 0, 
+                            recetteBruteReelle: 0
                         });
+                    });
+
+                    // Pré-tracer l'historique de déplacement en Bleu Navigation
+                    flotteGlobale.forEach(v => {
+                        const pts = data
+                            .filter(p => String(p.imei) === v.imei)
+                            .reverse()
+                            .map(p => [p.latitude, p.longitude]);
+                        tracesFlotte[v.imei] = pts.length > 0 ? pts : [[v.lat, v.lng]];
                     });
                     
                     document.getElementById('admin-flotte-count').textContent = `${flotteGlobale.length} Traceur(s)`;
@@ -516,60 +536,148 @@
             } catch (err) {}
         }
 
-        socket.on('nouvelle_position', (data) => {
+        // ========================================================
+        // GESTION CENTRALE DU MOUVEMENT TÉLÉMATIQUE (DISTANCE / CAP)
+        // ========================================================
+        function traiterNouvellePositionAdmin(data) {
             let vehiculeExistant = flotteGlobale.find(v => v.imei === data.imei);
+            const now = new Date();
             
             if (!vehiculeExistant) {
                 vehiculeExistant = {
-                    imei: data.imei, plaque: `TRK-${String(data.imei).slice(-4)}`, places: 14,
-                    lat: data.lat, lng: data.lng, derniereCo: new Date(), kmJour: 0,
-                    dernierPoleConnu: null, tronconsValides: 0, recetteBruteReelle: 0
+                    imei: data.imei, 
+                    plaque: `TRK-${String(data.imei).slice(-4)}`, 
+                    places: 14,
+                    tarif: 1000,
+                    origine: "Kintambo Magasin",
+                    destination: "Delvaux",
+                    distDirect: 4.2,
+                    distDeviee: 5.0,
+                    kmCourse: 0,
+                    dernierCap: undefined,
+                    secondesArret: 0,
+                    lat: data.lat, 
+                    lng: data.lng, 
+                    derniereCo: now, 
+                    kmJour: 0,
+                    tronconsValides: 0, 
+                    recetteBruteReelle: 0
                 };
                 flotteGlobale.push(vehiculeExistant);
-                if(mapAdmin) { adminMarkers[data.imei] = L.marker([data.lat, data.lng]).addTo(mapAdmin).bindPopup(`IMEI: ${data.imei}`); }
-            } else {
-                let distanceParcourue = calculerDistanceGPS(vehiculeExistant.lat, vehiculeExistant.lng, data.lat, data.lng);
-                if (distanceParcourue > 0.005 && distanceParcourue < 2) { 
-                    vehiculeExistant.kmJour += distanceParcourue; 
-                }
-
-                const poleDetecte = trouverPoleActuel(data.lat, data.lng);
+                tracesFlotte[data.imei] = [[data.lat, data.lng]];
                 
-                if (poleDetecte && (data.vitesse || 0) < 10) {
-                    if (vehiculeExistant.dernierPoleConnu === null) {
-                        vehiculeExistant.dernierPoleConnu = poleDetecte;
-                    } 
-                    else if (vehiculeExistant.dernierPoleConnu !== poleDetecte) {
-                        const poleA = vehiculeExistant.dernierPoleConnu;
-                        const poleB = poleDetecte;
-                        
-                        let tarifCourse = 0;
-                        for(let tarifObj of listeItineraires) {
-                            if ((tarifObj.origine === poleA && tarifObj.destination === poleB) || (tarifObj.origine === poleB && tarifObj.destination === poleA)) {
-                                tarifCourse = tarifObj.prix; break;
-                            }
-                        }
+                if(mapAdmin) { 
+                    adminMarkers[data.imei] = L.marker([data.lat, data.lng]).addTo(mapAdmin);
+                }
+            } else {
+                let distDelta = calculerDistanceGPS(vehiculeExistant.lat, vehiculeExistant.lng, data.lat, data.lng);
+                
+                if (distDelta > 0.002 && distDelta < 2.0) { 
+                    vehiculeExistant.kmJour += distDelta;
+                    vehiculeExistant.kmCourse = (vehiculeExistant.kmCourse || 0) + distDelta;
 
-                        if(tarifCourse > 0) {
-                            vehiculeExistant.recetteBruteReelle += (tarifCourse * vehiculeExistant.places);
-                            vehiculeExistant.tronconsValides += 1;
+                    const nouveauCap = calculerCap(vehiculeExistant.lat, vehiculeExistant.lng, data.lat, data.lng);
+                    let diffCap = 0;
+                    if (vehiculeExistant.dernierCap !== undefined) {
+                        diffCap = Math.abs(nouveauCap - vehiculeExistant.dernierCap);
+                        if (diffCap > 180) diffCap = 360 - diffCap;
+                    }
+                    vehiculeExistant.dernierCap = nouveauCap;
+
+                    const dDirect = vehiculeExistant.distDirect || 4.2;
+                    const dDeviee = vehiculeExistant.distDeviee || (dDirect * 1.2);
+                    const gainParRotation = (vehiculeExistant.tarif || 1000) * (vehiculeExistant.places || 14);
+
+                    let validee = false;
+                    if (vehiculeExistant.kmCourse >= dDeviee) {
+                        validee = true;
+                    } else if (vehiculeExistant.kmCourse >= dDirect) {
+                        if (diffCap >= 120) {
+                            validee = true;
+                        } else if ((data.vitesse || 0) < 5) {
+                            vehiculeExistant.secondesArret = (vehiculeExistant.secondesArret || 0) + 10;
+                            if (vehiculeExistant.secondesArret >= 40) validee = true;
+                        } else {
+                            vehiculeExistant.secondesArret = 0;
                         }
-                        vehiculeExistant.dernierPoleConnu = poleB;
+                    }
+
+                    if (validee) {
+                        vehiculeExistant.tronconsValides += 1;
+                        vehiculeExistant.recetteBruteReelle += gainParRotation;
+                        vehiculeExistant.kmCourse = 0;
+                        vehiculeExistant.secondesArret = 0;
                     }
                 }
 
-                vehiculeExistant.lat = data.lat; vehiculeExistant.lng = data.lng;
-                vehiculeExistant.derniereCo = new Date();
+                vehiculeExistant.lat = data.lat; 
+                vehiculeExistant.lng = data.lng;
+                vehiculeExistant.derniereCo = now;
 
-                if(mapAdmin && adminMarkers[data.imei]) {
-                    adminMarkers[data.imei].setLatLng([data.lat, data.lng]);
-                    adminMarkers[data.imei].getPopup().setContent(`<b>IMEI: ${data.imei}</b><br>Dernier Live: ${vehiculeExistant.derniereCo.toLocaleTimeString()}<br>Km: ${(vehiculeExistant.kmJour||0).toFixed(1)} km`);
+                if (!tracesFlotte[data.imei]) tracesFlotte[data.imei] = [];
+                tracesFlotte[data.imei].push([data.lat, data.lng]);
+
+                if(mapAdmin) {
+                    if (adminMarkers[data.imei]) {
+                        adminMarkers[data.imei].setLatLng([data.lat, data.lng]);
+                        adminMarkers[data.imei].getPopup().setContent(`
+                            <b>${vehiculeExistant.plaque}</b><br>
+                            IMEI: ${vehiculeExistant.imei}<br>
+                            Ligne: ${vehiculeExistant.origine} ➔ ${vehiculeExistant.destination}<br>
+                            Course: <b>${(vehiculeExistant.kmCourse || 0).toFixed(1)} / ${vehiculeExistant.distDirect} km</b><br>
+                            Rotations: <b>${vehiculeExistant.tronconsValides}</b> (${vehiculeExistant.recetteBruteReelle.toLocaleString()} CDF)<br>
+                            Dernier Live: ${vehiculeExistant.derniereCo.toLocaleTimeString()}
+                        `);
+                    }
+                    
+                    if (adminPolylines[data.imei]) {
+                        adminPolylines[data.imei].setLatLngs(tracesFlotte[data.imei]);
+                    } else {
+                        adminPolylines[data.imei] = L.polyline(tracesFlotte[data.imei], {
+                            color: '#1a73e8', // Bleu officiel Google Navigation
+                            weight: 6,
+                            opacity: 0.9,
+                            lineJoin: 'round'
+                        }).addTo(mapAdmin);
+                    }
                 }
             }
 
             document.getElementById('admin-flotte-count').textContent = `${flotteGlobale.length} Traceur(s)`;
             majTableauFlotteAdmin();
+        }
+
+        socket.on('nouvelle_position', (data) => {
+            traiterNouvellePositionAdmin(data);
         });
+
+        // DOUBLE INTERROGATION TEMPS RÉEL (SUPABASE TOUTES LES 4 SECONDES)
+        async function sonderPositionsCloudAdmin() {
+            try {
+                if (!window.supabase) return;
+                const { data } = await supabaseClient
+                    .from('transvision_positions_gps')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+
+                if (data && data.length > 0) {
+                    data.reverse().forEach(latest => {
+                        const pointKey = latest.id ? latest.id : (latest.latitude + '_' + latest.longitude + '_' + latest.created_at);
+                        if (pointKey !== dernierPointIdAdmin) {
+                            dernierPointIdAdmin = pointKey;
+                            traiterNouvellePositionAdmin({
+                                imei: String(latest.imei),
+                                lat: latest.latitude,
+                                lng: latest.longitude,
+                                vitesse: latest.speed || latest.vitesse || 0
+                            });
+                        }
+                    });
+                }
+            } catch(e) {}
+        }
+        setInterval(sonderPositionsCloudAdmin, 4000);
 
         function majTableauFlotteAdmin() {
             const tbody = document.getElementById('table-vehicules-body');
@@ -577,12 +685,18 @@
             let totalKm = 0; let totalRot = 0; let totalCDF = 0;
             
             flotteGlobale.forEach(v => {
-                totalKm += (v.kmJour || 0); totalRot += (v.tronconsValides || 0); totalCDF += (v.recetteBruteReelle || 0);
+                totalKm += (v.kmJour || 0); 
+                totalRot += (v.tronconsValides || 0); 
+                totalCDF += (v.recetteBruteReelle || 0);
+                
                 tbody.insertAdjacentHTML('beforeend', `
                     <tr>
                         <td class="py-3 font-bold text-slate-200">${v.plaque} <br><span class="text-[9px] text-slate-500">${v.imei}</span></td>
                         <td class="py-3 font-bold text-sky-400">${(v.kmJour || 0).toFixed(1)} km</td>
-                        <td class="py-3 text-indigo-400 font-bold">${v.dernierPoleConnu || 'Aucun'}</td>
+                        <td class="py-3 text-slate-300 font-mono">
+                            <span class="text-emerald-400 font-bold">${(v.kmCourse || 0).toFixed(1)}</span> / ${v.distDirect} km
+                            <div class="text-[9px] text-slate-500">${v.origine} ➔ ${v.destination}</div>
+                        </td>
                         <td class="py-3 font-black text-slate-200">${v.tronconsValides || 0}</td>
                         <td class="py-3 font-black text-emerald-400">${(v.recetteBruteReelle || 0).toLocaleString()} CDF</td>
                     </tr>
@@ -608,39 +722,47 @@
             if (idPage === 'page-suivi') { setTimeout(initMapAdmin, 50); }
         }
 
+        // ========================================================
+        // INITIALISATION DE LA CARTE GOOGLE MAPS PLEIN ÉCRAN
+        // ========================================================
         function initMapAdmin() {
             const container = document.getElementById('map-admin-suivi');
             if (!container || container.offsetParent === null) return;
             
             if (!mapAdmin) {
-                // Centrage sur Kinshasa
                 mapAdmin = L.map('map-admin-suivi').setView([-4.3224, 15.3070], 13);
                 
-                // Tuiles OpenStreetMap officielles libres et sans filigrane
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap contributors',
-                    maxZoom: 19
+                // Tuiles officielles Google Maps Roadmap
+                L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+                    maxZoom: 20,
+                    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                    attribution: '&copy; Google Maps'
                 }).addTo(mapAdmin);
-                
-                POLES_KINSHASA.forEach(pole => {
-                    L.circle([pole.lat, pole.lng], { color: '#4f46e5', fillColor: '#6366f1', fillOpacity: 0.2, radius: 250 }).addTo(mapAdmin).bindPopup(`Geofence: ${pole.nom}`);
-                });
 
                 flotteGlobale.forEach(v => {
-                    if(!adminMarkers[v.imei]) { adminMarkers[v.imei] = L.marker([v.lat, v.lng]).addTo(mapAdmin).bindPopup(`IMEI: ${v.imei}`); }
+                    if(!adminMarkers[v.imei]) { 
+                        adminMarkers[v.imei] = L.marker([v.lat, v.lng]).addTo(mapAdmin).bindPopup(`<b>${v.plaque}</b><br>IMEI: ${v.imei}`); 
+                    }
+                    if (tracesFlotte[v.imei] && tracesFlotte[v.imei].length > 1) {
+                        adminPolylines[v.imei] = L.polyline(tracesFlotte[v.imei], {
+                            color: '#1a73e8',
+                            weight: 6,
+                            opacity: 0.9,
+                            lineJoin: 'round'
+                        }).addTo(mapAdmin);
+                    }
                 });
             }
             
             setTimeout(() => {
                 mapAdmin.invalidateSize();
-                mapAdmin.setView([-4.3224, 15.3070], 13);
-            }, 250);
+            }, 200);
         }
 
         function centrerMapAdmin() { 
             if(mapAdmin) {
                 mapAdmin.invalidateSize();
-                mapAdmin.setView([-4.3224, 15.3070], 13);
+                mapAdmin.setView([-4.3224, 15.3070], 14);
             }
         }
 
@@ -658,12 +780,19 @@
                     jsonObject.forEach(row => {
                         const origine = row['Origine'] || row['Depart'];
                         const destination = row['Destination'] || row['Arrivee'];
-                        const prix = parseFloat(row['Prix'] || row['Tarif'] || row['CDF']) || 0;
-                        if(prix > 0 && origine) listeItineraires.push({ origine, destination, prix });
+                        const prix = parseFloat(row['Tarif (FC)'] || row['Prix'] || row['Tarif'] || row['CDF']) || 0;
+                        const distDirect = parseFloat(row['Distance Approx. (km)'] || row['Distance']) || 0;
+                        const distDeviee = parseFloat(row['Distance Réelle Déviée (km)'] || row['Distance Déviée']) || (distDirect * 1.2);
+                        if(prix > 0 && origine && destination) {
+                            listeItineraires.push({ origine, destination, prix, distDirect, distDeviee });
+                        }
                     });
-                    afficherItinerairesAdmin(); fileUpload.value = ""; 
-                    alert(`✅ Succès: Matrice mise à jour avec ${listeItineraires.length} prix.`);
-                } catch(error) {}
+                    afficherItinerairesAdmin(); 
+                    fileUpload.value = ""; 
+                    alert(`✅ Succès: Matrice synchronisée avec ${listeItineraires.length} lignes du fichier Excel.`);
+                } catch(error) {
+                    alert("❌ Erreur lors de la lecture du fichier Excel.");
+                }
             };
             reader.readAsArrayBuffer(fileUpload.files[0]);
         }
@@ -674,8 +803,14 @@
             listeItineraires.forEach((it, index) => {
                 box.insertAdjacentHTML('beforeend', `
                     <div class="flex justify-between items-center p-2.5 bg-slate-900 border border-slate-800 rounded-xl hover:border-emerald-500/30 transition-colors">
-                        <div class="flex flex-col"><span class="text-slate-200 font-bold uppercase tracking-wider">${it.origine} <i class="fa-solid fa-arrow-right text-emerald-500 mx-1"></i> ${it.destination}</span></div>
-                        <div class="flex items-center gap-3"><span class="text-emerald-400 font-black text-sm bg-slate-950 px-2 py-1 rounded">${it.prix} CDF</span><button onclick="supprimerItineraire(${index})" class="text-rose-500 hover:text-rose-400 p-1"><i class="fa-solid fa-trash"></i></button></div>
+                        <div class="flex flex-col">
+                            <span class="text-slate-200 font-bold uppercase tracking-wider">${it.origine} <i class="fa-solid fa-arrow-right text-emerald-500 mx-1"></i> ${it.destination}</span>
+                            <span class="text-[9px] text-slate-500 font-mono">Direct: ${it.distDirect || 0} km | Dévié: ${it.distDeviee || 0} km</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-emerald-400 font-black text-sm bg-slate-950 px-2 py-1 rounded">${it.prix} CDF</span>
+                            <button onclick="supprimerItineraire(${index})" class="text-rose-500 hover:text-rose-400 p-1"><i class="fa-solid fa-trash"></i></button>
+                        </div>
                     </div>`);
             });
             document.getElementById('badge-nb-routes').textContent = `${listeItineraires.length} Rte(s)`;
@@ -684,6 +819,26 @@
         function supprimerItineraire(index) {
             listeItineraires.splice(index, 1);
             afficherItinerairesAdmin();
+        }
+
+        function creerNouveauTronconAdmin() {
+            const origine = document.getElementById('add-origine').value.trim();
+            const destination = document.getElementById('add-destination').value.trim();
+            const prix = parseFloat(document.getElementById('add-prix-troncon').value);
+            const distDirect = parseFloat(document.getElementById('add-dist-troncon').value) || 3.0;
+
+            if(!origine || !destination || !prix) {
+                alert("Veuillez renseigner l'origine, la destination et le tarif.");
+                return;
+            }
+
+            listeItineraires.push({ origine, destination, prix, distDirect, distDeviee: distDirect * 1.2 });
+            afficherItinerairesAdmin();
+            document.getElementById('add-origine').value = "";
+            document.getElementById('add-destination').value = "";
+            document.getElementById('add-prix-troncon').value = "";
+            document.getElementById('add-dist-troncon').value = "";
+            alert("✅ Ligne ajoutée avec succès !");
         }
 
         function rechercherPartenaire() {
