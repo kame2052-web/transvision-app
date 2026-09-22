@@ -71,7 +71,7 @@
     <!-- 2. CORPS ADMIN -->
     <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
         <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
-            <span class="text-xs font-bold text-indigo-400">Central Control Panel v16.6 PROD</span>
+            <span class="text-xs font-bold text-indigo-400">Central Control Panel v16.7 PROD</span>
             <div class="flex gap-2 text-[10px] font-mono">
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 flex items-center gap-1">Central DO : <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="admin-server-dot"></span><span class="text-emerald-400 font-bold" id="admin-server-text">En Ligne</span></span>
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Historique : <span class="text-sky-400 font-bold" id="admin-historique-statut">Chargement...</span></span>
@@ -111,7 +111,7 @@
                 </div>
             </aside>
 
-            <!-- CONTENU PLEINE LARGEUR (w-full AU LIEU DE max-w-5xl) -->
+            <!-- CONTENU PLEINE LARGEUR -->
             <main class="flex-1 p-6 lg:p-8 space-y-6 overflow-y-auto w-full">
                 
                 <!-- SUIVI LIVE -->
@@ -356,7 +356,7 @@
                         </div>
                         
                         <div class="bg-slate-950 p-5 rounded-2xl border border-indigo-500/30 space-y-3.5 shadow-xl">
-                            <div class="flex items-center gap-2 border-b border-slate-800 pb-2">
+                            <div class="flex items-center gap-2 border-b border-slate-850 pb-2">
                                 <i class="fa-solid fa-shield-halved text-indigo-400 text-sm"></i>
                                 <h3 class="font-bold text-indigo-400 uppercase tracking-wider text-[10px]">Identifiants Super Admin</h3>
                             </div>
@@ -375,7 +375,7 @@
                             <button onclick="modifierAccesPropresAdmin()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-2.5 rounded-xl uppercase text-xs transition-all shadow-lg shadow-indigo-500/10 mt-1">Valider & Modifier</button>
                         </div>
 
-                        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-3">
+                        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-850 space-y-3">
                             <div class="flex justify-between items-center border-b border-slate-800 pb-2">
                                 <h3 class="font-bold text-emerald-400 uppercase tracking-wider text-[10px]">Rédaction des CGU</h3>
                                 <span class="text-[9px] text-slate-500 font-mono">Synchronisé</span>
@@ -611,12 +611,14 @@
         function initMapAdmin() {
             const container = document.getElementById('map-admin-suivi');
             if (!container || container.offsetParent === null) return;
+            
             if (!mapAdmin) {
-                mapAdmin = L.map('map-admin-suivi').setView([-4.3224, 15.3070], 12);
-                // Tuiles claires haute définition CartoDB Voyager
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                    attribution: '&copy; OpenStreetMap &copy; CARTO',
-                    subdomains: 'abcd',
+                // Centrage sur Kinshasa
+                mapAdmin = L.map('map-admin-suivi').setView([-4.3224, 15.3070], 13);
+                
+                // Tuiles OpenStreetMap officielles libres et sans filigrane
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors',
                     maxZoom: 19
                 }).addTo(mapAdmin);
                 
@@ -628,9 +630,19 @@
                     if(!adminMarkers[v.imei]) { adminMarkers[v.imei] = L.marker([v.lat, v.lng]).addTo(mapAdmin).bindPopup(`IMEI: ${v.imei}`); }
                 });
             }
-            mapAdmin.invalidateSize();
+            
+            setTimeout(() => {
+                mapAdmin.invalidateSize();
+                mapAdmin.setView([-4.3224, 15.3070], 13);
+            }, 250);
         }
-        function centrerMapAdmin() { if(mapAdmin) mapAdmin.setView([-4.3224, 15.3070], 12); }
+
+        function centrerMapAdmin() { 
+            if(mapAdmin) {
+                mapAdmin.invalidateSize();
+                mapAdmin.setView([-4.3224, 15.3070], 13);
+            }
+        }
 
         function importerItinerairesExcel() {
             const fileUpload = document.getElementById('excel-file-upload');
