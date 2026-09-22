@@ -20,10 +20,18 @@
 
     <style>
         .blur-transition { transition: filter 0.4s ease, opacity 0.4s ease; }
-        #map-container { height: 350px; width: 100%; border-radius: 1rem; z-index: 10; }
-        /* Style clair sans aucun filtre d'inversion */
+        
+        /* Carte plein écran dynamique sans fond noir inutile */
+        #map-container { 
+            height: 100%; 
+            min-height: 480px; 
+            width: 100%; 
+            border-radius: 1rem; 
+            z-index: 10; 
+        }
         .leaflet-tile { filter: none !important; }
         .leaflet-container { background: #f8fafc !important; }
+        
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(100deg); cursor: pointer; }
         @media print {
             body { background: white !important; color: black !important; }
@@ -110,7 +118,7 @@
             </div>
             
             <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v16.7 PROD — Global Tech Solutions
+                TransVision v16.8 PROD — Global Tech Solutions
             </div>
         </div>
 
@@ -139,19 +147,20 @@
                         <p class="text-[9px] text-slate-400 mt-0.5" id="last-update-text">Chargement de l'historique...</p>
                     </div>
                     <div class="text-right">
-                        <span id="timer-compte-rebours" class="text-sm font-mono font-black text-slate-100 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg shadow-inner">--:--:--</span>
+                        <!-- MINUTEUR ACTIF DU FORFAIT -->
+                        <span id="timer-compte-rebours" class="text-sm font-mono font-black text-slate-100 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg shadow-inner">Chargement...</span>
                     </div>
                 </div>
             </header>
 
-            <!-- ONGLET A : CARTE -->
-            <div id="onglet-flotte" class="p-4 space-y-4 blur-transition class-onglet no-print">
-                <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-2 shadow-md h-[430px] flex flex-col">
+            <!-- ONGLET A : CARTE ÉTIRÉE EN HAUTEUR (ESPACE NOIR COMBLÉ) -->
+            <div id="onglet-flotte" class="p-3 flex-1 flex flex-col blur-transition class-onglet no-print min-h-[calc(100vh-160px)]">
+                <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 flex-1 flex flex-col space-y-2 shadow-md">
                     <div class="flex justify-between items-center px-1 pb-1">
-                        <h2 class="text-[10px] font-bold text-slate-300 uppercase tracking-widest flex items-center gap-1.5"><i class="fa-solid fa-map-location-dot text-emerald-400"></i> Traceur GPS</h2>
-                        <select id="select-vehicule-map" onchange="centrerSurVehicule(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg text-[10px] text-emerald-400 font-bold px-2 py-1 outline-none truncate max-w-[130px]"></select>
+                        <h2 class="text-[10px] font-bold text-slate-300 uppercase tracking-widest flex items-center gap-1.5"><i class="fa-solid fa-map-location-dot text-emerald-400"></i> Traceur GPS Live</h2>
+                        <select id="select-vehicule-map" onchange="centrerSurVehicule(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg text-[10px] text-emerald-400 font-bold px-2 py-1 outline-none truncate max-w-[140px]"></select>
                     </div>
-                    <div id="map-container" class="shadow-inner flex-1 border border-slate-800"></div>
+                    <div id="map-container" class="shadow-inner flex-1 w-full border border-slate-800 rounded-xl"></div>
                 </div>
             </div>
 
@@ -446,8 +455,12 @@
 
         let partenaireProfil = null; 
         let client = { nom: "Dolce", tel: "0965647819", vehicules: [] };
-        let map = null; let busMarker = null;
+        let map = null; 
+        let busMarker = null;
+        let polylineTrace = null;
+        let tracePositions = [];
         let chartPartenaireInstance = null;
+        let dernierPointId = null;
 
         const POLES_KINSHASA = [
             { nom: "Matadi Kibala", lat: -4.4361, lng: 15.2605 },
@@ -486,7 +499,7 @@
         async function chargerDernieresPositions() {
             try {
                 const txtStatut = document.getElementById('last-update-text');
-                txtStatut.textContent = "Connexion à la base de données...";
+                txtStatut.textContent = "Interrogation de la flotte...";
                 
                 if (!window.supabase) return;
 
@@ -520,32 +533,34 @@
                     const sel = document.getElementById('select-vehicule-map');
                     if (sel && sel.value !== "none") { initMapEtCentrer(parseInt(sel.value)); }
                     
-                    txtStatut.textContent = `Historique chargé (${client.vehicules.length} veh).`;
+                    txtStatut.textContent = `Connecté (${client.vehicules.length} véhicule détecté).`;
                 }
             } catch (err) {}
         }
 
         socket.on('connect', () => {
-            document.getElementById('statut-serveur-voyant').classList.replace('bg-rose-500', 'bg-emerald-400');
-            document.getElementById('statut-serveur-texte').textContent = "Serveur Connecté";
-            document.getElementById('statut-serveur-texte').classList.replace('text-rose-400', 'text-emerald-400');
+            document.getElementById('statut-serveur-voyant').className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
+            document.getElementById('statut-serveur-texte').textContent = "SERVEUR EN LIGNE";
+            document.getElementById('statut-serveur-texte').className = "text-[10px] font-black uppercase text-emerald-400 tracking-wider";
         });
 
         socket.on('disconnect', () => {
-            document.getElementById('statut-serveur-voyant').classList.replace('bg-emerald-400', 'bg-rose-500');
-            document.getElementById('statut-serveur-texte').textContent = "Serveur Déconnecté";
-            document.getElementById('statut-serveur-texte').classList.replace('text-emerald-400', 'text-rose-400');
+            document.getElementById('statut-serveur-voyant').className = "w-2 h-2 rounded-full bg-rose-500";
+            document.getElementById('statut-serveur-texte').textContent = "RECONNEXION...";
+            document.getElementById('statut-serveur-texte').className = "text-[10px] font-black uppercase text-rose-400 tracking-wider";
         });
 
-        socket.on('nouvelle_position', (data) => {
+        // TRAITEMENT UNIFIÉ D'UNE NOUVELLE POSITION (LIVE SOCKET OU POLLING)
+        function traiterNouvellePosition(data) {
             const now = new Date();
-            document.getElementById('last-update-text').textContent = `Live : ${now.toLocaleTimeString()}`;
+            document.getElementById('last-update-text').textContent = `Point reçu: ${now.toLocaleTimeString()}`;
+            document.getElementById('statut-serveur-voyant').className = "w-2 h-2 rounded-full bg-emerald-400 animate-ping";
 
             let vehiculeIndex = client.vehicules.findIndex(v => v.imei === data.imei);
             
             if (vehiculeIndex === -1) {
                 client.vehicules.push({
-                    plaque: data.plaque || `Nouveau ${data.imei.slice(-4)}`, type: "Traceur GPS", places: 14, imei: data.imei,
+                    plaque: data.plaque || `Tracker ${data.imei.slice(-4)}`, type: "Traceur GPS", places: 14, imei: data.imei,
                     lat: data.lat, lng: data.lng, moteurCoupe: false, carburantJour: 0, kmJour: 0,
                     dernierPoleConnu: null, recetteBruteReelle: 0, tronconsValides: 0
                 });
@@ -591,15 +606,59 @@
 
             const selectMap = document.getElementById('select-vehicule-map');
             if (selectMap && selectMap.value == vehiculeIndex) {
-                if(busMarker && map) {
-                    busMarker.setLatLng(new L.LatLng(data.lat, data.lng));
-                    map.panTo(new L.LatLng(data.lat, data.lng));
-                } else { initMapEtCentrer(vehiculeIndex); }
+                const targetPoint = [data.lat, data.lng];
+                tracePositions.push(targetPoint);
+                
+                if (map) {
+                    if (busMarker) {
+                        busMarker.setLatLng(targetPoint);
+                        busMarker.getPopup().setContent(`<b>Tracker ${data.imei.slice(-4)}</b><br>Vitesse : ${data.vitesse || 0} km/h<br>Direct : ${now.toLocaleTimeString()}`);
+                    } else {
+                        initMapEtCentrer(vehiculeIndex);
+                    }
+                    
+                    if (polylineTrace) {
+                        polylineTrace.setLatLngs(tracePositions);
+                    } else {
+                        polylineTrace = L.polyline(tracePositions, { color: '#10b981', weight: 4, opacity: 0.85, dashArray: '6, 8' }).addTo(map);
+                    }
+                    map.panTo(targetPoint);
+                }
             }
 
             genererRapportFinancier(); 
             genererRapportTechnique();
+        }
+
+        socket.on('nouvelle_position', (data) => {
+            traiterNouvellePosition(data);
         });
+
+        // RENFORCEMENT TEMPS RÉEL (SONDAGE ACTIF TOUTES LES 4 SECONDES)
+        async function sonderPositionsCloudEnContinu() {
+            try {
+                if (!window.supabase) return;
+                const { data } = await supabaseClient
+                    .from('transvision_positions_gps')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+
+                if (data && data.length > 0) {
+                    const latest = data[0];
+                    if (latest.id !== dernierPointId) {
+                        dernierPointId = latest.id;
+                        traiterNouvellePosition({
+                            imei: String(latest.imei),
+                            lat: latest.latitude,
+                            lng: latest.longitude,
+                            vitesse: latest.speed || latest.vitesse || 0
+                        });
+                    }
+                }
+            } catch(e) {}
+        }
+        setInterval(sonderPositionsCloudEnContinu, 4000);
 
         function initFiltresDates() {
             const today = new Date();
@@ -655,7 +714,7 @@
                     initMapEtCentrer(sel && sel.value !== "none" ? parseInt(sel.value) : 0);
                     if (map) map.invalidateSize();
                 } 
-            }, 50);
+            }, 100);
         }
 
         function majSelecteurMap() {
@@ -669,24 +728,48 @@
         function initMapEtCentrer(index) {
             const mapContainer = document.getElementById('map-container');
             if (!mapContainer || mapContainer.offsetParent === null) return;
-            let lat = -4.3215; let lng = 15.3115; let label = "En attente de transmission...";
+            
+            let lat = -4.3215; let lng = 15.3115; 
             const v = client.vehicules[index];
-            if(v) { lat = v.lat; lng = v.lng; label = `<b>${v.plaque}</b><br>IMEI: ${v.imei}`; }
+            if(v) { 
+                lat = v.lat; 
+                lng = v.lng; 
+                tracePositions = [[lat, lng]];
+            }
+            
             if(!map) {
-                map = L.map('map-container').setView([lat, lng], 14);
-                // Tuiles OpenStreetMap officielles libres et sans filigrane
+                // Zoom renforcé à 16 (vue de rue)
+                map = L.map('map-container').setView([lat, lng], 16);
+                
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; OpenStreetMap contributors',
                     maxZoom: 19
                 }).addTo(map);
-                POLES_KINSHASA.forEach(pole => { L.circle([pole.lat, pole.lng], { color: '#059669', fillColor: '#10b981', fillOpacity: 0.2, radius: 250 }).addTo(map).bindPopup(`Zone: ${pole.nom}`); });
+                
+                POLES_KINSHASA.forEach(pole => { 
+                    L.circle([pole.lat, pole.lng], { 
+                        color: '#059669', 
+                        fillColor: '#10b981', 
+                        fillOpacity: 0.2, 
+                        radius: 250 
+                    }).addTo(map).bindPopup(`Zone: ${pole.nom}`); 
+                });
             }
+            
             if(busMarker) map.removeLayer(busMarker);
-            busMarker = L.marker([lat, lng]).addTo(map).bindPopup(label).openPopup();
-            map.setView([lat, lng], 14);
+            const popupTxt = v ? `<b>${v.plaque}</b><br>IMEI: ${v.imei}<br>Position temps réel` : "En attente...";
+            busMarker = L.marker([lat, lng]).addTo(map).bindPopup(popupTxt).openPopup();
+            
+            if (polylineTrace) map.removeLayer(polylineTrace);
+            polylineTrace = L.polyline(tracePositions, { color: '#10b981', weight: 4, opacity: 0.85, dashArray: '6, 8' }).addTo(map);
+
+            map.setView([lat, lng], 16);
             setTimeout(() => { map.invalidateSize(); }, 200);
         }
-        function centrerSurVehicule(indexStr) { if (indexStr !== "none") initMapEtCentrer(parseInt(indexStr)); }
+        
+        function centrerSurVehicule(indexStr) { 
+            if (indexStr !== "none") initMapEtCentrer(parseInt(indexStr)); 
+        }
 
         function enregistrerVehiculeSaisi() {
             const plaque = document.getElementById('add-plaque').value.trim();
@@ -789,24 +872,31 @@
         function basculerMoteur(i, couper) {
             client.vehicules[i].moteurCoupe = couper;
             socket.emit('commande_moteur', { imei: client.vehicules[i].imei, couper: couper });
-            alert(`📡 Commande envoyée au serveur. Moteur ${couper ? 'coupé' : 'restauré'} pour le véhicule ${client.vehicules[i].plaque}.`);
+            alert(`📡 Commande envoyée. Moteur ${couper ? 'coupé' : 'restauré'} pour ${client.vehicules[i].plaque}.`);
             appliquerFiltreTechnique(); 
         }
 
         function majIdentifiants() {
             const newPin = document.getElementById('prof-pin-new').value;
-            if(newPin && newPin.length >= 4) { alert("✅ Code PIN de sécurité mis à jour."); document.getElementById('prof-pin-new').value = ""; } else { alert("❌ Le PIN doit contenir au moins 4 caractères."); }
+            if(newPin && newPin.length >= 4) { alert("✅ Code PIN mis à jour."); document.getElementById('prof-pin-new').value = ""; } else { alert("❌ Le PIN doit contenir au moins 4 caractères."); }
         }
 
+        // ========================================================
+        // MINUTEUR ACTIF EN TEMPS RÉEL (Jours, Heures, Minutes, Sec)
+        // ========================================================
         function actualiserCompteAReboursForfait() {
             const display = document.getElementById('timer-compte-rebours');
             if(!display) return;
 
             let expString = (partenaireProfil && partenaireProfil.date_expiration) ? partenaireProfil.date_expiration : localStorage.getItem('tv_date_expiration');
             
+            // Si aucune expiration n'existe encore, on initialise automatiquement un forfait actif de 5 jours
             if(!expString) { 
-                display.textContent = "--:--:--"; 
-                return; 
+                const def = new Date();
+                def.setDate(def.getDate() + 5);
+                def.setHours(23, 59, 59, 999);
+                expString = def.toISOString();
+                localStorage.setItem('tv_date_expiration', expString);
             }
 
             const finForfait = new Date(expString);
@@ -828,12 +918,27 @@
             const s = Math.floor((resteMs % 60000) / 1000);
             
             if (j > 0) { 
-                display.textContent = `${j} Jours ${String(h).padStart(2, '0')}h`; 
+                display.textContent = `${j}j ${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m`; 
             } else { 
                 display.textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`; 
             }
         }
 
+        async function synchroniserForfaitCloud() {
+            try {
+                if(!window.supabase) return;
+                const tel = (partenaireProfil && partenaireProfil.tel) || localStorage.getItem('tv_partenaire_tel') || "0965647819";
+                const { data } = await supabaseClient.from('tv_partenaires').select('date_expiration').eq('tel', tel).single();
+                if(data && data.date_expiration) {
+                    localStorage.setItem('tv_date_expiration', data.date_expiration);
+                    if(partenaireProfil) partenaireProfil.date_expiration = data.date_expiration;
+                    actualiserCompteAReboursForfait();
+                }
+            } catch(e) {}
+        }
+        setInterval(synchroniserForfaitCloud, 10000);
+
+        // --- GESTION DE LA FENÊTRE DE RECHARGE CLIENT ---
         function basculerSelectVehiculeRecharge() {
             const mode = document.getElementById('recharge-mode').value;
             const blocSelect = document.getElementById('bloc-recharge-vehicule');
@@ -877,6 +982,9 @@
             fermerModalRecharge();
         }
 
+        // ========================================================
+        // AUTHENTIFICATION, INSCRIPTION ET AUTO-CONNEXION
+        // ========================================================
         function basculerVueAuth(mode) {
             if(mode === 'login') {
                 document.getElementById('form-connexion').classList.remove('hidden'); 
@@ -960,6 +1068,7 @@
             
             chargerDernieresPositions().then(() => { 
                 genererToutesLesVues(); 
+                actualiserCompteAReboursForfait();
                 setInterval(actualiserCompteAReboursForfait, 1000); 
                 changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]); 
             });
@@ -976,6 +1085,7 @@
 
         window.addEventListener('DOMContentLoaded', async () => {
             chargerConfigurationsAdmin();
+            actualiserCompteAReboursForfait();
             
             const telSauve = localStorage.getItem('tv_partenaire_tel');
             if (telSauve) {
@@ -996,7 +1106,6 @@
                 naviguerVers('page-auth');
             }
         });
-        
     </script>
 </body>
 </html>
