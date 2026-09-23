@@ -23,7 +23,7 @@
         
         #map-container { 
             height: 100%; 
-            min-height: 520px; 
+            min-height: 480px; 
             width: 100%; 
             border-radius: 1rem; 
             z-index: 10; 
@@ -31,6 +31,37 @@
         .leaflet-tile { filter: none !important; }
         .leaflet-container { background: #e5e3df !important; }
         
+        /* Animation du halo pulsant sous le véhicule en direct */
+        .live-pulse-ring {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            top: -7px;
+            left: -7px;
+            border-radius: 50%;
+            background: rgba(26, 115, 232, 0.25);
+            animation: pulseWave 1.8s infinite ease-out;
+            pointer-events: none;
+        }
+        @keyframes pulseWave {
+            0% { transform: scale(0.6); opacity: 0.9; }
+            100% { transform: scale(1.6); opacity: 0; }
+        }
+
+        .vehicle-marker-box {
+            position: relative;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #020617;
+            border: 2px solid #38bdf8;
+            border-radius: 50%;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+            transition: transform 0.3s ease;
+        }
+
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(100deg); cursor: pointer; }
         @media print {
             body { background: white !important; color: black !important; }
@@ -117,7 +148,7 @@
             </div>
             
             <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v17.4 PROD — Global Tech Solutions
+                TransVision v17.8 PROD — Global Tech Solutions
             </div>
         </div>
 
@@ -141,26 +172,59 @@
                     <div>
                         <div class="flex items-center gap-1.5">
                             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="statut-serveur-voyant"></span>
-                            <span class="text-[10px] font-black uppercase text-emerald-400 tracking-wider" id="statut-serveur-texte">Connexion en cours...</span>
+                            <span class="text-[10px] font-black uppercase text-emerald-400 tracking-wider" id="statut-serveur-texte">Suivi Satellite Actif</span>
                         </div>
-                        <p class="text-[9px] text-slate-400 mt-0.5" id="last-update-text">Chargement de l'historique...</p>
+                        <p class="text-[9px] text-slate-400 mt-0.5" id="last-update-text">Cumul en direct de la journée...</p>
                     </div>
                     <div class="text-right flex flex-col items-end gap-1.5">
                         <span id="timer-compte-rebours" class="text-xs font-mono font-black text-slate-100 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-lg shadow-inner">--:--:--</span>
-                        
-                        <button onclick="reinitialiserJourneeAZero()" class="text-[9px] bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-1 rounded-lg font-black uppercase flex items-center gap-1.5 transition-all shadow-sm active:scale-95">
-                            <i class="fa-solid fa-arrows-rotate"></i> Démarrer Journée à 0
-                        </button>
                     </div>
                 </div>
             </header>
 
-            <!-- ONGLET A : CARTE GOOGLE MAPS PLEINE HAUTEUR -->
-            <div id="onglet-flotte" class="p-2 flex-1 flex flex-col blur-transition class-onglet no-print min-h-[calc(100vh-170px)]">
-                <div class="bg-slate-950 p-2.5 rounded-2xl border border-slate-800 flex-1 flex flex-col space-y-2 shadow-md">
-                    <div class="flex justify-between items-center px-1 pb-1">
+            <!-- ONGLET A : CARTE GOOGLE MAPS TRAFIC LIVE AVEC BANDEAU TÉLÉMATIQUE -->
+            <div id="onglet-flotte" class="p-2 flex-1 flex flex-col blur-transition class-onglet no-print min-h-[calc(100vh-170px)] space-y-2">
+                
+                <!-- BANDEAU TÉLÉMATIQUE EN DIRECT AVEC LÉGENDE DU TRAFIC -->
+                <div class="bg-slate-900/95 border border-slate-800 rounded-xl p-2.5 space-y-1.5 shadow-lg backdrop-blur">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-sky-400 font-bold flex items-center gap-1.5 truncate max-w-[240px]">
+                            <i class="fa-solid fa-location-dot text-rose-500 animate-bounce"></i>
+                            <span id="hud-avenue-live" class="truncate font-sans font-semibold">Localisation de l'avenue...</span>
+                        </span>
+                        <span class="text-[10px] font-mono text-emerald-400 font-black bg-slate-950 px-2 py-0.5 rounded border border-emerald-500/20" id="hud-vitesse-live">0 km/h</span>
+                    </div>
+
+                    <!-- LÉGENDE TRAFIC EN DIRECT -->
+                    <div class="flex items-center justify-between text-[8px] font-bold text-slate-400 border-t border-slate-800/80 pt-1 px-1">
+                        <span class="uppercase tracking-wider text-slate-500">Trafic Kinshasa :</span>
+                        <div class="flex items-center gap-3">
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Fluide</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Ralenti</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-600"></span> Bouchon</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-1.5 text-center text-[10px] font-mono border-t border-slate-800/80 pt-1.5">
+                        <div class="bg-slate-950/80 p-1.5 rounded border border-slate-850">
+                            <span class="text-[8px] text-slate-500 block uppercase font-bold">Roulé aujourd'hui</span>
+                            <span class="font-black text-slate-100 text-xs" id="hud-km-jour">0.0 km</span>
+                        </div>
+                        <div class="bg-slate-950/80 p-1.5 rounded border border-slate-850">
+                            <span class="text-[8px] text-slate-500 block uppercase font-bold">Course en cours</span>
+                            <span class="font-black text-sky-400 text-xs" id="hud-course-progression">0.0 km</span>
+                        </div>
+                        <div class="bg-slate-950/80 p-1.5 rounded border border-slate-850">
+                            <span class="text-[8px] text-slate-500 block uppercase font-bold">Recettes Jour</span>
+                            <span class="font-black text-emerald-400 text-xs" id="hud-recettes-jour">0 CDF</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 p-2 rounded-2xl border border-slate-800 flex-1 flex flex-col space-y-2 shadow-md">
+                    <div class="flex justify-between items-center px-1">
                         <h2 class="text-[10px] font-bold text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
-                            <i class="fa-solid fa-map-location-dot text-sky-400"></i> Google Maps Live
+                            <i class="fa-solid fa-traffic-light text-emerald-400"></i> Google Maps & Trafic Routier Live
                         </h2>
                         <select id="select-vehicule-map" onchange="centrerSurVehicule(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg text-[10px] text-emerald-400 font-bold px-2 py-1 outline-none truncate max-w-[150px]"></select>
                     </div>
@@ -206,11 +270,11 @@
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
                                     <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Origine</label>
-                                    <input type="text" id="add-origine" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold focus:border-indigo-500 outline-none" placeholder="Ex: Kintambo Magasin" value="Kintambo Magasin">
+                                    <input type="text" id="add-origine" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold focus:border-indigo-500 outline-none" placeholder="Ex: BRIKIN" value="BRIKIN">
                                 </div>
                                 <div>
                                     <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Destination</label>
-                                    <input type="text" id="add-destination" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold focus:border-indigo-500 outline-none" placeholder="Ex: Delvaux" value="Delvaux">
+                                    <input type="text" id="add-destination" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold focus:border-indigo-500 outline-none" placeholder="Ex: GARE CENTRALE" value="GARE CENTRALE">
                                 </div>
                             </div>
                         </div>
@@ -256,11 +320,11 @@
 
                 <div class="grid grid-cols-2 gap-3">
                     <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800/80 space-y-1 shadow-md">
-                        <span class="text-[9px] text-slate-400 uppercase font-black">Recettes Brutes</span>
+                        <span class="text-[9px] text-slate-400 uppercase font-black">Recettes du Jour</span>
                         <p id="txt-total-recettes" class="text-lg font-black text-emerald-400">0 CDF</p>
                     </div>
                     <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800/80 space-y-1 shadow-md">
-                        <span class="text-[9px] text-slate-400 uppercase font-black">Rotations Complètes</span>
+                        <span class="text-[9px] text-slate-400 uppercase font-black">Rotations du Jour</span>
                         <p id="txt-total-rotations" class="text-lg font-black text-slate-100">0</p>
                     </div>
                 </div>
@@ -271,7 +335,7 @@
                 </div>
             </div>
 
-            <!-- ONGLET D : ANALYSE TECHNIQUE ET GESTION MOTEUR COMPLÈTE -->
+            <!-- ONGLET D : ANALYSE TECHNIQUE ET GESTION MOTEUR -->
             <div id="onglet-analyse" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
                 <div class="flex justify-between items-center">
                     <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Diagnostic Matériel & Coupe-Circuit</h2>
@@ -358,6 +422,7 @@
                             <option value="7">Marché Central ➔ Matadi Kibala</option>
                             <option value="8">Marché Selembao ➔ U.P.N.</option>
                             <option value="9">Bandal Moulaert ➔ Gare Centrale</option>
+                            <option value="10">Brikin ➔ Gare Centrale</option>
                         </select>
                     </div>
 
@@ -482,7 +547,8 @@
             { o: "GARE CENTRALE", d: "U.P.N.", t: 3000, d1: 12.5, d2: 15.0 },
             { o: "MARCHE CENTRAL", d: "MATADI KIBALA", t: 2000, d1: 16.5, d2: 19.5 },
             { o: "MARCHE SELEMBAO", d: "U.P.N.", t: 1000, d1: 5.5, d2: 6.7 },
-            { o: "BANDAL MOULAERT", d: "GARE CENTRALE", t: 500, d1: 6.8, d2: 8.2 }
+            { o: "BANDAL MOULAERT", d: "GARE CENTRALE", t: 500, d1: 6.8, d2: 8.2 },
+            { o: "BRIKIN", d: "GARE CENTRALE", t: 2500, d1: 12.0, d2: 14.5 }
         ];
 
         function trouverParametresSecrets(origine, destination) {
@@ -497,7 +563,39 @@
                     return { distDirect: l.d1, distDeviee: l.d2, tarif: l.t };
                 }
             }
-            return { distDirect: 4.5, distDeviee: 5.5, tarif: 1000 };
+            return { distDirect: 5.0, distDeviee: 6.5, tarif: 1500 };
+        }
+
+        // GÉOCODAGE INVERSÉ POUR AFFICHER L'AVENUE EXACTE
+        let dernierGeocodageTs = 0;
+        let cacheAdresse = "";
+
+        async function detecterNomAvenue(lat, lng) {
+            const now = Date.now();
+            if (now - dernierGeocodageTs < 8000 && cacheAdresse) {
+                return cacheAdresse;
+            }
+            try {
+                const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
+                    headers: { 'Accept-Language': 'fr' }
+                });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    dernierGeocodageTs = now;
+                    const addr = data.address || {};
+                    const voie = addr.road || addr.pedestrian || addr.street || addr.neighbourhood || "Avenue de circulation";
+                    const quartier = addr.suburb || addr.quarter || "";
+                    const commune = addr.city_district || addr.county || "Ngaliema";
+                    
+                    let nomAvenue = voie;
+                    if (quartier && quartier !== voie) nomAvenue += ` • ${quartier}`;
+                    if (commune) nomAvenue += ` (${commune})`;
+                    
+                    cacheAdresse = nomAvenue;
+                    return nomAvenue;
+                }
+            } catch(e) {}
+            return cacheAdresse || "Ngaliema, Kinshasa";
         }
 
         function calculerDistanceGPS(lat1, lon1, lat2, lon2) {
@@ -515,56 +613,122 @@
             return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
         }
 
-        function verifierEtReinitialiserAutomatiqueJournee() {
-            const aujourdhuiStr = new Date().toISOString().split('T')[0];
-            const dernierJourEnregistre = localStorage.getItem('tv_jour_actif');
-            
-            if (dernierJourEnregistre !== aujourdhuiStr) {
-                localStorage.setItem('tv_jour_actif', aujourdhuiStr);
-                reinitialiserDonneesJournee(false);
+        // ========================================================
+        // ANIMATION FLUIDE DU VÉHICULE EN DIRECT (SANS SACCADE)
+        // ========================================================
+        function animerDeplacementMarker(marker, startPos, endPos, dureeMs = 1200) {
+            const debut = performance.now();
+            function frame(maintenant) {
+                const ecoule = maintenant - debut;
+                const ratio = Math.min(ecoule / dureeMs, 1.0);
+                // Courbe d'accélération/décélération naturelle
+                const ease = ratio < 0.5 ? 2 * ratio * ratio : -1 + (4 - 2 * ratio) * ratio;
+                
+                const curLat = startPos.lat + (endPos.lat - startPos.lat) * ease;
+                const curLng = startPos.lng + (endPos.lng - startPos.lng) * ease;
+                
+                marker.setLatLng([curLat, curLng]);
+                
+                if (ratio < 1.0) {
+                    requestAnimationFrame(frame);
+                }
             }
+            requestAnimationFrame(frame);
         }
 
-        function reinitialiserJourneeAZero() {
-            if (confirm("🌅 Démarrer une nouvelle journée ?\n\nTous les compteurs (Rotations, Recettes, Kilomètres et Tracé GPS) seront remis à zéro.")) {
-                const aujourdhuiStr = new Date().toISOString().split('T')[0];
-                localStorage.setItem('tv_jour_actif', aujourdhuiStr);
-                localStorage.setItem('tv_timestamp_demarrage_journee', Date.now());
-                reinitialiserDonneesJournee(true);
-            }
+        function creerIconeVehiculeLive(cap = 0) {
+            return L.divIcon({
+                className: 'custom-live-marker',
+                html: `
+                    <div style="position:relative;">
+                        <div class="live-pulse-ring"></div>
+                        <div class="vehicle-marker-box" style="transform: rotate(${cap}deg);">
+                            <i class="fa-solid fa-car-side text-sky-400 text-xs"></i>
+                        </div>
+                    </div>
+                `,
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            });
         }
 
-        function reinitialiserDonneesJournee(afficherConfirmation = true) {
-            if (client && client.vehicules) {
-                client.vehicules.forEach(v => {
-                    v.kmJour = 0;
-                    v.kmCourse = 0;
-                    v.carburantJour = 0;
-                    v.recetteBruteReelle = 0;
-                    v.tronconsValides = 0;
-                    v.secondesArret = 0;
-                });
-            }
+        function getKinshasaDateStr() {
+            const d = new Date();
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
 
-            if (busMarker && map) {
-                const pos = busMarker.getLatLng();
-                tracePositions = [[pos.lat, pos.lng]];
-                if (polylineTrace) polylineTrace.setLatLngs(tracePositions);
+        function verifierEtChargerJournalDuJour(v) {
+            const dateDuJour = getKinshasaDateStr();
+            const cleStatsJour = `tv_stats_${dateDuJour}_${v.imei}`;
+            const statsSauvegardees = JSON.parse(localStorage.getItem(cleStatsJour) || 'null');
+
+            if (statsSauvegardees) {
+                v.kmJour = statsSauvegardees.kmJour || 0;
+                v.kmCourse = statsSauvegardees.kmCourse || 0;
+                v.tronconsValides = statsSauvegardees.tronconsValides || 0;
+                v.recetteBruteReelle = statsSauvegardees.recetteBruteReelle || 0;
+                v.carburantJour = statsSauvegardees.carburantJour || 0;
             } else {
-                tracePositions = [];
-            }
-
-            genererToutesLesVues();
-
-            if (afficherConfirmation) {
-                alert("✅ Démarrage de la journée réussi !\n- Recettes : 0 CDF\n- Rotations : 0\n- Kilomètres : 0.0 km\n- Tracé remis à zéro.");
+                v.kmJour = 0;
+                v.kmCourse = 0;
+                v.tronconsValides = 0;
+                v.recetteBruteReelle = 0;
+                v.carburantJour = 0;
+                sauvegarderStatsJournalieres(v);
             }
         }
 
+        function sauvegarderStatsJournalieres(v) {
+            const dateDuJour = getKinshasaDateStr();
+            const cleStatsJour = `tv_stats_${dateDuJour}_${v.imei}`;
+            const donnees = {
+                kmJour: v.kmJour || 0,
+                kmCourse: v.kmCourse || 0,
+                tronconsValides: v.tronconsValides || 0,
+                recetteBruteReelle: v.recetteBruteReelle || 0,
+                carburantJour: v.carburantJour || 0,
+                updatedAt: Date.now()
+            };
+            localStorage.setItem(cleStatsJour, JSON.stringify(donnees));
+        }
+
+        // BASCULE MINUIT STRICTE (00h00)
+        setInterval(() => {
+            const dateActuelle = getKinshasaDateStr();
+            const derniereDateVerifiee = localStorage.getItem('tv_derniere_date_minuit');
+            
+            if (derniereDateVerifiee && derniereDateVerifiee !== dateActuelle) {
+                if (client && client.vehicules) {
+                    client.vehicules.forEach(v => {
+                        v.kmJour = 0;
+                        v.kmCourse = 0;
+                        v.tronconsValides = 0;
+                        v.recetteBruteReelle = 0;
+                        v.carburantJour = 0;
+                        sauvegarderStatsJournalieres(v);
+                    });
+                }
+                tracePositions = [];
+                if (busMarker) {
+                    const pos = busMarker.getLatLng();
+                    tracePositions = [[pos.lat, pos.lng]];
+                    if (polylineTrace) polylineTrace.setLatLngs(tracePositions);
+                }
+                genererToutesLesVues();
+            }
+            localStorage.setItem('tv_derniere_date_minuit', dateActuelle);
+        }, 15000);
+
+        // ========================================================
+        // CHARGEMENT ET RESTITUTION DE L'ACTIVITÉ DU JOUR
+        // ========================================================
         async function chargerDernieresPositions() {
             try {
                 const txtStatut = document.getElementById('last-update-text');
-                txtStatut.textContent = "Interrogation de la flotte...";
+                txtStatut.textContent = "Calcul de l'activité du matin...";
                 
                 if (!window.supabase) return;
 
@@ -572,33 +736,45 @@
                     .from('transvision_positions_gps')
                     .select('*')
                     .order('created_at', { ascending: false })
-                    .limit(200);
+                    .limit(500);
 
                 if (data && data.length > 0) {
                     const vehiculesTrouves = {};
                     
                     data.forEach(pos => {
                         if (pos.imei && pos.latitude && pos.longitude) {
-                            if (!vehiculesTrouves[pos.imei]) { vehiculesTrouves[pos.imei] = pos; }
+                            const imeiClean = String(pos.imei).trim();
+                            if (!vehiculesTrouves[imeiClean]) { 
+                                vehiculesTrouves[imeiClean] = pos; 
+                            }
                         }
                     });
 
-                    const customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
-
                     client.vehicules = [];
-                    Object.values(vehiculesTrouves).forEach(pos => {
-                        const imeiStr = String(pos.imei);
-                        const cfg = customConfig[imeiStr] || {};
-                        const params = trouverParametresSecrets(cfg.origine || "Kintambo Magasin", cfg.destination || "Delvaux");
+                    
+                    const debutJournee = new Date();
+                    debutJournee.setHours(0, 0, 0, 0);
+                    const debutJourneeTs = debutJournee.getTime();
 
-                        client.vehicules.push({
-                            plaque: cfg.plaque || `Tracker ${imeiStr.slice(-4)}`, 
+                    Object.keys(vehiculesTrouves).forEach(imeiClean => {
+                        const pos = vehiculesTrouves[imeiClean];
+                        
+                        let savedLigne = JSON.parse(localStorage.getItem('tv_ligne_' + imeiClean) || 'null');
+                        let customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
+                        let cfg = customConfig[imeiClean] || {};
+
+                        let origine = savedLigne?.origine || cfg.origine || "BRIKIN";
+                        let destination = savedLigne?.destination || cfg.destination || "GARE CENTRALE";
+
+                        const params = trouverParametresSecrets(origine, destination);
+
+                        const nouveauVehicule = {
+                            plaque: cfg.plaque || `Tracker ${imeiClean.slice(-4)}`, 
                             type: cfg.type || "Traceur GPS", 
                             places: cfg.places || 14, 
-                            imei: imeiStr,
+                            imei: imeiClean,
                             lat: pos.latitude, 
                             lng: pos.longitude, 
-                            // État persistant du moteur
                             moteurCoupe: cfg.moteurCoupe || false, 
                             carburantJour: 0, 
                             kmJour: 0,
@@ -606,36 +782,65 @@
                             distDeviee: params.distDeviee,
                             tarif: params.tarif,
                             kmCourse: 0,
-                            origine: cfg.origine || "Kintambo Magasin",
-                            destination: cfg.destination || "Delvaux",
-                            dernierCap: undefined,
+                            origine: origine,
+                            destination: destination,
+                            dernierCap: 0,
                             secondesArret: 0,
                             recetteBruteReelle: 0, 
                             tronconsValides: 0 
+                        };
+
+                        verifierEtChargerJournalDuJour(nouveauVehicule);
+
+                        // Calcul de la distance réelle de la matinée
+                        const pointsDuJour = data
+                            .filter(p => String(p.imei).trim() === imeiClean && p.created_at && new Date(p.created_at).getTime() >= debutJourneeTs)
+                            .reverse();
+
+                        let kmCalc = 0;
+                        let kmCourseEnCours = 0;
+                        let rotationsCalculees = 0;
+                        let pointPrec = null;
+                        let dernierCapPoint = 0;
+
+                        pointsDuJour.forEach(pt => {
+                            if (pointPrec) {
+                                let d = calculerDistanceGPS(pointPrec.latitude, pointPrec.longitude, pt.latitude, pt.longitude);
+                                if (d > 0.003 && d < 2.0) {
+                                    kmCalc += d;
+                                    kmCourseEnCours += d;
+                                    dernierCapPoint = calculerCap(pointPrec.latitude, pointPrec.longitude, pt.latitude, pt.longitude);
+
+                                    if (kmCourseEnCours >= params.distDeviee || kmCourseEnCours >= params.distDirect) {
+                                        rotationsCalculees += 1;
+                                        kmCourseEnCours = 0;
+                                    }
+                                }
+                            }
+                            pointPrec = pt;
                         });
+
+                        if (kmCalc > 0) {
+                            nouveauVehicule.kmJour = Math.max(nouveauVehicule.kmJour, kmCalc);
+                            nouveauVehicule.kmCourse = kmCourseEnCours;
+                            nouveauVehicule.tronconsValides = Math.max(nouveauVehicule.tronconsValides, rotationsCalculees);
+                            nouveauVehicule.recetteBruteReelle = nouveauVehicule.tronconsValides * (params.tarif * nouveauVehicule.places);
+                            nouveauVehicule.carburantJour = nouveauVehicule.kmJour * 0.12;
+                            nouveauVehicule.dernierCap = dernierCapPoint;
+                            sauvegarderStatsJournalieres(nouveauVehicule);
+                        }
+
+                        client.vehicules.push(nouveauVehicule);
                     });
                     
-                    const premierImei = client.vehicules[0]?.imei;
-                    const debutJournee = new Date();
-                    debutJournee.setHours(0, 0, 0, 0);
-                    const tsDemarrageManuel = parseInt(localStorage.getItem('tv_timestamp_demarrage_journee') || '0');
-                    const repereTemps = Math.max(debutJournee.getTime(), tsDemarrageManuel);
-
-                    if(premierImei) {
-                        const pointsDuJour = data
-                            .filter(p => {
-                                if (String(p.imei) !== premierImei) return false;
-                                if (!p.created_at) return false;
-                                return new Date(p.created_at).getTime() >= repereTemps;
-                            })
+                    const premierVehicule = client.vehicules[0];
+                    if (premierVehicule) {
+                        const tracePts = data
+                            .filter(p => String(p.imei).trim() === premierVehicule.imei && p.created_at && new Date(p.created_at).getTime() >= debutJourneeTs)
                             .reverse()
                             .map(p => [p.latitude, p.longitude]);
 
-                        if(pointsDuJour.length > 0) {
-                            tracePositions = pointsDuJour;
-                        } else if(client.vehicules[0]) {
-                            tracePositions = [[client.vehicules[0].lat, client.vehicules[0].lng]];
-                        }
+                        tracePositions = tracePts.length > 0 ? tracePts : [[premierVehicule.lat, premierVehicule.lng]];
                     }
 
                     majSelecteurMap();
@@ -643,37 +848,39 @@
                     const sel = document.getElementById('select-vehicule-map');
                     if (sel && sel.value !== "none") { initMapEtCentrer(parseInt(sel.value)); }
                     
-                    txtStatut.textContent = `Connecté (${client.vehicules.length} véhicule détecté).`;
+                    txtStatut.textContent = `En ligne : ${premierVehicule ? premierVehicule.kmJour.toFixed(1) : 0} km parcourus ce jour.`;
                 }
             } catch (err) {}
         }
 
         socket.on('connect', () => {
             document.getElementById('statut-serveur-voyant').className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
-            document.getElementById('statut-serveur-texte').textContent = "SERVEUR EN LIGNE";
+            document.getElementById('statut-serveur-texte').textContent = "Suivi Satellite Actif";
             document.getElementById('statut-serveur-texte').className = "text-[10px] font-black uppercase text-emerald-400 tracking-wider";
         });
 
-        socket.on('disconnect', () => {
-            document.getElementById('statut-serveur-voyant').className = "w-2 h-2 rounded-full bg-rose-500";
-            document.getElementById('statut-serveur-texte').textContent = "RECONNEXION...";
-            document.getElementById('statut-serveur-texte').className = "text-[10px] font-black uppercase text-rose-400 tracking-wider";
-        });
-
+        // ========================================================
+        // RÉCEPTION D'UNE POSITION ET ANIMATION EN DIRECT
+        // ========================================================
         function traiterNouvellePosition(data) {
             const now = new Date();
-            document.getElementById('last-update-text').textContent = `Point reçu: ${now.toLocaleTimeString()}`;
+            document.getElementById('last-update-text').textContent = `Signal : ${now.toLocaleTimeString()}`;
             document.getElementById('statut-serveur-voyant').className = "w-2 h-2 rounded-full bg-emerald-400 animate-ping";
 
-            let vehiculeIndex = client.vehicules.findIndex(v => v.imei === data.imei);
+            const imeiClean = String(data.imei).trim();
+            let vehiculeIndex = client.vehicules.findIndex(v => String(v.imei).trim() === imeiClean);
             
             if (vehiculeIndex === -1) {
-                const params = trouverParametresSecrets("Kintambo Magasin", "Delvaux");
-                client.vehicules.push({
-                    plaque: data.plaque || `Tracker ${data.imei.slice(-4)}`, 
+                let savedLigne = JSON.parse(localStorage.getItem('tv_ligne_' + imeiClean) || 'null');
+                const origine = savedLigne?.origine || "BRIKIN";
+                const destination = savedLigne?.destination || "GARE CENTRALE";
+                const params = trouverParametresSecrets(origine, destination);
+
+                const nv = {
+                    plaque: data.plaque || `Tracker ${imeiClean.slice(-4)}`, 
                     type: "Traceur GPS", 
                     places: 14, 
-                    imei: data.imei,
+                    imei: imeiClean,
                     lat: data.lat, 
                     lng: data.lng, 
                     moteurCoupe: false, 
@@ -683,22 +890,23 @@
                     distDeviee: params.distDeviee,
                     kmCourse: 0,
                     tarif: params.tarif,
-                    origine: "Kintambo Magasin",
-                    destination: "Delvaux",
-                    dernierCap: undefined,
+                    origine: origine,
+                    destination: destination,
+                    dernierCap: 0,
                     secondesArret: 0,
                     recetteBruteReelle: 0, 
                     tronconsValides: 0
-                });
+                };
+                verifierEtChargerJournalDuJour(nv);
+                client.vehicules.push(nv);
                 vehiculeIndex = client.vehicules.length - 1;
                 majSelecteurMap();
                 peuplerSelecteursFiltre();
             } else {
                 let v = client.vehicules[vehiculeIndex];
-                
                 let distDelta = calculerDistanceGPS(v.lat, v.lng, data.lat, data.lng);
                 
-                if (distDelta > 0.002 && distDelta < 2.0) {
+                if (distDelta > 0.003 && distDelta < 2.0) {
                     v.kmJour += distDelta;
                     v.kmCourse = (v.kmCourse || 0) + distDelta;
                     v.carburantJour = v.kmJour * 0.12;
@@ -711,9 +919,9 @@
                     }
                     v.dernierCap = nouveauCap;
 
-                    const dDirect = v.distDirect || 4.5;
-                    const dDeviee = v.distDeviee || 5.5;
-                    const gainParRotation = (v.tarif || 1000) * (v.places || 14);
+                    const dDirect = v.distDirect || 12.0;
+                    const dDeviee = v.distDeviee || 14.5;
+                    const gainParRotation = (v.tarif || 2500) * (v.places || 14);
 
                     let rotationValidee = false;
 
@@ -741,8 +949,18 @@
                         v.secondesArret = 0;
                     }
 
+                    const anciennePosition = { lat: v.lat, lng: v.lng };
                     v.lat = data.lat; 
                     v.lng = data.lng;
+
+                    sauvegarderStatsJournalieres(v);
+
+                    // Animation fluide de déplacement sur la carte
+                    const selectMap = document.getElementById('select-vehicule-map');
+                    if (selectMap && selectMap.value == vehiculeIndex && map && busMarker) {
+                        animerDeplacementMarker(busMarker, anciennePosition, { lat: data.lat, lng: data.lng }, 1200);
+                        busMarker.setIcon(creerIconeVehiculeLive(v.dernierCap));
+                    }
                 }
             }
 
@@ -751,17 +969,28 @@
                 const targetPoint = [data.lat, data.lng];
                 tracePositions.push(targetPoint);
                 
+                detecterNomAvenue(data.lat, data.lng).then(avenue => {
+                    const elAv = document.getElementById('hud-avenue-live');
+                    if(elAv) elAv.textContent = avenue;
+                });
+
+                const v = client.vehicules[vehiculeIndex];
+                const vitTxt = (data.vitesse || 0) > 0 ? (data.vitesse).toFixed(0) + ' km/h' : 'À l\'arrêt';
+                
+                document.getElementById('hud-vitesse-live').textContent = vitTxt;
+                document.getElementById('hud-km-jour').textContent = (v.kmJour || 0).toFixed(1) + ' km';
+                document.getElementById('hud-course-progression').textContent = (v.kmCourse || 0).toFixed(1) + ' km';
+                document.getElementById('hud-recettes-jour').textContent = (v.recetteBruteReelle || 0).toLocaleString() + ' CDF';
+
                 if (map) {
                     if (busMarker) {
-                        busMarker.setLatLng(targetPoint);
-                        const v = client.vehicules[vehiculeIndex];
                         busMarker.getPopup().setContent(`
                             <b>${v.plaque}</b><br>
-                            Itinéraire: <b>${v.origine} ➔ ${v.destination}</b><br>
-                            État moteur: <b>${v.moteurCoupe ? '🔴 Bloqué' : '🟢 Démarré'}</b><br>
-                            Vitesse: <b>${data.vitesse || 0} km/h</b><br>
-                            Rotations du jour: <b>${v.tronconsValides}</b><br>
-                            Recettes: <b>${v.recetteBruteReelle.toLocaleString()} CDF</b>
+                            Ligne : <b>${v.origine} ➔ ${v.destination}</b><br>
+                            Vitesse : <b>${vitTxt}</b><br>
+                            Roulé ce matin : <b>${v.kmJour.toFixed(1)} km</b><br>
+                            Rotations validées : <b>${v.tronconsValides}</b><br>
+                            Recettes du jour : <b>${v.recetteBruteReelle.toLocaleString()} CDF</b>
                         `);
                     } else {
                         initMapEtCentrer(vehiculeIndex);
@@ -777,7 +1006,7 @@
                             lineJoin: 'round' 
                         }).addTo(map);
                     }
-                    map.panTo(targetPoint);
+                    map.panTo(targetPoint, { animate: true, duration: 1.0 });
                 }
             }
 
@@ -789,6 +1018,7 @@
             traiterNouvellePosition(data);
         });
 
+        // SONDAGE SATELLITE TOUTES LES 3 SECONDES
         async function sonderPositionsCloudEnContinu() {
             try {
                 if (!window.supabase) return;
@@ -804,7 +1034,7 @@
                     if (pointKey !== dernierPointId) {
                         dernierPointId = pointKey;
                         traiterNouvellePosition({
-                            imei: String(latest.imei),
+                            imei: String(latest.imei).trim(),
                             lat: latest.latitude,
                             lng: latest.longitude,
                             vitesse: latest.speed || latest.vitesse || 0
@@ -813,7 +1043,7 @@
                 }
             } catch(e) {}
         }
-        setInterval(sonderPositionsCloudEnContinu, 4000);
+        setInterval(sonderPositionsCloudEnContinu, 3000);
 
         function initFiltresDates() {
             const sel = document.getElementById('filtre-fin-vehicule');
@@ -871,6 +1101,9 @@
             client.vehicules.forEach((v, i) => sel.insertAdjacentHTML('beforeend', `<option value="${i}">${v.plaque} (${v.type})</option>`));
         }
 
+        // ========================================================
+        // INITIALISATION CARTE GOOGLE MAPS TRAFIC LIVE (ZOOM 17 VUE RUE)
+        // ========================================================
         function initMapEtCentrer(index) {
             const mapContainer = document.getElementById('map-container');
             if (!mapContainer || mapContainer.offsetParent === null) return;
@@ -881,27 +1114,41 @@
                 lat = v.lat; 
                 lng = v.lng; 
                 if (tracePositions.length === 0) tracePositions = [[lat, lng]];
+                
+                detecterNomAvenue(lat, lng).then(avenue => {
+                    const elAv = document.getElementById('hud-avenue-live');
+                    if(elAv) elAv.textContent = avenue;
+                });
+                
+                document.getElementById('hud-km-jour').textContent = (v.kmJour || 0).toFixed(1) + ' km';
+                document.getElementById('hud-course-progression').textContent = (v.kmCourse || 0).toFixed(1) + ' km';
+                document.getElementById('hud-recettes-jour').textContent = (v.recetteBruteReelle || 0).toLocaleString() + ' CDF';
             }
             
             if(!map) {
-                map = L.map('map-container').setView([lat, lng], 16);
-                L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+                map = L.map('map-container').setView([lat, lng], 17);
+                
+                // FLUX GOOGLE MAPS AVEC COUCHE TRAFIC ROUTIER EN TEMPS RÉEL (ROUGE, ORANGE, VERT)
+                L.tileLayer('https://{s}.google.com/vt/lyrs=m,traffic&x={x}&y={y}&z={z}', {
                     maxZoom: 20,
                     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-                    attribution: '&copy; Google Maps'
+                    attribution: '&copy; Google Maps & Traffic'
                 }).addTo(map);
             }
             
             if(busMarker) map.removeLayer(busMarker);
+            
             const popupTxt = v ? `
                 <b>${v.plaque}</b><br>
-                Itinéraire: <b>${v.origine} ➔ ${v.destination}</b><br>
-                Moteur: <b>${v.moteurCoupe ? '🔴 Bloqué' : '🟢 Démarré'}</b><br>
-                Rotations du jour: <b>${v.tronconsValides || 0}</b><br>
-                Recettes: <b>${(v.recetteBruteReelle || 0).toLocaleString()} CDF</b>
+                Ligne : <b>${v.origine} ➔ ${v.destination}</b><br>
+                Roulé aujourd'hui : <b>${(v.kmJour || 0).toFixed(1)} km</b><br>
+                Rotations validées : <b>${v.tronconsValides || 0}</b><br>
+                Recettes du jour : <b>${(v.recetteBruteReelle || 0).toLocaleString()} CDF</b>
             ` : "En attente...";
             
-            busMarker = L.marker([lat, lng]).addTo(map).bindPopup(popupTxt).openPopup();
+            busMarker = L.marker([lat, lng], {
+                icon: creerIconeVehiculeLive(v ? v.dernierCap : 0)
+            }).addTo(map).bindPopup(popupTxt).openPopup();
             
             if (polylineTrace) map.removeLayer(polylineTrace);
             if(tracePositions.length > 1) {
@@ -913,7 +1160,7 @@
                 }).addTo(map);
             }
 
-            map.setView([lat, lng], 16);
+            map.setView([lat, lng], 17);
             setTimeout(() => { map.invalidateSize(); }, 200);
         }
         
@@ -924,19 +1171,32 @@
         function enregistrerVehiculeSaisi() {
             const plaque = document.getElementById('add-plaque').value.trim();
             const imei = document.getElementById('add-imei').value.trim();
-            const origine = document.getElementById('add-origine').value.trim() || "Kintambo Magasin";
-            const destination = document.getElementById('add-destination').value.trim() || "Delvaux";
+            const origine = document.getElementById('add-origine').value.trim() || "BRIKIN";
+            const destination = document.getElementById('add-destination').value.trim() || "GARE CENTRALE";
             const places = parseInt(document.getElementById('add-places').value) || 14;
 
             if (!plaque || !imei) { alert("Veuillez remplir au moins la Plaque et l'IMEI."); return; }
             
+            const imeiClean = String(imei).trim();
             const params = trouverParametresSecrets(origine, destination);
 
-            client.vehicules.push({ 
+            localStorage.setItem('tv_ligne_' + imeiClean, JSON.stringify({ origine, destination }));
+            const customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
+            customConfig[imeiClean] = {
+                plaque: plaque,
+                type: document.getElementById('add-type').value || "Traceur GPS",
+                places: places,
+                origine: origine,
+                destination: destination,
+                moteurCoupe: false
+            };
+            localStorage.setItem('tv_vehicules_custom', JSON.stringify(customConfig));
+
+            const nv = { 
                 plaque: plaque, 
                 type: document.getElementById('add-type').value || "Traceur GPS", 
                 places: places, 
-                imei: imei, 
+                imei: imeiClean, 
                 lat: -4.32, 
                 lng: 15.31, 
                 moteurCoupe: false, 
@@ -948,15 +1208,32 @@
                 kmCourse: 0,
                 origine: origine,
                 destination: destination,
-                dernierCap: undefined,
+                dernierCap: 0,
                 secondesArret: 0,
                 recetteBruteReelle: 0, 
                 tronconsValides: 0 
-            });
+            };
+            verifierEtChargerJournalDuJour(nv);
+            client.vehicules.push(nv);
             
+            try {
+                if(window.supabase) {
+                    supabaseClient.from('tv_vehicules').upsert({
+                        imei: imeiClean,
+                        plaque: plaque,
+                        origine: origine,
+                        destination: destination,
+                        dist_direct: params.distDirect,
+                        dist_deviee: params.distDeviee,
+                        tarif: params.tarif,
+                        updated_at: new Date().toISOString()
+                    }, { onConflict: 'imei' }).then();
+                }
+            } catch(e) {}
+
             document.getElementById('add-plaque').value = ""; 
             document.getElementById('add-imei').value = "";
-            alert(`✅ Véhicule ${plaque} enregistré avec succès sur la ligne ${origine} ➔ ${destination}.`);
+            alert(`✅ Véhicule ${plaque} enregistré sur la ligne ${origine} ➔ ${destination}.`);
             genererToutesLesVues(); 
             changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
         }
@@ -998,7 +1275,7 @@
                             </div>
                             <div class="flex justify-between text-[10px] text-slate-400 font-mono pt-1.5 border-t border-slate-900">
                                 <span><i class="fa-solid fa-rotate text-emerald-400 mr-1"></i><strong>${troncons}</strong> rotation(s) validée(s)</span>
-                                <span>Activité jour: <strong class="text-slate-200">${(v.kmJour || 0).toFixed(1)} km</strong></span>
+                                <span>Roulé aujourd'hui : <strong class="text-slate-200">${(v.kmJour || 0).toFixed(1)} km</strong></span>
                             </div>
                         </div>`);
                 }
@@ -1026,9 +1303,6 @@
 
         function appliquerFiltreTechnique() { genererRapportTechnique(); }
 
-        // ========================================================
-        // GESTION DU RAPPORT TECHNIQUE ET CONTRÔLE DÉMARRAGE / COUPURE
-        // ========================================================
         function genererRapportTechnique() {
             const list = document.getElementById('tech-vehicules-list');
             if(!list) return;
@@ -1052,7 +1326,6 @@
                             <p>🛣️ Dist: <span class="text-sky-400 font-bold">${kmPeriode} km</span></p>
                         </div>
 
-                        <!-- INDICATEUR ET BOUTONS COUPER / DÉMARRER -->
                         <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 space-y-2">
                             <div class="flex justify-between items-center text-[9px] font-mono">
                                 <span class="text-slate-400 uppercase font-bold">État du relais moteur :</span>
@@ -1062,12 +1335,10 @@
                             </div>
 
                             <div class="grid grid-cols-2 gap-2 pt-1">
-                                <!-- BOUTON 1 : COUPER -->
                                 <button onclick="actionnerMoteur(${origineIndex}, true)" class="w-full bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30 font-black py-2.5 rounded-xl text-[10px] uppercase transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95">
                                     <i class="fa-solid fa-power-off"></i> Couper Moteur
                                 </button>
                                 
-                                <!-- BOUTON 2 : DÉMARRER / DÉBLOQUER -->
                                 <button onclick="actionnerMoteur(${origineIndex}, false)" class="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 font-black py-2.5 rounded-xl text-[10px] uppercase transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95">
                                     <i class="fa-solid fa-key"></i> Démarrer
                                 </button>
@@ -1081,7 +1352,6 @@
             });
         }
 
-        // FONCTION DE COMMANDE MOTEUR (DÉMARRER OU COUPER)
         function actionnerMoteur(index, couper) {
             const v = client.vehicules[index];
             if (!v) return;
@@ -1089,21 +1359,18 @@
             const actionTxt = couper ? "COUPER" : "DÉMARRER / DÉBLOQUER";
             const confirmMsg = couper 
                 ? `⚠️ CONFIRMATION DE COUPURE\n\nVoulez-vous couper le moteur du véhicule ${v.plaque} ?\nLa pompe à carburant sera bloquée à distance.`
-                : `🔑 CONFIRMATION DE DÉMARRAGE\n\nVoulez-vous réactiver le moteur du véhicule ${v.plaque} ?\nLe circuit d'allumage sera reconnecté pour permettre le démarrage avec la clé.`;
+                : `🔑 CONFIRMATION DE DÉMARRAGE\n\nVoulez-vous réactiver le moteur du véhicule ${v.plaque} ?\nLe contact sera rétabli pour permettre le démarrage avec la clé.`;
 
             if (confirm(confirmMsg)) {
                 v.moteurCoupe = couper;
 
-                // 1. Sauvegarde locale de l'état
                 const customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
                 if (!customConfig[v.imei]) customConfig[v.imei] = {};
                 customConfig[v.imei].moteurCoupe = couper;
                 localStorage.setItem('tv_vehicules_custom', JSON.stringify(customConfig));
 
-                // 2. Envoi de la commande au serveur DigitalOcean en direct
                 socket.emit('commande_moteur', { imei: v.imei, couper: couper });
 
-                // 3. Sauvegarde dans Supabase
                 try {
                     if (window.supabase) {
                         supabaseClient.from('tv_vehicules').upsert({
@@ -1115,7 +1382,7 @@
                 } catch(e) {}
 
                 const smsCode = couper ? "6690000" : "7110000";
-                alert(`📡 Ordre envoyé au traceur SinoTrack !\n\nAction : ${actionTxt}\nVéhicule : ${v.plaque}\n\n(En cas de problème réseau mobile, vous pouvez aussi envoyer par SMS le code : ${smsCode} au numéro du boîtier).`);
+                alert(`📡 Ordre envoyé au traceur SinoTrack !\n\nAction : ${actionTxt}\nVéhicule : ${v.plaque}\n\n(Secours par SMS : envoyez ${smsCode} au numéro de la puce).`);
                 
                 genererRapportTechnique();
                 if (map && busMarker) initMapEtCentrer(index);
@@ -1128,8 +1395,8 @@
 
             document.getElementById('mod-vehicule-index').value = index;
             document.getElementById('mod-vehicule-nom').textContent = `${v.plaque}`;
-            document.getElementById('mod-origine').value = v.origine || "Kintambo Magasin";
-            document.getElementById('mod-destination').value = v.destination || "Delvaux";
+            document.getElementById('mod-origine').value = v.origine || "BRIKIN";
+            document.getElementById('mod-destination').value = v.destination || "GARE CENTRALE";
             document.getElementById('mod-select-ligne-rapide').value = "";
 
             document.getElementById('modal-modifier-itineraire').classList.remove('hidden');
@@ -1159,6 +1426,7 @@
                 return;
             }
 
+            const imeiClean = String(v.imei).trim();
             const params = trouverParametresSecrets(nouvelleOrigine, nouvelleDestination);
 
             v.origine = nouvelleOrigine;
@@ -1169,8 +1437,10 @@
             v.kmCourse = 0;
             v.secondesArret = 0;
 
+            localStorage.setItem('tv_ligne_' + imeiClean, JSON.stringify({ origine: nouvelleOrigine, destination: nouvelleDestination }));
+            
             const customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
-            customConfig[v.imei] = {
+            customConfig[imeiClean] = {
                 plaque: v.plaque,
                 type: v.type,
                 places: v.places,
@@ -1179,9 +1449,10 @@
                 moteurCoupe: v.moteurCoupe
             };
             localStorage.setItem('tv_vehicules_custom', JSON.stringify(customConfig));
+            sauvegarderStatsJournalieres(v);
 
             const payloadLigne = {
-                imei: v.imei,
+                imei: imeiClean,
                 plaque: v.plaque,
                 origine: v.origine,
                 destination: v.destination,
@@ -1200,7 +1471,7 @@
 
             try {
                 supabaseClient.from('tv_vehicules').upsert({
-                    imei: v.imei,
+                    imei: imeiClean,
                     plaque: v.plaque,
                     origine: v.origine,
                     destination: v.destination,
@@ -1211,7 +1482,7 @@
                 }, { onConflict: 'imei' }).then();
             } catch(e) {}
 
-            alert(`✅ Itinéraire mis à jour avec succès !\n${v.plaque} est désormais positionné sur la ligne : ${v.origine} ➔ ${v.destination}.`);
+            alert(`✅ Itinéraire sauvegardé avec succès !\n${v.plaque} est désormais configuré sur : ${v.origine} ➔ ${v.destination}.`);
 
             fermerModalModifierItineraire();
             genererToutesLesVues();
@@ -1400,7 +1671,6 @@
             naviguerVers('app-proprietaire'); 
             
             chargerDernieresPositions().then(() => { 
-                verifierEtReinitialiserAutomatiqueJournee();
                 genererToutesLesVues(); 
                 actualiserCompteAReboursForfait();
                 setInterval(actualiserCompteAReboursForfait, 1000); 
@@ -1419,7 +1689,6 @@
 
         window.addEventListener('DOMContentLoaded', async () => {
             chargerConfigurationsAdmin();
-            verifierEtReinitialiserAutomatiqueJournee();
             actualiserCompteAReboursForfait();
             
             const telSauve = localStorage.getItem('tv_partenaire_tel');
