@@ -32,6 +32,900 @@
         .leaflet-container { background: #e5e3df !important; }
         
         /* STYLE DU VÉHICULE EN DIRECT TYPE YANGO */
+        .yango-marker-container {
+            pointer-events: auto;
+        }
+
+        .yango-car-wrapper {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Halo radar pulsant sous le véhicule */
+        .yango-pulse-halo {
+            position: absolute;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: rgba(14, 165, 233, 0.28);
+            border: 1px solid rgba(56, 189, 248, 0.5);
+            animation: pulseYango 2s infinite ease-out;
+            pointer-events: none;
+        }
+        @keyframes pulseYango {
+            0% { transform: scale(0.6); opacity: 0.9; }
+            100% { transform: scale(1.6); opacity: 0; }
+        }
+
+        /* Corps de la voiture vue du ciel orientable */
+        .yango-car-body {
+            position: relative;
+            width: 32px;
+            height: 32px;
+            transform-origin: center center;
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45));
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(100deg); cursor: pointer; }
+        @media print {
+            body { background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            .print-clean { background: transparent !important; border: 1px solid #cbd5e1 !important; color: black !important; box-shadow: none !important; }
+            .print-text { color: black !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen relative overflow-x-hidden">
+
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <img src="VISION.png" alt="Fond d'écran TransVision" class="w-full h-full object-cover object-center opacity-25 select-none scale-105" onerror="this.style.display='none'">
+        <div class="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/70 to-slate-950/90"></div>
+    </div>
+
+    <!-- BANNIÈRE INSTALLATION PWA -->
+    <div id="pwa-install-banner" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-slate-900/95 backdrop-blur border border-emerald-500/50 text-slate-100 p-3 rounded-2xl shadow-2xl flex items-center gap-3 z-[100] w-[90%] max-w-sm hidden no-print">
+        <div class="w-10 h-10 rounded-xl overflow-hidden shadow-md flex items-center justify-center bg-slate-950 flex-shrink-0">
+            <img src="logo%20192x192.png" alt="Logo" class="w-full h-full object-contain scale-[2.05]" onerror="this.style.display='none'">
+        </div>
+        <div class="flex-1">
+            <p class="text-[11px] font-black text-emerald-400">Installer TransVision</p>
+            <p class="text-[9px] text-slate-400">by Global Tech Solutions</p>
+        </div>
+        <button id="btn-install-pwa" class="bg-emerald-500 text-slate-950 font-black text-[10px] px-3 py-2 rounded-xl">Installer</button>
+        <button onclick="document.getElementById('pwa-install-banner').classList.add('hidden')" class="text-slate-500 px-2"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- MAQUETTE PRINCIPALE -->
+    <div class="relative z-10 max-w-md mx-auto min-h-screen shadow-2xl overflow-hidden flex flex-col border-x border-slate-800/70 pb-20 bg-slate-900/70 backdrop-blur-xl" id="zone-flotte">
+        
+        <!-- 1. ÉCRAN D'ACCÈS / AUTHENTIFICATION -->
+        <div id="page-auth" class="p-6 space-y-5 flex-1 flex flex-col justify-between no-print overflow-y-auto">
+            <div class="space-y-4 mt-1">
+                <div class="text-center">
+                    <div class="w-20 h-20 mx-auto mb-3 rounded-2xl overflow-hidden shadow-2xl shadow-emerald-500/25 flex items-center justify-center bg-slate-950 border border-emerald-500/30">
+                        <img src="logo%20192x192.png" alt="Logo TransVision" class="w-full h-full object-contain scale-[2.05]" onerror="this.style.display='none'">
+                    </div>
+                    <h2 class="text-xl font-black tracking-wide">TransVision</h2>
+                    <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">by Global Tech Solutions</p>
+                    <p class="text-[9px] text-slate-300 mt-0.5 italic">Contrôle de flotte & Audit des recettes</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-1 bg-slate-950/80 backdrop-blur p-1 rounded-xl border border-slate-800">
+                    <button id="tab-btn-login" onclick="basculerVueAuth('login')" class="py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950">Connexion</button>
+                    <button id="tab-btn-register" onclick="basculerVueAuth('register')" class="py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200">Nouveau Partenaire</button>
+                </div>
+
+                <!-- FORMULAIRE CONNEXION -->
+                <div id="form-connexion" class="bg-slate-950/85 backdrop-blur p-5 rounded-2xl border border-slate-800/80 space-y-4 shadow-xl">
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Téléphone Enregistré</label>
+                        <input type="tel" id="login-tel" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-mono font-bold" value="0965647819">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Code PIN Sécurité</label>
+                        <input type="password" id="login-pin" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-mono" placeholder="4 chiffres" value="0000">
+                    </div>
+                    <button onclick="executerConnexionPartenaire()" id="btn-login-text" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl text-xs uppercase shadow-lg shadow-emerald-500/10 transition-colors">
+                        Ouvrir mon Espace Flotte
+                    </button>
+                </div>
+
+                <!-- FORMULAIRE INSCRIPTION -->
+                <div id="form-inscription" class="bg-slate-950/85 backdrop-blur p-4 rounded-2xl border border-slate-800/80 space-y-3 shadow-xl hidden">
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Nom Complet</label>
+                        <input type="text" id="ins-nom" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200" placeholder="Ex: Jean Dupont">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Téléphone RDC</label>
+                        <input type="tel" id="ins-tel" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono" placeholder="Ex: 0810000000">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Créer un Code PIN</label>
+                        <input type="password" id="ins-pin" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono" placeholder="4 chiffres secrets">
+                    </div>
+                    <button onclick="inscrireNouveauPartenaire()" class="w-full bg-emerald-500 text-slate-950 font-black py-3 rounded-xl text-xs uppercase mt-3 shadow-lg">S'inscrire</button>
+                    <p class="text-[10px] text-slate-400 text-center mt-2">
+                        En adhérant, vous acceptez nos <button type="button" onclick="ouvrirModalCGU()" class="text-emerald-400 font-bold underline">CGU & Forfaits</button>.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
+                TransVision v18.8 PROD — Moteur Télématique Yango (Temps Réel)
+            </div>
+        </div>
+
+        <!-- 2. ESPACE CLIENT CONNECTÉ -->
+        <div id="app-proprietaire" class="flex-1 flex flex-col hidden relative">
+            <header class="p-4 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur sticky top-0 z-30 no-print">
+                <div class="flex justify-between items-center mb-3">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 id="lbl-nom-partenaire" class="text-sm font-black text-slate-100">Dolce</h1>
+                            <span class="text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded font-mono font-bold">ACTIF</span>
+                        </div>
+                        <p class="text-[8px] text-slate-400 font-mono">TransVision by Global Tech Solutions</p>
+                    </div>
+                    <div class="w-8 h-8 rounded-xl overflow-hidden shadow border border-slate-800 bg-slate-950 flex-shrink-0">
+                        <img src="logo%20192x192.png" alt="Logo" class="w-full h-full object-contain scale-[2.05]" onerror="this.style.display='none'">
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 flex items-center justify-between shadow-md">
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" id="statut-serveur-voyant"></span>
+                            <span class="text-[10px] font-black uppercase text-emerald-400 tracking-wider" id="statut-serveur-texte">FLUX TEMPS RÉEL ACTIF</span>
+                        </div>
+                        <p class="text-[9px] text-slate-400 mt-0.5" id="last-update-text">En attente de coordonnée...</p>
+                    </div>
+                    <div class="text-right flex flex-col items-end gap-1.5">
+                        <span id="timer-compte-rebours" class="text-xs font-mono font-black text-slate-100 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-lg shadow-inner">--:--:--</span>
+                        <button onclick="reinitialiserJourneeManuelle()" class="text-[8px] bg-slate-850 hover:bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded font-bold uppercase transition-colors">
+                            <i class="fa-solid fa-rotate-left mr-1"></i> Remise à zéro
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- ONGLET A : CARTE INTERFACE STYLE YANGO -->
+            <div id="onglet-flotte" class="p-2 flex-1 flex flex-col blur-transition class-onglet no-print min-h-[calc(100vh-170px)] space-y-2">
+                
+                <!-- BANDEAU HUD TEMPS RÉEL -->
+                <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-3 space-y-2 shadow-2xl backdrop-blur">
+                    <div class="flex justify-between items-center text-xs">
+                        <div class="flex items-center gap-2 truncate max-w-[240px]">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                            <span id="hud-avenue-live" class="truncate font-sans font-black text-slate-100">Localisation de l'avenue...</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-xl border border-slate-800">
+                            <i class="fa-solid fa-gauge-high text-sky-400 text-xs"></i>
+                            <span class="text-xs font-mono font-black text-emerald-400" id="hud-vitesse-live">0 km/h</span>
+                        </div>
+                    </div>
+
+                    <!-- LÉGENDE DU TRAFIC ROUTIER GOOGLE EN DIRECT -->
+                    <div class="flex items-center justify-between text-[8px] font-bold text-slate-400 border-t border-slate-800/80 pt-1.5 px-1">
+                        <span class="uppercase tracking-wider text-slate-500 flex items-center gap-1">
+                            <i class="fa-solid fa-road"></i> Trafic Kinshasa :
+                        </span>
+                        <div class="flex items-center gap-3 font-sans">
+                            <span class="flex items-center gap-1 text-emerald-400"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Fluide</span>
+                            <span class="flex items-center gap-1 text-amber-400"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Ralenti</span>
+                            <span class="flex items-center gap-1 text-rose-400"><span class="w-2 h-2 rounded-full bg-rose-600"></span> Bouchon</span>
+                        </div>
+                    </div>
+
+                    <!-- CUMUL DU JOUR CALCULÉ SUR 4 PLACES -->
+                    <div class="grid grid-cols-3 gap-1.5 text-center text-[10px] font-mono border-t border-slate-800/80 pt-1.5">
+                        <div class="bg-slate-950/80 p-1.5 rounded-xl border border-slate-850">
+                            <span class="text-[8px] text-slate-500 block uppercase font-bold">Roulé aujourd'hui</span>
+                            <span class="font-black text-slate-100 text-xs" id="hud-km-jour">0.0 km</span>
+                        </div>
+                        <div class="bg-slate-950/80 p-1.5 rounded-xl border border-slate-850">
+                            <span class="text-[8px] text-slate-500 block uppercase font-bold">Course en cours</span>
+                            <span class="font-black text-sky-400 text-xs" id="hud-course-progression">0.0 km</span>
+                        </div>
+                        <div class="bg-slate-950/80 p-1.5 rounded-xl border border-slate-850">
+                            <span class="text-[8px] text-slate-500 block uppercase font-bold">Recettes (4 places)</span>
+                            <span class="font-black text-emerald-400 text-xs" id="hud-recettes-jour">0 CDF</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 p-2 rounded-2xl border border-slate-800 flex-1 flex flex-col space-y-2 shadow-md">
+                    <div class="flex justify-between items-center px-1">
+                        <h2 class="text-[10px] font-bold text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
+                            <i class="fa-solid fa-map text-sky-400"></i> Navigation Suivie
+                        </h2>
+                        <select id="select-vehicule-map" onchange="centrerSurVehicule(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg text-[10px] text-emerald-400 font-bold px-2 py-1 outline-none truncate max-w-[150px]"></select>
+                    </div>
+                    <div id="map-container" class="shadow-inner flex-1 w-full border border-slate-800 rounded-xl overflow-hidden"></div>
+                </div>
+            </div>
+
+            <!-- ONGLET B : GESTION VÉHICULE -->
+            <div id="onglet-ajouter" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
+                <div class="bg-slate-950/85 backdrop-blur p-5 rounded-2xl border border-slate-800/80 space-y-4 shadow-xl">
+                    <div class="border-b border-slate-800 pb-2">
+                        <h3 class="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-square-plus text-indigo-400"></i> Configuration Matériel</h3>
+                        <p class="text-[10px] text-slate-400">Plaque, IMEI et affectation de ligne.</p>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Plaque / ID</label>
+                                <input type="text" id="add-plaque" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono focus:border-indigo-500 outline-none" placeholder="Ex: KIN 4082AE">
+                            </div>
+                            <div>
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Places Assises</label>
+                                <input type="number" id="add-places" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-emerald-400 font-bold focus:border-indigo-500 outline-none" value="4">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">N° IMEI Traceur</label>
+                            <input type="text" id="add-imei" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono focus:border-indigo-500 outline-none" placeholder="357445101350102" value="357445101350102">
+                        </div>
+
+                        <div class="p-3 bg-slate-900/90 border border-indigo-500/30 rounded-2xl space-y-3 shadow-inner">
+                            <span class="text-[9px] font-black uppercase text-indigo-400 tracking-wider flex items-center gap-1.5">
+                                <i class="fa-solid fa-route"></i> Ligne Assignée
+                            </span>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Origine</label>
+                                    <input type="text" id="add-origine" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold outline-none" value="BRIKIN">
+                                </div>
+                                <div>
+                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Destination</label>
+                                    <input type="text" id="add-destination" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold outline-none" value="GARE CENTRALE">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button onclick="enregistrerVehiculeSaisi()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-3 rounded-xl text-xs uppercase shadow-lg shadow-indigo-500/10">
+                            Enregistrer les Paramètres
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ONGLET C : RAPPORT FINANCIER (4 PLACES) -->
+            <div id="onglet-rapport" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
+                <div class="bg-slate-950/85 backdrop-blur p-4 rounded-2xl border border-slate-800/80 space-y-2 shadow-md">
+                    <h3 class="text-xs font-black uppercase text-emerald-400 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-simple"></i> Recettes Journalières (Base 4 places)
+                    </h3>
+                    <div class="h-40 relative">
+                        <canvas id="chart-recettes-partenaire"></canvas>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800/80 space-y-1 shadow-md">
+                        <span class="text-[9px] text-slate-400 uppercase font-black">Recettes du Jour</span>
+                        <p id="txt-total-recettes" class="text-lg font-black text-emerald-400">0 CDF</p>
+                    </div>
+                    <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800/80 space-y-1 shadow-md">
+                        <span class="text-[9px] text-slate-400 uppercase font-black">Rotations du Jour</span>
+                        <p id="txt-total-rotations" class="text-lg font-black text-slate-100">0</p>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-800 pb-1">Détail par Véhicule</h3>
+                    <div id="fin-vehicules-list" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <!-- ONGLET D : ANALYSE TECHNIQUE & MOTEUR -->
+            <div id="onglet-analyse" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Diagnostic Matériel & Coupe-Circuit</h2>
+                </div>
+                <div id="tech-vehicules-list" class="space-y-3"></div>
+            </div>
+
+            <!-- ONGLET E : PROFIL -->
+            <div id="onglet-profil" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
+                <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mon Profil</h2>
+                <div class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800 space-y-3 shadow-md">
+                    <button onclick="declencherDeconnexion()" class="w-full bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 font-black py-3 rounded-xl text-xs uppercase flex items-center justify-center gap-2 transition-colors">
+                        <i class="fa-solid fa-power-off"></i> Se Déconnecter
+                    </button>
+                </div>
+            </div>
+
+            <!-- NAVIGATION BAS -->
+            <nav class="fixed bottom-0 max-w-md w-full inset-x-0 mx-auto bg-slate-950/95 backdrop-blur border-t border-slate-800 h-16 flex justify-around items-center z-40 no-print px-1">
+                <button onclick="changerOnglet('onglet-flotte', this)" class="flex flex-col items-center justify-center gap-1 text-emerald-400 btn-nav flex-1"><i class="fa-solid fa-location-crosshairs text-sm"></i><span class="text-[8px] font-bold">GPS Live</span></button>
+                <button onclick="changerOnglet('onglet-ajouter', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-plus-circle text-sm"></i><span class="text-[8px] font-bold">Véhicule</span></button>
+                <button onclick="changerOnglet('onglet-rapport', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-file-invoice-dollar text-sm"></i><span class="text-[8px] font-bold">Rapport</span></button>
+                <button onclick="changerOnglet('onglet-analyse', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-wrench text-sm"></i><span class="text-[8px] font-bold">Tech.</span></button>
+                <button onclick="changerOnglet('onglet-profil', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-user text-sm"></i><span class="text-[8px] font-bold">Profil</span></button>
+            </nav>
+        </div>
+
+        <!-- MODAL MODIFIER ITINÉRAIRE -->
+        <div id="modal-modifier-itineraire" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                    <h3 class="font-black text-sm text-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square text-sky-400"></i> Modifier l'Itinéraire
+                    </h3>
+                    <button onclick="fermerModalModifierItineraire()" class="text-slate-500 hover:text-slate-300"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Origine</label>
+                        <input type="text" id="mod-origine" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 font-bold outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Destination</label>
+                        <input type="text" id="mod-destination" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 font-bold outline-none">
+                    </div>
+                </div>
+                <input type="hidden" id="mod-vehicule-index" value="">
+                <button onclick="sauvegarderModificationItineraire()" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs transition-colors shadow-lg mt-2">
+                    Enregistrer la Ligne
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGIQUE JAVASCRIPT TEMPS RÉEL FLUIDE -->
+    <script>
+        const supabaseUrl = 'https://vbriworyscymnmtzzdny.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+        let client = { nom: "Dolce", tel: "0965647819", vehicules: [] };
+        let map = null; 
+        let busMarker = null;
+        let polylineTrace = null;
+        let tracePositions = [];
+        let chartPartenaireInstance = null;
+        let dernierTimestampTraite = 0;
+
+        const MATRICE_SECRETE = [
+            { o: "BRIKIN", d: "GARE CENTRALE", t: 2500, d1: 12.0, d2: 14.5 },
+            { o: "KINTAMBO MAGASIN", d: "DELVAUX", t: 1000, d1: 4.2, d2: 5.0 },
+            { o: "KINGASANI PASCAL", d: "ROUTE MOKALI", t: 1500, d1: 4.5, d2: 5.3 },
+            { o: "L'UPN", d: "ROND POINT VICTOIRE", t: 1000, d1: 9.5, d2: 11.5 }
+        ];
+
+        function trouverParametresSecrets(origine, destination) {
+            const org = (origine || "").trim().toUpperCase();
+            const dst = (destination || "").trim().toUpperCase();
+            for (let l of MATRICE_SECRETE) {
+                if ((org.includes(l.o) || l.o.includes(org)) && (dst.includes(l.d) || l.d.includes(dst))) return { distDirect: l.d1, distDeviee: l.d2, tarif: l.t };
+                if ((org.includes(l.d) || l.d.includes(org)) && (dst.includes(l.o) || l.o.includes(dst))) return { distDirect: l.d1, distDeviee: l.d2, tarif: l.t };
+            }
+            return { distDirect: 12.0, distDeviee: 14.5, tarif: 2500 };
+        }
+
+        let dernierGeocodageTs = 0;
+        let cacheAdresse = "";
+        async function detecterNomAvenue(lat, lng) {
+            const now = Date.now();
+            if (now - dernierGeocodageTs < 12000 && cacheAdresse) return cacheAdresse;
+            try {
+                const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
+                    headers: { 'Accept-Language': 'fr' }
+                });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    dernierGeocodageTs = now;
+                    const addr = data.address || {};
+                    const voie = addr.road || addr.pedestrian || addr.street || addr.neighbourhood || "Avenue de circulation";
+                    const quartier = addr.suburb || addr.quarter || "";
+                    const commune = addr.city_district || addr.county || "Ngaliema";
+                    let res = voie;
+                    if (quartier && quartier !== voie) res += ` • ${quartier}`;
+                    if (commune) res += ` (${commune})`;
+                    cacheAdresse = res;
+                    return res;
+                }
+            } catch(e) {}
+            return cacheAdresse || "Ngaliema, Kinshasa";
+        }
+
+        function calculerDistanceGPS(lat1, lon1, lat2, lon2) {
+            const R = 6371; 
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+        }
+
+        function calculerCap(lat1, lon1, lat2, lon2) {
+            const y = Math.sin((lon2 - lon1) * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180);
+            const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
+                      Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos((lon2 - lon1) * Math.PI / 180);
+            return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+        }
+
+        function interpolerAngle(depart, arrivee) {
+            let diff = (arrivee - depart) % 360;
+            if (diff < -180) diff += 360;
+            if (diff > 180) diff -= 360;
+            return depart + diff;
+        }
+
+        function animerDeplacementMarker(marker, startPos, endPos, startAngle, targetAngle, dureeMs = 1200) {
+            const debut = performance.now();
+            const angleFinal = interpolerAngle(startAngle, targetAngle);
+            function frame(maintenant) {
+                const ecoule = maintenant - debut;
+                const ratio = Math.min(ecoule / dureeMs, 1.0);
+                const ease = ratio < 0.5 ? 2 * ratio * ratio : -1 + (4 - 2 * ratio) * ratio;
+                const curLat = startPos.lat + (endPos.lat - startPos.lat) * ease;
+                const curLng = startPos.lng + (endPos.lng - startPos.lng) * ease;
+                const curAngle = startAngle + (angleFinal - startAngle) * ease;
+                marker.setLatLng([curLat, curLng]);
+                const carBody = marker.getElement()?.querySelector('.yango-car-body');
+                if (carBody) carBody.style.transform = `rotate(${curAngle}deg)`;
+                if (ratio < 1.0) requestAnimationFrame(frame);
+            }
+            requestAnimationFrame(frame);
+        }
+
+        function creerIconeVehiculeYango(cap = 0) {
+            return L.divIcon({
+                className: 'yango-marker-container',
+                html: `
+                    <div class="yango-car-wrapper">
+                        <div class="yango-pulse-halo"></div>
+                        <div class="yango-car-body" style="transform: rotate(${cap}deg);">
+                            <svg viewBox="0 0 40 40" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <ellipse cx="20" cy="21" rx="11" ry="16" fill="rgba(0,0,0,0.3)"/>
+                                <rect x="11" y="6" width="18" height="28" rx="6" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5"/>
+                                <rect x="13" y="12" width="14" height="15" rx="3" fill="#0f172a"/>
+                                <path d="M13 13 C15 9, 25 9, 27 13 Z" fill="#38bdf8" opacity="0.9"/>
+                                <path d="M14 26 C16 28, 24 28, 26 26 Z" fill="#38bdf8" opacity="0.7"/>
+                                <circle cx="13.5" cy="7" r="1.5" fill="#fef08a"/>
+                                <circle cx="26.5" cy="7" r="1.5" fill="#fef08a"/>
+                                <rect x="12" y="32" width="3" height="1.5" rx="0.5" fill="#f43f5e"/>
+                                <rect x="25" y="32" width="3" height="1.5" rx="0.5" fill="#f43f5e"/>
+                            </svg>
+                        </div>
+                    </div>
+                `,
+                iconSize: [44, 44],
+                iconAnchor: [22, 22]
+            });
+        }
+
+        function getKinshasaDateStr() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        function verifierEtChargerJournalDuJour(v) {
+            const dateDuJour = getKinshasaDateStr();
+            const cleStatsJour = `tv_stats_${dateDuJour}_${v.imei}`;
+            const stats = JSON.parse(localStorage.getItem(cleStatsJour) || 'null');
+            if (stats) {
+                v.kmJour = stats.kmJour || 0;
+                v.kmCourse = stats.kmCourse || 0;
+                v.tronconsValides = stats.tronconsValides || 0;
+                v.recetteBruteReelle = stats.recetteBruteReelle || 0;
+            } else {
+                v.kmJour = 0;
+                v.kmCourse = 0;
+                v.tronconsValides = 0;
+                v.recetteBruteReelle = 0;
+                sauvegarderStatsJournalieres(v);
+            }
+        }
+
+        function sauvegarderStatsJournalieres(v) {
+            const dateDuJour = getKinshasaDateStr();
+            const cleStatsJour = `tv_stats_${dateDuJour}_${v.imei}`;
+            localStorage.setItem(cleStatsJour, JSON.stringify({
+                kmJour: v.kmJour || 0,
+                kmCourse: v.kmCourse || 0,
+                tronconsValides: v.tronconsValides || 0,
+                recetteBruteReelle: v.recetteBruteReelle || 0,
+                updatedAt: Date.now()
+            }));
+        }
+
+        // BASCULE MINUIT STRICTE (00H00 KINSHASA)
+        setInterval(() => {
+            const dateActuelle = getKinshasaDateStr();
+            const derniereDate = localStorage.getItem('tv_derniere_date_minuit');
+            if (derniereDate && derniereDate !== dateActuelle) {
+                if (client && client.vehicules) {
+                    client.vehicules.forEach(v => {
+                        v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0;
+                        sauvegarderStatsJournalieres(v);
+                    });
+                }
+                tracePositions = [];
+                if (busMarker) tracePositions = [[busMarker.getLatLng().lat, busMarker.getLatLng().lng]];
+                genererToutesLesVues();
+            }
+            localStorage.setItem('tv_derniere_date_minuit', dateActuelle);
+        }, 15000);
+
+        function reinitialiserJourneeManuelle() {
+            if (confirm("Réinitialiser les compteurs du jour à zéro ?")) {
+                if (client && client.vehicules) {
+                    client.vehicules.forEach(v => {
+                        v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0;
+                        sauvegarderStatsJournalieres(v);
+                    });
+                }
+                tracePositions = [];
+                if (busMarker) tracePositions = [[busMarker.getLatLng().lat, busMarker.getLatLng().lng]];
+                if (polylineTrace) polylineTrace.setLatLngs(tracePositions);
+                genererToutesLesVues();
+            }
+        }
+
+        // ========================================================
+        // CHARGEMENT INITIAL (HISTORIQUE DEPUIS 00h00)
+        // ========================================================
+        async function chargerDernieresPositions() {
+            try {
+                if (!window.supabase) return;
+                const debutJournee = new Date();
+                debutJournee.setHours(0, 0, 0, 0);
+
+                const { data } = await supabaseClient
+                    .from('transvision_positions_gps')
+                    .select('*')
+                    .gte('created_at', debutJournee.toISOString())
+                    .order('created_at', { ascending: true })
+                    .limit(600);
+
+                const imeiClean = "357445101350102";
+                let savedLigne = JSON.parse(localStorage.getItem('tv_ligne_' + imeiClean) || 'null');
+                let customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
+                let cfg = customConfig[imeiClean] || {};
+
+                let origine = savedLigne?.origine || cfg.origine || "BRIKIN";
+                let destination = savedLigne?.destination || cfg.destination || "GARE CENTRALE";
+                const params = trouverParametresSecrets(origine, destination);
+
+                const v = {
+                    plaque: cfg.plaque || "Tracker 0102",
+                    type: "Traceur GPS",
+                    places: 4, // 4 PLACES STRICTES
+                    imei: imeiClean,
+                    lat: -4.3215,
+                    lng: 15.3115,
+                    moteurCoupe: false,
+                    distDirect: params.distDirect,
+                    distDeviee: params.distDeviee,
+                    tarif: params.tarif,
+                    kmJour: 0,
+                    kmCourse: 0,
+                    tronconsValides: 0,
+                    recetteBruteReelle: 0,
+                    dernierCap: 0,
+                    origine: origine,
+                    destination: destination
+                };
+
+                verifierEtChargerJournalDuJour(v);
+
+                if (data && data.length > 0) {
+                    tracePositions = [];
+                    let pointPrec = null;
+                    let kmCalc = 0;
+                    let courseEnCours = 0;
+                    let rot = 0;
+
+                    data.forEach(pt => {
+                        const pLat = parseFloat(pt.latitude);
+                        const pLng = parseFloat(pt.longitude);
+                        const vit = parseFloat(pt.speed || pt.vitesse || 0);
+
+                        if (pointPrec) {
+                            const d = calculerDistanceGPS(pointPrec.latitude, pointPrec.longitude, pLat, pLng);
+                            // Filtre du bruit à l'arrêt : ignore les micro-oscillations < 25m si vitesse < 3 km/h
+                            if (d > 0.025 || (d > 0.005 && vit > 3)) {
+                                kmCalc += d;
+                                courseEnCours += d;
+                                tracePositions.push([pLat, pLng]);
+                                if (courseEnCours >= params.distDeviee || courseEnCours >= params.distDirect) {
+                                    rot += 1;
+                                    courseEnCours = 0;
+                                }
+                            }
+                        } else {
+                            tracePositions.push([pLat, pLng]);
+                        }
+                        pointPrec = { latitude: pLat, longitude: pLng };
+                        dernierTimestampTraite = Math.max(dernierTimestampTraite, new Date(pt.created_at).getTime());
+                    });
+
+                    const dernier = data[data.length - 1];
+                    v.lat = parseFloat(dernier.latitude);
+                    v.lng = parseFloat(dernier.longitude);
+                    v.kmJour = kmCalc;
+                    v.kmCourse = courseEnCours;
+                    v.tronconsValides = rot;
+                    v.recetteBruteReelle = rot * (params.tarif * v.places); // 4 places
+                    sauvegarderStatsJournalieres(v);
+                }
+
+                client.vehicules = [v];
+                majSelecteurMap();
+                initMapEtCentrer(0);
+                genererToutesLesVues();
+                document.getElementById('statut-serveur-texte').textContent = "SUIVI SATELLITE ACTIF";
+            } catch(e) {}
+        }
+
+        // ========================================================
+        // CANAL SUPABASE REALTIME PUSH EN TEMPS RÉEL (< 200 ms)
+        // ========================================================
+        function activerFluxRealtimePush() {
+            supabaseClient
+                .channel('transvision_flux_live')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transvision_positions_gps' }, (payload) => {
+                    const row = payload.new;
+                    if (row && row.latitude && row.longitude) {
+                        traiterNouveauPointPush({
+                            imei: String(row.imei).trim(),
+                            lat: parseFloat(row.latitude),
+                            lng: parseFloat(row.longitude),
+                            vitesse: parseFloat(row.speed || row.vitesse || 0),
+                            timestamp: new Date(row.created_at || Date.now()).getTime()
+                        });
+                    }
+                })
+                .subscribe();
+        }
+
+        function traiterNouveauPointPush(data) {
+            // VERROU CHRONOLOGIQUE : Ignore les anciens paquets retardataires du buffer
+            if (data.timestamp && data.timestamp < dernierTimestampTraite) {
+                return; 
+            }
+            dernierTimestampTraite = data.timestamp || Date.now();
+
+            const now = new Date();
+            document.getElementById('last-update-text').textContent = `Point Live reçu : ${now.toLocaleTimeString()}`;
+            document.getElementById('statut-serveur-voyant').className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping";
+
+            let v = client.vehicules[0];
+            if (!v) return;
+
+            const anciennePosition = { lat: v.lat, lng: v.lng };
+            const distDelta = calculerDistanceGPS(v.lat, v.lng, data.lat, data.lng);
+
+            // Filtrage des faux déplacements à l'arrêt (inférieurs à 20 mètres)
+            if (distDelta > 0.020 || (distDelta > 0.005 && data.vitesse > 3)) {
+                v.kmJour += distDelta;
+                v.kmCourse += distDelta;
+
+                const nouveauCap = calculerCap(v.lat, v.lng, data.lat, data.lng);
+                const ancienCap = v.dernierCap || 0;
+                v.dernierCap = nouveauCap;
+
+                const dDirect = v.distDirect || 12.0;
+                const dDeviee = v.distDeviee || 14.5;
+                const gainRotation = (v.tarif || 2500) * (v.places || 4); // 4 places
+
+                if (v.kmCourse >= dDeviee || (v.kmCourse >= dDirect && data.vitesse < 5)) {
+                    v.tronconsValides += 1;
+                    v.recetteBruteReelle += gainRotation;
+                    v.kmCourse = 0;
+                }
+
+                v.lat = data.lat;
+                v.lng = data.lng;
+                sauvegarderStatsJournalieres(v);
+
+                // Animation glissée fluide (Style Yango)
+                if (map && busMarker) {
+                    animerDeplacementMarker(busMarker, anciennePosition, { lat: data.lat, lng: data.lng }, ancienCap, nouveauCap, 1200);
+                }
+            } else {
+                v.lat = data.lat;
+                v.lng = data.lng;
+            }
+
+            tracePositions.push([data.lat, data.lng]);
+            if (polylineTrace) polylineTrace.setLatLngs(tracePositions);
+
+            detecterNomAvenue(data.lat, data.lng).then(av => {
+                const el = document.getElementById('hud-avenue-live');
+                if (el) el.textContent = av;
+            });
+
+            const vitTxt = data.vitesse > 0 ? `${data.vitesse.toFixed(0)} km/h` : 'À l\'arrêt';
+            document.getElementById('hud-vitesse-live').textContent = vitTxt;
+            document.getElementById('hud-km-jour').textContent = `${v.kmJour.toFixed(1)} km`;
+            document.getElementById('hud-course-progression').textContent = `${v.kmCourse.toFixed(1)} km`;
+            document.getElementById('hud-recettes-jour').textContent = `${v.recetteBruteReelle.toLocaleString()} CDF`;
+
+            if (map) map.panTo([data.lat, data.lng], { animate: true, duration: 1.0 });
+
+            genererRapportFinancier();
+        }
+
+        // INITIALISATION CARTE GOOGLE MAPS TRAFIC LIVE
+        function initMapEtCentrer(index) {
+            const container = document.getElementById('map-container');
+            if (!container || container.offsetParent === null) return;
+            const v = client.vehicules[index] || { lat: -4.3215, lng: 15.3115, dernierCap: 0 };
+            
+            if (!map) {
+                map = L.map('map-container').setView([v.lat, v.lng], 17);
+                L.tileLayer('https://{s}.google.com/vt/lyrs=m,traffic&x={x}&y={y}&z={z}', {
+                    maxZoom: 20,
+                    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                    attribution: '&copy; Google Maps & Traffic'
+                }).addTo(map);
+            }
+
+            if (busMarker) map.removeLayer(busMarker);
+            busMarker = L.marker([v.lat, v.lng], {
+                icon: creerIconeVehiculeYango(v.dernierCap)
+            }).addTo(map);
+
+            if (polylineTrace) map.removeLayer(polylineTrace);
+            if (tracePositions.length > 1) {
+                polylineTrace = L.polyline(tracePositions, { 
+                    color: '#1a73e8', 
+                    weight: 6, 
+                    opacity: 0.9, 
+                    lineJoin: 'round' 
+                }).addTo(map);
+            }
+            map.setView([v.lat, v.lng], 17);
+        }
+
+        function centrerSurVehicule(val) { initMapEtCentrer(0); }
+
+        function enregistrerVehiculeSaisi() {
+            const imei = document.getElementById('add-imei').value.trim();
+            const places = parseInt(document.getElementById('add-places').value) || 4;
+            const plaque = document.getElementById('add-plaque').value.trim() || "Tracker 0102";
+            const origine = document.getElementById('add-origine').value.trim();
+            const destination = document.getElementById('add-destination').value.trim();
+
+            const customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
+            customConfig[imei] = { plaque, places, origine, destination };
+            localStorage.setItem('tv_vehicules_custom', JSON.stringify(customConfig));
+            localStorage.setItem('tv_ligne_' + imei, JSON.stringify({ origine, destination }));
+
+            if (client.vehicules[0]) {
+                client.vehicules[0].places = places;
+                client.vehicules[0].plaque = plaque;
+                client.vehicules[0].origine = origine;
+                client.vehicules[0].destination = destination;
+            }
+
+            alert("✅ Configuration enregistrée avec succès !");
+            genererToutesLesVues();
+            changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
+        }
+
+        function genererRapportFinancier() {
+            const v = client.vehicules[0];
+            if (!v) return;
+            document.getElementById('txt-total-recettes').textContent = `${(v.recetteBruteReelle || 0).toLocaleString()} CDF`;
+            document.getElementById('txt-total-rotations').textContent = v.tronconsValides || 0;
+            
+            const list = document.getElementById('fin-vehicules-list');
+            if (list) {
+                list.innerHTML = `
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2.5">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-black text-slate-200">${v.plaque} (4 places)</h4>
+                                <p class="text-[9px] text-sky-400 font-mono mt-0.5">
+                                    <i class="fa-solid fa-route text-indigo-400"></i> ${v.origine} ➔ ${v.destination}
+                                </p>
+                            </div>
+                            <span class="font-black text-emerald-400 text-sm">${(v.recetteBruteReelle || 0).toLocaleString()} CDF</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 font-mono pt-1.5 border-t border-slate-900">
+                            <span><i class="fa-solid fa-rotate text-emerald-400 mr-1"></i><strong>${v.tronconsValides}</strong> rotation(s) validée(s)</span>
+                            <span>Distance : <strong class="text-slate-200">${v.kmJour.toFixed(1)} km</strong></span>
+                        </div>
+                    </div>`;
+            }
+            initialiserGraphiqueRapport(v.recetteBruteReelle || 0);
+        }
+
+        function initialiserGraphiqueRapport(total) {
+            const canvas = document.getElementById('chart-recettes-partenaire');
+            if (!canvas || canvas.offsetParent === null) return;
+            if (chartPartenaireInstance) chartPartenaireInstance.destroy();
+            chartPartenaireInstance = new Chart(canvas.getContext('2d'), {
+                type: 'bar',
+                data: { labels: ['Aujourd\'hui'], datasets: [{ label: 'CDF', data: [total], backgroundColor: '#10b981', borderRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b' } } } }
+            });
+        }
+
+        function genererToutesLesVues() {
+            genererRapportFinancier();
+        }
+
+        function majSelecteurMap() {
+            const sel = document.getElementById('select-vehicule-map');
+            if (!sel) return;
+            sel.innerHTML = `<option value="0">${client.vehicules[0]?.plaque || 'Tracker 0102'}</option>`;
+        }
+
+        function changerOnglet(idOnglet, boutonActif) {
+            document.querySelectorAll('.class-onglet').forEach(ong => ong.classList.add('hidden'));
+            document.getElementById(idOnglet).classList.remove('hidden');
+            document.querySelectorAll('.btn-nav').forEach(btn => { btn.classList.remove('text-emerald-400'); btn.classList.add('text-slate-500'); });
+            if (boutonActif) { boutonActif.classList.remove('text-slate-500'); boutonActif.classList.add('text-emerald-400'); }
+            if (idOnglet === 'onglet-flotte') {
+                setTimeout(() => { if (map) map.invalidateSize(); }, 150);
+            }
+        }
+
+        function executerConnexionPartenaire() {
+            document.getElementById('page-auth').classList.add('hidden');
+            document.getElementById('app-proprietaire').classList.remove('hidden');
+            chargerDernieresPositions().then(() => {
+                activerFluxRealtimePush();
+            });
+        }
+
+        function declencherDeconnexion() {
+            document.getElementById('app-proprietaire').classList.add('hidden');
+            document.getElementById('page-auth').classList.remove('hidden');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            executerConnexionPartenaire();
+        });
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TransVision by Global Tech Solutions — Espace Partenaire</title>
+    
+    <link rel="icon" type="image/png" href="logo%20192x192.png">
+    <link rel="apple-touch-icon" href="logo%20192x192.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#020617">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        .blur-transition { transition: filter 0.4s ease, opacity 0.4s ease; }
+        
+        #map-container { 
+            height: 100%; 
+            min-height: 480px; 
+            width: 100%; 
+            border-radius: 1rem; 
+            z-index: 10; 
+        }
+        .leaflet-tile { filter: none !important; }
+        .leaflet-container { background: #e5e3df !important; }
+        
+        /* STYLE DU VÉHICULE EN DIRECT TYPE YANGO */
         .yango-car-wrapper {
             position: relative;
             width: 44px;
