@@ -117,7 +117,7 @@
             </div>
             
             <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v17.2 PROD — Global Tech Solutions
+                TransVision v17.4 PROD — Global Tech Solutions
             </div>
         </div>
 
@@ -137,7 +137,7 @@
                     </div>
                 </div>
 
-                <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 flex items-center justify-between shadow-md">
+                <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 flex items-center justify-between shadow-md">
                     <div>
                         <div class="flex items-center gap-1.5">
                             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="statut-serveur-voyant"></span>
@@ -145,8 +145,12 @@
                         </div>
                         <p class="text-[9px] text-slate-400 mt-0.5" id="last-update-text">Chargement de l'historique...</p>
                     </div>
-                    <div class="text-right">
-                        <span id="timer-compte-rebours" class="text-sm font-mono font-black text-slate-100 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg shadow-inner">--:--:--</span>
+                    <div class="text-right flex flex-col items-end gap-1.5">
+                        <span id="timer-compte-rebours" class="text-xs font-mono font-black text-slate-100 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-lg shadow-inner">--:--:--</span>
+                        
+                        <button onclick="reinitialiserJourneeAZero()" class="text-[9px] bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-1 rounded-lg font-black uppercase flex items-center gap-1.5 transition-all shadow-sm active:scale-95">
+                            <i class="fa-solid fa-arrows-rotate"></i> Démarrer Journée à 0
+                        </button>
                     </div>
                 </div>
             </header>
@@ -164,7 +168,7 @@
                 </div>
             </div>
 
-            <!-- ONGLET B : NOUVEAU VÉHICULE (CHAMPS PURS SANS DISTANCES NI PRIX) -->
+            <!-- ONGLET B : NOUVEAU VÉHICULE -->
             <div id="onglet-ajouter" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
                 <div class="bg-slate-950/85 backdrop-blur p-5 rounded-2xl border border-slate-800/80 space-y-4 shadow-xl">
                     <div class="border-b border-slate-800 pb-2">
@@ -195,7 +199,6 @@
                             </div>
                         </div>
 
-                        <!-- SEULS LES CHAMPS ORIGINE ET DESTINATION SONT DEMANDÉS -->
                         <div class="p-3 bg-slate-900/90 border border-indigo-500/30 rounded-2xl space-y-3 shadow-inner">
                             <span class="text-[9px] font-black uppercase text-indigo-400 tracking-wider flex items-center gap-1.5">
                                 <i class="fa-solid fa-route"></i> Itinéraire d'Exploitation
@@ -268,10 +271,10 @@
                 </div>
             </div>
 
-            <!-- ONGLET D : ANALYSE TECHNIQUE -->
+            <!-- ONGLET D : ANALYSE TECHNIQUE ET GESTION MOTEUR COMPLÈTE -->
             <div id="onglet-analyse" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
                 <div class="flex justify-between items-center">
-                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Diagnostic Matériel & Télématique</h2>
+                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Diagnostic Matériel & Coupe-Circuit</h2>
                 </div>
                 <div id="tech-vehicules-list" class="space-y-3"></div>
             </div>
@@ -327,7 +330,7 @@
             </nav>
         </div>
 
-        <!-- MODAL MODIFIER L'ITINÉRAIRE (UNIQUEMENT ORIGINE & DESTINATION) -->
+        <!-- MODAL MODIFIER L'ITINÉRAIRE -->
         <div id="modal-modifier-itineraire" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
             <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
                 <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -341,7 +344,6 @@
                 <p class="text-xs text-slate-300 font-bold">Véhicule : <span id="mod-vehicule-nom" class="text-emerald-400"></span></p>
 
                 <div class="space-y-3 text-xs">
-                    <!-- CHOIX RAPIDE DE LA LIGNE (AUCUN PRIX NI KILOMÈTRE AFFICHÉ) -->
                     <div>
                         <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Lignes Fréquentes</label>
                         <select id="mod-select-ligne-rapide" onchange="appliquerLignePredefinie(this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-sky-400 font-bold outline-none focus:border-sky-500">
@@ -359,7 +361,6 @@
                         </select>
                     </div>
 
-                    <!-- CHAMPS D'ORIGINE ET DESTINATION PURS -->
                     <div class="space-y-2">
                         <div>
                             <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Origine</label>
@@ -471,7 +472,6 @@
         let chartPartenaireInstance = null;
         let dernierPointId = null;
 
-        // MATRICE SECRÈTE INTERNE (NON AFFICHÉE À L'ÉCRAN DU PARTENAIRE)
         const MATRICE_SECRETE = [
             { o: "KINTAMBO MAGASIN", d: "DELVAUX", t: 1000, d1: 4.2, d2: 5.0 },
             { o: "KINGASANI PASCAL", d: "ROUTE MOKALI", t: 1500, d1: 4.5, d2: 5.3 },
@@ -485,7 +485,6 @@
             { o: "BANDAL MOULAERT", d: "GARE CENTRALE", t: 500, d1: 6.8, d2: 8.2 }
         ];
 
-        // RECHERCHE DISCRÈTE DES PARAMÈTRES TECHNIQUES SANS RIEN DÉVOILER
         function trouverParametresSecrets(origine, destination) {
             const org = (origine || "").trim().toUpperCase();
             const dst = (destination || "").trim().toUpperCase();
@@ -498,7 +497,6 @@
                     return { distDirect: l.d1, distDeviee: l.d2, tarif: l.t };
                 }
             }
-            // Valeurs par défaut sécurisées en arrière-plan
             return { distDirect: 4.5, distDeviee: 5.5, tarif: 1000 };
         }
 
@@ -515,6 +513,52 @@
             const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
                       Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos((lon2 - lon1) * Math.PI / 180);
             return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+        }
+
+        function verifierEtReinitialiserAutomatiqueJournee() {
+            const aujourdhuiStr = new Date().toISOString().split('T')[0];
+            const dernierJourEnregistre = localStorage.getItem('tv_jour_actif');
+            
+            if (dernierJourEnregistre !== aujourdhuiStr) {
+                localStorage.setItem('tv_jour_actif', aujourdhuiStr);
+                reinitialiserDonneesJournee(false);
+            }
+        }
+
+        function reinitialiserJourneeAZero() {
+            if (confirm("🌅 Démarrer une nouvelle journée ?\n\nTous les compteurs (Rotations, Recettes, Kilomètres et Tracé GPS) seront remis à zéro.")) {
+                const aujourdhuiStr = new Date().toISOString().split('T')[0];
+                localStorage.setItem('tv_jour_actif', aujourdhuiStr);
+                localStorage.setItem('tv_timestamp_demarrage_journee', Date.now());
+                reinitialiserDonneesJournee(true);
+            }
+        }
+
+        function reinitialiserDonneesJournee(afficherConfirmation = true) {
+            if (client && client.vehicules) {
+                client.vehicules.forEach(v => {
+                    v.kmJour = 0;
+                    v.kmCourse = 0;
+                    v.carburantJour = 0;
+                    v.recetteBruteReelle = 0;
+                    v.tronconsValides = 0;
+                    v.secondesArret = 0;
+                });
+            }
+
+            if (busMarker && map) {
+                const pos = busMarker.getLatLng();
+                tracePositions = [[pos.lat, pos.lng]];
+                if (polylineTrace) polylineTrace.setLatLngs(tracePositions);
+            } else {
+                tracePositions = [];
+            }
+
+            genererToutesLesVues();
+
+            if (afficherConfirmation) {
+                alert("✅ Démarrage de la journée réussi !\n- Recettes : 0 CDF\n- Rotations : 0\n- Kilomètres : 0.0 km\n- Tracé remis à zéro.");
+            }
         }
 
         async function chargerDernieresPositions() {
@@ -554,10 +598,10 @@
                             imei: imeiStr,
                             lat: pos.latitude, 
                             lng: pos.longitude, 
-                            moteurCoupe: false, 
+                            // État persistant du moteur
+                            moteurCoupe: cfg.moteurCoupe || false, 
                             carburantJour: 0, 
                             kmJour: 0,
-                            // PARAMÈTRES SECRETS DU MOTEUR (MASQUÉS DU CLIENT)
                             distDirect: params.distDirect,
                             distDeviee: params.distDeviee,
                             tarif: params.tarif,
@@ -572,13 +616,25 @@
                     });
                     
                     const premierImei = client.vehicules[0]?.imei;
+                    const debutJournee = new Date();
+                    debutJournee.setHours(0, 0, 0, 0);
+                    const tsDemarrageManuel = parseInt(localStorage.getItem('tv_timestamp_demarrage_journee') || '0');
+                    const repereTemps = Math.max(debutJournee.getTime(), tsDemarrageManuel);
+
                     if(premierImei) {
-                        const pointsHistoriques = data
-                            .filter(p => String(p.imei) === premierImei)
+                        const pointsDuJour = data
+                            .filter(p => {
+                                if (String(p.imei) !== premierImei) return false;
+                                if (!p.created_at) return false;
+                                return new Date(p.created_at).getTime() >= repereTemps;
+                            })
                             .reverse()
                             .map(p => [p.latitude, p.longitude]);
-                        if(pointsHistoriques.length > 0) {
-                            tracePositions = pointsHistoriques;
+
+                        if(pointsDuJour.length > 0) {
+                            tracePositions = pointsDuJour;
+                        } else if(client.vehicules[0]) {
+                            tracePositions = [[client.vehicules[0].lat, client.vehicules[0].lng]];
                         }
                     }
 
@@ -702,6 +758,7 @@
                         busMarker.getPopup().setContent(`
                             <b>${v.plaque}</b><br>
                             Itinéraire: <b>${v.origine} ➔ ${v.destination}</b><br>
+                            État moteur: <b>${v.moteurCoupe ? '🔴 Bloqué' : '🟢 Démarré'}</b><br>
                             Vitesse: <b>${data.vitesse || 0} km/h</b><br>
                             Rotations du jour: <b>${v.tronconsValides}</b><br>
                             Recettes: <b>${v.recetteBruteReelle.toLocaleString()} CDF</b>
@@ -839,6 +896,7 @@
             const popupTxt = v ? `
                 <b>${v.plaque}</b><br>
                 Itinéraire: <b>${v.origine} ➔ ${v.destination}</b><br>
+                Moteur: <b>${v.moteurCoupe ? '🔴 Bloqué' : '🟢 Démarré'}</b><br>
                 Rotations du jour: <b>${v.tronconsValides || 0}</b><br>
                 Recettes: <b>${(v.recetteBruteReelle || 0).toLocaleString()} CDF</b>
             ` : "En attente...";
@@ -872,7 +930,6 @@
 
             if (!plaque || !imei) { alert("Veuillez remplir au moins la Plaque et l'IMEI."); return; }
             
-            // Récupération automatique et secrète des paramètres de ligne
             const params = trouverParametresSecrets(origine, destination);
 
             client.vehicules.push({ 
@@ -894,7 +951,7 @@
                 dernierCap: undefined,
                 secondesArret: 0,
                 recetteBruteReelle: 0, 
-                tronconsValides: 0
+                tronconsValides: 0 
             });
             
             document.getElementById('add-plaque').value = ""; 
@@ -906,7 +963,6 @@
 
         function appliquerFiltreFinancier() { genererRapportFinancier(); }
 
-        // AFFICHAGE DU RAPPORT SANS AUCUNE FUITE DE KILOMÈTRES SECRETS
         function genererRapportFinancier() {
             let totalCDF = 0; let totalRot = 0;
             const list = document.getElementById('fin-vehicules-list');
@@ -970,44 +1026,102 @@
 
         function appliquerFiltreTechnique() { genererRapportTechnique(); }
 
+        // ========================================================
+        // GESTION DU RAPPORT TECHNIQUE ET CONTRÔLE DÉMARRAGE / COUPURE
+        // ========================================================
         function genererRapportTechnique() {
             const list = document.getElementById('tech-vehicules-list');
             if(!list) return;
             list.innerHTML = "";
             client.vehicules.forEach((v, origineIndex) => {
-                const btnMoteur = v.moteurCoupe 
-                    ? `<button onclick="basculerMoteur(${origineIndex}, false)" class="flex-1 bg-emerald-500/20 text-emerald-400 font-bold py-2 rounded text-[10px] uppercase"><i class="fa-solid fa-unlock"></i> Restaurer</button>`
-                    : `<button onclick="basculerMoteur(${origineIndex}, true)" class="flex-1 bg-rose-500/20 text-rose-400 font-bold py-2 rounded text-[10px] uppercase"><i class="fa-solid fa-lock"></i> Couper</button>`;
-
                 const consoPeriode = (v.carburantJour || 0).toFixed(1);
                 const kmPeriode = (v.kmJour || 0).toFixed(1);
 
                 list.insertAdjacentHTML('beforeend', `
-                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
                         <div class="flex justify-between items-center">
                             <h4 class="font-black text-slate-200">${v.plaque}</h4>
                             <span class="text-[9px] font-mono text-slate-500">IMEI: ${v.imei}</span>
                         </div>
                         <p class="text-[9px] text-sky-400 font-mono">Itinéraire: ${v.origine} ➔ ${v.destination}</p>
+                        
                         <div class="grid grid-cols-2 gap-y-2 gap-x-1 text-[9px] font-mono bg-slate-900 p-2.5 rounded border border-slate-800">
                             <p>📡 GPS: <span class="text-emerald-400">Opérationnel</span></p>
                             <p>🔋 Batt: <span class="text-emerald-400">12.6V</span></p>
                             <p>⛽ Conso: <span class="text-sky-400 font-bold">${consoPeriode} L</span></p>
                             <p>🛣️ Dist: <span class="text-sky-400 font-bold">${kmPeriode} km</span></p>
                         </div>
-                        <div class="flex gap-2 pt-1">
-                            ${btnMoteur}
-                            <button onclick="ouvrirModalModifierItineraire(${origineIndex})" class="flex-1 bg-slate-800 hover:bg-slate-700 text-sky-400 border border-slate-700 font-bold py-2 rounded text-[10px] uppercase">
-                                <i class="fa-solid fa-pen-to-square"></i> Modifier Itinéraire
-                            </button>
+
+                        <!-- INDICATEUR ET BOUTONS COUPER / DÉMARRER -->
+                        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 space-y-2">
+                            <div class="flex justify-between items-center text-[9px] font-mono">
+                                <span class="text-slate-400 uppercase font-bold">État du relais moteur :</span>
+                                <span class="${v.moteurCoupe ? 'text-rose-400 font-black animate-pulse' : 'text-emerald-400 font-black'}">
+                                    ${v.moteurCoupe ? '🔴 MOTEUR BLOQUÉ' : '🟢 DÉMARRAGE AUTORISÉ'}
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2 pt-1">
+                                <!-- BOUTON 1 : COUPER -->
+                                <button onclick="actionnerMoteur(${origineIndex}, true)" class="w-full bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30 font-black py-2.5 rounded-xl text-[10px] uppercase transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95">
+                                    <i class="fa-solid fa-power-off"></i> Couper Moteur
+                                </button>
+                                
+                                <!-- BOUTON 2 : DÉMARRER / DÉBLOQUER -->
+                                <button onclick="actionnerMoteur(${origineIndex}, false)" class="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 font-black py-2.5 rounded-xl text-[10px] uppercase transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95">
+                                    <i class="fa-solid fa-key"></i> Démarrer
+                                </button>
+                            </div>
                         </div>
+
+                        <button onclick="ouvrirModalModifierItineraire(${origineIndex})" class="w-full bg-slate-900 hover:bg-slate-800 text-sky-400 border border-slate-800 font-bold py-2 rounded-xl text-[10px] uppercase transition-colors">
+                            <i class="fa-solid fa-pen-to-square"></i> Modifier Itinéraire
+                        </button>
                     </div>`);
             });
         }
 
-        // ========================================================
-        // MODALE DE MODIFICATION D'ITINÉRAIRE (SÉCURISÉE)
-        // ========================================================
+        // FONCTION DE COMMANDE MOTEUR (DÉMARRER OU COUPER)
+        function actionnerMoteur(index, couper) {
+            const v = client.vehicules[index];
+            if (!v) return;
+
+            const actionTxt = couper ? "COUPER" : "DÉMARRER / DÉBLOQUER";
+            const confirmMsg = couper 
+                ? `⚠️ CONFIRMATION DE COUPURE\n\nVoulez-vous couper le moteur du véhicule ${v.plaque} ?\nLa pompe à carburant sera bloquée à distance.`
+                : `🔑 CONFIRMATION DE DÉMARRAGE\n\nVoulez-vous réactiver le moteur du véhicule ${v.plaque} ?\nLe circuit d'allumage sera reconnecté pour permettre le démarrage avec la clé.`;
+
+            if (confirm(confirmMsg)) {
+                v.moteurCoupe = couper;
+
+                // 1. Sauvegarde locale de l'état
+                const customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
+                if (!customConfig[v.imei]) customConfig[v.imei] = {};
+                customConfig[v.imei].moteurCoupe = couper;
+                localStorage.setItem('tv_vehicules_custom', JSON.stringify(customConfig));
+
+                // 2. Envoi de la commande au serveur DigitalOcean en direct
+                socket.emit('commande_moteur', { imei: v.imei, couper: couper });
+
+                // 3. Sauvegarde dans Supabase
+                try {
+                    if (window.supabase) {
+                        supabaseClient.from('tv_vehicules').upsert({
+                            imei: v.imei,
+                            moteur_coupe: couper,
+                            updated_at: new Date().toISOString()
+                        }, { onConflict: 'imei' }).then();
+                    }
+                } catch(e) {}
+
+                const smsCode = couper ? "6690000" : "7110000";
+                alert(`📡 Ordre envoyé au traceur SinoTrack !\n\nAction : ${actionTxt}\nVéhicule : ${v.plaque}\n\n(En cas de problème réseau mobile, vous pouvez aussi envoyer par SMS le code : ${smsCode} au numéro du boîtier).`);
+                
+                genererRapportTechnique();
+                if (map && busMarker) initMapEtCentrer(index);
+            }
+        }
+
         function ouvrirModalModifierItineraire(index) {
             const v = client.vehicules[index];
             if (!v) return;
@@ -1045,7 +1159,6 @@
                 return;
             }
 
-            // Récupération confidentielle des paramètres techniques
             const params = trouverParametresSecrets(nouvelleOrigine, nouvelleDestination);
 
             v.origine = nouvelleOrigine;
@@ -1053,31 +1166,55 @@
             v.distDirect = params.distDirect;
             v.distDeviee = params.distDeviee;
             v.tarif = params.tarif;
-            v.kmCourse = 0; // Remise à zéro discrète de la rotation en cours
+            v.kmCourse = 0;
             v.secondesArret = 0;
 
-            // Sauvegarde de l'affectation dans le stockage local
             const customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
             customConfig[v.imei] = {
                 plaque: v.plaque,
                 type: v.type,
                 places: v.places,
                 origine: v.origine,
-                destination: v.destination
+                destination: v.destination,
+                moteurCoupe: v.moteurCoupe
             };
             localStorage.setItem('tv_vehicules_custom', JSON.stringify(customConfig));
+
+            const payloadLigne = {
+                imei: v.imei,
+                plaque: v.plaque,
+                origine: v.origine,
+                destination: v.destination,
+                distDirect: v.distDirect,
+                distDeviee: v.distDeviee,
+                tarif: v.tarif
+            };
+
+            const channelSync = supabaseClient.channel('transvision_flotte');
+            channelSync.send({
+                type: 'broadcast',
+                event: 'maj_ligne_vehicule',
+                payload: payloadLigne
+            });
+            socket.emit('maj_ligne_vehicule', payloadLigne);
+
+            try {
+                supabaseClient.from('tv_vehicules').upsert({
+                    imei: v.imei,
+                    plaque: v.plaque,
+                    origine: v.origine,
+                    destination: v.destination,
+                    dist_direct: v.distDirect,
+                    dist_deviee: v.distDeviee,
+                    tarif: v.tarif,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'imei' }).then();
+            } catch(e) {}
 
             alert(`✅ Itinéraire mis à jour avec succès !\n${v.plaque} est désormais positionné sur la ligne : ${v.origine} ➔ ${v.destination}.`);
 
             fermerModalModifierItineraire();
             genererToutesLesVues();
-        }
-
-        function basculerMoteur(i, couper) {
-            client.vehicules[i].moteurCoupe = couper;
-            socket.emit('commande_moteur', { imei: client.vehicules[i].imei, couper: couper });
-            alert(`📡 Commande envoyée. Moteur ${couper ? 'coupé' : 'restauré'} pour ${client.vehicules[i].plaque}.`);
-            appliquerFiltreTechnique(); 
         }
 
         function majIdentifiants() {
@@ -1263,6 +1400,7 @@
             naviguerVers('app-proprietaire'); 
             
             chargerDernieresPositions().then(() => { 
+                verifierEtReinitialiserAutomatiqueJournee();
                 genererToutesLesVues(); 
                 actualiserCompteAReboursForfait();
                 setInterval(actualiserCompteAReboursForfait, 1000); 
@@ -1281,6 +1419,7 @@
 
         window.addEventListener('DOMContentLoaded', async () => {
             chargerConfigurationsAdmin();
+            verifierEtReinitialiserAutomatiqueJournee();
             actualiserCompteAReboursForfait();
             
             const telSauve = localStorage.getItem('tv_partenaire_tel');
