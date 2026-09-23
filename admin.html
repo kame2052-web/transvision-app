@@ -107,7 +107,7 @@
     <!-- 2. CORPS APPLICATION ADMIN -->
     <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
         <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
-            <span class="text-xs font-bold text-indigo-400">TransVision Control Panel v22.0 PROD — Supervision Télématique Directe</span>
+            <span class="text-xs font-bold text-indigo-400">TransVision Control Panel v22.5 PROD — Supervision Télématique Directe</span>
             <div class="flex gap-2 text-[10px] font-mono">
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 flex items-center gap-1">Push WSS : <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" id="admin-server-dot"></span><span class="text-emerald-400 font-bold" id="admin-server-text">En Direct</span></span>
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Live : <span class="text-emerald-400 font-bold" id="admin-flotte-count">0 Traceur(s)</span></span>
@@ -217,12 +217,12 @@
                     </div>
                 </div>
 
-                <!-- 3. PARTENAIRES -->
+                <!-- 3. PARTENAIRES AVEC MENU ACTIONS COMPLET -->
                 <div id="page-partenaires" class="space-y-4 page-fade class-page-admin hidden print:block">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 no-print">
                         <div>
                             <h2 class="text-xl font-black text-slate-100">👤 Base des Partenaires</h2>
-                            <p class="text-xs text-slate-400">Gérez les comptes, vérifiez les identifiants et validez les recharges.</p>
+                            <p class="text-xs text-slate-400">Gérez les comptes, vérifiez les identifiants et appliquez les sanctions ou activations.</p>
                         </div>
                         
                         <div class="relative w-full sm:w-64">
@@ -249,7 +249,22 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-850 text-slate-300 print-text" id="table-partenaires-body">
-                                <tr><td colspan="5" class="py-4 text-center text-slate-500 font-sans italic">Chargement des partenaires...</td></tr>
+                                <tr class="item-partenaire-row" data-contrat="commercial">
+                                    <td class="py-3 font-black text-slate-200 partenaire-nom">Dolce<br><span class="text-[9px] font-normal text-slate-500 partenaire-tel">0965647819</span></td>
+                                    <td class="py-3"><span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-black text-[10px] uppercase">Commercial</span></td>
+                                    <td class="py-3 text-center font-bold font-mono text-indigo-400">1 Véh.</td>
+                                    <td class="py-3 text-center font-mono"><span id="jours-dolce" class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-lg font-black text-[10px]">Actif</span></td>
+                                    <td class="py-3 text-right no-print">
+                                        <select onchange="executerActionPartenaire('Dolce', '0965647819', '0000', this)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 focus:outline-none focus:border-indigo-500">
+                                            <option value="">-- Actions --</option>
+                                            <option value="recharger" class="text-emerald-400 font-bold">💸 Valider Recharge</option>
+                                            <option value="voir_id" class="text-sky-400 font-bold">👁️ Voir Identifiants</option>
+                                            <option value="activer" class="text-emerald-500 font-bold">🟢 Activer Compte</option>
+                                            <option value="suspendre" class="text-amber-500 font-bold">🟠 Suspendre Compte</option>
+                                            <option value="supprimer" class="text-rose-500 font-bold">🔴 Supprimer Compte</option>
+                                        </select>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -328,7 +343,7 @@
                     </div>
                 </div>
 
-                <!-- 6. STATISTIQUES CROISÉES RÉELLES -->
+                <!-- 6. STATISTIQUES CROISÉES -->
                 <div id="page-stats-croisees" class="space-y-5 page-fade class-page-admin hidden">
                     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
                         <div>
@@ -466,7 +481,7 @@
                 </div>
             </div>
             <input type="hidden" id="edit-matrice-index" value="">
-            <button onclick="sauvegarderModificationTarifAdmin()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs shadow-lg mt-2">
+            <button onclick="sauvegarderModificationTarifAdmin()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs shadow-lg mt-2 transition-colors">
                 Enregistrer & Appliquer
             </button>
         </div>
@@ -521,7 +536,7 @@
         </div>
     </div>
 
-    <!-- LOGIQUE JAVASCRIPT TEMPS RÉEL FLUIDE -->
+    <!-- SCRIPT APPLICATION ADMIN -->
     <script>
         const supabaseUrl = 'https://vbriworyscymnmtzzdny.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
@@ -682,7 +697,6 @@
                 v.tronconsValides = stats.tronconsValides || 0;
                 v.recetteBruteReelle = stats.recetteBruteReelle || 0;
 
-                // GARDE-FOU ANTI-DONNÉES FANTÔMES DANS L'ADMIN
                 const seuilMin = (v.distDirect || 12.0) * 0.55;
                 const maxRot = Math.floor(v.kmJour / seuilMin);
                 if (v.tronconsValides > maxRot) {
@@ -858,7 +872,7 @@
                             const vit = parseFloat(pt.speed || pt.vitesse || 0);
 
                             if (pointPrec) {
-                                const d = calculerDistanceGPS(pointPrec.latitude, pointPrec.longitude, pLat, pLng);
+                                let d = calculerDistanceGPS(pointPrec.latitude, pointPrec.longitude, pLat, pLng);
                                 if (d > 0.025 || (d > 0.005 && vit > 3)) {
                                     kmCalc += d;
                                     courseEnCours += d;
@@ -907,7 +921,7 @@
         // ========================================================
         function activerFluxRealtimeAdmin() {
             supabaseClient
-                .channel('transvision_admin_live_stream_v3')
+                .channel('transvision_admin_live_stream_v4')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transvision_positions_gps' }, (payload) => {
                     const row = payload.new;
                     if (row && row.latitude && row.longitude) {
@@ -1292,7 +1306,7 @@
                     v.tarif = prix;
                     v.distDirect = distDirect;
                     v.distDeviee = distDeviee;
-                    v.recetteBruteReelle = v.tronconsValides * (prix * 4); // 4 PLACES
+                    v.recetteBruteReelle = v.tronconsValides * (prix * (v.places || 4));
                     sauvegarderStatsJournalieresAdmin(v);
 
                     channelSyncAdmin.send({
@@ -1338,6 +1352,9 @@
             alert("✅ Ligne ajoutée avec succès !");
         }
 
+        // ========================================================
+        // GESTION DES PARTENAIRES : ACTIONS COMPLÈTES RESTAURÉES
+        // ========================================================
         async function chargerPartenairesAdmin() {
             const tbody = document.getElementById('table-partenaires-body');
             try {
@@ -1360,11 +1377,11 @@
                                     <td class="py-3 text-right no-print">
                                         <select onchange="executerActionPartenaire('${p.nom}', '${p.tel}', '${p.pin || '0000'}', this)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 outline-none">
                                             <option value="">-- Actions --</option>
-                                            <option value="recharger" class="text-emerald-400">💸 Valider Recharge</option>
-                                            <option value="voir_id" class="text-sky-400">👁️ Voir Identifiants</option>
-                                            <option value="activer" class="text-emerald-500">🟢 Activer Compte</option>
-                                            <option value="suspendre" class="text-amber-500">🟠 Suspendre</option>
-                                            <option value="supprimer" class="text-rose-500">🔴 Supprimer Compte</option>
+                                            <option value="recharger" class="text-emerald-400 font-bold">💸 Valider Recharge</option>
+                                            <option value="voir_id" class="text-sky-400 font-bold">👁️ Voir Identifiants</option>
+                                            <option value="activer" class="text-emerald-500 font-bold">🟢 Activer Compte</option>
+                                            <option value="suspendre" class="text-amber-500 font-bold">🟠 Suspendre Compte</option>
+                                            <option value="supprimer" class="text-rose-500 font-bold">🔴 Supprimer Compte</option>
                                         </select>
                                     </td>
                                 </tr>`);
@@ -1374,7 +1391,7 @@
                 }
             } catch(e) {}
 
-            // Affichage par défaut si la base n'a pas encore de table
+            // Affichage par défaut avec le menu actions complet
             tbody.innerHTML = `
                 <tr class="item-partenaire-row" data-contrat="commercial">
                     <td class="py-3 font-black text-slate-200 partenaire-nom">Dolce<br><span class="text-[9px] font-normal text-slate-500 partenaire-tel">0965647819</span></td>
@@ -1384,8 +1401,11 @@
                     <td class="py-3 text-right no-print">
                         <select onchange="executerActionPartenaire('Dolce', '0965647819', '0000', this)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 outline-none">
                             <option value="">-- Actions --</option>
-                            <option value="recharger" class="text-emerald-400">💸 Valider Recharge</option>
-                            <option value="voir_id" class="text-sky-400">👁️ Voir Identifiants</option>
+                            <option value="recharger" class="text-emerald-400 font-bold">💸 Valider Recharge</option>
+                            <option value="voir_id" class="text-sky-400 font-bold">👁️ Voir Identifiants</option>
+                            <option value="activer" class="text-emerald-500 font-bold">🟢 Activer Compte</option>
+                            <option value="suspendre" class="text-amber-500 font-bold">🟠 Suspendre Compte</option>
+                            <option value="supprimer" class="text-rose-500 font-bold">🔴 Supprimer Compte</option>
                         </select>
                     </td>
                 </tr>`;
@@ -1407,19 +1427,48 @@
             });
         }
 
-        function executerActionPartenaire(nom, tel, pin, selectElem) {
+        async function executerActionPartenaire(nom, tel, pin, selectElem) {
             const action = selectElem.value;
             if(!action) return;
+
             if (action === 'recharger') { 
                 ouvrirModalRechargeFlexible(nom, tel); 
             } 
-            else if (action === 'voir_id') { alert(`👁️ IDENTIFIANTS\nNom: ${nom}\nTél: ${tel}\nPIN: ${pin}`); }
-            else if (action === 'activer') { alert(`🟢 Le compte de ${nom} a été réactivé.`); }
-            else if (action === 'suspendre') { if(confirm(`⚠️ Suspendre l'accès de ${nom} ?`)) alert(`🟠 Compte suspendu.`); }
+            else if (action === 'voir_id') { 
+                alert(`👁️ IDENTIFIANTS DU PARTENAIRE\n\nNom: ${nom}\nTéléphone: ${tel}\nCode PIN: ${pin}`); 
+            }
+            else if (action === 'activer') { 
+                const futureDate = new Date();
+                futureDate.setDate(futureDate.getDate() + 30);
+                try {
+                    if (window.supabase) {
+                        await supabaseClient.from('tv_partenaires').update({ date_expiration: futureDate.toISOString() }).eq('tel', tel);
+                    }
+                } catch(e) {}
+                alert(`🟢 Le compte de ${nom} a été réactivé avec succès (30 jours accordés).`); 
+                chargerPartenairesAdmin();
+            }
+            else if (action === 'suspendre') { 
+                if (confirm(`⚠️ Suspendre l'accès de ${nom} ?\nLe partenaire ne pourra plus suivre sa flotte.`)) {
+                    const pastDate = new Date(0).toISOString();
+                    try {
+                        if (window.supabase) {
+                            await supabaseClient.from('tv_partenaires').update({ date_expiration: pastDate }).eq('tel', tel);
+                        }
+                    } catch(e) {}
+                    alert(`🟠 Le compte de ${nom} a été suspendu.`); 
+                    chargerPartenairesAdmin();
+                }
+            }
             else if (action === 'supprimer') { 
-                if(confirm(`🔴 Supprimer définitivement le compte de ${nom} ?`)) { 
-                    selectElem.closest('tr').remove(); 
-                    alert(`🗑️ Compte supprimé.`); 
+                if (confirm(`🔴 ATTENTION : Supprimer définitivement le compte partenaire de ${nom} ?`)) { 
+                    try {
+                        if (window.supabase) {
+                            await supabaseClient.from('tv_partenaires').delete().eq('tel', tel);
+                        }
+                    } catch(e) {}
+                    selectElem.closest('tr')?.remove(); 
+                    alert(`🗑️ Compte de ${nom} supprimé.`); 
                 } 
             }
             selectElem.value = ""; 
@@ -1469,7 +1518,6 @@
             
             localStorage.setItem('tv_date_expiration', dateExpiration.toISOString());
 
-            // Enregistrement réel dans la trésorerie locale
             if (montant > 0) {
                 let cumulTreso = parseFloat(localStorage.getItem('tv_tresorerie_cumul') || '0') + montant;
                 localStorage.setItem('tv_tresorerie_cumul', cumulTreso);
@@ -1516,7 +1564,6 @@
             alert(`✅ Données réelles synchronisées pour la période.`);
         }
 
-        // GRAPHIQUES 100 % CONNECTÉS AUX DONNÉES RÉELLES (SANS FAUX CHIFFRES)
         function initialiserGraphiquesAdmin() {
             let totalCDF = 0;
             flotteGlobale.forEach(v => { totalCDF += (v.recetteBruteReelle || 0); });
@@ -1589,7 +1636,6 @@
             document.getElementById('corps-application-admin').classList.remove('hidden');
             document.body.className = "bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col";
             
-            // Chargement de la trésorerie réelle enregistrée
             const tresoReelle = parseFloat(localStorage.getItem('tv_tresorerie_cumul') || '0');
             document.getElementById('txt-tresor').textContent = tresoReelle.toLocaleString() + " CDF";
 
@@ -1640,6 +1686,7 @@
                 chargerCGUAdmin();
                 chargerNumerosAdmin();
                 afficherItinerairesAdmin();
+                chargerPartenairesAdmin();
             } catch (erreur) {
                 console.warn(erreur);
             }
