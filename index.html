@@ -31,12 +31,12 @@
         .leaflet-tile { filter: none !important; }
         .leaflet-container { background: #e5e3df !important; }
         
-        /* STYLE DU VÉHICULE EN DIRECT */
-        .yango-marker-container {
+        /* STYLE DU VÉHICULE EN DIRECT VECTORIEL DYNAMIQUE */
+        .tv-marker-container {
             pointer-events: auto;
         }
 
-        .yango-car-wrapper {
+        .tv-car-wrapper {
             position: relative;
             width: 44px;
             height: 44px;
@@ -46,23 +46,23 @@
         }
 
         /* Halo radar pulsant sous le véhicule */
-        .yango-pulse-halo {
+        .tv-pulse-halo {
             position: absolute;
             width: 52px;
             height: 52px;
             border-radius: 50%;
             background: rgba(14, 165, 233, 0.28);
             border: 1px solid rgba(56, 189, 248, 0.5);
-            animation: pulseYango 2s infinite ease-out;
+            animation: pulseRadar 2s infinite ease-out;
             pointer-events: none;
         }
-        @keyframes pulseYango {
+        @keyframes pulseRadar {
             0% { transform: scale(0.6); opacity: 0.9; }
             100% { transform: scale(1.6); opacity: 0; }
         }
 
-        /* Corps de la voiture vue du ciel orientable */
-        .yango-car-body {
+        /* Corps du véhicule vue du dessus orientable */
+        .tv-car-body {
             position: relative;
             width: 32px;
             height: 32px;
@@ -157,7 +157,7 @@
             </div>
             
             <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v19.0 PROD — Moteur Télématique Temps Réel Yango
+                TransVision v19.2 PROD — Plateforme Télématique Temps Réel
             </div>
         </div>
 
@@ -191,10 +191,10 @@
                 </div>
             </header>
 
-            <!-- ONGLET A : CARTE INTERFACE STYLE YANGO -->
+            <!-- ONGLET A : CARTE INTERFACE DYNAMIQUE HAUTE PRÉCISION -->
             <div id="onglet-flotte" class="p-2 flex-1 flex flex-col blur-transition class-onglet no-print min-h-[calc(100vh-170px)] space-y-2">
                 
-                <!-- BANDEAU DE BORD STYLE PASSAGER / CHAUFFEUR YANGO -->
+                <!-- BANDEAU HUD TEMPS RÉEL -->
                 <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-3 space-y-2 shadow-2xl backdrop-blur">
                     <div class="flex justify-between items-center text-xs">
                         <div class="flex items-center gap-2 truncate max-w-[240px]">
@@ -251,7 +251,7 @@
             <div id="onglet-ajouter" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
                 <div class="bg-slate-950/85 backdrop-blur p-5 rounded-2xl border border-slate-800/80 space-y-4 shadow-xl">
                     <div class="border-b border-slate-800 pb-2">
-                        <h3 class="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-square-plus text-indigo-400"></i> Ajouter un Véhicule</h3>
+                        <h3 class="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-square-plus text-indigo-400"></i> Configuration Matériel</h3>
                         <p class="text-[10px] text-slate-400">Enregistrez le matériel et son itinéraire d'exploitation habituel.</p>
                     </div>
 
@@ -515,7 +515,7 @@
         </div>
     </div>
 
-    <!-- LOGIQUE JAVASCRIPT CONNECTÉE TEMPS RÉEL SANS RÉGRESSION -->
+    <!-- LOGIQUE JAVASCRIPT CONNECTÉE SANS RÉGRESSION -->
     <script>
         function chargerConfigurationsAdmin() {
             const numWhatsApp = localStorage.getItem('tv_whatsapp') || "243810000000";
@@ -650,7 +650,7 @@
                 
                 marker.setLatLng([curLat, curLng]);
                 
-                const carBody = marker.getElement()?.querySelector('.yango-car-body');
+                const carBody = marker.getElement()?.querySelector('.tv-car-body');
                 if (carBody) {
                     carBody.style.transform = `rotate(${curAngle}deg)`;
                 }
@@ -662,13 +662,13 @@
             requestAnimationFrame(frame);
         }
 
-        function creerIconeVehiculeYango(cap = 0) {
+        function creerIconeVehiculeDynamique(cap = 0) {
             return L.divIcon({
-                className: 'yango-marker-container',
+                className: 'tv-marker-container',
                 html: `
-                    <div class="yango-car-wrapper">
-                        <div class="yango-pulse-halo"></div>
-                        <div class="yango-car-body" style="transform: rotate(${cap}deg);">
+                    <div class="tv-car-wrapper">
+                        <div class="tv-pulse-halo"></div>
+                        <div class="tv-car-body" style="transform: rotate(${cap}deg);">
                             <svg viewBox="0 0 40 40" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <ellipse cx="20" cy="21" rx="11" ry="16" fill="rgba(0,0,0,0.3)"/>
                                 <rect x="11" y="6" width="18" height="28" rx="6" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5"/>
@@ -731,7 +731,6 @@
             localStorage.setItem(cleStatsJour, JSON.stringify(donnees));
         }
 
-        // BASCULE MINUIT (00H00) SANS FONCTION MANQUANTE
         function verifierEtReinitialiserAutomatiqueJournee() {
             const dateActuelle = getKinshasaDateStr();
             const derniereDateVerifiee = localStorage.getItem('tv_derniere_date_minuit');
@@ -769,6 +768,10 @@
                 
                 if (!window.supabase) return;
 
+                const debutJournee = new Date();
+                debutJournee.setHours(0, 0, 0, 0);
+                const debutJourneeTs = debutJournee.getTime();
+
                 const { data, error } = await supabaseClient
                     .from('transvision_positions_gps')
                     .select('*')
@@ -788,10 +791,6 @@
                     });
 
                     client.vehicules = [];
-                    
-                    const debutJournee = new Date();
-                    debutJournee.setHours(0, 0, 0, 0);
-                    const debutJourneeTs = debutJournee.getTime();
 
                     Object.keys(vehiculesTrouves).forEach(imeiClean => {
                         const pos = vehiculesTrouves[imeiClean];
@@ -846,7 +845,6 @@
 
                             if (pointPrec) {
                                 let d = calculerDistanceGPS(pointPrec.latitude, pointPrec.longitude, pLat, pLng);
-                                // Filtre anti-dérive à l'arrêt
                                 if (d > 0.025 || (d > 0.005 && vit > 3)) {
                                     kmCalc += d;
                                     kmCourseEnCours += d;
@@ -929,10 +927,9 @@
         });
 
         // ========================================================
-        // RÉCEPTION D'UNE POSITION ET ANIMATION EN DIRECT (STYLE YANGO)
+        // RÉCEPTION D'UNE POSITION ET ANIMATION EN DIRECT
         // ========================================================
         function traiterNouvellePosition(data) {
-            // VERROU ANTI-SACCADE : Ignore les points antérieurs au dernier point valide
             if (data.timestamp && data.timestamp < dernierTimestampTraite) {
                 return;
             }
@@ -1033,7 +1030,6 @@
 
                     sauvegarderStatsJournalieres(v);
 
-                    // ANIMATION FLUIDE LERP EN TEMPS RÉEL (STYLE YANGO)
                     const selectMap = document.getElementById('select-vehicule-map');
                     if (selectMap && selectMap.value == vehiculeIndex && map && busMarker) {
                         animerDeplacementMarker(busMarker, anciennePosition, { lat: data.lat, lng: data.lng }, ancienCap, nouveauCap, 1200);
@@ -1231,7 +1227,7 @@
             ` : "En attente...";
             
             busMarker = L.marker([lat, lng], {
-                icon: creerIconeVehiculeYango(v ? v.dernierCap : 0)
+                icon: creerIconeVehiculeDynamique(v ? v.dernierCap : 0)
             }).addTo(map).bindPopup(popupTxt).openPopup();
             
             if (polylineTrace) map.removeLayer(polylineTrace);
@@ -1783,26 +1779,6 @@
         function fermerModalCGU() { 
             const modal = document.getElementById('modal-cgu');
             if (modal) modal.classList.add('hidden'); 
-        }
-
-        // GESTION INSTALLATION PWA
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            const banner = document.getElementById('pwa-install-banner');
-            if (banner) banner.classList.remove('hidden');
-        });
-        const btnInstall = document.getElementById('btn-install-pwa');
-        if (btnInstall) {
-            btnInstall.addEventListener('click', async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    deferredPrompt = null;
-                    document.getElementById('pwa-install-banner')?.classList.add('hidden');
-                }
-            });
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
