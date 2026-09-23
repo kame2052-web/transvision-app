@@ -31,7 +31,7 @@
         .leaflet-tile { filter: none !important; }
         .leaflet-container { background: #e5e3df !important; }
         
-        /* STYLE DU VÉHICULE EN DIRECT VECTORIEL DYNAMIQUE */
+        /* STYLE DU VÉHICULE EN DIRECT HAUTE PRÉCISION */
         .tv-marker-container {
             pointer-events: auto;
         }
@@ -61,7 +61,7 @@
             100% { transform: scale(1.6); opacity: 0; }
         }
 
-        /* Corps du véhicule vue du dessus orientable */
+        /* Corps de la voiture vue du dessus orientable */
         .tv-car-body {
             position: relative;
             width: 32px;
@@ -157,7 +157,7 @@
             </div>
             
             <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v19.2 PROD — Plateforme Télématique Temps Réel
+                TransVision v20.0 PROD — Global Tech Solutions
             </div>
         </div>
 
@@ -181,17 +181,20 @@
                     <div>
                         <div class="flex items-center gap-1.5">
                             <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" id="statut-serveur-voyant"></span>
-                            <span class="text-[10px] font-black uppercase text-emerald-400 tracking-wider" id="statut-serveur-texte">FLUX TEMPS RÉEL ACTIF</span>
+                            <span class="text-[10px] font-black uppercase text-emerald-400 tracking-wider" id="statut-serveur-texte">Suivi Satellite Actif</span>
                         </div>
-                        <p class="text-[9px] text-slate-400 mt-0.5" id="last-update-text">Connexion satellite en direct...</p>
+                        <p class="text-[9px] text-slate-400 mt-0.5" id="last-update-text">Calcul télématique en direct...</p>
                     </div>
                     <div class="text-right flex flex-col items-end gap-1.5">
                         <span id="timer-compte-rebours" class="text-xs font-mono font-black text-slate-100 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-lg shadow-inner">--:--:--</span>
+                        <button onclick="remettreCompteurZeroManuel()" class="bg-slate-900 hover:bg-slate-850 text-rose-400 border border-rose-500/30 px-2 py-0.5 rounded text-[8px] font-bold uppercase transition-all flex items-center gap-1">
+                            <i class="fa-solid fa-rotate-left"></i> Remettre à 0
+                        </button>
                     </div>
                 </div>
             </header>
 
-            <!-- ONGLET A : CARTE INTERFACE DYNAMIQUE HAUTE PRÉCISION -->
+            <!-- ONGLET A : CARTE LIVE HAUTE PRÉCISION -->
             <div id="onglet-flotte" class="p-2 flex-1 flex flex-col blur-transition class-onglet no-print min-h-[calc(100vh-170px)] space-y-2">
                 
                 <!-- BANDEAU HUD TEMPS RÉEL -->
@@ -219,7 +222,7 @@
                         </div>
                     </div>
 
-                    <!-- RECAPITULATIF JOURNALIER (BASE 4 PLACES) -->
+                    <!-- RECAPITULATIF JOURNALIER FIXE (BASE 4 PLACES) -->
                     <div class="grid grid-cols-3 gap-1.5 text-center text-[10px] font-mono border-t border-slate-800/80 pt-1.5">
                         <div class="bg-slate-950/80 p-1.5 rounded-xl border border-slate-850">
                             <span class="text-[8px] text-slate-500 block uppercase font-bold">Roulé aujourd'hui</span>
@@ -247,11 +250,11 @@
                 </div>
             </div>
 
-            <!-- ONGLET B : NOUVEAU VÉHICULE -->
+            <!-- ONGLET B : GESTION VÉHICULE -->
             <div id="onglet-ajouter" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
                 <div class="bg-slate-950/85 backdrop-blur p-5 rounded-2xl border border-slate-800/80 space-y-4 shadow-xl">
                     <div class="border-b border-slate-800 pb-2">
-                        <h3 class="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-square-plus text-indigo-400"></i> Configuration Matériel</h3>
+                        <h3 class="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-square-plus text-indigo-400"></i> Ajouter un Véhicule</h3>
                         <p class="text-[10px] text-slate-400">Enregistrez le matériel et son itinéraire d'exploitation habituel.</p>
                     </div>
 
@@ -399,7 +402,7 @@
                 </div>
             </div>
 
-            <!-- BARRE NAV -->
+            <!-- BARRE NAVIGATION -->
             <nav class="fixed bottom-0 max-w-md w-full inset-x-0 mx-auto bg-slate-950/95 backdrop-blur border-t border-slate-800 h-16 flex justify-around items-center z-40 no-print px-1">
                 <button onclick="changerOnglet('onglet-flotte', this)" class="flex flex-col items-center justify-center gap-1 text-emerald-400 btn-nav flex-1"><i class="fa-solid fa-location-crosshairs text-sm"></i><span class="text-[8px] font-bold">GPS Live</span></button>
                 <button onclick="changerOnglet('onglet-ajouter', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-plus-circle text-sm"></i><span class="text-[8px] font-bold">Nouveau</span></button>
@@ -758,6 +761,25 @@
         }
         setInterval(verifierEtReinitialiserAutomatiqueJournee, 15000);
 
+        function remettreCompteurZeroManuel() {
+            if (confirm("Remettre le compteur de la journée à zéro ? Le calcul se relancera dès que le véhicule roulera.")) {
+                const v = client.vehicules[0];
+                if (v) {
+                    v.kmJour = 0;
+                    v.kmCourse = 0;
+                    v.tronconsValides = 0;
+                    v.recetteBruteReelle = 0;
+                    v.carburantJour = 0;
+                    localStorage.setItem('tv_reset_ts_' + v.imei, Date.now());
+                    sauvegarderStatsJournalieres(v);
+                    tracePositions = [[v.lat, v.lng]];
+                    if (polylineTrace) polylineTrace.setLatLngs(tracePositions);
+                    genererToutesLesVues();
+                    alert("✅ Compteurs réinitialisés à 0.");
+                }
+            }
+        }
+
         // ========================================================
         // CHARGEMENT ET RESTITUTION DE L'ACTIVITÉ DU JOUR
         // ========================================================
@@ -794,6 +816,7 @@
 
                     Object.keys(vehiculesTrouves).forEach(imeiClean => {
                         const pos = vehiculesTrouves[imeiClean];
+                        const resetTs = parseInt(localStorage.getItem('tv_reset_ts_' + imeiClean) || '0');
                         
                         let savedLigne = JSON.parse(localStorage.getItem('tv_ligne_' + imeiClean) || 'null');
                         let customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
@@ -806,7 +829,7 @@
 
                         const nouveauVehicule = {
                             plaque: cfg.plaque || `Tracker ${imeiClean.slice(-4)}`, 
-                            type: cfg.type || "Toyota", 
+                            type: cfg.type || "Toyota IST", 
                             places: cfg.places || 4, // 4 PLACES STRICTES
                             imei: imeiClean,
                             lat: parseFloat(pos.latitude), 
@@ -828,8 +851,9 @@
 
                         verifierEtChargerJournalDuJour(nouveauVehicule);
 
+                        const filtreDebut = Math.max(debutJourneeTs, resetTs);
                         const pointsDuJour = data
-                            .filter(p => String(p.imei).trim() === imeiClean && p.created_at && new Date(p.created_at).getTime() >= debutJourneeTs)
+                            .filter(p => String(p.imei).trim() === imeiClean && p.created_at && new Date(p.created_at).getTime() >= filtreDebut)
                             .reverse();
 
                         let kmCalc = 0;
@@ -875,8 +899,10 @@
                     
                     const premierVehicule = client.vehicules[0];
                     if (premierVehicule) {
+                        const resetTs = parseInt(localStorage.getItem('tv_reset_ts_' + premierVehicule.imei) || '0');
+                        const filtreDebut = Math.max(debutJourneeTs, resetTs);
                         const tracePts = data
-                            .filter(p => String(p.imei).trim() === premierVehicule.imei && p.created_at && new Date(p.created_at).getTime() >= debutJourneeTs)
+                            .filter(p => String(p.imei).trim() === premierVehicule.imei && p.created_at && new Date(p.created_at).getTime() >= filtreDebut)
                             .reverse()
                             .map(p => [parseFloat(p.latitude), parseFloat(p.longitude)]);
 
@@ -900,7 +926,7 @@
             try {
                 if (!window.supabase) return;
                 supabaseClient
-                    .channel('transvision_flux_client_push')
+                    .channel('tv_partner_realtime_stream')
                     .on('postgres_changes', { 
                         event: 'INSERT', 
                         schema: 'public', 
@@ -923,23 +949,23 @@
 
         socket.on('connect', () => {
             document.getElementById('statut-serveur-voyant').className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping";
-            document.getElementById('statut-serveur-texte').textContent = "FLUX TEMPS RÉEL ACTIF";
+            document.getElementById('statut-serveur-texte').textContent = "Suivi Satellite Actif";
         });
 
         // ========================================================
         // RÉCEPTION D'UNE POSITION ET ANIMATION EN DIRECT
         // ========================================================
         function traiterNouvellePosition(data) {
-            if (data.timestamp && data.timestamp < dernierTimestampTraite) {
-                return;
-            }
+            const imeiClean = String(data.imei).trim();
+            const resetTs = parseInt(localStorage.getItem('tv_reset_ts_' + imeiClean) || '0');
+            if (data.timestamp && data.timestamp < resetTs) return;
+            if (data.timestamp && data.timestamp < dernierTimestampTraite) return;
             dernierTimestampTraite = data.timestamp || Date.now();
 
             const now = new Date();
             document.getElementById('last-update-text').textContent = `Signal : ${now.toLocaleTimeString()}`;
             document.getElementById('statut-serveur-voyant').className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping";
 
-            const imeiClean = String(data.imei).trim();
             let vehiculeIndex = client.vehicules.findIndex(v => String(v.imei).trim() === imeiClean);
             
             if (vehiculeIndex === -1) {
@@ -950,7 +976,7 @@
 
                 const nv = {
                     plaque: data.plaque || `Tracker ${imeiClean.slice(-4)}`, 
-                    type: "Toyota", 
+                    type: "Toyota IST", 
                     places: 4, // 4 PLACES
                     imei: imeiClean,
                     lat: data.lat, 
@@ -985,12 +1011,6 @@
                     v.carburantJour = v.kmJour * 0.12;
 
                     const nouveauCap = calculerCap(v.lat, v.lng, data.lat, data.lng);
-                    let diffCap = 0;
-                    if (v.dernierCap !== undefined) {
-                        diffCap = Math.abs(nouveauCap - v.dernierCap);
-                        if (diffCap > 180) diffCap = 360 - diffCap;
-                    }
-
                     const ancienCap = v.dernierCap || 0;
                     v.dernierCap = nouveauCap;
 
@@ -1004,6 +1024,9 @@
                         rotationValidee = true;
                     } 
                     else if (v.kmCourse >= dDirect) {
+                        let diffCap = Math.abs(nouveauCap - ancienCap);
+                        if (diffCap > 180) diffCap = 360 - diffCap;
+
                         if (diffCap >= 120) {
                             rotationValidee = true;
                         } 
@@ -1100,7 +1123,7 @@
             });
         });
 
-        // SONDAGE SATELLITE HAUTE FRÉQUENCE DE SECOURS
+        // POLLING SUPABASE HAUTE FRÉQUENCE DE SECOURS
         async function sonderPositionsCloudEnContinu() {
             try {
                 if (!window.supabase) return;
@@ -1264,7 +1287,7 @@
             const customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
             customConfig[imeiClean] = {
                 plaque: plaque,
-                type: document.getElementById('add-type').value || "Toyota",
+                type: document.getElementById('add-type').value || "Toyota IST",
                 places: places,
                 origine: origine,
                 destination: destination,
@@ -1274,7 +1297,7 @@
 
             const nv = { 
                 plaque: plaque, 
-                type: document.getElementById('add-type').value || "Toyota", 
+                type: document.getElementById('add-type').value || "Toyota IST", 
                 places: places, 
                 imei: imeiClean, 
                 lat: -4.32, 
@@ -1401,8 +1424,8 @@
                         <p class="text-[9px] text-sky-400 font-mono">Itinéraire: ${v.origine} ➔ ${v.destination}</p>
                         
                         <div class="grid grid-cols-2 gap-y-2 gap-x-1 text-[9px] font-mono bg-slate-900 p-2.5 rounded border border-slate-800">
-                            <p>📡 GPS: <span class="text-emerald-400">Opérationnel</span></p>
-                            <p>🔋 Batt: <span class="text-emerald-400">12.6V</span></p>
+                            <p>📡 GPS: <span class="text-emerald-400 font-bold">Connecté</span></p>
+                            <p>🔋 Batterie: <span class="text-emerald-400 font-bold">12.6V</span></p>
                             <p>⛽ Conso: <span class="text-sky-400 font-bold">${consoPeriode} L</span></p>
                             <p>🛣️ Dist: <span class="text-sky-400 font-bold">${kmPeriode} km</span></p>
                         </div>
@@ -1771,7 +1794,7 @@
             const modal = document.getElementById('modal-cgu');
             const zone = document.getElementById('zone-texte-cgu');
             if (zone) {
-                zone.textContent = localStorage.getItem('transvision_cgu') || "CONDITIONS GÉNÉRALES D'UTILISATION (CGU) — TRANSVISION\nÉditées par Global Tech Solutions SARL\n\n1. OBJET DU SERVICE :\nTransVision fournit aux partenaires transporteurs une plateforme de supervision télématique en direct par balises SinoTrack.\n\n2. RECHARGES ET FORFAITS :\nL'accès au suivi satellite est conditionné par la souscription d'un forfait d'exploitation validé par le Super Admin.\n\n3. CONFIDENTIALITÉ :\nLes données de géolocalisation et d'audit des recettes sont strictement confidentielles et réservées au transporteur.";
+                zone.textContent = localStorage.getItem('transvision_cgu') || "CONDITIONS GÉNÉRALES D'UTILISATION (CGU) — TRANSVISION\nÉditées par Global Tech Solutions SARL\n\n1. OBJET DU SERVICE :\nTransVision fournit aux partenaires transporteurs une plateforme de supervision télématique en direct par balises SinoTrack.\n\n2. RECHARGES ET FORFAITS :\nL'accès au suivi satellite est conditionné par la souscription d'un forfait d'exploitation validé par le Super Admin.\n\n3. AUDIT DES RECETTES :\nLes calculs de recettes sont basés sur le nombre de rotations complètes validées sur la ligne.";
             }
             if (modal) modal.classList.remove('hidden'); 
         }
