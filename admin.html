@@ -107,7 +107,7 @@
     <!-- 2. CORPS APPLICATION ADMIN -->
     <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
         <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
-            <span class="text-xs font-bold text-indigo-400">TransVision Control Panel v22.5 PROD — Supervision Télématique Directe</span>
+            <span class="text-xs font-bold text-indigo-400">TransVision Control Panel v24.0 PROD — Supervision Télématique</span>
             <div class="flex gap-2 text-[10px] font-mono">
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 flex items-center gap-1">Push WSS : <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" id="admin-server-dot"></span><span class="text-emerald-400 font-bold" id="admin-server-text">En Direct</span></span>
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Live : <span class="text-emerald-400 font-bold" id="admin-flotte-count">0 Traceur(s)</span></span>
@@ -128,7 +128,7 @@
 
                     <nav class="space-y-1 text-xs">
                         <button onclick="changerPageAdmin('page-suivi', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/10 nav-link-admin"><i class="fa-solid fa-map-location-dot text-sm text-sky-400"></i> Suivi de la flotte</button>
-                        <button onclick="changerPageAdmin('page-gestion-flotte', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"><i class="fa-solid fa-bus text-sm text-emerald-400"></i> Flotte & Recettes (4 places)</button>
+                        <button onclick="changerPageAdmin('page-gestion-flotte', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"><i class="fa-solid fa-bus text-sm text-emerald-400"></i> Flotte & Recettes</button>
                         <button onclick="changerPageAdmin('page-partenaires', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"><i class="fa-solid fa-users text-sm text-indigo-400"></i> Gestion des partenaires</button>
                         <button onclick="changerPageAdmin('page-itineraires', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"><i class="fa-solid fa-route text-sm text-teal-400"></i> Matrice Tarifs (Pôles)</button>
                         <button onclick="changerPageAdmin('page-tresorerie', this)" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"><span class="flex items-center gap-3"><i class="fa-solid fa-wallet text-sm text-amber-500"></i> Trésorerie</span></button>
@@ -162,9 +162,6 @@
                             <button onclick="centrerMapAdmin()" class="bg-slate-800 text-sky-400 hover:bg-slate-700 text-[10px] px-3 py-1.5 rounded-lg font-bold border border-slate-700 transition-colors">
                                 <i class="fa-solid fa-crosshairs mr-1"></i> Recentrer Flotte
                             </button>
-                            <button onclick="remettreFlotteAZeroAdmin()" class="bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30 text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1 shadow-sm">
-                                <i class="fa-solid fa-rotate-left"></i> Remettre à zéro
-                            </button>
                         </div>
                     </div>
                     <div id="map-admin-suivi" class="border border-slate-800 shadow-2xl overflow-hidden"></div>
@@ -174,12 +171,9 @@
                 <div id="page-gestion-flotte" class="space-y-4 page-fade class-page-admin hidden">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2">
                         <div>
-                            <h2 class="text-xl font-black text-slate-100">🚍 Parc Automobile & Recettes de la Journée (Base 4 places)</h2>
-                            <p class="text-xs text-slate-400">Cumul automatique continu du jour (réinitialisation stricte à 00h00 Kinshasa).</p>
+                            <h2 class="text-xl font-black text-slate-100">🚍 Parc Automobile & Recettes de la Journée</h2>
+                            <p class="text-xs text-slate-400">Cumul automatique continu du jour (réinitialisation stricte à 00h00 Kinshasa selon la capacité saisie).</p>
                         </div>
-                        <button onclick="remettreFlotteAZeroAdmin()" class="bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30 text-xs px-3.5 py-2 rounded-xl font-bold transition-all flex items-center gap-1.5 shadow-sm">
-                            <i class="fa-solid fa-rotate-left"></i> Remettre à zéro la Flotte
-                        </button>
                     </div>
 
                     <div class="grid grid-cols-3 gap-4">
@@ -204,10 +198,10 @@
                                     <th class="py-2">Plaque / IMEI</th>
                                     <th class="py-2">Localisation / Avenue Live</th>
                                     <th class="py-2">Distance Jour</th>
-                                    <th class="py-2">Ligne Assignée</th>
+                                    <th class="py-2">Ligne & Places</th>
                                     <th class="py-2">Rotations</th>
-                                    <th class="py-2">Gains (4 places)</th>
-                                    <th class="py-2 text-right">Actions / Moteur</th>
+                                    <th class="py-2">Gains Réels</th>
+                                    <th class="py-2 text-right">Contrôle Moteur</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-850" id="table-vehicules-body">
@@ -217,7 +211,7 @@
                     </div>
                 </div>
 
-                <!-- 3. PARTENAIRES AVEC MENU ACTIONS COMPLET -->
+                <!-- 3. PARTENAIRES AVEC MENU ACTIONS COMPLET RÉTABLI -->
                 <div id="page-partenaires" class="space-y-4 page-fade class-page-admin hidden print:block">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 no-print">
                         <div>
@@ -249,22 +243,7 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-850 text-slate-300 print-text" id="table-partenaires-body">
-                                <tr class="item-partenaire-row" data-contrat="commercial">
-                                    <td class="py-3 font-black text-slate-200 partenaire-nom">Dolce<br><span class="text-[9px] font-normal text-slate-500 partenaire-tel">0965647819</span></td>
-                                    <td class="py-3"><span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-black text-[10px] uppercase">Commercial</span></td>
-                                    <td class="py-3 text-center font-bold font-mono text-indigo-400">1 Véh.</td>
-                                    <td class="py-3 text-center font-mono"><span id="jours-dolce" class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-lg font-black text-[10px]">Actif</span></td>
-                                    <td class="py-3 text-right no-print">
-                                        <select onchange="executerActionPartenaire('Dolce', '0965647819', '0000', this)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 focus:outline-none focus:border-indigo-500">
-                                            <option value="">-- Actions --</option>
-                                            <option value="recharger" class="text-emerald-400 font-bold">💸 Valider Recharge</option>
-                                            <option value="voir_id" class="text-sky-400 font-bold">👁️ Voir Identifiants</option>
-                                            <option value="activer" class="text-emerald-500 font-bold">🟢 Activer Compte</option>
-                                            <option value="suspendre" class="text-amber-500 font-bold">🟠 Suspendre Compte</option>
-                                            <option value="supprimer" class="text-rose-500 font-bold">🔴 Supprimer Compte</option>
-                                        </select>
-                                    </td>
-                                </tr>
+                                <tr><td colspan="5" class="py-4 text-center text-slate-500 font-sans italic">Chargement des partenaires...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -536,7 +515,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT APPLICATION ADMIN -->
+    <!-- LOGIQUE JAVASCRIPT TEMPS RÉEL FLUIDE -->
     <script>
         const supabaseUrl = 'https://vbriworyscymnmtzzdny.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
@@ -578,6 +557,7 @@
                 if (payload.distDirect) v.distDirect = payload.distDirect;
                 if (payload.distDeviee) v.distDeviee = payload.distDeviee;
                 if (payload.tarif) v.tarif = payload.tarif;
+                if (payload.places !== undefined) v.places = payload.places;
                 v.kmCourse = 0;
             }
             majTableauFlotteAdmin();
@@ -689,21 +669,13 @@
             const dateDuJour = getKinshasaDateStr();
             const cleStatsJour = `tv_stats_admin_${dateDuJour}_${v.imei}`;
             let stats = JSON.parse(localStorage.getItem(cleStatsJour) || 'null');
-            v.places = 4; // FORÇAGE STRICT À 4 PLACES
+            const placesReelles = parseInt(v.places) || 0;
 
             if (stats) {
                 v.kmJour = stats.kmJour || 0;
                 v.kmCourse = stats.kmCourse || 0;
                 v.tronconsValides = stats.tronconsValides || 0;
-                v.recetteBruteReelle = stats.recetteBruteReelle || 0;
-
-                const seuilMin = (v.distDirect || 12.0) * 0.55;
-                const maxRot = Math.floor(v.kmJour / seuilMin);
-                if (v.tronconsValides > maxRot) {
-                    v.tronconsValides = maxRot;
-                    v.recetteBruteReelle = maxRot * (v.tarif * 4);
-                    sauvegarderStatsJournalieresAdmin(v);
-                }
+                v.recetteBruteReelle = v.tronconsValides * (v.tarif * placesReelles);
             } else {
                 v.kmJour = 0;
                 v.kmCourse = 0;
@@ -721,6 +693,7 @@
                 kmCourse: v.kmCourse || 0,
                 tronconsValides: v.tronconsValides || 0,
                 recetteBruteReelle: v.recetteBruteReelle || 0,
+                places: v.places,
                 updatedAt: Date.now()
             }));
         }
@@ -732,7 +705,6 @@
             if (derniereDate && derniereDate !== dateActuelle) {
                 flotteGlobale.forEach(v => {
                     v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0;
-                    v.places = 4;
                     sauvegarderStatsJournalieresAdmin(v);
                 });
                 tracesFlotte = {};
@@ -742,51 +714,7 @@
         }, 15000);
 
         // ========================================================
-        // REMISE À ZÉRO GLOBALE DE TOUTE LA FLOTTE
-        // ========================================================
-        function remettreFlotteAZeroAdmin() {
-            if (confirm("⚠️ VOULEZ-VOUS REMETTRE À ZÉRO TOUS LES COMPTEURS ET LE SUIVI DE LA FLOTTE ?\n\nToutes les distances et recettes d'aujourd'hui seront réinitialisées à 0 (base 4 places).")) {
-                const resetTs = Date.now();
-                flotteGlobale.forEach(v => {
-                    v.kmJour = 0;
-                    v.kmCourse = 0;
-                    v.tronconsValides = 0;
-                    v.recetteBruteReelle = 0;
-                    v.secondesArret = 0;
-                    v.distanceSensInverse = 0;
-                    v.capOrigineCourse = v.dernierCap || 0;
-                    v.places = 4;
-                    localStorage.setItem('tv_reset_ts_' + v.imei, resetTs);
-                    sauvegarderStatsJournalieresAdmin(v);
-                    tracesFlotte[v.imei] = [[v.lat, v.lng]];
-                    if (adminPolylines[v.imei]) adminPolylines[v.imei].setLatLngs(tracesFlotte[v.imei]);
-                });
-
-                majTableauFlotteAdmin();
-                initialiserGraphiquesAdmin();
-                alert("✅ La flotte a été remise à zéro. Les compteurs redémarreront dès le prochain trajet.");
-            }
-        }
-
-        function reinitialiserVehiculeAdmin(idx) {
-            const v = flotteGlobale[idx];
-            if (!v) return;
-            if (confirm(`Remettre le compteur de ${v.plaque} à zéro pour aujourd'hui ?`)) {
-                v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0;
-                v.secondesArret = 0; v.distanceSensInverse = 0; v.capOrigineCourse = 0;
-                v.places = 4;
-                localStorage.setItem('tv_reset_ts_' + v.imei, Date.now());
-                sauvegarderStatsJournalieresAdmin(v);
-                tracesFlotte[v.imei] = [[v.lat, v.lng]];
-                if (adminPolylines[v.imei]) adminPolylines[v.imei].setLatLngs(tracesFlotte[v.imei]);
-                majTableauFlotteAdmin();
-                initialiserGraphiquesAdmin();
-                alert(`✅ Compteur de ${v.plaque} remis à 0.`);
-            }
-        }
-
-        // ========================================================
-        // CHARGEMENT INITIAL (HISTORIQUE DEPUIS 00h00)
+        // CHARGEMENT INITIAL (HISTORIQUE DEPUIS 00h00 AVEC PLACES RÉELLES)
         // ========================================================
         async function chargerHistoriqueAdmin() {
             try {
@@ -825,15 +753,18 @@
                     Object.values(vehiculesUniques).forEach(pos => {
                         const imeiStr = String(pos.imei).trim();
                         const cfg = lignesConfig[imeiStr] || {};
-                        const resetTs = parseInt(localStorage.getItem('tv_reset_ts_' + imeiStr) || '0');
+                        const customLocal = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}')[imeiStr] || {};
+                        
+                        // LECTURE DYNAMIQUE STRICTE DES PLACES ENREGISTRÉES
+                        const placesSaisies = parseInt(cfg.places || customLocal.places) || 0;
 
                         const vObj = {
                             imei: imeiStr,
-                            plaque: cfg.plaque || `TRK-${imeiStr.slice(-4)}`,
-                            places: 4, // 4 PLACES STRICTES
+                            plaque: cfg.plaque || customLocal.plaque || `TRK-${imeiStr.slice(-4)}`,
+                            places: placesSaisies, // AUCUNE PLACE FORCÉE EN DUR
                             tarif: cfg.tarif || 2500,
-                            origine: cfg.origine || "BRIKIN",
-                            destination: cfg.destination || "GARE CENTRALE",
+                            origine: cfg.origine || customLocal.origine || "BRIKIN",
+                            destination: cfg.destination || customLocal.destination || "GARE CENTRALE",
                             distDirect: cfg.dist_direct || 12.0,
                             distDeviee: cfg.dist_deviee || 14.5,
                             kmCourse: 0,
@@ -853,9 +784,8 @@
 
                         verifierEtChargerJournalAdmin(vObj);
 
-                        const filtreDebut = Math.max(debutJourneeTs, resetTs);
                         const pointsDuJour = data
-                            .filter(p => String(p.imei).trim() === imeiStr && new Date(p.created_at).getTime() >= filtreDebut)
+                            .filter(p => String(p.imei).trim() === imeiStr && new Date(p.created_at).getTime() >= debutJourneeTs)
                             .reverse();
 
                         let kmCalc = 0;
@@ -872,7 +802,7 @@
                             const vit = parseFloat(pt.speed || pt.vitesse || 0);
 
                             if (pointPrec) {
-                                let d = calculerDistanceGPS(pointPrec.latitude, pointPrec.longitude, pLat, pLng);
+                                const d = calculerDistanceGPS(pointPrec.latitude, pointPrec.longitude, pLat, pLng);
                                 if (d > 0.025 || (d > 0.005 && vit > 3)) {
                                     kmCalc += d;
                                     courseEnCours += d;
@@ -891,11 +821,11 @@
                             dernierTimestampAdmin = Math.max(dernierTimestampAdmin, new Date(pt.created_at).getTime());
                         });
 
-                        if (resetTs > 0 || vObj.kmJour === 0) {
+                        if (vObj.kmJour === 0) {
                             vObj.kmJour = kmCalc;
                             vObj.kmCourse = courseEnCours;
                             vObj.tronconsValides = rotationsCalculees;
-                            vObj.recetteBruteReelle = rotationsCalculees * (vObj.tarif * 4);
+                            vObj.recetteBruteReelle = rotationsCalculees * (vObj.tarif * placesSaisies);
                             vObj.dernierCap = dernierCapPoint;
                             sauvegarderStatsJournalieresAdmin(vObj);
                         }
@@ -921,7 +851,7 @@
         // ========================================================
         function activerFluxRealtimeAdmin() {
             supabaseClient
-                .channel('transvision_admin_live_stream_v4')
+                .channel('transvision_admin_live_stream_v6')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transvision_positions_gps' }, (payload) => {
                     const row = payload.new;
                     if (row && row.latitude && row.longitude) {
@@ -939,8 +869,6 @@
 
         function traiterNouvellePositionAdmin(data) {
             const imeiClean = String(data.imei).trim();
-            const resetTs = parseInt(localStorage.getItem('tv_reset_ts_' + imeiClean) || '0');
-            if (data.timestamp && data.timestamp < resetTs) return;
             if (data.timestamp && data.timestamp < dernierTimestampAdmin) return;
             dernierTimestampAdmin = data.timestamp || Date.now();
 
@@ -948,10 +876,14 @@
             const now = new Date();
             
             if (!vehiculeExistant) {
+                // Lecture des places configurées
+                const customLocal = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}')[imeiClean] || {};
+                const placesDynamiques = parseInt(customLocal.places) || 0;
+
                 vehiculeExistant = {
                     imei: imeiClean, 
-                    plaque: `TRK-${imeiClean.slice(-4)}`, 
-                    places: 4, // 4 PLACES
+                    plaque: customLocal.plaque || `TRK-${imeiClean.slice(-4)}`, 
+                    places: placesDynamiques,
                     tarif: 2500,
                     origine: "BRIKIN",
                     destination: "GARE CENTRALE",
@@ -999,7 +931,8 @@
                     if (diffCap > 180) diffCap = 360 - diffCap;
 
                     const dDirect = vehiculeExistant.distDirect || 12.0;
-                    const gainParRotation = (vehiculeExistant.tarif || 2500) * 4; // 4 places
+                    const placesReelles = parseInt(vehiculeExistant.places) || 0;
+                    const gainParRotation = (vehiculeExistant.tarif || 2500) * placesReelles;
                     let rotationValidee = false;
 
                     // 1. Terminus direct
@@ -1029,7 +962,7 @@
 
                     if (rotationValidee) {
                         vehiculeExistant.tronconsValides += 1;
-                        vehiculeExistant.recetteBruteReelle += gainParRotation;
+                        vehiculeExistant.recetteBruteReelle = vehiculeExistant.tronconsValides * gainParRotation;
                         vehiculeExistant.kmCourse = 0;
                         vehiculeExistant.secondesArret = 0;
                         vehiculeExistant.distanceSensInverse = 0;
@@ -1062,15 +995,16 @@
 
                 if (mapAdmin) {
                     const vitTxt = data.vitesse > 0 ? `${Math.round(data.vitesse)} km/h` : 'À l\'arrêt';
+                    const pl = vehiculeExistant.places || 0;
                     if (adminMarkers[imeiClean]) {
                         adminMarkers[imeiClean].bindPopup(`
-                            <b>${vehiculeExistant.plaque}</b> (4 places)<br>
+                            <b>${vehiculeExistant.plaque}</b> (${pl} places)<br>
                             IMEI: ${vehiculeExistant.imei}<br>
                             Lieu : <b>${vehiculeExistant.avenueLive}</b><br>
                             Ligne: <b>${vehiculeExistant.origine} ➔ ${vehiculeExistant.destination}</b><br>
                             Vitesse: <b>${vitTxt}</b><br>
                             Roulé aujourd'hui: <b>${vehiculeExistant.kmJour.toFixed(1)} km</b><br>
-                            Rotations validées: <b>${vehiculeExistant.tronconsValides}</b> (${vehiculeExistant.recetteBruteReelle.toLocaleString()} CDF)<br>
+                            Rotations: <b>${vehiculeExistant.tronconsValides}</b> (${vehiculeExistant.recetteBruteReelle.toLocaleString()} CDF)<br>
                             Dernier Live: ${vehiculeExistant.derniereCo.toLocaleTimeString()}
                         `);
                     }
@@ -1094,6 +1028,7 @@
 
         function majTableauFlotteAdmin() {
             const tbody = document.getElementById('table-vehicules-body');
+            if (!tbody) return;
             tbody.innerHTML = "";
             let totalKm = 0; let totalRot = 0; let totalCDF = 0;
             
@@ -1115,12 +1050,12 @@
                         <td class="py-3 font-bold text-slate-100">${(v.kmJour || 0).toFixed(1)} km</td>
                         <td class="py-3 text-slate-200 font-bold">
                             <span class="text-sky-400">${v.origine}</span> ➔ <span class="text-emerald-400">${v.destination}</span>
+                            <span class="block text-[9px] text-slate-400 font-normal">Capacité: <b>${v.places || 0} places</b></span>
                         </td>
                         <td class="py-3 font-black text-slate-200">${v.tronconsValides || 0}</td>
                         <td class="py-3 font-black text-emerald-400">${(v.recetteBruteReelle || 0).toLocaleString()} CDF</td>
-                        <td class="py-3 text-right space-x-1">
+                        <td class="py-3 text-right">
                             ${btnMoteur}
-                            <button onclick="reinitialiserVehiculeAdmin(${idx})" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-2 py-1 rounded text-[10px] font-bold" title="Remise à 0 du jour"><i class="fa-solid fa-rotate-left"></i></button>
                         </td>
                     </tr>
                 `);
@@ -1306,13 +1241,13 @@
                     v.tarif = prix;
                     v.distDirect = distDirect;
                     v.distDeviee = distDeviee;
-                    v.recetteBruteReelle = v.tronconsValides * (prix * (v.places || 4));
+                    v.recetteBruteReelle = v.tronconsValides * (prix * (parseInt(v.places) || 0));
                     sauvegarderStatsJournalieresAdmin(v);
 
                     channelSyncAdmin.send({
                         type: 'broadcast',
                         event: 'maj_ligne_vehicule',
-                        payload: { imei: v.imei, origine, destination, tarif: prix, distDirect, distDeviee }
+                        payload: { imei: v.imei, origine, destination, tarif: prix, distDirect, distDeviee, places: v.places }
                     });
                 }
             });
@@ -1391,7 +1326,6 @@
                 }
             } catch(e) {}
 
-            // Affichage par défaut avec le menu actions complet
             tbody.innerHTML = `
                 <tr class="item-partenaire-row" data-contrat="commercial">
                     <td class="py-3 font-black text-slate-200 partenaire-nom">Dolce<br><span class="text-[9px] font-normal text-slate-500 partenaire-tel">0965647819</span></td>
@@ -1486,7 +1420,7 @@
                 selVehicules.innerHTML = `<option value="ALL">Sélectionner (Demo)</option>`;
             } else {
                 flotteGlobale.forEach((v, index) => {
-                    selVehicules.insertAdjacentHTML('beforeend', `<option value="${index}">${v.plaque} (IMEI: ${v.imei})</option>`);
+                    selVehicules.insertAdjacentHTML('beforeend', `<option value="${index}">${v.plaque} (${v.places || 0} places)</option>`);
                 });
             }
 
