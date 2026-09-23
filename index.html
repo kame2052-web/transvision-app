@@ -31,7 +31,7 @@
         .leaflet-tile { filter: none !important; }
         .leaflet-container { background: #e5e3df !important; }
         
-        /* STYLE DU VÉHICULE EN DIRECT TYPE YANGO */
+        /* STYLE DU VÉHICULE EN DIRECT */
         .yango-marker-container {
             pointer-events: auto;
         }
@@ -157,7 +157,7 @@
             </div>
             
             <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v18.8 PROD — Moteur Télématique Yango (Temps Réel)
+                TransVision v19.0 PROD — Moteur Télématique Temps Réel Yango
             </div>
         </div>
 
@@ -183,13 +183,10 @@
                             <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" id="statut-serveur-voyant"></span>
                             <span class="text-[10px] font-black uppercase text-emerald-400 tracking-wider" id="statut-serveur-texte">FLUX TEMPS RÉEL ACTIF</span>
                         </div>
-                        <p class="text-[9px] text-slate-400 mt-0.5" id="last-update-text">En attente de coordonnée...</p>
+                        <p class="text-[9px] text-slate-400 mt-0.5" id="last-update-text">Connexion satellite en direct...</p>
                     </div>
                     <div class="text-right flex flex-col items-end gap-1.5">
                         <span id="timer-compte-rebours" class="text-xs font-mono font-black text-slate-100 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-lg shadow-inner">--:--:--</span>
-                        <button onclick="reinitialiserJourneeManuelle()" class="text-[8px] bg-slate-850 hover:bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded font-bold uppercase transition-colors">
-                            <i class="fa-solid fa-rotate-left mr-1"></i> Remise à zéro
-                        </button>
                     </div>
                 </div>
             </header>
@@ -197,11 +194,11 @@
             <!-- ONGLET A : CARTE INTERFACE STYLE YANGO -->
             <div id="onglet-flotte" class="p-2 flex-1 flex flex-col blur-transition class-onglet no-print min-h-[calc(100vh-170px)] space-y-2">
                 
-                <!-- BANDEAU HUD TEMPS RÉEL -->
+                <!-- BANDEAU DE BORD STYLE PASSAGER / CHAUFFEUR YANGO -->
                 <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-3 space-y-2 shadow-2xl backdrop-blur">
                     <div class="flex justify-between items-center text-xs">
                         <div class="flex items-center gap-2 truncate max-w-[240px]">
-                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
                             <span id="hud-avenue-live" class="truncate font-sans font-black text-slate-100">Localisation de l'avenue...</span>
                         </div>
                         <div class="flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-xl border border-slate-800">
@@ -222,7 +219,7 @@
                         </div>
                     </div>
 
-                    <!-- CUMUL DU JOUR CALCULÉ SUR 4 PLACES -->
+                    <!-- RECAPITULATIF JOURNALIER (BASE 4 PLACES) -->
                     <div class="grid grid-cols-3 gap-1.5 text-center text-[10px] font-mono border-t border-slate-800/80 pt-1.5">
                         <div class="bg-slate-950/80 p-1.5 rounded-xl border border-slate-850">
                             <span class="text-[8px] text-slate-500 block uppercase font-bold">Roulé aujourd'hui</span>
@@ -250,12 +247,12 @@
                 </div>
             </div>
 
-            <!-- ONGLET B : GESTION VÉHICULE -->
+            <!-- ONGLET B : NOUVEAU VÉHICULE -->
             <div id="onglet-ajouter" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
                 <div class="bg-slate-950/85 backdrop-blur p-5 rounded-2xl border border-slate-800/80 space-y-4 shadow-xl">
                     <div class="border-b border-slate-800 pb-2">
-                        <h3 class="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-square-plus text-indigo-400"></i> Configuration Matériel</h3>
-                        <p class="text-[10px] text-slate-400">Plaque, IMEI et affectation de ligne.</p>
+                        <h3 class="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-square-plus text-indigo-400"></i> Ajouter un Véhicule</h3>
+                        <p class="text-[10px] text-slate-400">Enregistrez le matériel et son itinéraire d'exploitation habituel.</p>
                     </div>
 
                     <div class="space-y-3">
@@ -265,44 +262,71 @@
                                 <input type="text" id="add-plaque" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono focus:border-indigo-500 outline-none" placeholder="Ex: KIN 4082AE">
                             </div>
                             <div>
-                                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Places Assises</label>
-                                <input type="number" id="add-places" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-emerald-400 font-bold focus:border-indigo-500 outline-none" value="4">
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Modèle</label>
+                                <input type="text" id="add-type" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:border-indigo-500 outline-none" placeholder="Ex: Toyota IST">
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">N° IMEI Traceur</label>
-                            <input type="text" id="add-imei" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono focus:border-indigo-500 outline-none" placeholder="357445101350102" value="357445101350102">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Places Assises</label>
+                                <input type="number" id="add-places" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-emerald-400 font-bold focus:border-indigo-500 outline-none" value="4">
+                            </div>
+                            <div>
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">N° IMEI Traceur SinoTrack</label>
+                                <input type="text" id="add-imei" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono focus:border-indigo-500 outline-none" placeholder="Ex: 357445101350102">
+                            </div>
                         </div>
 
                         <div class="p-3 bg-slate-900/90 border border-indigo-500/30 rounded-2xl space-y-3 shadow-inner">
                             <span class="text-[9px] font-black uppercase text-indigo-400 tracking-wider flex items-center gap-1.5">
-                                <i class="fa-solid fa-route"></i> Ligne Assignée
+                                <i class="fa-solid fa-route"></i> Itinéraire d'Exploitation
                             </span>
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
                                     <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Origine</label>
-                                    <input type="text" id="add-origine" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold outline-none" value="BRIKIN">
+                                    <input type="text" id="add-origine" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold focus:border-indigo-500 outline-none" placeholder="Ex: BRIKIN" value="BRIKIN">
                                 </div>
                                 <div>
                                     <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Destination</label>
-                                    <input type="text" id="add-destination" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold outline-none" value="GARE CENTRALE">
+                                    <input type="text" id="add-destination" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-sky-400 font-bold focus:border-indigo-500 outline-none" placeholder="Ex: GARE CENTRALE" value="GARE CENTRALE">
                                 </div>
                             </div>
                         </div>
 
                         <button onclick="enregistrerVehiculeSaisi()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-3 rounded-xl text-xs uppercase shadow-lg shadow-indigo-500/10">
-                            Enregistrer les Paramètres
+                            Valider le Véhicule
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- ONGLET C : RAPPORT FINANCIER (4 PLACES) -->
+            <!-- ONGLET C : RAPPORT FINANCIER -->
             <div id="onglet-rapport" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
+                <div class="bg-slate-950/90 backdrop-blur p-3.5 rounded-2xl border border-slate-800 space-y-3 shadow-md">
+                    <div class="flex justify-between items-center">
+                        <label class="block text-[10px] font-bold text-slate-300 uppercase tracking-wider">
+                            <i class="fa-solid fa-filter text-emerald-400 mr-1"></i> Filtre du Rapport Financier
+                        </label>
+                        <button onclick="window.print()" class="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded font-bold hover:bg-emerald-500/20"><i class="fa-solid fa-print"></i> PDF</button>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div>
+                            <label class="block text-[8px] text-slate-500 uppercase mb-1">Cibler un Véhicule</label>
+                            <select id="filtre-fin-vehicule" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-[10px] text-slate-200 font-bold focus:outline-none focus:border-emerald-500">
+                                <option value="all">Tous les véhicules (Flotte globale)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="appliquerFiltreFinancier()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-black py-2 rounded-lg text-[10px] uppercase transition-colors shadow-inner">
+                        Actualiser les Recettes
+                    </button>
+                </div>
+
                 <div class="bg-slate-950/85 backdrop-blur p-4 rounded-2xl border border-slate-800/80 space-y-2 shadow-md">
                     <h3 class="text-xs font-black uppercase text-emerald-400 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-simple"></i> Recettes Journalières (Base 4 places)
+                        <i class="fa-solid fa-chart-simple"></i> Recettes Journalières Générées (Base 4 places)
                     </h3>
                     <div class="h-40 relative">
                         <canvas id="chart-recettes-partenaire"></canvas>
@@ -321,12 +345,12 @@
                 </div>
 
                 <div class="space-y-3">
-                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-800 pb-1">Détail par Véhicule</h3>
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-800 pb-1">Progression des Rotations par Véhicule</h3>
                     <div id="fin-vehicules-list" class="space-y-3"></div>
                 </div>
             </div>
 
-            <!-- ONGLET D : ANALYSE TECHNIQUE & MOTEUR -->
+            <!-- ONGLET D : ANALYSE TECHNIQUE ET GESTION MOTEUR -->
             <div id="onglet-analyse" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
                 <div class="flex justify-between items-center">
                     <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Diagnostic Matériel & Coupe-Circuit</h2>
@@ -336,25 +360,56 @@
 
             <!-- ONGLET E : PROFIL -->
             <div id="onglet-profil" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
-                <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mon Profil</h2>
+                <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mon Profil & Forfait</h2>
+                
+                <button onclick="ouvrirModalRecharge()" class="w-full bg-slate-950 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl text-center shadow-lg transition-colors flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-wallet text-2xl text-emerald-400"></i>
+                    <div class="text-left">
+                        <h3 class="text-[11px] font-black uppercase text-slate-200">Recharger Mon Forfait</h3>
+                        <p class="text-[9px] text-slate-400 mt-0.5">Envoyer des fonds sur votre compte partenaire</p>
+                    </div>
+                </button>
+
+                <div class="bg-slate-950/80 backdrop-blur p-5 rounded-2xl border border-slate-800 space-y-3 shadow-xl">
+                    <h3 class="text-xs font-black uppercase text-indigo-400 flex items-center gap-2 border-b border-slate-800 pb-2">
+                        <i class="fa-solid fa-shield-halved"></i> Mes Identifiants
+                    </h3>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Téléphone (Login)</label>
+                        <input type="tel" id="prof-tel" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-400 font-mono" readonly>
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Nouveau Code PIN</label>
+                        <input type="password" id="prof-pin-new" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono focus:border-indigo-500 outline-none" placeholder="Saisir 4 chiffres">
+                    </div>
+                    <button onclick="majIdentifiants()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-2.5 rounded-xl text-xs uppercase mt-2 shadow-md">Mettre à jour mon PIN</button>
+                </div>
+
                 <div class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800 space-y-3 shadow-md">
-                    <button onclick="declencherDeconnexion()" class="w-full bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 font-black py-3 rounded-xl text-xs uppercase flex items-center justify-center gap-2 transition-colors">
+                    <a href="#" id="lien-whatsapp-support" target="_blank" class="w-full bg-green-500/10 border border-green-500/30 hover:bg-green-500/20 text-green-400 font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition-colors">
+                        <i class="fa-brands fa-whatsapp text-lg"></i> Contacter le Support
+                    </a>
+
+                    <button onclick="ouvrirModalCGU()" class="w-full bg-slate-900 border border-slate-800 hover:border-emerald-500 text-slate-300 font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition-colors">
+                        <i class="fa-solid fa-file-contract text-emerald-400"></i> Consulter les CGU
+                    </button>
+                    <button onclick="declencherDeconnexion()" class="w-full bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 font-black py-3 rounded-xl text-xs uppercase flex items-center justify-center gap-2 mt-4 transition-colors">
                         <i class="fa-solid fa-power-off"></i> Se Déconnecter
                     </button>
                 </div>
             </div>
 
-            <!-- NAVIGATION BAS -->
+            <!-- BARRE NAV -->
             <nav class="fixed bottom-0 max-w-md w-full inset-x-0 mx-auto bg-slate-950/95 backdrop-blur border-t border-slate-800 h-16 flex justify-around items-center z-40 no-print px-1">
                 <button onclick="changerOnglet('onglet-flotte', this)" class="flex flex-col items-center justify-center gap-1 text-emerald-400 btn-nav flex-1"><i class="fa-solid fa-location-crosshairs text-sm"></i><span class="text-[8px] font-bold">GPS Live</span></button>
-                <button onclick="changerOnglet('onglet-ajouter', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-plus-circle text-sm"></i><span class="text-[8px] font-bold">Véhicule</span></button>
+                <button onclick="changerOnglet('onglet-ajouter', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-plus-circle text-sm"></i><span class="text-[8px] font-bold">Nouveau</span></button>
                 <button onclick="changerOnglet('onglet-rapport', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-file-invoice-dollar text-sm"></i><span class="text-[8px] font-bold">Rapport</span></button>
                 <button onclick="changerOnglet('onglet-analyse', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-wrench text-sm"></i><span class="text-[8px] font-bold">Tech.</span></button>
                 <button onclick="changerOnglet('onglet-profil', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-user text-sm"></i><span class="text-[8px] font-bold">Profil</span></button>
             </nav>
         </div>
 
-        <!-- MODAL MODIFIER ITINÉRAIRE -->
+        <!-- MODAL MODIFIER L'ITINÉRAIRE -->
         <div id="modal-modifier-itineraire" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
             <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
                 <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -363,60 +418,178 @@
                     </h3>
                     <button onclick="fermerModalModifierItineraire()" class="text-slate-500 hover:text-slate-300"><i class="fa-solid fa-xmark"></i></button>
                 </div>
+
+                <p class="text-[10px] text-slate-400">Choisissez une ligne parmi la liste ou indiquez l'origine et la destination de votre parcours.</p>
+                <p class="text-xs text-slate-300 font-bold">Véhicule : <span id="mod-vehicule-nom" class="text-emerald-400"></span></p>
+
                 <div class="space-y-3 text-xs">
                     <div>
-                        <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Origine</label>
-                        <input type="text" id="mod-origine" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 font-bold outline-none">
+                        <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Lignes Fréquentes</label>
+                        <select id="mod-select-ligne-rapide" onchange="appliquerLignePredefinie(this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-sky-400 font-bold outline-none focus:border-sky-500">
+                            <option value="">-- Sélectionner une ligne habituelle --</option>
+                            <option value="0">Brikin ➔ Gare Centrale</option>
+                            <option value="1">Kintambo Magasin ➔ Delvaux</option>
+                            <option value="2">Kingasani Pascal ➔ Route Mokali</option>
+                            <option value="3">Kingasani Pascal ➔ Mikondo</option>
+                            <option value="4">Kingasani Pascal ➔ Aéroport N'djili</option>
+                            <option value="5">Kintambo Magasin ➔ Kinsuka Pompage</option>
+                            <option value="6">L'UPN ➔ Rond Point Victoire</option>
+                            <option value="7">Gare Centrale ➔ U.P.N.</option>
+                            <option value="8">Marché Central ➔ Matadi Kibala</option>
+                            <option value="9">Marché Selembao ➔ U.P.N.</option>
+                            <option value="10">Bandal Moulaert ➔ Gare Centrale</option>
+                        </select>
                     </div>
-                    <div>
-                        <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Destination</label>
-                        <input type="text" id="mod-destination" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 font-bold outline-none">
+
+                    <div class="space-y-2">
+                        <div>
+                            <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Origine</label>
+                            <input type="text" id="mod-origine" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 font-bold focus:border-sky-500 outline-none" placeholder="Lieu de départ">
+                        </div>
+                        <div>
+                            <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Destination</label>
+                            <input type="text" id="mod-destination" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 font-bold focus:border-sky-500 outline-none" placeholder="Lieu d'arrivée">
+                        </div>
                     </div>
                 </div>
+
                 <input type="hidden" id="mod-vehicule-index" value="">
+
                 <button onclick="sauvegarderModificationItineraire()" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs transition-colors shadow-lg mt-2">
-                    Enregistrer la Ligne
+                    Enregistrer la Nouvelle Ligne
                 </button>
+            </div>
+        </div>
+
+        <!-- MODAL RECHARGE CLIENT -->
+        <div id="modal-recharge-partenaire" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                    <h3 class="font-black text-sm text-slate-100 flex items-center gap-2"><i class="fa-solid fa-wallet text-emerald-400"></i> Paiement Mobile</h3>
+                    <button onclick="fermerModalRecharge()" class="text-slate-500 hover:text-slate-300"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="space-y-3">
+                    <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-850 space-y-2">
+                        <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Compte Cible</label>
+                        <select id="recharge-mode" onchange="basculerSelectVehiculeRecharge()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-bold focus:outline-none focus:border-emerald-500">
+                            <option value="flotte">Flotte Complète</option>
+                            <option value="unitaire">Véhicule Spécifique</option>
+                        </select>
+                        <div id="bloc-recharge-vehicule" class="hidden mt-2 border-t border-slate-800 pt-2">
+                            <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Sélectionner le Véhicule</label>
+                            <select id="recharge-vehicule-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-mono text-[10px] focus:outline-none focus:border-emerald-500"></select>
+                        </div>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-emerald-500/30 space-y-1 shadow-inner">
+                        <label class="block text-[10px] text-emerald-400 uppercase font-black text-center mb-2">Montant à transférer</label>
+                        <div class="flex items-center gap-2">
+                            <input type="number" id="input-montant-libre" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-2xl font-black text-slate-100 text-right focus:outline-none focus:border-emerald-500" placeholder="Ex: 5000">
+                            <span class="text-slate-400 font-black text-lg">CDF</span>
+                        </div>
+                    </div>
+                    <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-850 text-xs font-mono text-slate-300">
+                        <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Réseau de Paiement</label>
+                        <select id="recharge-numero" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-emerald-400 font-bold focus:outline-none focus:border-emerald-500">
+                            <option value="mpesa" id="opt-mpesa">M-Pesa</option>
+                            <option value="airtel" id="opt-airtel">Airtel Money</option>
+                            <option value="orange" id="opt-orange">Orange Money</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="declarerPaiementForfait()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs transition-colors shadow-lg mt-2">Transférer les fonds</button>
+            </div>
+        </div>
+
+        <!-- MODAL CGU -->
+        <div id="modal-cgu" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md max-h-[80vh] flex flex-col overflow-hidden shadow-2xl">
+                <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
+                    <h3 class="font-black text-xs text-slate-100 uppercase">Conditions TransVision</h3>
+                    <button onclick="fermerModalCGU()" class="text-slate-400 hover:text-slate-100 text-sm p-1"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="p-5 overflow-y-auto text-slate-300 text-xs font-mono leading-relaxed whitespace-pre-wrap" id="zone-texte-cgu"></div>
+                <div class="p-3 border-t border-slate-800 text-right">
+                    <button onclick="fermerModalCGU()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs px-4 py-2 rounded-xl transition-colors">Fermer</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- LOGIQUE JAVASCRIPT TEMPS RÉEL FLUIDE -->
+    <!-- LOGIQUE JAVASCRIPT CONNECTÉE TEMPS RÉEL SANS RÉGRESSION -->
     <script>
+        function chargerConfigurationsAdmin() {
+            const numWhatsApp = localStorage.getItem('tv_whatsapp') || "243810000000";
+            const numMpesa = localStorage.getItem('tv_mpesa') || "+243 812 000 000";
+            const numAirtel = localStorage.getItem('tv_airtel') || "+243 999 000 000";
+            const numOrange = localStorage.getItem('tv_orange') || "+243 890 000 000";
+
+            const lienWa = document.getElementById('lien-whatsapp-support');
+            if(lienWa) lienWa.href = `https://wa.me/${numWhatsApp.replace(/[^0-9]/g, '')}`;
+
+            const optMpesa = document.getElementById('opt-mpesa');
+            if(optMpesa) optMpesa.textContent = `${numMpesa} (M-Pesa)`;
+            
+            const optAirtel = document.getElementById('opt-airtel');
+            if(optAirtel) optAirtel.textContent = `${numAirtel} (Airtel Money)`;
+            
+            const optOrange = document.getElementById('opt-orange');
+            if(optOrange) optOrange.textContent = `${numOrange} (Orange Money)`;
+        }
+
         const supabaseUrl = 'https://vbriworyscymnmtzzdny.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
+        const SERVEUR_URL = "http://134.209.116.89:3000";
+        const socket = io(SERVEUR_URL, { transports: ['websocket'], reconnection: true });
+
+        let partenaireProfil = null; 
         let client = { nom: "Dolce", tel: "0965647819", vehicules: [] };
         let map = null; 
         let busMarker = null;
         let polylineTrace = null;
         let tracePositions = [];
         let chartPartenaireInstance = null;
+        let dernierPointId = null;
         let dernierTimestampTraite = 0;
 
         const MATRICE_SECRETE = [
             { o: "BRIKIN", d: "GARE CENTRALE", t: 2500, d1: 12.0, d2: 14.5 },
             { o: "KINTAMBO MAGASIN", d: "DELVAUX", t: 1000, d1: 4.2, d2: 5.0 },
             { o: "KINGASANI PASCAL", d: "ROUTE MOKALI", t: 1500, d1: 4.5, d2: 5.3 },
-            { o: "L'UPN", d: "ROND POINT VICTOIRE", t: 1000, d1: 9.5, d2: 11.5 }
+            { o: "KINGASANI PASCAL", d: "MIKONDO", t: 500, d1: 3.0, d2: 3.6 },
+            { o: "KINGASANI PASCAL", d: "AEROPORT N'DJILI", t: 500, d1: 5.5, d2: 6.2 },
+            { o: "KINTAMBO MAGASIN", d: "KINSUKA POMPAGE", t: 1000, d1: 4.8, d2: 5.8 },
+            { o: "L'UPN", d: "ROND POINT VICTOIRE", t: 1000, d1: 9.5, d2: 11.5 },
+            { o: "GARE CENTRALE", d: "U.P.N.", t: 3000, d1: 12.5, d2: 15.0 },
+            { o: "MARCHE CENTRAL", d: "MATADI KIBALA", t: 2000, d1: 16.5, d2: 19.5 },
+            { o: "MARCHE SELEMBAO", d: "U.P.N.", t: 1000, d1: 5.5, d2: 6.7 },
+            { o: "BANDAL MOULAERT", d: "GARE CENTRALE", t: 500, d1: 6.8, d2: 8.2 }
         ];
 
         function trouverParametresSecrets(origine, destination) {
             const org = (origine || "").trim().toUpperCase();
             const dst = (destination || "").trim().toUpperCase();
+
             for (let l of MATRICE_SECRETE) {
-                if ((org.includes(l.o) || l.o.includes(org)) && (dst.includes(l.d) || l.d.includes(dst))) return { distDirect: l.d1, distDeviee: l.d2, tarif: l.t };
-                if ((org.includes(l.d) || l.d.includes(org)) && (dst.includes(l.o) || l.o.includes(dst))) return { distDirect: l.d1, distDeviee: l.d2, tarif: l.t };
+                if ((org.includes(l.o) || l.o.includes(org)) && (dst.includes(l.d) || l.d.includes(dst))) {
+                    return { distDirect: l.d1, distDeviee: l.d2, tarif: l.t };
+                }
+                if ((org.includes(l.d) || l.d.includes(org)) && (dst.includes(l.o) || l.o.includes(dst))) {
+                    return { distDirect: l.d1, distDeviee: l.d2, tarif: l.t };
+                }
             }
             return { distDirect: 12.0, distDeviee: 14.5, tarif: 2500 };
         }
 
         let dernierGeocodageTs = 0;
         let cacheAdresse = "";
+
         async function detecterNomAvenue(lat, lng) {
             const now = Date.now();
-            if (now - dernierGeocodageTs < 12000 && cacheAdresse) return cacheAdresse;
+            if (now - dernierGeocodageTs < 12000 && cacheAdresse) {
+                return cacheAdresse;
+            }
             try {
                 const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
                     headers: { 'Accept-Language': 'fr' }
@@ -428,11 +601,13 @@
                     const voie = addr.road || addr.pedestrian || addr.street || addr.neighbourhood || "Avenue de circulation";
                     const quartier = addr.suburb || addr.quarter || "";
                     const commune = addr.city_district || addr.county || "Ngaliema";
-                    let res = voie;
-                    if (quartier && quartier !== voie) res += ` • ${quartier}`;
-                    if (commune) res += ` (${commune})`;
-                    cacheAdresse = res;
-                    return res;
+                    
+                    let nomAvenue = voie;
+                    if (quartier && quartier !== voie) nomAvenue += ` • ${quartier}`;
+                    if (commune) nomAvenue += ` (${commune})`;
+                    
+                    cacheAdresse = nomAvenue;
+                    return nomAvenue;
                 }
             } catch(e) {}
             return cacheAdresse || "Ngaliema, Kinshasa";
@@ -463,17 +638,26 @@
         function animerDeplacementMarker(marker, startPos, endPos, startAngle, targetAngle, dureeMs = 1200) {
             const debut = performance.now();
             const angleFinal = interpolerAngle(startAngle, targetAngle);
+
             function frame(maintenant) {
                 const ecoule = maintenant - debut;
                 const ratio = Math.min(ecoule / dureeMs, 1.0);
                 const ease = ratio < 0.5 ? 2 * ratio * ratio : -1 + (4 - 2 * ratio) * ratio;
+                
                 const curLat = startPos.lat + (endPos.lat - startPos.lat) * ease;
                 const curLng = startPos.lng + (endPos.lng - startPos.lng) * ease;
                 const curAngle = startAngle + (angleFinal - startAngle) * ease;
+                
                 marker.setLatLng([curLat, curLng]);
+                
                 const carBody = marker.getElement()?.querySelector('.yango-car-body');
-                if (carBody) carBody.style.transform = `rotate(${curAngle}deg)`;
-                if (ratio < 1.0) requestAnimationFrame(frame);
+                if (carBody) {
+                    carBody.style.transform = `rotate(${curAngle}deg)`;
+                }
+                
+                if (ratio < 1.0) {
+                    requestAnimationFrame(frame);
+                }
             }
             requestAnimationFrame(frame);
         }
@@ -506,23 +690,29 @@
 
         function getKinshasaDateStr() {
             const d = new Date();
-            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
         }
 
         function verifierEtChargerJournalDuJour(v) {
             const dateDuJour = getKinshasaDateStr();
             const cleStatsJour = `tv_stats_${dateDuJour}_${v.imei}`;
-            const stats = JSON.parse(localStorage.getItem(cleStatsJour) || 'null');
-            if (stats) {
-                v.kmJour = stats.kmJour || 0;
-                v.kmCourse = stats.kmCourse || 0;
-                v.tronconsValides = stats.tronconsValides || 0;
-                v.recetteBruteReelle = stats.recetteBruteReelle || 0;
+            const statsSauvegardees = JSON.parse(localStorage.getItem(cleStatsJour) || 'null');
+
+            if (statsSauvegardees) {
+                v.kmJour = statsSauvegardees.kmJour || 0;
+                v.kmCourse = statsSauvegardees.kmCourse || 0;
+                v.tronconsValides = statsSauvegardees.tronconsValides || 0;
+                v.recetteBruteReelle = statsSauvegardees.recetteBruteReelle || 0;
+                v.carburantJour = statsSauvegardees.carburantJour || 0;
             } else {
                 v.kmJour = 0;
                 v.kmCourse = 0;
                 v.tronconsValides = 0;
                 v.recetteBruteReelle = 0;
+                v.carburantJour = 0;
                 sauvegarderStatsJournalieres(v);
             }
         }
@@ -530,255 +720,522 @@
         function sauvegarderStatsJournalieres(v) {
             const dateDuJour = getKinshasaDateStr();
             const cleStatsJour = `tv_stats_${dateDuJour}_${v.imei}`;
-            localStorage.setItem(cleStatsJour, JSON.stringify({
+            const donnees = {
                 kmJour: v.kmJour || 0,
                 kmCourse: v.kmCourse || 0,
                 tronconsValides: v.tronconsValides || 0,
                 recetteBruteReelle: v.recetteBruteReelle || 0,
+                carburantJour: v.carburantJour || 0,
                 updatedAt: Date.now()
-            }));
+            };
+            localStorage.setItem(cleStatsJour, JSON.stringify(donnees));
         }
 
-        // BASCULE MINUIT STRICTE (00H00 KINSHASA)
-        setInterval(() => {
+        // BASCULE MINUIT (00H00) SANS FONCTION MANQUANTE
+        function verifierEtReinitialiserAutomatiqueJournee() {
             const dateActuelle = getKinshasaDateStr();
-            const derniereDate = localStorage.getItem('tv_derniere_date_minuit');
-            if (derniereDate && derniereDate !== dateActuelle) {
+            const derniereDateVerifiee = localStorage.getItem('tv_derniere_date_minuit');
+            
+            if (derniereDateVerifiee && derniereDateVerifiee !== dateActuelle) {
                 if (client && client.vehicules) {
                     client.vehicules.forEach(v => {
-                        v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0;
+                        v.kmJour = 0;
+                        v.kmCourse = 0;
+                        v.tronconsValides = 0;
+                        v.recetteBruteReelle = 0;
+                        v.carburantJour = 0;
                         sauvegarderStatsJournalieres(v);
                     });
                 }
                 tracePositions = [];
-                if (busMarker) tracePositions = [[busMarker.getLatLng().lat, busMarker.getLatLng().lng]];
+                if (busMarker) {
+                    const pos = busMarker.getLatLng();
+                    tracePositions = [[pos.lat, pos.lng]];
+                    if (polylineTrace) polylineTrace.setLatLngs(tracePositions);
+                }
                 genererToutesLesVues();
             }
             localStorage.setItem('tv_derniere_date_minuit', dateActuelle);
-        }, 15000);
-
-        function reinitialiserJourneeManuelle() {
-            if (confirm("Réinitialiser les compteurs du jour à zéro ?")) {
-                if (client && client.vehicules) {
-                    client.vehicules.forEach(v => {
-                        v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0;
-                        sauvegarderStatsJournalieres(v);
-                    });
-                }
-                tracePositions = [];
-                if (busMarker) tracePositions = [[busMarker.getLatLng().lat, busMarker.getLatLng().lng]];
-                if (polylineTrace) polylineTrace.setLatLngs(tracePositions);
-                genererToutesLesVues();
-            }
         }
+        setInterval(verifierEtReinitialiserAutomatiqueJournee, 15000);
 
         // ========================================================
-        // CHARGEMENT INITIAL (HISTORIQUE DEPUIS 00h00)
+        // CHARGEMENT ET RESTITUTION DE L'ACTIVITÉ DU JOUR
         // ========================================================
         async function chargerDernieresPositions() {
             try {
+                const txtStatut = document.getElementById('last-update-text');
+                txtStatut.textContent = "Calcul de l'activité en cours...";
+                
                 if (!window.supabase) return;
-                const debutJournee = new Date();
-                debutJournee.setHours(0, 0, 0, 0);
 
-                const { data } = await supabaseClient
+                const { data, error } = await supabaseClient
                     .from('transvision_positions_gps')
                     .select('*')
-                    .gte('created_at', debutJournee.toISOString())
-                    .order('created_at', { ascending: true })
-                    .limit(600);
-
-                const imeiClean = "357445101350102";
-                let savedLigne = JSON.parse(localStorage.getItem('tv_ligne_' + imeiClean) || 'null');
-                let customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
-                let cfg = customConfig[imeiClean] || {};
-
-                let origine = savedLigne?.origine || cfg.origine || "BRIKIN";
-                let destination = savedLigne?.destination || cfg.destination || "GARE CENTRALE";
-                const params = trouverParametresSecrets(origine, destination);
-
-                const v = {
-                    plaque: cfg.plaque || "Tracker 0102",
-                    type: "Traceur GPS",
-                    places: 4, // 4 PLACES STRICTES
-                    imei: imeiClean,
-                    lat: -4.3215,
-                    lng: 15.3115,
-                    moteurCoupe: false,
-                    distDirect: params.distDirect,
-                    distDeviee: params.distDeviee,
-                    tarif: params.tarif,
-                    kmJour: 0,
-                    kmCourse: 0,
-                    tronconsValides: 0,
-                    recetteBruteReelle: 0,
-                    dernierCap: 0,
-                    origine: origine,
-                    destination: destination
-                };
-
-                verifierEtChargerJournalDuJour(v);
+                    .order('created_at', { ascending: false })
+                    .limit(500);
 
                 if (data && data.length > 0) {
-                    tracePositions = [];
-                    let pointPrec = null;
-                    let kmCalc = 0;
-                    let courseEnCours = 0;
-                    let rot = 0;
-
-                    data.forEach(pt => {
-                        const pLat = parseFloat(pt.latitude);
-                        const pLng = parseFloat(pt.longitude);
-                        const vit = parseFloat(pt.speed || pt.vitesse || 0);
-
-                        if (pointPrec) {
-                            const d = calculerDistanceGPS(pointPrec.latitude, pointPrec.longitude, pLat, pLng);
-                            // Filtre du bruit à l'arrêt : ignore les micro-oscillations < 25m si vitesse < 3 km/h
-                            if (d > 0.025 || (d > 0.005 && vit > 3)) {
-                                kmCalc += d;
-                                courseEnCours += d;
-                                tracePositions.push([pLat, pLng]);
-                                if (courseEnCours >= params.distDeviee || courseEnCours >= params.distDirect) {
-                                    rot += 1;
-                                    courseEnCours = 0;
-                                }
+                    const vehiculesTrouves = {};
+                    
+                    data.forEach(pos => {
+                        if (pos.imei && pos.latitude && pos.longitude) {
+                            const imeiClean = String(pos.imei).trim();
+                            if (!vehiculesTrouves[imeiClean]) { 
+                                vehiculesTrouves[imeiClean] = pos; 
                             }
-                        } else {
-                            tracePositions.push([pLat, pLng]);
                         }
-                        pointPrec = { latitude: pLat, longitude: pLng };
-                        dernierTimestampTraite = Math.max(dernierTimestampTraite, new Date(pt.created_at).getTime());
                     });
 
-                    const dernier = data[data.length - 1];
-                    v.lat = parseFloat(dernier.latitude);
-                    v.lng = parseFloat(dernier.longitude);
-                    v.kmJour = kmCalc;
-                    v.kmCourse = courseEnCours;
-                    v.tronconsValides = rot;
-                    v.recetteBruteReelle = rot * (params.tarif * v.places); // 4 places
-                    sauvegarderStatsJournalieres(v);
-                }
+                    client.vehicules = [];
+                    
+                    const debutJournee = new Date();
+                    debutJournee.setHours(0, 0, 0, 0);
+                    const debutJourneeTs = debutJournee.getTime();
 
-                client.vehicules = [v];
-                majSelecteurMap();
-                initMapEtCentrer(0);
-                genererToutesLesVues();
-                document.getElementById('statut-serveur-texte').textContent = "SUIVI SATELLITE ACTIF";
+                    Object.keys(vehiculesTrouves).forEach(imeiClean => {
+                        const pos = vehiculesTrouves[imeiClean];
+                        
+                        let savedLigne = JSON.parse(localStorage.getItem('tv_ligne_' + imeiClean) || 'null');
+                        let customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
+                        let cfg = customConfig[imeiClean] || {};
+
+                        let origine = savedLigne?.origine || cfg.origine || "BRIKIN";
+                        let destination = savedLigne?.destination || cfg.destination || "GARE CENTRALE";
+
+                        const params = trouverParametresSecrets(origine, destination);
+
+                        const nouveauVehicule = {
+                            plaque: cfg.plaque || `Tracker ${imeiClean.slice(-4)}`, 
+                            type: cfg.type || "Toyota", 
+                            places: cfg.places || 4, // 4 PLACES STRICTES
+                            imei: imeiClean,
+                            lat: parseFloat(pos.latitude), 
+                            lng: parseFloat(pos.longitude), 
+                            moteurCoupe: cfg.moteurCoupe || false, 
+                            carburantJour: 0, 
+                            kmJour: 0,
+                            distDirect: params.distDirect,
+                            distDeviee: params.distDeviee,
+                            tarif: params.tarif,
+                            kmCourse: 0,
+                            origine: origine,
+                            destination: destination,
+                            dernierCap: 0,
+                            secondesArret: 0,
+                            recetteBruteReelle: 0, 
+                            tronconsValides: 0 
+                        };
+
+                        verifierEtChargerJournalDuJour(nouveauVehicule);
+
+                        const pointsDuJour = data
+                            .filter(p => String(p.imei).trim() === imeiClean && p.created_at && new Date(p.created_at).getTime() >= debutJourneeTs)
+                            .reverse();
+
+                        let kmCalc = 0;
+                        let kmCourseEnCours = 0;
+                        let rotationsCalculees = 0;
+                        let pointPrec = null;
+                        let dernierCapPoint = 0;
+
+                        pointsDuJour.forEach(pt => {
+                            const pLat = parseFloat(pt.latitude);
+                            const pLng = parseFloat(pt.longitude);
+                            const vit = parseFloat(pt.speed || pt.vitesse || 0);
+
+                            if (pointPrec) {
+                                let d = calculerDistanceGPS(pointPrec.latitude, pointPrec.longitude, pLat, pLng);
+                                // Filtre anti-dérive à l'arrêt
+                                if (d > 0.025 || (d > 0.005 && vit > 3)) {
+                                    kmCalc += d;
+                                    kmCourseEnCours += d;
+                                    dernierCapPoint = calculerCap(pointPrec.latitude, pointPrec.longitude, pLat, pLng);
+
+                                    if (kmCourseEnCours >= params.distDeviee || kmCourseEnCours >= params.distDirect) {
+                                        rotationsCalculees += 1;
+                                        kmCourseEnCours = 0;
+                                    }
+                                }
+                            }
+                            pointPrec = { latitude: pLat, longitude: pLng };
+                            dernierTimestampTraite = Math.max(dernierTimestampTraite, new Date(pt.created_at).getTime());
+                        });
+
+                        if (kmCalc > 0) {
+                            nouveauVehicule.kmJour = Math.max(nouveauVehicule.kmJour, kmCalc);
+                            nouveauVehicule.kmCourse = kmCourseEnCours;
+                            nouveauVehicule.tronconsValides = Math.max(nouveauVehicule.tronconsValides, rotationsCalculees);
+                            nouveauVehicule.recetteBruteReelle = nouveauVehicule.tronconsValides * (params.tarif * nouveauVehicule.places); // 4 places
+                            nouveauVehicule.carburantJour = nouveauVehicule.kmJour * 0.12;
+                            nouveauVehicule.dernierCap = dernierCapPoint;
+                            sauvegarderStatsJournalieres(nouveauVehicule);
+                        }
+
+                        client.vehicules.push(nouveauVehicule);
+                    });
+                    
+                    const premierVehicule = client.vehicules[0];
+                    if (premierVehicule) {
+                        const tracePts = data
+                            .filter(p => String(p.imei).trim() === premierVehicule.imei && p.created_at && new Date(p.created_at).getTime() >= debutJourneeTs)
+                            .reverse()
+                            .map(p => [parseFloat(p.latitude), parseFloat(p.longitude)]);
+
+                        tracePositions = tracePts.length > 0 ? tracePts : [[premierVehicule.lat, premierVehicule.lng]];
+                    }
+
+                    majSelecteurMap();
+                    peuplerSelecteursFiltre();
+                    const sel = document.getElementById('select-vehicule-map');
+                    if (sel && sel.value !== "none") { initMapEtCentrer(parseInt(sel.value)); }
+                    
+                    txtStatut.textContent = `Télématique Live active : ${premierVehicule ? premierVehicule.kmJour.toFixed(1) : 0} km aujourd'hui.`;
+                }
+            } catch (err) {}
+        }
+
+        // ========================================================
+        // CANAL REALTIME PUSH DIRECT (< 200 ms)
+        // ========================================================
+        function activerFluxRealtimePush() {
+            try {
+                if (!window.supabase) return;
+                supabaseClient
+                    .channel('transvision_flux_client_push')
+                    .on('postgres_changes', { 
+                        event: 'INSERT', 
+                        schema: 'public', 
+                        table: 'transvision_positions_gps' 
+                    }, (payload) => {
+                        const row = payload.new;
+                        if (row && row.latitude && row.longitude) {
+                            traiterNouvellePosition({
+                                imei: String(row.imei).trim(),
+                                lat: parseFloat(row.latitude),
+                                lng: parseFloat(row.longitude),
+                                vitesse: parseFloat(row.speed || row.vitesse || 0),
+                                timestamp: new Date(row.created_at || Date.now()).getTime()
+                            });
+                        }
+                    })
+                    .subscribe();
             } catch(e) {}
         }
 
-        // ========================================================
-        // CANAL SUPABASE REALTIME PUSH EN TEMPS RÉEL (< 200 ms)
-        // ========================================================
-        function activerFluxRealtimePush() {
-            supabaseClient
-                .channel('transvision_flux_live')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transvision_positions_gps' }, (payload) => {
-                    const row = payload.new;
-                    if (row && row.latitude && row.longitude) {
-                        traiterNouveauPointPush({
-                            imei: String(row.imei).trim(),
-                            lat: parseFloat(row.latitude),
-                            lng: parseFloat(row.longitude),
-                            vitesse: parseFloat(row.speed || row.vitesse || 0),
-                            timestamp: new Date(row.created_at || Date.now()).getTime()
-                        });
-                    }
-                })
-                .subscribe();
-        }
+        socket.on('connect', () => {
+            document.getElementById('statut-serveur-voyant').className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping";
+            document.getElementById('statut-serveur-texte').textContent = "FLUX TEMPS RÉEL ACTIF";
+        });
 
-        function traiterNouveauPointPush(data) {
-            // VERROU CHRONOLOGIQUE : Ignore les anciens paquets retardataires du buffer
+        // ========================================================
+        // RÉCEPTION D'UNE POSITION ET ANIMATION EN DIRECT (STYLE YANGO)
+        // ========================================================
+        function traiterNouvellePosition(data) {
+            // VERROU ANTI-SACCADE : Ignore les points antérieurs au dernier point valide
             if (data.timestamp && data.timestamp < dernierTimestampTraite) {
-                return; 
+                return;
             }
             dernierTimestampTraite = data.timestamp || Date.now();
 
             const now = new Date();
-            document.getElementById('last-update-text').textContent = `Point Live reçu : ${now.toLocaleTimeString()}`;
+            document.getElementById('last-update-text').textContent = `Signal : ${now.toLocaleTimeString()}`;
             document.getElementById('statut-serveur-voyant').className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping";
 
-            let v = client.vehicules[0];
-            if (!v) return;
+            const imeiClean = String(data.imei).trim();
+            let vehiculeIndex = client.vehicules.findIndex(v => String(v.imei).trim() === imeiClean);
+            
+            if (vehiculeIndex === -1) {
+                let savedLigne = JSON.parse(localStorage.getItem('tv_ligne_' + imeiClean) || 'null');
+                const origine = savedLigne?.origine || "BRIKIN";
+                const destination = savedLigne?.destination || "GARE CENTRALE";
+                const params = trouverParametresSecrets(origine, destination);
 
-            const anciennePosition = { lat: v.lat, lng: v.lng };
-            const distDelta = calculerDistanceGPS(v.lat, v.lng, data.lat, data.lng);
-
-            // Filtrage des faux déplacements à l'arrêt (inférieurs à 20 mètres)
-            if (distDelta > 0.020 || (distDelta > 0.005 && data.vitesse > 3)) {
-                v.kmJour += distDelta;
-                v.kmCourse += distDelta;
-
-                const nouveauCap = calculerCap(v.lat, v.lng, data.lat, data.lng);
-                const ancienCap = v.dernierCap || 0;
-                v.dernierCap = nouveauCap;
-
-                const dDirect = v.distDirect || 12.0;
-                const dDeviee = v.distDeviee || 14.5;
-                const gainRotation = (v.tarif || 2500) * (v.places || 4); // 4 places
-
-                if (v.kmCourse >= dDeviee || (v.kmCourse >= dDirect && data.vitesse < 5)) {
-                    v.tronconsValides += 1;
-                    v.recetteBruteReelle += gainRotation;
-                    v.kmCourse = 0;
-                }
-
-                v.lat = data.lat;
-                v.lng = data.lng;
-                sauvegarderStatsJournalieres(v);
-
-                // Animation glissée fluide (Style Yango)
-                if (map && busMarker) {
-                    animerDeplacementMarker(busMarker, anciennePosition, { lat: data.lat, lng: data.lng }, ancienCap, nouveauCap, 1200);
-                }
+                const nv = {
+                    plaque: data.plaque || `Tracker ${imeiClean.slice(-4)}`, 
+                    type: "Toyota", 
+                    places: 4, // 4 PLACES
+                    imei: imeiClean,
+                    lat: data.lat, 
+                    lng: data.lng, 
+                    moteurCoupe: false, 
+                    carburantJour: 0, 
+                    kmJour: 0,
+                    distDirect: params.distDirect,
+                    distDeviee: params.distDeviee,
+                    kmCourse: 0,
+                    tarif: params.tarif,
+                    origine: origine,
+                    destination: destination,
+                    dernierCap: 0,
+                    secondesArret: 0,
+                    recetteBruteReelle: 0, 
+                    tronconsValides: 0
+                };
+                verifierEtChargerJournalDuJour(nv);
+                client.vehicules.push(nv);
+                vehiculeIndex = client.vehicules.length - 1;
+                majSelecteurMap();
+                peuplerSelecteursFiltre();
             } else {
-                v.lat = data.lat;
-                v.lng = data.lng;
+                let v = client.vehicules[vehiculeIndex];
+                let distDelta = calculerDistanceGPS(v.lat, v.lng, data.lat, data.lng);
+                
+                // Filtrage anti-dérive à l'arrêt
+                if (distDelta > 0.020 || (distDelta > 0.005 && data.vitesse > 3)) {
+                    v.kmJour += distDelta;
+                    v.kmCourse = (v.kmCourse || 0) + distDelta;
+                    v.carburantJour = v.kmJour * 0.12;
+
+                    const nouveauCap = calculerCap(v.lat, v.lng, data.lat, data.lng);
+                    let diffCap = 0;
+                    if (v.dernierCap !== undefined) {
+                        diffCap = Math.abs(nouveauCap - v.dernierCap);
+                        if (diffCap > 180) diffCap = 360 - diffCap;
+                    }
+
+                    const ancienCap = v.dernierCap || 0;
+                    v.dernierCap = nouveauCap;
+
+                    const dDirect = v.distDirect || 12.0;
+                    const dDeviee = v.distDeviee || 14.5;
+                    const gainParRotation = (v.tarif || 2500) * (v.places || 4); // 4 PLACES
+
+                    let rotationValidee = false;
+
+                    if (v.kmCourse >= dDeviee) {
+                        rotationValidee = true;
+                    } 
+                    else if (v.kmCourse >= dDirect) {
+                        if (diffCap >= 120) {
+                            rotationValidee = true;
+                        } 
+                        else if ((data.vitesse || 0) < 5) {
+                            v.secondesArret = (v.secondesArret || 0) + 10;
+                            if (v.secondesArret >= 40) {
+                                rotationValidee = true;
+                            }
+                        } else {
+                            v.secondesArret = 0;
+                        }
+                    }
+
+                    if (rotationValidee) {
+                        v.tronconsValides = (v.tronconsValides || 0) + 1;
+                        v.recetteBruteReelle = (v.recetteBruteReelle || 0) + gainParRotation;
+                        v.kmCourse = 0;
+                        v.secondesArret = 0;
+                    }
+
+                    const anciennePosition = { lat: v.lat, lng: v.lng };
+                    v.lat = data.lat; 
+                    v.lng = data.lng;
+
+                    sauvegarderStatsJournalieres(v);
+
+                    // ANIMATION FLUIDE LERP EN TEMPS RÉEL (STYLE YANGO)
+                    const selectMap = document.getElementById('select-vehicule-map');
+                    if (selectMap && selectMap.value == vehiculeIndex && map && busMarker) {
+                        animerDeplacementMarker(busMarker, anciennePosition, { lat: data.lat, lng: data.lng }, ancienCap, nouveauCap, 1200);
+                    }
+                } else {
+                    v.lat = data.lat; 
+                    v.lng = data.lng;
+                }
             }
 
-            tracePositions.push([data.lat, data.lng]);
-            if (polylineTrace) polylineTrace.setLatLngs(tracePositions);
+            const selectMap = document.getElementById('select-vehicule-map');
+            if (selectMap && selectMap.value == vehiculeIndex) {
+                const targetPoint = [data.lat, data.lng];
+                tracePositions.push(targetPoint);
+                
+                detecterNomAvenue(data.lat, data.lng).then(avenue => {
+                    const elAv = document.getElementById('hud-avenue-live');
+                    if(elAv) elAv.textContent = avenue;
+                });
 
-            detecterNomAvenue(data.lat, data.lng).then(av => {
-                const el = document.getElementById('hud-avenue-live');
-                if (el) el.textContent = av;
+                const v = client.vehicules[vehiculeIndex];
+                const vitTxt = (data.vitesse || 0) > 0 ? `${Math.round(data.vitesse)} km/h` : 'À l\'arrêt';
+                
+                document.getElementById('hud-vitesse-live').textContent = vitTxt;
+                document.getElementById('hud-km-jour').textContent = `${(v.kmJour || 0).toFixed(1)} km`;
+                document.getElementById('hud-course-progression').textContent = `${(v.kmCourse || 0).toFixed(1)} km`;
+                document.getElementById('hud-recettes-jour').textContent = `${(v.recetteBruteReelle || 0).toLocaleString()} CDF`;
+
+                if (map) {
+                    if (busMarker) {
+                        busMarker.getPopup().setContent(`
+                            <b>${v.plaque}</b> (${v.places} places)<br>
+                            Ligne : <b>${v.origine} ➔ ${v.destination}</b><br>
+                            Vitesse en direct : <b>${vitTxt}</b><br>
+                            Roulé aujourd'hui : <b>${(v.kmJour || 0).toFixed(1)} km</b><br>
+                            Rotations validées : <b>${v.tronconsValides || 0}</b><br>
+                            Recettes : <b>${(v.recetteBruteReelle || 0).toLocaleString()} CDF</b>
+                        `);
+                    } else {
+                        initMapEtCentrer(vehiculeIndex);
+                    }
+                    
+                    if (polylineTrace) {
+                        polylineTrace.setLatLngs(tracePositions);
+                    } else {
+                        polylineTrace = L.polyline(tracePositions, { 
+                            color: '#1a73e8', 
+                            weight: 6, 
+                            opacity: 0.9, 
+                            lineJoin: 'round' 
+                        }).addTo(map);
+                    }
+                    map.panTo(targetPoint, { animate: true, duration: 1.0 });
+                }
+            }
+
+            genererRapportFinancier(); 
+            genererRapportTechnique();
+        }
+
+        socket.on('nouvelle_position', (data) => {
+            traiterNouvellePosition({
+                imei: String(data.imei).trim(),
+                lat: parseFloat(data.lat),
+                lng: parseFloat(data.lng),
+                vitesse: parseFloat(data.vitesse || data.speed || 0),
+                timestamp: data.timestamp ? new Date(data.timestamp).getTime() : Date.now()
             });
+        });
 
-            const vitTxt = data.vitesse > 0 ? `${data.vitesse.toFixed(0)} km/h` : 'À l\'arrêt';
-            document.getElementById('hud-vitesse-live').textContent = vitTxt;
-            document.getElementById('hud-km-jour').textContent = `${v.kmJour.toFixed(1)} km`;
-            document.getElementById('hud-course-progression').textContent = `${v.kmCourse.toFixed(1)} km`;
-            document.getElementById('hud-recettes-jour').textContent = `${v.recetteBruteReelle.toLocaleString()} CDF`;
+        // SONDAGE SATELLITE HAUTE FRÉQUENCE DE SECOURS
+        async function sonderPositionsCloudEnContinu() {
+            try {
+                if (!window.supabase) return;
+                const { data } = await supabaseClient
+                    .from('transvision_positions_gps')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(1);
 
-            if (map) map.panTo([data.lat, data.lng], { animate: true, duration: 1.0 });
+                if (data && data.length > 0) {
+                    const latest = data[0];
+                    const pointKey = latest.id ? latest.id : (latest.latitude + '_' + latest.longitude + '_' + latest.created_at);
+                    if (pointKey !== dernierPointId) {
+                        dernierPointId = pointKey;
+                        traiterNouvellePosition({
+                            imei: String(latest.imei).trim(),
+                            lat: parseFloat(latest.latitude),
+                            lng: parseFloat(latest.longitude),
+                            vitesse: parseFloat(latest.speed || latest.vitesse || 0),
+                            timestamp: new Date(latest.created_at || Date.now()).getTime()
+                        });
+                    }
+                }
+            } catch(e) {}
+        }
+        setInterval(sonderPositionsCloudEnContinu, 3000);
 
-            genererRapportFinancier();
+        function initFiltresDates() {
+            const sel = document.getElementById('filtre-fin-vehicule');
+            if(sel && sel.options.length <= 1) peuplerSelecteursFiltre();
+        }
+
+        function peuplerSelecteursFiltre() {
+            const selFin = document.getElementById('filtre-fin-vehicule');
+            const selRecharge = document.getElementById('recharge-vehicule-select');
+            
+            if(selFin) selFin.innerHTML = '<option value="all">Tous les véhicules (Flotte globale)</option>';
+            if(selRecharge) selRecharge.innerHTML = '';
+
+            if (client.vehicules.length === 0 && selRecharge) {
+                selRecharge.innerHTML = '<option value="none">Aucun véhicule détecté</option>';
+            } else {
+                client.vehicules.forEach((v, i) => {
+                    const opt = `<option value="${i}">${v.plaque}</option>`;
+                    if(selFin) selFin.insertAdjacentHTML('beforeend', opt);
+                    if(selRecharge) selRecharge.insertAdjacentHTML('beforeend', opt);
+                });
+            }
+        }
+
+        function genererToutesLesVues() {
+            document.getElementById('lbl-nom-partenaire').textContent = partenaireProfil ? partenaireProfil.nom : client.nom;
+            document.getElementById('prof-tel').value = partenaireProfil ? partenaireProfil.tel : client.tel;
+            
+            initFiltresDates();
+            peuplerSelecteursFiltre();
+            majSelecteurMap();
+            genererRapportFinancier(); 
+            genererRapportTechnique();
+        }
+
+        function changerOnglet(idOnglet, boutonActif) {
+            document.querySelectorAll('.class-onglet').forEach(ong => ong.classList.add('hidden'));
+            document.getElementById(idOnglet).classList.remove('hidden');
+            document.querySelectorAll('.btn-nav').forEach(btn => { btn.classList.remove('text-emerald-400'); btn.classList.add('text-slate-500'); });
+            if(boutonActif) { boutonActif.classList.remove('text-slate-500'); boutonActif.classList.add('text-emerald-400'); }
+            setTimeout(() => {
+                if (idOnglet === 'onglet-flotte') {
+                    const sel = document.getElementById('select-vehicule-map');
+                    initMapEtCentrer(sel && sel.value !== "none" ? parseInt(sel.value) : 0);
+                    if (map) map.invalidateSize();
+                } 
+            }, 100);
+        }
+
+        function majSelecteurMap() {
+            const sel = document.getElementById('select-vehicule-map');
+            if(!sel) return;
+            sel.innerHTML = "";
+            if(client.vehicules.length === 0) { sel.insertAdjacentHTML('beforeend', `<option value="none">Aucun véhicule détecté</option>`); return; }
+            client.vehicules.forEach((v, i) => sel.insertAdjacentHTML('beforeend', `<option value="${i}">${v.plaque} (${v.type})</option>`));
         }
 
         // INITIALISATION CARTE GOOGLE MAPS TRAFIC LIVE
         function initMapEtCentrer(index) {
-            const container = document.getElementById('map-container');
-            if (!container || container.offsetParent === null) return;
-            const v = client.vehicules[index] || { lat: -4.3215, lng: 15.3115, dernierCap: 0 };
+            const mapContainer = document.getElementById('map-container');
+            if (!mapContainer || mapContainer.offsetParent === null) return;
             
-            if (!map) {
-                map = L.map('map-container').setView([v.lat, v.lng], 17);
+            let lat = -4.3215; let lng = 15.3115; 
+            const v = client.vehicules[index];
+            if(v) { 
+                lat = v.lat; 
+                lng = v.lng; 
+                if (tracePositions.length === 0) tracePositions = [[lat, lng]];
+                
+                detecterNomAvenue(lat, lng).then(avenue => {
+                    const elAv = document.getElementById('hud-avenue-live');
+                    if(elAv) elAv.textContent = avenue;
+                });
+                
+                document.getElementById('hud-km-jour').textContent = (v.kmJour || 0).toFixed(1) + ' km';
+                document.getElementById('hud-course-progression').textContent = (v.kmCourse || 0).toFixed(1) + ' km';
+                document.getElementById('hud-recettes-jour').textContent = (v.recetteBruteReelle || 0).toLocaleString() + ' CDF';
+            }
+            
+            if(!map) {
+                map = L.map('map-container').setView([lat, lng], 17);
+                
                 L.tileLayer('https://{s}.google.com/vt/lyrs=m,traffic&x={x}&y={y}&z={z}', {
                     maxZoom: 20,
                     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
                     attribution: '&copy; Google Maps & Traffic'
                 }).addTo(map);
             }
-
-            if (busMarker) map.removeLayer(busMarker);
-            busMarker = L.marker([v.lat, v.lng], {
-                icon: creerIconeVehiculeYango(v.dernierCap)
-            }).addTo(map);
-
+            
+            if(busMarker) map.removeLayer(busMarker);
+            
+            const popupTxt = v ? `
+                <b>${v.plaque}</b> (${v.places} places)<br>
+                Ligne : <b>${v.origine} ➔ ${v.destination}</b><br>
+                Roulé aujourd'hui : <b>${(v.kmJour || 0).toFixed(1)} km</b><br>
+                Rotations validées : <b>${v.tronconsValides || 0}</b><br>
+                Recettes du jour : <b>${(v.recetteBruteReelle || 0).toLocaleString()} CDF</b>
+            ` : "En attente...";
+            
+            busMarker = L.marker([lat, lng], {
+                icon: creerIconeVehiculeYango(v ? v.dernierCap : 0)
+            }).addTo(map).bindPopup(popupTxt).openPopup();
+            
             if (polylineTrace) map.removeLayer(polylineTrace);
-            if (tracePositions.length > 1) {
+            if(tracePositions.length > 1) {
                 polylineTrace = L.polyline(tracePositions, { 
                     color: '#1a73e8', 
                     weight: 6, 
@@ -786,109 +1243,591 @@
                     lineJoin: 'round' 
                 }).addTo(map);
             }
-            map.setView([v.lat, v.lng], 17);
+
+            map.setView([lat, lng], 17);
+            setTimeout(() => { map.invalidateSize(); }, 200);
+        }
+        
+        function centrerSurVehicule(indexStr) { 
+            if (indexStr !== "none") initMapEtCentrer(parseInt(indexStr)); 
         }
 
-        function centrerSurVehicule(val) { initMapEtCentrer(0); }
-
         function enregistrerVehiculeSaisi() {
+            const plaque = document.getElementById('add-plaque').value.trim();
             const imei = document.getElementById('add-imei').value.trim();
+            const origine = document.getElementById('add-origine').value.trim() || "BRIKIN";
+            const destination = document.getElementById('add-destination').value.trim() || "GARE CENTRALE";
             const places = parseInt(document.getElementById('add-places').value) || 4;
-            const plaque = document.getElementById('add-plaque').value.trim() || "Tracker 0102";
-            const origine = document.getElementById('add-origine').value.trim();
-            const destination = document.getElementById('add-destination').value.trim();
 
+            if (!plaque || !imei) { alert("Veuillez remplir au moins la Plaque et l'IMEI."); return; }
+            
+            const imeiClean = String(imei).trim();
+            const params = trouverParametresSecrets(origine, destination);
+
+            localStorage.setItem('tv_ligne_' + imeiClean, JSON.stringify({ origine, destination }));
             const customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
-            customConfig[imei] = { plaque, places, origine, destination };
+            customConfig[imeiClean] = {
+                plaque: plaque,
+                type: document.getElementById('add-type').value || "Toyota",
+                places: places,
+                origine: origine,
+                destination: destination,
+                moteurCoupe: false
+            };
             localStorage.setItem('tv_vehicules_custom', JSON.stringify(customConfig));
-            localStorage.setItem('tv_ligne_' + imei, JSON.stringify({ origine, destination }));
 
-            if (client.vehicules[0]) {
-                client.vehicules[0].places = places;
-                client.vehicules[0].plaque = plaque;
-                client.vehicules[0].origine = origine;
-                client.vehicules[0].destination = destination;
-            }
+            const nv = { 
+                plaque: plaque, 
+                type: document.getElementById('add-type').value || "Toyota", 
+                places: places, 
+                imei: imeiClean, 
+                lat: -4.32, 
+                lng: 15.31, 
+                moteurCoupe: false, 
+                carburantJour: 0, 
+                kmJour: 0,
+                distDirect: params.distDirect,
+                distDeviee: params.distDeviee,
+                tarif: params.tarif,
+                kmCourse: 0,
+                origine: origine,
+                destination: destination,
+                dernierCap: 0,
+                secondesArret: 0,
+                recetteBruteReelle: 0, 
+                tronconsValides: 0 
+            };
+            verifierEtChargerJournalDuJour(nv);
+            client.vehicules.push(nv);
+            
+            try {
+                if(window.supabase) {
+                    supabaseClient.from('tv_vehicules').upsert({
+                        imei: imeiClean,
+                        plaque: plaque,
+                        places: places,
+                        origine: origine,
+                        destination: destination,
+                        dist_direct: params.distDirect,
+                        dist_deviee: params.distDeviee,
+                        tarif: params.tarif,
+                        updated_at: new Date().toISOString()
+                    }, { onConflict: 'imei' }).then();
+                }
+            } catch(e) {}
 
-            alert("✅ Configuration enregistrée avec succès !");
-            genererToutesLesVues();
+            document.getElementById('add-plaque').value = ""; 
+            document.getElementById('add-imei').value = "";
+            alert(`✅ Véhicule ${plaque} (4 places) enregistré sur la ligne ${origine} ➔ ${destination}.`);
+            genererToutesLesVues(); 
             changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
         }
 
+        function appliquerFiltreFinancier() { genererRapportFinancier(); }
+
         function genererRapportFinancier() {
-            const v = client.vehicules[0];
-            if (!v) return;
-            document.getElementById('txt-total-recettes').textContent = `${(v.recetteBruteReelle || 0).toLocaleString()} CDF`;
-            document.getElementById('txt-total-rotations').textContent = v.tronconsValides || 0;
-            
+            let totalCDF = 0; let totalRot = 0;
             const list = document.getElementById('fin-vehicules-list');
-            if (list) {
-                list.innerHTML = `
-                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2.5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h4 class="font-black text-slate-200">${v.plaque} (4 places)</h4>
-                                <p class="text-[9px] text-sky-400 font-mono mt-0.5">
-                                    <i class="fa-solid fa-route text-indigo-400"></i> ${v.origine} ➔ ${v.destination}
-                                </p>
+            if(list) list.innerHTML = "";
+
+            const cibleIdx = document.getElementById('filtre-fin-vehicule') ? document.getElementById('filtre-fin-vehicule').value : 'all';
+            let vehiculesCibles = client.vehicules;
+            if (cibleIdx !== 'all') { vehiculesCibles = [client.vehicules[parseInt(cibleIdx)]]; }
+
+            vehiculesCibles.forEach((v) => {
+                const gainReel = v.recetteBruteReelle || 0;
+                const troncons = v.tronconsValides || 0;
+                totalCDF += gainReel; totalRot += troncons;
+                
+                const realIndex = client.vehicules.indexOf(v);
+
+                if(list) {
+                    list.insertAdjacentHTML('beforeend', `
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2.5">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-black text-slate-200">${v.plaque} <span class="text-[9px] text-emerald-400 font-normal">(${v.places || 4} places)</span></h4>
+                                    <p class="text-[9px] text-sky-400 font-mono flex items-center gap-1.5 mt-0.5">
+                                        <i class="fa-solid fa-route text-indigo-400"></i> ${v.origine} ➔ ${v.destination}
+                                    </p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="font-black text-emerald-400 text-sm">${gainReel.toLocaleString()} CDF</span>
+                                    <button onclick="ouvrirModalModifierItineraire(${realIndex})" class="block mt-1 text-[9px] text-sky-400 hover:text-sky-300 font-bold bg-slate-900 border border-slate-700 px-2 py-0.5 rounded ml-auto">
+                                        <i class="fa-solid fa-pen-to-square"></i> Modifier Itinéraire
+                                    </button>
+                                </div>
                             </div>
-                            <span class="font-black text-emerald-400 text-sm">${(v.recetteBruteReelle || 0).toLocaleString()} CDF</span>
-                        </div>
-                        <div class="flex justify-between text-[10px] text-slate-400 font-mono pt-1.5 border-t border-slate-900">
-                            <span><i class="fa-solid fa-rotate text-emerald-400 mr-1"></i><strong>${v.tronconsValides}</strong> rotation(s) validée(s)</span>
-                            <span>Distance : <strong class="text-slate-200">${v.kmJour.toFixed(1)} km</strong></span>
-                        </div>
-                    </div>`;
-            }
-            initialiserGraphiqueRapport(v.recetteBruteReelle || 0);
+                            <div class="flex justify-between text-[10px] text-slate-400 font-mono pt-1.5 border-t border-slate-900">
+                                <span><i class="fa-solid fa-rotate text-emerald-400 mr-1"></i><strong>${troncons}</strong> rotation(s) validée(s)</span>
+                                <span>Roulé aujourd'hui : <strong class="text-slate-200">${(v.kmJour || 0).toFixed(1)} km</strong></span>
+                            </div>
+                        </div>`);
+                }
+            });
+
+            const txtRecettes = document.getElementById('txt-total-recettes');
+            if(txtRecettes) txtRecettes.textContent = totalCDF.toLocaleString() + " CDF";
+            const txtRotations = document.getElementById('txt-total-rotations');
+            if(txtRotations) txtRotations.textContent = totalRot;
+            initialiserGraphiqueRapport(totalCDF);
         }
 
-        function initialiserGraphiqueRapport(total) {
+        function initialiserGraphiqueRapport(totalAffiche) {
             const canvas = document.getElementById('chart-recettes-partenaire');
-            if (!canvas || canvas.offsetParent === null) return;
+            if (!canvas || canvas.offsetParent === null) return; 
             if (chartPartenaireInstance) chartPartenaireInstance.destroy();
+            let dataGains = [totalAffiche]; 
+            let labels = ['Aujourd\'hui'];
+
             chartPartenaireInstance = new Chart(canvas.getContext('2d'), {
-                type: 'bar',
-                data: { labels: ['Aujourd\'hui'], datasets: [{ label: 'CDF', data: [total], backgroundColor: '#10b981', borderRadius: 4 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b' } } } }
+                type: 'bar', data: { labels: labels, datasets: [{ label: 'Gains (CDF)', data: dataGains, backgroundColor: '#10b981', borderRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 9 } } } } }
             });
         }
 
-        function genererToutesLesVues() {
-            genererRapportFinancier();
+        function appliquerFiltreTechnique() { genererRapportTechnique(); }
+
+        function genererRapportTechnique() {
+            const list = document.getElementById('tech-vehicules-list');
+            if(!list) return;
+            list.innerHTML = "";
+            client.vehicules.forEach((v, origineIndex) => {
+                const consoPeriode = (v.carburantJour || 0).toFixed(1);
+                const kmPeriode = (v.kmJour || 0).toFixed(1);
+
+                list.insertAdjacentHTML('beforeend', `
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h4 class="font-black text-slate-200">${v.plaque}</h4>
+                            <span class="text-[9px] font-mono text-slate-500">IMEI: ${v.imei}</span>
+                        </div>
+                        <p class="text-[9px] text-sky-400 font-mono">Itinéraire: ${v.origine} ➔ ${v.destination}</p>
+                        
+                        <div class="grid grid-cols-2 gap-y-2 gap-x-1 text-[9px] font-mono bg-slate-900 p-2.5 rounded border border-slate-800">
+                            <p>📡 GPS: <span class="text-emerald-400">Opérationnel</span></p>
+                            <p>🔋 Batt: <span class="text-emerald-400">12.6V</span></p>
+                            <p>⛽ Conso: <span class="text-sky-400 font-bold">${consoPeriode} L</span></p>
+                            <p>🛣️ Dist: <span class="text-sky-400 font-bold">${kmPeriode} km</span></p>
+                        </div>
+
+                        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 space-y-2">
+                            <div class="flex justify-between items-center text-[9px] font-mono">
+                                <span class="text-slate-400 uppercase font-bold">État du relais moteur :</span>
+                                <span class="${v.moteurCoupe ? 'text-rose-400 font-black animate-pulse' : 'text-emerald-400 font-black'}">
+                                    ${v.moteurCoupe ? '🔴 MOTEUR BLOQUÉ' : '🟢 DÉMARRAGE AUTORISÉ'}
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2 pt-1">
+                                <button onclick="actionnerMoteur(${origineIndex}, true)" class="w-full bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30 font-black py-2.5 rounded-xl text-[10px] uppercase transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95">
+                                    <i class="fa-solid fa-power-off"></i> Couper Moteur
+                                </button>
+                                
+                                <button onclick="actionnerMoteur(${origineIndex}, false)" class="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 font-black py-2.5 rounded-xl text-[10px] uppercase transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95">
+                                    <i class="fa-solid fa-key"></i> Démarrer
+                                </button>
+                            </div>
+                        </div>
+
+                        <button onclick="ouvrirModalModifierItineraire(${origineIndex})" class="w-full bg-slate-900 hover:bg-slate-800 text-sky-400 border border-slate-800 font-bold py-2 rounded-xl text-[10px] uppercase transition-colors">
+                            <i class="fa-solid fa-pen-to-square"></i> Modifier Itinéraire
+                        </button>
+                    </div>`);
+            });
         }
 
-        function majSelecteurMap() {
-            const sel = document.getElementById('select-vehicule-map');
-            if (!sel) return;
-            sel.innerHTML = `<option value="0">${client.vehicules[0]?.plaque || 'Tracker 0102'}</option>`;
-        }
+        function actionnerMoteur(index, couper) {
+            const v = client.vehicules[index];
+            if (!v) return;
 
-        function changerOnglet(idOnglet, boutonActif) {
-            document.querySelectorAll('.class-onglet').forEach(ong => ong.classList.add('hidden'));
-            document.getElementById(idOnglet).classList.remove('hidden');
-            document.querySelectorAll('.btn-nav').forEach(btn => { btn.classList.remove('text-emerald-400'); btn.classList.add('text-slate-500'); });
-            if (boutonActif) { boutonActif.classList.remove('text-slate-500'); boutonActif.classList.add('text-emerald-400'); }
-            if (idOnglet === 'onglet-flotte') {
-                setTimeout(() => { if (map) map.invalidateSize(); }, 150);
+            const actionTxt = couper ? "COUPER" : "DÉMARRER / DÉBLOQUER";
+            const confirmMsg = couper 
+                ? `⚠️ CONFIRMATION DE COUPURE\n\nVoulez-vous couper le moteur du véhicule ${v.plaque} ?\nLa pompe à carburant sera bloquée à distance.`
+                : `🔑 CONFIRMATION DE DÉMARRAGE\n\nVoulez-vous réactiver le moteur du véhicule ${v.plaque} ?\nLe contact sera rétabli pour permettre le démarrage avec la clé.`;
+
+            if (confirm(confirmMsg)) {
+                v.moteurCoupe = couper;
+
+                const customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
+                if (!customConfig[v.imei]) customConfig[v.imei] = {};
+                customConfig[v.imei].moteurCoupe = couper;
+                localStorage.setItem('tv_vehicules_custom', JSON.stringify(customConfig));
+
+                socket.emit('commande_moteur', { imei: v.imei, couper: couper });
+
+                try {
+                    if (window.supabase) {
+                        supabaseClient.from('tv_vehicules').upsert({
+                            imei: v.imei,
+                            moteur_coupe: couper,
+                            updated_at: new Date().toISOString()
+                        }, { onConflict: 'imei' }).then();
+                    }
+                } catch(e) {}
+
+                const smsCode = couper ? "RELAY,1#" : "RELAY,0#";
+                alert(`📡 Ordre envoyé au traceur SinoTrack !\n\nAction : ${actionTxt}\nVéhicule : ${v.plaque}\n\n(Secours par SMS : envoyez ${smsCode} au numéro de la puce).`);
+                
+                genererRapportTechnique();
+                if (map && busMarker) initMapEtCentrer(index);
             }
         }
 
-        function executerConnexionPartenaire() {
-            document.getElementById('page-auth').classList.add('hidden');
-            document.getElementById('app-proprietaire').classList.remove('hidden');
-            chargerDernieresPositions().then(() => {
+        function ouvrirModalModifierItineraire(index) {
+            const v = client.vehicules[index];
+            if (!v) return;
+
+            document.getElementById('mod-vehicule-index').value = index;
+            document.getElementById('mod-vehicule-nom').textContent = `${v.plaque}`;
+            document.getElementById('mod-origine').value = v.origine || "BRIKIN";
+            document.getElementById('mod-destination').value = v.destination || "GARE CENTRALE";
+            document.getElementById('mod-select-ligne-rapide').value = "";
+
+            document.getElementById('modal-modifier-itineraire').classList.remove('hidden');
+        }
+
+        function fermerModalModifierItineraire() {
+            document.getElementById('modal-modifier-itineraire').classList.add('hidden');
+        }
+
+        function appliquerLignePredefinie(valeurIdx) {
+            if (valeurIdx === "" || !MATRICE_SECRETE[valeurIdx]) return;
+            const l = MATRICE_SECRETE[valeurIdx];
+            document.getElementById('mod-origine').value = l.o;
+            document.getElementById('mod-destination').value = l.d;
+        }
+
+        function sauvegarderModificationItineraire() {
+            const index = parseInt(document.getElementById('mod-vehicule-index').value);
+            const v = client.vehicules[index];
+            if (!v) return;
+
+            const nouvelleOrigine = document.getElementById('mod-origine').value.trim();
+            const nouvelleDestination = document.getElementById('mod-destination').value.trim();
+
+            if (!nouvelleOrigine || !nouvelleDestination) {
+                alert("Veuillez remplir l'origine et la destination.");
+                return;
+            }
+
+            const imeiClean = String(v.imei).trim();
+            const params = trouverParametresSecrets(nouvelleOrigine, nouvelleDestination);
+
+            v.origine = nouvelleOrigine;
+            v.destination = nouvelleDestination;
+            v.distDirect = params.distDirect;
+            v.distDeviee = params.distDeviee;
+            v.tarif = params.tarif;
+            v.kmCourse = 0;
+            v.secondesArret = 0;
+
+            localStorage.setItem('tv_ligne_' + imeiClean, JSON.stringify({ origine: nouvelleOrigine, destination: nouvelleDestination }));
+            
+            const customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
+            customConfig[imeiClean] = {
+                plaque: v.plaque,
+                type: v.type,
+                places: v.places,
+                origine: v.origine,
+                destination: v.destination,
+                moteurCoupe: v.moteurCoupe
+            };
+            localStorage.setItem('tv_vehicules_custom', JSON.stringify(customConfig));
+            sauvegarderStatsJournalieres(v);
+
+            const payloadLigne = {
+                imei: imeiClean,
+                plaque: v.plaque,
+                origine: v.origine,
+                destination: v.destination,
+                distDirect: v.distDirect,
+                distDeviee: v.distDeviee,
+                tarif: v.tarif
+            };
+
+            const channelSync = supabaseClient.channel('transvision_flotte');
+            channelSync.send({
+                type: 'broadcast',
+                event: 'maj_ligne_vehicule',
+                payload: payloadLigne
+            });
+            socket.emit('maj_ligne_vehicule', payloadLigne);
+
+            try {
+                supabaseClient.from('tv_vehicules').upsert({
+                    imei: imeiClean,
+                    plaque: v.plaque,
+                    origine: v.origine,
+                    destination: v.destination,
+                    dist_direct: v.distDirect,
+                    dist_deviee: v.distDeviee,
+                    tarif: v.tarif,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'imei' }).then();
+            } catch(e) {}
+
+            alert(`✅ Itinéraire sauvegardé avec succès !\n${v.plaque} est désormais configuré sur : ${v.origine} ➔ ${v.destination}.`);
+
+            fermerModalModifierItineraire();
+            genererToutesLesVues();
+        }
+
+        function majIdentifiants() {
+            const newPin = document.getElementById('prof-pin-new').value;
+            if(newPin && newPin.length >= 4) { alert("✅ Code PIN mis à jour."); document.getElementById('prof-pin-new').value = ""; } else { alert("❌ Le PIN doit contenir au moins 4 caractères."); }
+        }
+
+        function actualiserCompteAReboursForfait() {
+            const display = document.getElementById('timer-compte-rebours');
+            if(!display) return;
+
+            let expString = (partenaireProfil && partenaireProfil.date_expiration) ? partenaireProfil.date_expiration : localStorage.getItem('tv_date_expiration');
+            
+            if(!expString) { 
+                const def = new Date();
+                def.setDate(def.getDate() + 5);
+                def.setHours(23, 59, 59, 999);
+                expString = def.toISOString();
+                localStorage.setItem('tv_date_expiration', expString);
+            }
+
+            const finForfait = new Date(expString);
+            const resteMs = finForfait - new Date();
+
+            if (resteMs <= 0) { 
+                display.textContent = "EXPIRÉ"; 
+                display.classList.add('text-rose-400');
+                display.classList.remove('text-slate-100');
+                return; 
+            }
+
+            display.classList.add('text-slate-100');
+            display.classList.remove('text-rose-400');
+            
+            const j = Math.floor(resteMs / (1000 * 60 * 60 * 24));
+            const h = Math.floor((resteMs % (1000 * 60 * 60 * 24)) / 3600000); 
+            const m = Math.floor((resteMs % 3600000) / 60000); 
+            const s = Math.floor((resteMs % 60000) / 1000);
+            
+            if (j > 0) { 
+                display.textContent = `${j}j ${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m`; 
+            } else { 
+                display.textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`; 
+            }
+        }
+
+        async function synchroniserForfaitCloud() {
+            try {
+                if(!window.supabase) return;
+                const tel = (partenaireProfil && partenaireProfil.tel) || localStorage.getItem('tv_partenaire_tel') || "0965647819";
+                const { data } = await supabaseClient.from('tv_partenaires').select('date_expiration').eq('tel', tel).single();
+                if(data && data.date_expiration) {
+                    localStorage.setItem('tv_date_expiration', data.date_expiration);
+                    if(partenaireProfil) partenaireProfil.date_expiration = data.date_expiration;
+                    actualiserCompteAReboursForfait();
+                }
+            } catch(e) {}
+        }
+        setInterval(synchroniserForfaitCloud, 10000);
+
+        function basculerSelectVehiculeRecharge() {
+            const mode = document.getElementById('recharge-mode').value;
+            const blocSelect = document.getElementById('bloc-recharge-vehicule');
+            if (mode === 'flotte') { 
+                blocSelect.classList.add('hidden'); 
+            } else { 
+                blocSelect.classList.remove('hidden'); 
+            }
+        }
+
+        function ouvrirModalRecharge() { 
+            peuplerSelecteursFiltre();
+            basculerSelectVehiculeRecharge();
+            const modal = document.getElementById('modal-recharge-partenaire');
+            if(modal) modal.classList.remove('hidden');
+        }
+        
+        function fermerModalRecharge() { 
+            const modal = document.getElementById('modal-recharge-partenaire');
+            if(modal) modal.classList.add('hidden');
+        }
+
+        function declarerPaiementForfait() {
+            const montant = parseInt(document.getElementById('input-montant-libre').value);
+            if (!montant || montant <= 0) { alert("❌ Veuillez saisir un montant valide."); return; }
+            
+            const num = document.getElementById('recharge-numero');
+            const reseau = num.options[num.selectedIndex].text;
+            const mode = document.getElementById('recharge-mode').value;
+            
+            let cible = "la flotte complète";
+            if (mode === 'unitaire' && client.vehicules.length > 0) {
+                const indexVehicule = document.getElementById('recharge-vehicule-select').value;
+                if(indexVehicule !== "none" && client.vehicules[indexVehicule]) {
+                    cible = `le véhicule ${client.vehicules[indexVehicule].plaque}`;
+                }
+            }
+            
+            alert(`🛰️ Demande de transfert de ${montant.toLocaleString()} CDF pour ${cible}.\nTransaction via ${reseau} transmise.`);
+            document.getElementById('input-montant-libre').value = "";
+            fermerModalRecharge();
+        }
+
+        function basculerVueAuth(mode) {
+            if(mode === 'login') {
+                document.getElementById('form-connexion').classList.remove('hidden'); 
+                document.getElementById('form-inscription').classList.add('hidden');
+                document.getElementById('tab-btn-login').className = "py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950";
+                document.getElementById('tab-btn-register').className = "py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200";
+            } else {
+                document.getElementById('form-connexion').classList.add('hidden'); 
+                document.getElementById('form-inscription').classList.remove('hidden');
+                document.getElementById('tab-btn-register').className = "py-2 text-xs font-black rounded-lg transition-all bg-emerald-500 text-slate-950";
+                document.getElementById('tab-btn-login').className = "py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200";
+            }
+        }
+        
+        function naviguerVers(id) { 
+            document.getElementById('page-auth').classList.add('hidden'); 
+            document.getElementById('app-proprietaire').classList.add('hidden'); 
+            document.getElementById(id).classList.remove('hidden'); 
+        }
+
+        async function inscrireNouveauPartenaire() {
+            const nom = document.getElementById('ins-nom').value.trim();
+            const tel = document.getElementById('ins-tel').value.trim();
+            const pin = document.getElementById('ins-pin').value.trim();
+
+            if(!nom || !tel || !pin) { alert("Veuillez remplir tous les champs."); return; }
+
+            try {
+                const dateExpiration = new Date();
+                dateExpiration.setDate(dateExpiration.getDate() + 3);
+
+                const { error } = await supabaseClient.from('tv_partenaires').insert([{
+                    nom: nom, tel: tel, pin: pin, type_contrat: 'commercial', date_expiration: dateExpiration.toISOString()
+                }]);
+
+                if(error) throw error;
+                
+                alert("✅ Inscription réussie ! Connectez-vous avec vos nouveaux identifiants.");
+                document.getElementById('login-tel').value = tel;
+                document.getElementById('login-pin').value = pin;
+                basculerVueAuth('login');
+            } catch (err) {
+                alert("❌ Erreur lors de l'inscription.");
+            }
+        }
+
+        async function executerConnexionPartenaire() { 
+            const telInput = document.getElementById('login-tel').value.trim();
+            const pinInput = document.getElementById('login-pin').value.trim();
+            const btn = document.getElementById('btn-login-text');
+            btn.textContent = "Vérification...";
+
+            try {
+                const { data, error } = await supabaseClient.from('tv_partenaires').select('*').eq('tel', telInput).eq('pin', pinInput).single();
+                
+                if (data) {
+                    localStorage.setItem('tv_partenaire_tel', data.tel);
+                    lancerEspaceFlotte(data);
+                } else {
+                    declencherFallback(telInput, pinInput, btn);
+                }
+            } catch (err) { 
+                declencherFallback(telInput, pinInput, btn);
+            }
+        }
+
+        function declencherFallback(telInput, pinInput, btn) {
+            if (telInput === "0965647819" && pinInput === "0000") {
+                const fallbackData = { nom: "Dolce", tel: "0965647819" };
+                localStorage.setItem('tv_partenaire_tel', "0965647819");
+                lancerEspaceFlotte(fallbackData);
+            } else {
+                alert("❌ Téléphone ou Code PIN incorrect."); 
+                btn.textContent = "Ouvrir mon Espace Flotte"; 
+            }
+        }
+
+        function lancerEspaceFlotte(donneesPartenaire) {
+            partenaireProfil = donneesPartenaire;
+            naviguerVers('app-proprietaire'); 
+            
+            chargerDernieresPositions().then(() => { 
+                verifierEtReinitialiserAutomatiqueJournee();
+                genererToutesLesVues(); 
+                actualiserCompteAReboursForfait();
+                setInterval(actualiserCompteAReboursForfait, 1000); 
+                changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]); 
                 activerFluxRealtimePush();
             });
         }
 
-        function declencherDeconnexion() {
-            document.getElementById('app-proprietaire').classList.add('hidden');
-            document.getElementById('page-auth').classList.remove('hidden');
+        function declencherDeconnexion() { 
+            localStorage.removeItem('tv_partenaire_tel');
+            naviguerVers('page-auth'); 
+            document.getElementById('btn-login-text').textContent = "Ouvrir mon Espace Flotte";
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            executerConnexionPartenaire();
+        function ouvrirModalCGU() { 
+            const modal = document.getElementById('modal-cgu');
+            const zone = document.getElementById('zone-texte-cgu');
+            if (zone) {
+                zone.textContent = localStorage.getItem('transvision_cgu') || "CONDITIONS GÉNÉRALES D'UTILISATION (CGU) — TRANSVISION\nÉditées par Global Tech Solutions SARL\n\n1. OBJET DU SERVICE :\nTransVision fournit aux partenaires transporteurs une plateforme de supervision télématique en direct par balises SinoTrack.\n\n2. RECHARGES ET FORFAITS :\nL'accès au suivi satellite est conditionné par la souscription d'un forfait d'exploitation validé par le Super Admin.\n\n3. CONFIDENTIALITÉ :\nLes données de géolocalisation et d'audit des recettes sont strictement confidentielles et réservées au transporteur.";
+            }
+            if (modal) modal.classList.remove('hidden'); 
+        }
+
+        function fermerModalCGU() { 
+            const modal = document.getElementById('modal-cgu');
+            if (modal) modal.classList.add('hidden'); 
+        }
+
+        // GESTION INSTALLATION PWA
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const banner = document.getElementById('pwa-install-banner');
+            if (banner) banner.classList.remove('hidden');
+        });
+        const btnInstall = document.getElementById('btn-install-pwa');
+        if (btnInstall) {
+            btnInstall.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    deferredPrompt = null;
+                    document.getElementById('pwa-install-banner')?.classList.add('hidden');
+                }
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            chargerConfigurationsAdmin();
+            verifierEtReinitialiserAutomatiqueJournee();
+            actualiserCompteAReboursForfait();
+            
+            const telSauve = localStorage.getItem('tv_partenaire_tel');
+            if (telSauve) {
+                try {
+                    const { data, error } = await supabaseClient.from('tv_partenaires').select('*').eq('tel', telSauve).single();
+                    if (data) { 
+                        lancerEspaceFlotte(data); 
+                    } else if (telSauve === "0965647819") {
+                        lancerEspaceFlotte({ nom: "Dolce", tel: "0965647819" });
+                    } else { 
+                        declencherDeconnexion(); 
+                    }
+                } catch (err) { 
+                    if (telSauve === "0965647819") lancerEspaceFlotte({ nom: "Dolce", tel: "0965647819" });
+                    else declencherDeconnexion(); 
+                }
+            } else {
+                naviguerVers('page-auth');
+            }
         });
     </script>
 </body>
