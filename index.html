@@ -85,7 +85,6 @@
                     <button id="tab-btn-register" onclick="basculerVueAuth('register')" class="py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200">Nouveau Partenaire</button>
                 </div>
 
-                <!-- FORMULAIRE CONNEXION -->
                 <div id="form-connexion" class="bg-slate-950/85 backdrop-blur p-5 rounded-2xl border border-slate-800/80 space-y-4 shadow-xl">
                     <div>
                         <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Téléphone Enregistré</label>
@@ -100,7 +99,6 @@
                     </button>
                 </div>
 
-                <!-- FORMULAIRE INSCRIPTION -->
                 <div id="form-inscription" class="bg-slate-950/85 backdrop-blur p-4 rounded-2xl border border-slate-800/80 space-y-3 shadow-xl hidden">
                     <div>
                         <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Nom Complet</label>
@@ -120,13 +118,12 @@
                     </p>
                 </div>
             </div>
-            
             <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v21.0 PROD — Global Tech Solutions
+                TransVision v22.0 PROD — Données Réelles 4 Places
             </div>
         </div>
 
-        <!-- 2. ESPACE CLIENT CONNECTÉ -->
+        <!-- 2. APPLICATION PROPRIÉTAIRE -->
         <div id="app-proprietaire" class="flex-1 flex flex-col hidden relative">
             <header class="p-4 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur sticky top-0 z-30 no-print">
                 <div class="flex justify-between items-center mb-3">
@@ -148,7 +145,7 @@
                             <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" id="statut-serveur-voyant"></span>
                             <span class="text-[10px] font-black uppercase text-emerald-400 tracking-wider" id="statut-serveur-texte">Suivi Satellite Actif</span>
                         </div>
-                        <p class="text-[9px] text-slate-400 mt-0.5" id="last-update-text">Calcul télématique en direct...</p>
+                        <p class="text-[9px] text-slate-400 mt-0.5" id="last-update-text">Connexion satellite en direct...</p>
                     </div>
                     <div class="text-right flex flex-col items-end gap-1.5">
                         <span id="timer-compte-rebours" class="text-xs font-mono font-black text-slate-100 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-lg shadow-inner">--:--:--</span>
@@ -320,12 +317,12 @@
                 <div class="bg-slate-950/80 backdrop-blur p-5 rounded-2xl border border-slate-800 space-y-3 shadow-xl">
                     <h3 class="text-xs font-black uppercase text-indigo-400 flex items-center gap-2 border-b border-slate-800 pb-2"><i class="fa-solid fa-shield-halved"></i> Mes Identifiants</h3>
                     <div>
-                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Téléphone</label>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Téléphone (Login)</label>
                         <input type="tel" id="prof-tel" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-400 font-mono" readonly>
                     </div>
                     <div>
                         <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Nouveau Code PIN</label>
-                        <input type="password" id="prof-pin-new" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono" placeholder="Saisir 4 chiffres">
+                        <input type="password" id="prof-pin-new" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono focus:border-indigo-500 outline-none" placeholder="Saisir 4 chiffres">
                     </div>
                     <button onclick="majIdentifiants()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-slate-950 font-black py-2.5 rounded-xl text-xs uppercase mt-2 shadow-md">Mettre à jour mon PIN</button>
                 </div>
@@ -344,23 +341,29 @@
                 </div>
             </div>
 
-            <!-- NAVIGATION BAS -->
+            <!-- BARRE NAVIGATION -->
             <nav class="fixed bottom-0 max-w-md w-full inset-x-0 mx-auto bg-slate-950/95 backdrop-blur border-t border-slate-800 h-16 flex justify-around items-center z-40 no-print px-1">
                 <button onclick="changerOnglet('onglet-flotte', this)" class="flex flex-col items-center justify-center gap-1 text-emerald-400 btn-nav flex-1"><i class="fa-solid fa-location-crosshairs text-sm"></i><span class="text-[8px] font-bold">GPS Live</span></button>
-                <button onclick="changerOnglet('onglet-ajouter', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-plus-circle text-sm"></i><span class="text-[8px] font-bold">Véhicule</span></button>
+                <button onclick="changerOnglet('onglet-ajouter', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-plus-circle text-sm"></i><span class="text-[8px] font-bold">Nouveau</span></button>
                 <button onclick="changerOnglet('onglet-rapport', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-file-invoice-dollar text-sm"></i><span class="text-[8px] font-bold">Rapport</span></button>
                 <button onclick="changerOnglet('onglet-analyse', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-wrench text-sm"></i><span class="text-[8px] font-bold">Tech.</span></button>
                 <button onclick="changerOnglet('onglet-profil', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-user text-sm"></i><span class="text-[8px] font-bold">Profil</span></button>
             </nav>
         </div>
 
-        <!-- MODAL MODIFIER ITINÉRAIRE -->
+        <!-- MODAL MODIFIER L'ITINÉRAIRE -->
         <div id="modal-modifier-itineraire" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
             <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
                 <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                    <h3 class="font-black text-sm text-slate-100 flex items-center gap-2"><i class="fa-solid fa-pen-to-square text-sky-400"></i> Modifier l'Itinéraire</h3>
+                    <h3 class="font-black text-sm text-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square text-sky-400"></i> Modifier l'Itinéraire
+                    </h3>
                     <button onclick="fermerModalModifierItineraire()" class="text-slate-500 hover:text-slate-300"><i class="fa-solid fa-xmark"></i></button>
                 </div>
+
+                <p class="text-[10px] text-slate-400">Choisissez une ligne parmi la liste ou indiquez l'origine et la destination de votre parcours.</p>
+                <p class="text-xs text-slate-300 font-bold">Véhicule : <span id="mod-vehicule-nom" class="text-emerald-400"></span></p>
+
                 <div class="space-y-3 text-xs">
                     <div>
                         <label class="block text-[9px] uppercase text-slate-400 font-bold mb-1">Lignes Fréquentes</label>
@@ -379,20 +382,23 @@
                             <option value="10">Bandal Moulaert ➔ Gare Centrale</option>
                         </select>
                     </div>
+
                     <div class="space-y-2">
                         <div>
                             <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Origine</label>
-                            <input type="text" id="mod-origine" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 font-bold outline-none">
+                            <input type="text" id="mod-origine" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 font-bold focus:border-sky-500 outline-none" placeholder="Lieu de départ">
                         </div>
                         <div>
                             <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Destination</label>
-                            <input type="text" id="mod-destination" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 font-bold outline-none">
+                            <input type="text" id="mod-destination" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 font-bold focus:border-sky-500 outline-none" placeholder="Lieu d'arrivée">
                         </div>
                     </div>
                 </div>
+
                 <input type="hidden" id="mod-vehicule-index" value="">
+
                 <button onclick="sauvegarderModificationItineraire()" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs transition-colors shadow-lg mt-2">
-                    Enregistrer la Ligne
+                    Enregistrer la Nouvelle Ligne
                 </button>
             </div>
         </div>
@@ -451,7 +457,7 @@
         </div>
     </div>
 
-    <!-- LOGIQUE JAVASCRIPT CONNECTÉE SANS RÉGRESSION -->
+    <!-- LOGIQUE JAVASCRIPT CONNECTÉE SANS DONNÉES FANTÔMES -->
     <script>
         function chargerConfigurationsAdmin() {
             const numWhatsApp = localStorage.getItem('tv_whatsapp') || "243810000000";
@@ -626,23 +632,33 @@
 
         function getKinshasaDateStr() {
             const d = new Date();
-            const year = d.getFullYear();
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         }
 
         function verifierEtChargerJournalDuJour(v) {
             const dateDuJour = getKinshasaDateStr();
             const cleStatsJour = `tv_stats_${dateDuJour}_${v.imei}`;
-            const statsSauvegardees = JSON.parse(localStorage.getItem(cleStatsJour) || 'null');
+            let stats = JSON.parse(localStorage.getItem(cleStatsJour) || 'null');
 
-            if (statsSauvegardees) {
-                v.kmJour = statsSauvegardees.kmJour || 0;
-                v.kmCourse = statsSauvegardees.kmCourse || 0;
-                v.tronconsValides = statsSauvegardees.tronconsValides || 0;
-                v.recetteBruteReelle = statsSauvegardees.recetteBruteReelle || 0;
-                v.carburantJour = statsSauvegardees.carburantJour || 0;
+            v.places = 4; // FORCÉ À 4 PLACES STRICTES
+
+            if (stats) {
+                v.kmJour = stats.kmJour || 0;
+                v.kmCourse = stats.kmCourse || 0;
+                v.tronconsValides = stats.tronconsValides || 0;
+                v.recetteBruteReelle = stats.recetteBruteReelle || 0;
+                v.carburantJour = stats.carburantJour || 0;
+
+                // GARDE-FOU ANTI-DONNÉES FANTÔMES :
+                // Si la voiture n'a fait que 7 km, impossible d'avoir 14 rotations ou 140 000 CDF
+                const seuilMinParRotation = (v.distDirect || 12.0) * 0.55;
+                const maxRotationsPossibles = Math.floor(v.kmJour / seuilMinParRotation);
+                
+                if (v.tronconsValides > maxRotationsPossibles) {
+                    v.tronconsValides = maxRotationsPossibles;
+                    v.recetteBruteReelle = v.tronconsValides * (v.tarif * 4);
+                    sauvegarderStatsJournalieres(v);
+                }
             } else {
                 v.kmJour = 0;
                 v.kmCourse = 0;
@@ -679,6 +695,7 @@
                         v.tronconsValides = 0;
                         v.recetteBruteReelle = 0;
                         v.carburantJour = 0;
+                        v.places = 4;
                         sauvegarderStatsJournalieres(v);
                     });
                 }
@@ -706,18 +723,19 @@
                     v.secondesArret = 0;
                     v.distanceSensInverse = 0;
                     v.capOrigineCourse = 0;
+                    v.places = 4;
                     localStorage.setItem('tv_reset_ts_' + v.imei, Date.now());
                     sauvegarderStatsJournalieres(v);
                     tracePositions = [[v.lat, v.lng]];
                     if (polylineTrace) polylineTrace.setLatLngs(tracePositions);
                     genererToutesLesVues();
-                    alert("✅ Compteurs réinitialisés à 0.");
+                    alert("✅ Compteurs réinitialisés à 0 (4 places). Prêt pour le départ.");
                 }
             }
         }
 
         // ========================================================
-        // CHARGEMENT ET RESTITUTION DE L'ACTIVITÉ DU JOUR
+        // CHARGEMENT INITIAL STRICT (SANS RÉCUPÉRATION DU BUFFER)
         // ========================================================
         async function chargerDernieresPositions() {
             try {
@@ -734,17 +752,14 @@
                     .from('transvision_positions_gps')
                     .select('*')
                     .order('created_at', { ascending: false })
-                    .limit(500);
+                    .limit(200);
 
                 if (data && data.length > 0) {
                     const vehiculesTrouves = {};
-                    
                     data.forEach(pos => {
                         if (pos.imei && pos.latitude && pos.longitude) {
                             const imeiClean = String(pos.imei).trim();
-                            if (!vehiculesTrouves[imeiClean]) { 
-                                vehiculesTrouves[imeiClean] = pos; 
-                            }
+                            if (!vehiculesTrouves[imeiClean]) vehiculesTrouves[imeiClean] = pos; 
                         }
                     });
 
@@ -758,15 +773,21 @@
                         let customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
                         let cfg = customConfig[imeiClean] || {};
 
+                        // Éradication du vieux 14 places dans le localStorage
+                        if (cfg.places !== 4) {
+                            cfg.places = 4;
+                            customConfig[imeiClean] = cfg;
+                            localStorage.setItem('tv_vehicules_custom', JSON.stringify(customConfig));
+                        }
+
                         let origine = savedLigne?.origine || cfg.origine || "BRIKIN";
                         let destination = savedLigne?.destination || cfg.destination || "GARE CENTRALE";
-
                         const params = trouverParametresSecrets(origine, destination);
 
                         const nouveauVehicule = {
                             plaque: cfg.plaque || `Tracker ${imeiClean.slice(-4)}`, 
                             type: cfg.type || "Toyota IST", 
-                            places: cfg.places || 4, // 4 PLACES STRICTES
+                            places: 4, // 4 PLACES STRICTES
                             imei: imeiClean,
                             lat: parseFloat(pos.latitude), 
                             lng: parseFloat(pos.longitude), 
@@ -812,7 +833,7 @@
                                     kmCourseEnCours += d;
                                     dernierCapPoint = calculerCap(pointPrec.latitude, pointPrec.longitude, pLat, pLng);
 
-                                    if (kmCourseEnCours >= params.distDeviee || kmCourseEnCours >= params.distDirect) {
+                                    if (kmCourseEnCours >= params.distDirect) {
                                         rotationsCalculees += 1;
                                         kmCourseEnCours = 0;
                                     }
@@ -822,11 +843,12 @@
                             dernierTimestampTraite = Math.max(dernierTimestampTraite, new Date(pt.created_at).getTime());
                         });
 
-                        if (kmCalc > 0) {
-                            nouveauVehicule.kmJour = Math.max(nouveauVehicule.kmJour, kmCalc);
+                        // AUCUN Math.max() avec des vieilles valeurs corrompues :
+                        if (resetTs > 0 || nouveauVehicule.kmJour === 0) {
+                            nouveauVehicule.kmJour = kmCalc;
                             nouveauVehicule.kmCourse = kmCourseEnCours;
-                            nouveauVehicule.tronconsValides = Math.max(nouveauVehicule.tronconsValides, rotationsCalculees);
-                            nouveauVehicule.recetteBruteReelle = nouveauVehicule.tronconsValides * (params.tarif * nouveauVehicule.places); // 4 places
+                            nouveauVehicule.tronconsValides = rotationsCalculees;
+                            nouveauVehicule.recetteBruteReelle = rotationsCalculees * (params.tarif * 4);
                             nouveauVehicule.carburantJour = nouveauVehicule.kmJour * 0.12;
                             nouveauVehicule.dernierCap = dernierCapPoint;
                             sauvegarderStatsJournalieres(nouveauVehicule);
@@ -915,7 +937,7 @@
                 const nv = {
                     plaque: data.plaque || `Tracker ${imeiClean.slice(-4)}`, 
                     type: "Toyota IST", 
-                    places: 4, // 4 PLACES
+                    places: 4, // 4 PLACES STRICTES
                     imei: imeiClean,
                     lat: data.lat, 
                     lng: data.lng, 
@@ -942,12 +964,15 @@
                 peuplerSelecteursFiltre();
             } else {
                 let v = client.vehicules[vehiculeIndex];
+                v.places = 4; // FORÇAGE PERMANENT 4 PLACES
+
                 let distDelta = calculerDistanceGPS(v.lat, v.lng, data.lat, data.lng);
                 
                 // Filtrage anti-dérive à l'arrêt
                 if (distDelta > 0.020 || (distDelta > 0.005 && data.vitesse > 3)) {
                     v.kmJour += distDelta;
                     v.kmCourse += distDelta;
+                    v.carburantJour = v.kmJour * 0.12;
 
                     const nouveauCap = calculerCap(v.lat, v.lng, data.lat, data.lng);
                     const ancienCap = v.dernierCap || 0;
@@ -963,10 +988,10 @@
                     if (diffCap > 180) diffCap = 360 - diffCap;
 
                     const dDirect = v.distDirect || 12.0;
-                    const gainParRotation = (v.tarif || 2500) * (v.places || 4); // BASE 4 PLACES
+                    const gainParRotation = (v.tarif || 2500) * 4; // BASE 4 PLACES = 10 000 CDF
                     let rotationValidee = false;
 
-                    // CRITÈRE 1 : Terminus nominal atteint
+                    // CRITÈRE 1 : Terminus nominal atteint (100%)
                     if (v.kmCourse >= dDirect) {
                         rotationValidee = true;
                     }
@@ -993,11 +1018,11 @@
 
                     if (rotationValidee) {
                         v.tronconsValides += 1;
-                        v.recetteBruteReelle += gainParRotation;
+                        v.recetteBruteReelle = v.tronconsValides * gainParRotation;
                         v.kmCourse = 0;
                         v.secondesArret = 0;
                         v.distanceSensInverse = 0;
-                        v.capOrigineCourse = nouveauCap; // Le nouveau cap devient la référence du retour
+                        v.capOrigineCourse = nouveauCap;
                     }
 
                     const anciennePosition = { lat: v.lat, lng: v.lng };
@@ -1037,7 +1062,7 @@
                 if (map) {
                     if (busMarker) {
                         busMarker.getPopup().setContent(`
-                            <b>${v.plaque}</b> (${v.places} places)<br>
+                            <b>${v.plaque}</b> (4 places)<br>
                             Ligne : <b>${v.origine} ➔ ${v.destination}</b><br>
                             Vitesse en direct : <b>${vitTxt}</b><br>
                             Roulé aujourd'hui : <b>${(v.kmJour || 0).toFixed(1)} km</b><br>
@@ -1160,7 +1185,6 @@
             client.vehicules.forEach((v, i) => sel.insertAdjacentHTML('beforeend', `<option value="${i}">${v.plaque} (${v.type})</option>`));
         }
 
-        // INITIALISATION CARTE GOOGLE MAPS TRAFIC LIVE
         function initMapEtCentrer(index) {
             const mapContainer = document.getElementById('map-container');
             if (!mapContainer || mapContainer.offsetParent === null) return;
@@ -1241,7 +1265,7 @@
             customConfig[imeiClean] = {
                 plaque: plaque,
                 type: document.getElementById('add-type').value || "Toyota IST",
-                places: places,
+                places: 4, // 4 PLACES STRICTES
                 origine: origine,
                 destination: destination,
                 moteurCoupe: false
@@ -1251,7 +1275,7 @@
             const nv = { 
                 plaque: plaque, 
                 type: document.getElementById('add-type').value || "Toyota IST", 
-                places: places, 
+                places: 4, 
                 imei: imeiClean, 
                 lat: -4.32, 
                 lng: 15.31, 
@@ -1279,7 +1303,7 @@
                     supabaseClient.from('tv_vehicules').upsert({
                         imei: imeiClean,
                         plaque: plaque,
-                        places: places,
+                        places: 4,
                         origine: origine,
                         destination: destination,
                         dist_direct: params.distDirect,
@@ -1356,7 +1380,7 @@
 
             chartPartenaireInstance = new Chart(canvas.getContext('2d'), {
                 type: 'bar', data: { labels: labels, datasets: [{ label: 'Gains (CDF)', data: dataGains, backgroundColor: '#10b981', borderRadius: 4 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { size: 9 } } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b' } } } }
             });
         }
 
@@ -1379,8 +1403,8 @@
                         <p class="text-[9px] text-sky-400 font-mono">Itinéraire: ${v.origine} ➔ ${v.destination}</p>
                         
                         <div class="grid grid-cols-2 gap-y-2 gap-x-1 text-[9px] font-mono bg-slate-900 p-2.5 rounded border border-slate-800">
-                            <p>📡 GPS: <span class="text-emerald-400">Opérationnel</span></p>
-                            <p>🔋 Batt: <span class="text-emerald-400">12.6V</span></p>
+                            <p>📡 GPS: <span class="text-emerald-400 font-bold">Connecté</span></p>
+                            <p>🔋 Batt: <span class="text-emerald-400 font-bold">12.6V</span></p>
                             <p>⛽ Conso: <span class="text-sky-400 font-bold">${consoPeriode} L</span></p>
                             <p>🛣️ Dist: <span class="text-sky-400 font-bold">${kmPeriode} km</span></p>
                         </div>
@@ -1504,7 +1528,7 @@
             customConfig[imeiClean] = {
                 plaque: v.plaque,
                 type: v.type,
-                places: v.places,
+                places: 4, // 4 PLACES STRICTES
                 origine: v.origine,
                 destination: v.destination,
                 moteurCoupe: v.moteurCoupe
