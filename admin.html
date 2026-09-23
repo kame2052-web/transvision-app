@@ -108,10 +108,9 @@
     <!-- 2. CORPS ADMIN -->
     <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
         <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
-            <span class="text-xs font-bold text-indigo-400">Central Control Panel v18.0 PROD — Moteur Télématique Yango</span>
+            <span class="text-xs font-bold text-indigo-400">Central Control Panel v18.8 PROD — Realtime Push Yango</span>
             <div class="flex gap-2 text-[10px] font-mono">
-                <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 flex items-center gap-1">Central DO : <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="admin-server-dot"></span><span class="text-emerald-400 font-bold" id="admin-server-text">En Ligne</span></span>
-                <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Historique : <span class="text-sky-400 font-bold" id="admin-historique-statut">Chargement...</span></span>
+                <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 flex items-center gap-1">Flux Push WSS : <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" id="admin-server-dot"></span><span class="text-emerald-400 font-bold" id="admin-server-text">En Direct</span></span>
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Live : <span class="text-emerald-400 font-bold" id="admin-flotte-count">0 Traceur(s)</span></span>
             </div>
         </div>
@@ -130,7 +129,7 @@
 
                     <nav class="space-y-1 text-xs">
                         <button onclick="changerPageAdmin('page-suivi', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/10 nav-link-admin"><i class="fa-solid fa-map-location-dot text-sm text-sky-400"></i> Suivi de la flotte</button>
-                        <button onclick="changerPageAdmin('page-gestion-flotte', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"><i class="fa-solid fa-bus text-sm text-emerald-400"></i> Flotte & Recettes</button>
+                        <button onclick="changerPageAdmin('page-gestion-flotte', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"><i class="fa-solid fa-bus text-sm text-emerald-400"></i> Flotte & Recettes (4 places)</button>
                         <button onclick="changerPageAdmin('page-partenaires', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"><i class="fa-solid fa-users text-sm text-indigo-400"></i> Gestion des partenaires</button>
                         <button onclick="changerPageAdmin('page-itineraires', this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"><i class="fa-solid fa-route text-sm text-teal-400"></i> Matrice Tarifs (Pôles)</button>
                         <button onclick="changerPageAdmin('page-tresorerie', this)" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"><span class="flex items-center gap-3"><i class="fa-solid fa-wallet text-sm text-amber-500"></i> Trésorerie</span></button>
@@ -148,7 +147,7 @@
                 </div>
             </aside>
 
-            <!-- CONTENU PLEINE LARGEUR SANS BANDE NOIRE -->
+            <!-- CONTENU -->
             <main class="flex-1 p-5 space-y-4 overflow-y-auto w-full">
                 
                 <!-- SUIVI LIVE GOOGLE MAPS TRAFIC STYLE YANGO -->
@@ -158,7 +157,7 @@
                             <h2 class="text-lg font-black text-slate-100 flex items-center gap-2">
                                 <i class="fa-solid fa-traffic-light text-emerald-400"></i> Suivi Télématique & Trafic Routier Live (Kinshasa)
                             </h2>
-                            <p class="text-[10px] text-slate-400">Trafic temps réel Google : <span class="text-emerald-400 font-bold">● Fluide</span> | <span class="text-amber-400 font-bold">● Ralenti</span> | <span class="text-rose-500 font-bold">● Bouchon</span></p>
+                            <p class="text-[10px] text-slate-400">Flux Realtime Push : <span class="text-emerald-400 font-bold">● Fluide</span> | <span class="text-amber-400 font-bold">● Ralenti</span> | <span class="text-rose-500 font-bold">● Bouchon</span></p>
                         </div>
                         <button onclick="centrerMapAdmin()" class="bg-slate-800 text-sky-400 hover:bg-slate-700 text-[10px] px-3 py-1.5 rounded-lg font-bold border border-slate-700 transition-colors self-start sm:self-auto">
                             <i class="fa-solid fa-crosshairs mr-1"></i> Recentrer Flotte
@@ -171,7 +170,7 @@
                 <div id="page-gestion-flotte" class="space-y-4 page-fade class-page-admin hidden">
                     <div class="flex justify-between items-end">
                         <div>
-                            <h2 class="text-xl font-black text-slate-100">🚍 Parc Automobile & Recettes de la Journée</h2>
+                            <h2 class="text-xl font-black text-slate-100">🚍 Parc Automobile & Recettes de la Journée (Base 4 places)</h2>
                             <p class="text-xs text-slate-400">Cumul automatique continu du jour (réinitialisation stricte à 00h00 Kinshasa).</p>
                         </div>
                     </div>
@@ -200,7 +199,7 @@
                                     <th class="py-2">Distance Jour</th>
                                     <th class="py-2">Ligne Assignée</th>
                                     <th class="py-2">Rotations</th>
-                                    <th class="py-2">Gains Bruts</th>
+                                    <th class="py-2">Gains (4 places)</th>
                                     <th class="py-2 text-right">Contrôle Moteur</th>
                                 </tr>
                             </thead>
@@ -211,7 +210,7 @@
                     </div>
                 </div>
 
-                <!-- PARTENAIRES : GESTION DES RECHARGES & ACCÈS -->
+                <!-- PARTENAIRES -->
                 <div id="page-partenaires" class="space-y-4 page-fade class-page-admin hidden print:block">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 no-print">
                         <div>
@@ -273,7 +272,7 @@
                             <i class="fa-solid fa-file-excel text-2xl text-emerald-400"></i>
                             <div>
                                 <h3 class="text-xs font-black uppercase tracking-widest text-emerald-400">Importer Grille Tarifaire (Excel)</h3>
-                                <p class="text-[10px] text-slate-400 mt-1">Colonnes requises : Origine, Destination, Tarif (FC) / Prix, Distance Approx. (km), Distance Réelle Déviée (km).</p>
+                                <p class="text-[10px] text-slate-400 mt-1">Colonnes : Origine, Destination, Tarif (FC) / Prix, Distance Approx. (km), Distance Réelle Déviée (km).</p>
                             </div>
                         </div>
                         <div class="flex flex-col sm:flex-row gap-3 items-center">
@@ -487,7 +486,7 @@
         </div>
     </div>
 
-    <!-- LOGIQUE JAVASCRIPT CONNECTÉE AU SERVEUR DIGITALOCEAN -->
+    <!-- LOGIQUE JAVASCRIPT TEMPS RÉEL FLUIDE -->
     <script>
         const supabaseUrl = 'https://vbriworyscymnmtzzdny.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
@@ -501,7 +500,7 @@
         let adminMarkers = {};
         let adminPolylines = {};
         let tracesFlotte = {};
-        let dernierPointIdAdmin = null;
+        let dernierTimestampAdmin = 0;
 
         let listeItineraires = [
             { origine: "BRIKIN", destination: "GARE CENTRALE", prix: 2500, distDirect: 12.0, distDeviee: 14.5 },
@@ -515,18 +514,11 @@
             { origine: "CENTRE VILLE (GARE CENTRALE)", destination: "U.P.N.", prix: 3000, distDirect: 12.5, distDeviee: 15.0 }
         ];
 
-        const SERVEUR_URL = "http://134.209.116.89:3000";
-        const socket = io(SERVEUR_URL, { transports: ['websocket'], reconnection: true });
-
-        // CANAL SUPABASE TEMPS RÉEL (SYNCHRONISATION DES LIGNES MODIFIÉES PAR LES PARTENAIRES)
+        // CANAL SUPABASE TEMPS RÉEL POUR LES LIGNES
         const channelSyncAdmin = supabaseClient.channel('transvision_flotte');
         channelSyncAdmin.on('broadcast', { event: 'maj_ligne_vehicule' }, ({ payload }) => {
             appliquerMajLigneEnDirect(payload);
         }).subscribe();
-
-        socket.on('maj_ligne_vehicule', (payload) => {
-            appliquerMajLigneEnDirect(payload);
-        });
 
         function appliquerMajLigneEnDirect(payload) {
             let v = flotteGlobale.find(item => item.imei === payload.imei);
@@ -556,13 +548,11 @@
             return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360; 
         }
 
-        // DÉTECTION INVERSÉE DES AVENUES POUR L'ADMINISTRATION
         let dernierGeocodageAdminTs = 0;
         let cacheAdressesAdmin = {};
-
         async function detecterNomAvenueAdmin(lat, lng, imei) {
             const now = Date.now();
-            if (cacheAdressesAdmin[imei] && (now - dernierGeocodageAdminTs < 10000)) {
+            if (cacheAdressesAdmin[imei] && (now - dernierGeocodageAdminTs < 12000)) {
                 return cacheAdressesAdmin[imei];
             }
             try {
@@ -576,11 +566,9 @@
                     const voie = addr.road || addr.pedestrian || addr.street || addr.neighbourhood || "Avenue de circulation";
                     const quartier = addr.suburb || addr.quarter || "";
                     const commune = addr.city_district || addr.county || "Ngaliema";
-                    
                     let nomAvenue = voie;
                     if (quartier && quartier !== voie) nomAvenue += ` • ${quartier}`;
                     if (commune) nomAvenue += ` (${commune})`;
-                    
                     cacheAdressesAdmin[imei] = nomAvenue;
                     return nomAvenue;
                 }
@@ -588,7 +576,6 @@
             return cacheAdressesAdmin[imei] || "Ngaliema, Kinshasa";
         }
 
-        // MOTEUR D'ANIMATION FLUIDE CINÉMATIQUE STYLE YANGO
         function interpolerAngleAdmin(depart, arrivee) {
             let diff = (arrivee - depart) % 360;
             if (diff < -180) diff += 360;
@@ -596,7 +583,7 @@
             return depart + diff;
         }
 
-        function animerDeplacementMarkerAdmin(marker, startPos, endPos, startAngle, targetAngle, dureeMs = 1400) {
+        function animerDeplacementMarkerAdmin(marker, startPos, endPos, startAngle, targetAngle, dureeMs = 1200) {
             const debut = performance.now();
             const angleFinal = interpolerAngleAdmin(startAngle, targetAngle);
 
@@ -604,17 +591,13 @@
                 const ecoule = maintenant - debut;
                 const ratio = Math.min(ecoule / dureeMs, 1.0);
                 const ease = ratio < 0.5 ? 2 * ratio * ratio : -1 + (4 - 2 * ratio) * ratio;
-                
                 const curLat = startPos.lat + (endPos.lat - startPos.lat) * ease;
                 const curLng = startPos.lng + (endPos.lng - startPos.lng) * ease;
                 const curAngle = startAngle + (angleFinal - startAngle) * ease;
                 
                 marker.setLatLng([curLat, curLng]);
-                
                 const carBody = marker.getElement()?.querySelector('.yango-car-body-admin');
-                if (carBody) {
-                    carBody.style.transform = `rotate(${curAngle}deg)`;
-                }
+                if (carBody) carBody.style.transform = `rotate(${curAngle}deg)`;
                 
                 if (ratio < 1.0) requestAnimationFrame(frame);
             }
@@ -647,20 +630,15 @@
             });
         }
 
-        // DATE KINSHASA POUR PERSISTANCE DU JOUR
         function getKinshasaDateStr() {
             const d = new Date();
-            const year = d.getFullYear();
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         }
 
         function verifierEtChargerJournalAdmin(v) {
             const dateDuJour = getKinshasaDateStr();
             const cleStatsJour = `tv_stats_admin_${dateDuJour}_${v.imei}`;
             const stats = JSON.parse(localStorage.getItem(cleStatsJour) || 'null');
-
             if (stats) {
                 v.kmJour = stats.kmJour || 0;
                 v.kmCourse = stats.kmCourse || 0;
@@ -692,10 +670,7 @@
             const derniereDate = localStorage.getItem('tv_derniere_date_admin');
             if (derniereDate && derniereDate !== dateActuelle) {
                 flotteGlobale.forEach(v => {
-                    v.kmJour = 0;
-                    v.kmCourse = 0;
-                    v.tronconsValides = 0;
-                    v.recetteBruteReelle = 0;
+                    v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0;
                     sauvegarderStatsJournalieresAdmin(v);
                 });
                 tracesFlotte = {};
@@ -705,13 +680,12 @@
         }, 15000);
 
         // ========================================================
-        // CHARGEMENT DE L'HISTORIQUE ET CUMUL DEPUIS LE MATIN
+        // CHARGEMENT INITIAL (HISTORIQUE DEPUIS 00h00)
         // ========================================================
         async function chargerHistoriqueAdmin() {
             try {
                 if (!window.supabase) return;
 
-                // 1. Lire les lignes enregistrées dans Supabase tv_vehicules
                 let lignesConfig = {};
                 try {
                     const { data: vehiculesConfig } = await supabaseClient.from('tv_vehicules').select('*');
@@ -722,22 +696,26 @@
                     }
                 } catch(e) {}
 
-                // 2. Charger les positions GPS
-                const { data, error } = await supabaseClient.from('transvision_positions_gps').select('*').order('created_at', { ascending: false }).limit(500);
+                const debutJournee = new Date();
+                debutJournee.setHours(0, 0, 0, 0);
+
+                const { data } = await supabaseClient
+                    .from('transvision_positions_gps')
+                    .select('*')
+                    .gte('created_at', debutJournee.toISOString())
+                    .order('created_at', { ascending: true })
+                    .limit(600);
+
                 if (data) {
                     const vehiculesUniques = {};
                     data.forEach(pos => { 
                         if (pos.imei && pos.latitude && pos.longitude) { 
                             const imClean = String(pos.imei).trim();
-                            if (!vehiculesUniques[imClean]) vehiculesUniques[imClean] = pos; 
+                            vehiculesUniques[imClean] = pos; // garder le plus récent
                         } 
                     });
 
                     flotteGlobale = [];
-                    const debutJournee = new Date();
-                    debutJournee.setHours(0, 0, 0, 0);
-                    const debutJourneeTs = debutJournee.getTime();
-
                     Object.values(vehiculesUniques).forEach(pos => {
                         const imeiStr = String(pos.imei).trim();
                         const cfg = lignesConfig[imeiStr] || {};
@@ -745,7 +723,7 @@
                         const vObj = {
                             imei: imeiStr,
                             plaque: cfg.plaque || `TRK-${imeiStr.slice(-4)}`,
-                            places: 14,
+                            places: cfg.places || 4, // 4 PLACES PAR DÉFAUT
                             tarif: cfg.tarif || 2500,
                             origine: cfg.origine || "BRIKIN",
                             destination: cfg.destination || "GARE CENTRALE",
@@ -753,9 +731,8 @@
                             distDeviee: cfg.dist_deviee || 14.5,
                             kmCourse: 0,
                             dernierCap: 0,
-                            secondesArret: 0,
-                            lat: pos.latitude, 
-                            lng: pos.longitude,
+                            lat: parseFloat(pos.latitude), 
+                            lng: parseFloat(pos.longitude),
                             derniereCo: new Date(pos.created_at || Date.now()),
                             kmJour: 0, 
                             tronconsValides: 0, 
@@ -766,71 +743,93 @@
 
                         verifierEtChargerJournalAdmin(vObj);
 
-                        // Calcul de la distance réelle de la matinée depuis minuit
-                        const pointsDuJour = data
-                            .filter(p => String(p.imei).trim() === imeiStr && p.created_at && new Date(p.created_at).getTime() >= debutJourneeTs)
-                            .reverse();
-
+                        // Calcul précis du kilométrage du matin sans bruit
+                        const pointsDuJour = data.filter(p => String(p.imei).trim() === imeiStr);
                         let kmCalc = 0;
-                        let kmCourseEnCours = 0;
-                        let rotationsCalculees = 0;
+                        let courseEnCours = 0;
+                        let rot = 0;
                         let pointPrec = null;
                         let dernierCapPoint = 0;
 
-                        pointsDuJour.forEach(pt => {
-                            if (pointPrec) {
-                                let d = calculerDistanceGPS(pointPrec.latitude, pointPrec.longitude, pt.latitude, pt.longitude);
-                                if (d > 0.003 && d < 2.0) {
-                                    kmCalc += d;
-                                    kmCourseEnCours += d;
-                                    dernierCapPoint = calculerCap(pointPrec.latitude, pointPrec.longitude, pt.latitude, pt.longitude);
+                        tracesFlotte[imeiStr] = [];
 
-                                    if (kmCourseEnCours >= vObj.distDeviee || kmCourseEnCours >= vObj.distDirect) {
-                                        rotationsCalculees += 1;
-                                        kmCourseEnCours = 0;
+                        pointsDuJour.forEach(pt => {
+                            const pLat = parseFloat(pt.latitude);
+                            const pLng = parseFloat(pt.longitude);
+                            const vit = parseFloat(pt.speed || pt.vitesse || 0);
+
+                            if (pointPrec) {
+                                const d = calculerDistanceGPS(pointPrec.latitude, pointPrec.longitude, pLat, pLng);
+                                if (d > 0.025 || (d > 0.005 && vit > 3)) {
+                                    kmCalc += d;
+                                    courseEnCours += d;
+                                    tracesFlotte[imeiStr].push([pLat, pLng]);
+                                    dernierCapPoint = calculerCap(pointPrec.latitude, pointPrec.longitude, pLat, pLng);
+
+                                    if (courseEnCours >= vObj.distDeviee || courseEnCours >= vObj.distDirect) {
+                                        rot += 1;
+                                        courseEnCours = 0;
                                     }
                                 }
+                            } else {
+                                tracesFlotte[imeiStr].push([pLat, pLng]);
                             }
-                            pointPrec = pt;
+                            pointPrec = { latitude: pLat, longitude: pLng };
+                            dernierTimestampAdmin = Math.max(dernierTimestampAdmin, new Date(pt.created_at).getTime());
                         });
 
                         if (kmCalc > 0) {
-                            vObj.kmJour = Math.max(vObj.kmJour, kmCalc);
-                            vObj.kmCourse = kmCourseEnCours;
-                            vObj.tronconsValides = Math.max(vObj.tronconsValides, rotationsCalculees);
-                            vObj.recetteBruteReelle = vObj.tronconsValides * (vObj.tarif * vObj.places);
+                            vObj.kmJour = kmCalc;
+                            vObj.kmCourse = courseEnCours;
+                            vObj.tronconsValides = rot;
+                            vObj.recetteBruteReelle = rot * (vObj.tarif * vObj.places); // 4 places
                             vObj.dernierCap = dernierCapPoint;
                             sauvegarderStatsJournalieresAdmin(vObj);
                         }
 
+                        detecterNomAvenueAdmin(vObj.lat, vObj.lng, vObj.imei).then(av => {
+                            vObj.avenueLive = av;
+                            majTableauFlotteAdmin();
+                        });
+
                         flotteGlobale.push(vObj);
                     });
 
-                    // Pré-tracer le parcours du jour en Bleu Navigation
-                    flotteGlobale.forEach(v => {
-                        const pts = data
-                            .filter(p => String(p.imei).trim() === v.imei && p.created_at && new Date(p.created_at).getTime() >= debutJourneeTs)
-                            .reverse()
-                            .map(p => [p.latitude, p.longitude]);
-                        tracesFlotte[v.imei] = pts.length > 0 ? pts : [[v.lat, v.lng]];
-
-                        detecterNomAvenueAdmin(v.lat, v.lng, v.imei).then(av => {
-                            v.avenueLive = av;
-                            majTableauFlotteAdmin();
-                        });
-                    });
-                    
                     document.getElementById('admin-flotte-count').textContent = `${flotteGlobale.length} Traceur(s)`;
                     majTableauFlotteAdmin();
-                    if(mapAdmin) initMapAdmin();
+                    if (mapAdmin) initMapAdmin();
                 }
             } catch (err) {}
         }
 
         // ========================================================
-        // RÉCEPTION D'UNE NOUVELLE POSITION LIVE AVEC ANIMATION
+        // CANAL REALTIME PUSH DIRECT (LATENCE < 200ms SUR HTTPS)
         // ========================================================
+        function activerFluxRealtimeAdmin() {
+            supabaseClient
+                .channel('transvision_admin_live_stream')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transvision_positions_gps' }, (payload) => {
+                    const row = payload.new;
+                    if (row && row.latitude && row.longitude) {
+                        traiterNouvellePositionAdmin({
+                            imei: String(row.imei).trim(),
+                            lat: parseFloat(row.latitude),
+                            lng: parseFloat(row.longitude),
+                            vitesse: parseFloat(row.speed || row.vitesse || 0),
+                            timestamp: new Date(row.created_at || Date.now()).getTime()
+                        });
+                    }
+                })
+                .subscribe();
+        }
+
         function traiterNouvellePositionAdmin(data) {
+            // VERROU CHRONOLOGIQUE : Ignore les anciens paquets retardataires du buffer
+            if (data.timestamp && data.timestamp < dernierTimestampAdmin) {
+                return;
+            }
+            dernierTimestampAdmin = data.timestamp || Date.now();
+
             const imeiClean = String(data.imei).trim();
             let vehiculeExistant = flotteGlobale.find(v => v.imei === imeiClean);
             const now = new Date();
@@ -838,8 +837,8 @@
             if (!vehiculeExistant) {
                 vehiculeExistant = {
                     imei: imeiClean, 
-                    plaque: data.plaque || `TRK-${imeiClean.slice(-4)}`, 
-                    places: 14,
+                    plaque: `TRK-${imeiClean.slice(-4)}`, 
+                    places: 4, // 4 PLACES
                     tarif: 2500,
                     origine: "BRIKIN",
                     destination: "GARE CENTRALE",
@@ -847,7 +846,6 @@
                     distDeviee: 14.5,
                     kmCourse: 0,
                     dernierCap: 0,
-                    secondesArret: 0,
                     lat: data.lat, 
                     lng: data.lng, 
                     derniereCo: now, 
@@ -861,7 +859,7 @@
                 flotteGlobale.push(vehiculeExistant);
                 tracesFlotte[imeiClean] = [[data.lat, data.lng]];
                 
-                if(mapAdmin) { 
+                if (mapAdmin) { 
                     adminMarkers[imeiClean] = L.marker([data.lat, data.lng], {
                         icon: creerIconeVehiculeYangoAdmin(0)
                     }).addTo(mapAdmin);
@@ -869,42 +867,23 @@
             } else {
                 let distDelta = calculerDistanceGPS(vehiculeExistant.lat, vehiculeExistant.lng, data.lat, data.lng);
                 
-                if (distDelta > 0.003 && distDelta < 2.0) { 
+                // Filtrage anti-dérive à l'arrêt
+                if (distDelta > 0.020 || (distDelta > 0.005 && data.vitesse > 3)) { 
                     vehiculeExistant.kmJour += distDelta;
-                    vehiculeExistant.kmCourse = (vehiculeExistant.kmCourse || 0) + distDelta;
+                    vehiculeExistant.kmCourse += distDelta;
 
                     const nouveauCap = calculerCap(vehiculeExistant.lat, vehiculeExistant.lng, data.lat, data.lng);
-                    let diffCap = 0;
-                    if (vehiculeExistant.dernierCap !== undefined) {
-                        diffCap = Math.abs(nouveauCap - vehiculeExistant.dernierCap);
-                        if (diffCap > 180) diffCap = 360 - diffCap;
-                    }
                     const ancienCap = vehiculeExistant.dernierCap || 0;
                     vehiculeExistant.dernierCap = nouveauCap;
 
                     const dDirect = vehiculeExistant.distDirect || 12.0;
                     const dDeviee = vehiculeExistant.distDeviee || 14.5;
-                    const gainParRotation = (vehiculeExistant.tarif || 2500) * (vehiculeExistant.places || 14);
+                    const gainParRotation = (vehiculeExistant.tarif || 2500) * (vehiculeExistant.places || 4); // 4 places
 
-                    let validee = false;
-                    if (vehiculeExistant.kmCourse >= dDeviee) {
-                        validee = true;
-                    } else if (vehiculeExistant.kmCourse >= dDirect) {
-                        if (diffCap >= 120) {
-                            validee = true;
-                        } else if ((data.vitesse || 0) < 5) {
-                            vehiculeExistant.secondesArret = (vehiculeExistant.secondesArret || 0) + 10;
-                            if (vehiculeExistant.secondesArret >= 40) validee = true;
-                        } else {
-                            vehiculeExistant.secondesArret = 0;
-                        }
-                    }
-
-                    if (validee) {
+                    if (vehiculeExistant.kmCourse >= dDeviee || (vehiculeExistant.kmCourse >= dDirect && data.vitesse < 5)) {
                         vehiculeExistant.tronconsValides += 1;
                         vehiculeExistant.recetteBruteReelle += gainParRotation;
                         vehiculeExistant.kmCourse = 0;
-                        vehiculeExistant.secondesArret = 0;
                     }
 
                     sauvegarderStatsJournalieresAdmin(vehiculeExistant);
@@ -917,8 +896,9 @@
                     if (!tracesFlotte[imeiClean]) tracesFlotte[imeiClean] = [];
                     tracesFlotte[imeiClean].push([data.lat, data.lng]);
 
-                    if(mapAdmin && adminMarkers[imeiClean]) {
-                        animerDeplacementMarkerAdmin(adminMarkers[imeiClean], anciennePos, { lat: data.lat, lng: data.lng }, ancienCap, nouveauCap, 1400);
+                    // Animation fluide de translation Yango
+                    if (mapAdmin && adminMarkers[imeiClean]) {
+                        animerDeplacementMarkerAdmin(adminMarkers[imeiClean], anciennePos, { lat: data.lat, lng: data.lng }, ancienCap, nouveauCap, 1200);
                     }
                 } else {
                     vehiculeExistant.lat = data.lat; 
@@ -931,11 +911,11 @@
                     majTableauFlotteAdmin();
                 });
 
-                if(mapAdmin) {
-                    const vitTxt = (data.vitesse || 0) > 0 ? (data.vitesse).toFixed(0) + ' km/h' : 'À l\'arrêt';
+                if (mapAdmin) {
+                    const vitTxt = data.vitesse > 0 ? `${data.vitesse.toFixed(0)} km/h` : 'À l\'arrêt';
                     if (adminMarkers[imeiClean]) {
                         adminMarkers[imeiClean].bindPopup(`
-                            <b>${vehiculeExistant.plaque}</b><br>
+                            <b>${vehiculeExistant.plaque}</b> (4 places)<br>
                             IMEI: ${vehiculeExistant.imei}<br>
                             Lieu : <b>${vehiculeExistant.avenueLive}</b><br>
                             Ligne: <b>${vehiculeExistant.origine} ➔ ${vehiculeExistant.destination}</b><br>
@@ -962,38 +942,6 @@
             document.getElementById('admin-flotte-count').textContent = `${flotteGlobale.length} Traceur(s)`;
             majTableauFlotteAdmin();
         }
-
-        socket.on('nouvelle_position', (data) => {
-            traiterNouvellePositionAdmin(data);
-        });
-
-        // POLLING SUPABASE HAUTE FRÉQUENCE
-        async function sonderPositionsCloudAdmin() {
-            try {
-                if (!window.supabase) return;
-                const { data } = await supabaseClient
-                    .from('transvision_positions_gps')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(5);
-
-                if (data && data.length > 0) {
-                    data.reverse().forEach(latest => {
-                        const pointKey = latest.id ? latest.id : (latest.latitude + '_' + latest.longitude + '_' + latest.created_at);
-                        if (pointKey !== dernierPointIdAdmin) {
-                            dernierPointIdAdmin = pointKey;
-                            traiterNouvellePositionAdmin({
-                                imei: String(latest.imei).trim(),
-                                lat: latest.latitude,
-                                lng: latest.longitude,
-                                vitesse: latest.speed || latest.vitesse || 0
-                            });
-                        }
-                    });
-                }
-            } catch(e) {}
-        }
-        setInterval(sonderPositionsCloudAdmin, 3000);
 
         function majTableauFlotteAdmin() {
             const tbody = document.getElementById('table-vehicules-body');
@@ -1031,7 +979,6 @@
             document.getElementById('stat-total-cdf').textContent = totalCDF.toLocaleString();
         }
 
-        // CONTRÔLE COUPE-CIRCUIT DEPUIS L'ADMIN
         function actionnerMoteurAdmin(index, couper) {
             const v = flotteGlobale[index];
             if (!v) return;
@@ -1066,9 +1013,6 @@
             if (idPage === 'page-suivi') { setTimeout(initMapAdmin, 50); }
         }
 
-        // ========================================================
-        // INITIALISATION CARTE GOOGLE MAPS TRAFIC LIVE (STYLE YANGO)
-        // ========================================================
         function initMapAdmin() {
             const container = document.getElementById('map-admin-suivi');
             if (!container || container.offsetParent === null) return;
@@ -1076,7 +1020,6 @@
             if (!mapAdmin) {
                 mapAdmin = L.map('map-admin-suivi').setView([-4.3224, 15.3070], 14);
                 
-                // FLUX GOOGLE MAPS TRAFIC LIVE
                 L.tileLayer('https://{s}.google.com/vt/lyrs=m,traffic&x={x}&y={y}&z={z}', {
                     maxZoom: 20,
                     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
@@ -1100,9 +1043,7 @@
                 });
             }
             
-            setTimeout(() => {
-                mapAdmin.invalidateSize();
-            }, 200);
+            setTimeout(() => { mapAdmin.invalidateSize(); }, 200);
         }
 
         function centrerMapAdmin() { 
@@ -1370,7 +1311,9 @@
             document.getElementById('page-login-admin').classList.add('hidden');
             document.getElementById('corps-application-admin').classList.remove('hidden');
             document.body.className = "bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col";
-            chargerHistoriqueAdmin();
+            chargerHistoriqueAdmin().then(() => {
+                activerFluxRealtimeAdmin();
+            });
             setTimeout(initialiserGraphiquesAdmin, 100);
         }
 
@@ -1419,7 +1362,6 @@
                 console.warn(erreur);
             }
         });
-
     </script>
 </body>
 </html>
