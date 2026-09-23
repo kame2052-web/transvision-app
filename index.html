@@ -31,35 +31,41 @@
         .leaflet-tile { filter: none !important; }
         .leaflet-container { background: #e5e3df !important; }
         
-        /* Animation du halo pulsant sous le véhicule en direct */
-        .live-pulse-ring {
-            position: absolute;
+        /* STYLE DU VÉHICULE EN DIRECT TYPE YANGO */
+        .yango-car-wrapper {
+            position: relative;
             width: 44px;
             height: 44px;
-            top: -7px;
-            left: -7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+        }
+
+        /* Halo radar pulsant sous le véhicule */
+        .yango-pulse-halo {
+            position: absolute;
+            width: 52px;
+            height: 52px;
             border-radius: 50%;
-            background: rgba(26, 115, 232, 0.25);
-            animation: pulseWave 1.8s infinite ease-out;
+            background: rgba(14, 165, 233, 0.28);
+            border: 1px solid rgba(56, 189, 248, 0.5);
+            animation: pulseYango 2s infinite ease-out;
             pointer-events: none;
         }
-        @keyframes pulseWave {
+        @keyframes pulseYango {
             0% { transform: scale(0.6); opacity: 0.9; }
             100% { transform: scale(1.6); opacity: 0; }
         }
 
-        .vehicle-marker-box {
+        /* Corps de la voiture vue du ciel orientable */
+        .yango-car-body {
             position: relative;
             width: 32px;
             height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #020617;
-            border: 2px solid #38bdf8;
-            border-radius: 50%;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.6);
-            transition: transform 0.3s ease;
+            transform-origin: center center;
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45));
         }
 
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(100deg); cursor: pointer; }
@@ -148,7 +154,7 @@
             </div>
             
             <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v17.8 PROD — Global Tech Solutions
+                TransVision v18.0 PROD — Moteur Télématique Yango
             </div>
         </div>
 
@@ -172,9 +178,9 @@
                     <div>
                         <div class="flex items-center gap-1.5">
                             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="statut-serveur-voyant"></span>
-                            <span class="text-[10px] font-black uppercase text-emerald-400 tracking-wider" id="statut-serveur-texte">Suivi Satellite Actif</span>
+                            <span class="text-[10px] font-black uppercase text-emerald-400 tracking-wider" id="statut-serveur-texte">Suivi Live Yango Actif</span>
                         </div>
-                        <p class="text-[9px] text-slate-400 mt-0.5" id="last-update-text">Cumul en direct de la journée...</p>
+                        <p class="text-[9px] text-slate-400 mt-0.5" id="last-update-text">Calcul cinématique continu...</p>
                     </div>
                     <div class="text-right flex flex-col items-end gap-1.5">
                         <span id="timer-compte-rebours" class="text-xs font-mono font-black text-slate-100 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-lg shadow-inner">--:--:--</span>
@@ -182,40 +188,46 @@
                 </div>
             </header>
 
-            <!-- ONGLET A : CARTE GOOGLE MAPS TRAFIC LIVE AVEC BANDEAU TÉLÉMATIQUE -->
+            <!-- ONGLET A : CARTE INTERFACE STYLE YANGO -->
             <div id="onglet-flotte" class="p-2 flex-1 flex flex-col blur-transition class-onglet no-print min-h-[calc(100vh-170px)] space-y-2">
                 
-                <!-- BANDEAU TÉLÉMATIQUE EN DIRECT AVEC LÉGENDE DU TRAFIC -->
-                <div class="bg-slate-900/95 border border-slate-800 rounded-xl p-2.5 space-y-1.5 shadow-lg backdrop-blur">
+                <!-- BANDEAU DE BORD STYLE PASSAGER / CHAUFFEUR YANGO -->
+                <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-3 space-y-2 shadow-2xl backdrop-blur">
                     <div class="flex justify-between items-center text-xs">
-                        <span class="text-sky-400 font-bold flex items-center gap-1.5 truncate max-w-[240px]">
-                            <i class="fa-solid fa-location-dot text-rose-500 animate-bounce"></i>
-                            <span id="hud-avenue-live" class="truncate font-sans font-semibold">Localisation de l'avenue...</span>
-                        </span>
-                        <span class="text-[10px] font-mono text-emerald-400 font-black bg-slate-950 px-2 py-0.5 rounded border border-emerald-500/20" id="hud-vitesse-live">0 km/h</span>
-                    </div>
-
-                    <!-- LÉGENDE TRAFIC EN DIRECT -->
-                    <div class="flex items-center justify-between text-[8px] font-bold text-slate-400 border-t border-slate-800/80 pt-1 px-1">
-                        <span class="uppercase tracking-wider text-slate-500">Trafic Kinshasa :</span>
-                        <div class="flex items-center gap-3">
-                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Fluide</span>
-                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Ralenti</span>
-                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-600"></span> Bouchon</span>
+                        <div class="flex items-center gap-2 truncate max-w-[240px]">
+                            <span class="w-3 h-3 rounded-full bg-emerald-500 border-2 border-emerald-300 animate-ping"></span>
+                            <span id="hud-avenue-live" class="truncate font-sans font-black text-slate-100">Localisation de l'avenue...</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-xl border border-slate-800">
+                            <i class="fa-solid fa-gauge-high text-sky-400 text-xs"></i>
+                            <span class="text-xs font-mono font-black text-emerald-400" id="hud-vitesse-live">0 km/h</span>
                         </div>
                     </div>
 
+                    <!-- LÉGENDE DU TRAFIC ROUTIER GOOGLE EN DIRECT -->
+                    <div class="flex items-center justify-between text-[8px] font-bold text-slate-400 border-t border-slate-800/80 pt-1.5 px-1">
+                        <span class="uppercase tracking-wider text-slate-500 flex items-center gap-1">
+                            <i class="fa-solid fa-road"></i> Trafic Kinshasa :
+                        </span>
+                        <div class="flex items-center gap-3 font-sans">
+                            <span class="flex items-center gap-1 text-emerald-400"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Fluide</span>
+                            <span class="flex items-center gap-1 text-amber-400"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Ralenti</span>
+                            <span class="flex items-center gap-1 text-rose-400"><span class="w-2 h-2 rounded-full bg-rose-600"></span> Bouchon</span>
+                        </div>
+                    </div>
+
+                    <!-- RECAPITULATIF JOURNALIER FIXE (RESTE DU MATIN AU SOIR) -->
                     <div class="grid grid-cols-3 gap-1.5 text-center text-[10px] font-mono border-t border-slate-800/80 pt-1.5">
-                        <div class="bg-slate-950/80 p-1.5 rounded border border-slate-850">
+                        <div class="bg-slate-950/80 p-1.5 rounded-xl border border-slate-850">
                             <span class="text-[8px] text-slate-500 block uppercase font-bold">Roulé aujourd'hui</span>
                             <span class="font-black text-slate-100 text-xs" id="hud-km-jour">0.0 km</span>
                         </div>
-                        <div class="bg-slate-950/80 p-1.5 rounded border border-slate-850">
+                        <div class="bg-slate-950/80 p-1.5 rounded-xl border border-slate-850">
                             <span class="text-[8px] text-slate-500 block uppercase font-bold">Course en cours</span>
                             <span class="font-black text-sky-400 text-xs" id="hud-course-progression">0.0 km</span>
                         </div>
-                        <div class="bg-slate-950/80 p-1.5 rounded border border-slate-850">
-                            <span class="text-[8px] text-slate-500 block uppercase font-bold">Recettes Jour</span>
+                        <div class="bg-slate-950/80 p-1.5 rounded-xl border border-slate-850">
+                            <span class="text-[8px] text-slate-500 block uppercase font-bold">Recettes du jour</span>
                             <span class="font-black text-emerald-400 text-xs" id="hud-recettes-jour">0 CDF</span>
                         </div>
                     </div>
@@ -224,7 +236,7 @@
                 <div class="bg-slate-950 p-2 rounded-2xl border border-slate-800 flex-1 flex flex-col space-y-2 shadow-md">
                     <div class="flex justify-between items-center px-1">
                         <h2 class="text-[10px] font-bold text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
-                            <i class="fa-solid fa-traffic-light text-emerald-400"></i> Google Maps & Trafic Routier Live
+                            <i class="fa-solid fa-map text-sky-400"></i> Navigation Suivie
                         </h2>
                         <select id="select-vehicule-map" onchange="centrerSurVehicule(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg text-[10px] text-emerald-400 font-bold px-2 py-1 outline-none truncate max-w-[150px]"></select>
                     </div>
@@ -614,20 +626,35 @@
         }
 
         // ========================================================
-        // ANIMATION FLUIDE DU VÉHICULE EN DIRECT (SANS SACCADE)
+        // MOTEUR D'ANIMATION FLUIDE YANGO (SMOOTH SLIDING & ROTATION)
         // ========================================================
-        function animerDeplacementMarker(marker, startPos, endPos, dureeMs = 1200) {
+        function interpolerAngle(depart, arrivee) {
+            let diff = (arrivee - depart) % 360;
+            if (diff < -180) diff += 360;
+            if (diff > 180) diff -= 360;
+            return depart + diff;
+        }
+
+        function animerDeplacementMarker(marker, startPos, endPos, startAngle, targetAngle, dureeMs = 1400) {
             const debut = performance.now();
+            const angleFinal = interpolerAngle(startAngle, targetAngle);
+
             function frame(maintenant) {
                 const ecoule = maintenant - debut;
                 const ratio = Math.min(ecoule / dureeMs, 1.0);
-                // Courbe d'accélération/décélération naturelle
+                // Courbe d'interpolation cinématique fluide
                 const ease = ratio < 0.5 ? 2 * ratio * ratio : -1 + (4 - 2 * ratio) * ratio;
                 
                 const curLat = startPos.lat + (endPos.lat - startPos.lat) * ease;
                 const curLng = startPos.lng + (endPos.lng - startPos.lng) * ease;
+                const curAngle = startAngle + (angleFinal - startAngle) * ease;
                 
                 marker.setLatLng([curLat, curLng]);
+                
+                const carBody = marker.getElement()?.querySelector('.yango-car-body');
+                if (carBody) {
+                    carBody.style.transform = `rotate(${curAngle}deg)`;
+                }
                 
                 if (ratio < 1.0) {
                     requestAnimationFrame(frame);
@@ -636,19 +663,37 @@
             requestAnimationFrame(frame);
         }
 
-        function creerIconeVehiculeLive(cap = 0) {
+        // VÉHICULE VUE DU DESSUS STYLE YANGO (SVG HAUTE DÉFINITION)
+        function creerIconeVehiculeYango(cap = 0) {
             return L.divIcon({
-                className: 'custom-live-marker',
+                className: 'yango-marker-container',
                 html: `
-                    <div style="position:relative;">
-                        <div class="live-pulse-ring"></div>
-                        <div class="vehicle-marker-box" style="transform: rotate(${cap}deg);">
-                            <i class="fa-solid fa-car-side text-sky-400 text-xs"></i>
+                    <div class="yango-car-wrapper">
+                        <div class="yango-pulse-halo"></div>
+                        <div class="yango-car-body" style="transform: rotate(${cap}deg);">
+                            <svg viewBox="0 0 40 40" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Ombre portée -->
+                                <ellipse cx="20" cy="21" rx="11" ry="16" fill="rgba(0,0,0,0.3)"/>
+                                <!-- Châssis de voiture -->
+                                <rect x="11" y="6" width="18" height="28" rx="6" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5"/>
+                                <!-- Toit -->
+                                <rect x="13" y="12" width="14" height="15" rx="3" fill="#0f172a"/>
+                                <!-- Pare-brise avant -->
+                                <path d="M13 13 C15 9, 25 9, 27 13 Z" fill="#38bdf8" opacity="0.9"/>
+                                <!-- Vitre arrière -->
+                                <path d="M14 26 C16 28, 24 28, 26 26 Z" fill="#38bdf8" opacity="0.7"/>
+                                <!-- Phares avant -->
+                                <circle cx="13.5" cy="7" r="1.5" fill="#fef08a"/>
+                                <circle cx="26.5" cy="7" r="1.5" fill="#fef08a"/>
+                                <!-- Feux arrière -->
+                                <rect x="12" y="32" width="3" height="1.5" rx="0.5" fill="#f43f5e"/>
+                                <rect x="25" y="32" width="3" height="1.5" rx="0.5" fill="#f43f5e"/>
+                            </svg>
                         </div>
                     </div>
                 `,
-                iconSize: [32, 32],
-                iconAnchor: [16, 16]
+                iconSize: [44, 44],
+                iconAnchor: [22, 22]
             });
         }
 
@@ -728,7 +773,7 @@
         async function chargerDernieresPositions() {
             try {
                 const txtStatut = document.getElementById('last-update-text');
-                txtStatut.textContent = "Calcul de l'activité du matin...";
+                txtStatut.textContent = "Calcul de l'activité en cours...";
                 
                 if (!window.supabase) return;
 
@@ -792,7 +837,6 @@
 
                         verifierEtChargerJournalDuJour(nouveauVehicule);
 
-                        // Calcul de la distance réelle de la matinée
                         const pointsDuJour = data
                             .filter(p => String(p.imei).trim() === imeiClean && p.created_at && new Date(p.created_at).getTime() >= debutJourneeTs)
                             .reverse();
@@ -848,19 +892,19 @@
                     const sel = document.getElementById('select-vehicule-map');
                     if (sel && sel.value !== "none") { initMapEtCentrer(parseInt(sel.value)); }
                     
-                    txtStatut.textContent = `En ligne : ${premierVehicule ? premierVehicule.kmJour.toFixed(1) : 0} km parcourus ce jour.`;
+                    txtStatut.textContent = `Télématique Live active : ${premierVehicule ? premierVehicule.kmJour.toFixed(1) : 0} km aujourd'hui.`;
                 }
             } catch (err) {}
         }
 
         socket.on('connect', () => {
             document.getElementById('statut-serveur-voyant').className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
-            document.getElementById('statut-serveur-texte').textContent = "Suivi Satellite Actif";
+            document.getElementById('statut-serveur-texte').textContent = "Suivi Live Yango Actif";
             document.getElementById('statut-serveur-texte').className = "text-[10px] font-black uppercase text-emerald-400 tracking-wider";
         });
 
         // ========================================================
-        // RÉCEPTION D'UNE POSITION ET ANIMATION EN DIRECT
+        // RÉCEPTION D'UNE POSITION ET ANIMATION EN DIRECT (STYLE YANGO)
         // ========================================================
         function traiterNouvellePosition(data) {
             const now = new Date();
@@ -917,6 +961,8 @@
                         diffCap = Math.abs(nouveauCap - v.dernierCap);
                         if (diffCap > 180) diffCap = 360 - diffCap;
                     }
+
+                    const ancienCap = v.dernierCap || 0;
                     v.dernierCap = nouveauCap;
 
                     const dDirect = v.distDirect || 12.0;
@@ -955,11 +1001,10 @@
 
                     sauvegarderStatsJournalieres(v);
 
-                    // Animation fluide de déplacement sur la carte
+                    // ANIMATION FLUIDE LERP EN TEMPS RÉEL (STYLE YANGO)
                     const selectMap = document.getElementById('select-vehicule-map');
                     if (selectMap && selectMap.value == vehiculeIndex && map && busMarker) {
-                        animerDeplacementMarker(busMarker, anciennePosition, { lat: data.lat, lng: data.lng }, 1200);
-                        busMarker.setIcon(creerIconeVehiculeLive(v.dernierCap));
+                        animerDeplacementMarker(busMarker, anciennePosition, { lat: data.lat, lng: data.lng }, ancienCap, nouveauCap, 1400);
                     }
                 }
             }
@@ -987,10 +1032,10 @@
                         busMarker.getPopup().setContent(`
                             <b>${v.plaque}</b><br>
                             Ligne : <b>${v.origine} ➔ ${v.destination}</b><br>
-                            Vitesse : <b>${vitTxt}</b><br>
-                            Roulé ce matin : <b>${v.kmJour.toFixed(1)} km</b><br>
+                            Vitesse en direct : <b>${vitTxt}</b><br>
+                            Roulé aujourd'hui : <b>${v.kmJour.toFixed(1)} km</b><br>
                             Rotations validées : <b>${v.tronconsValides}</b><br>
-                            Recettes du jour : <b>${v.recetteBruteReelle.toLocaleString()} CDF</b>
+                            Recettes : <b>${v.recetteBruteReelle.toLocaleString()} CDF</b>
                         `);
                     } else {
                         initMapEtCentrer(vehiculeIndex);
@@ -1018,7 +1063,7 @@
             traiterNouvellePosition(data);
         });
 
-        // SONDAGE SATELLITE TOUTES LES 3 SECONDES
+        // POLLING SUPABASE HAUTE FRÉQUENCE (3 SECONDES)
         async function sonderPositionsCloudEnContinu() {
             try {
                 if (!window.supabase) return;
@@ -1128,7 +1173,7 @@
             if(!map) {
                 map = L.map('map-container').setView([lat, lng], 17);
                 
-                // FLUX GOOGLE MAPS AVEC COUCHE TRAFIC ROUTIER EN TEMPS RÉEL (ROUGE, ORANGE, VERT)
+                // COUCHE GOOGLE MAPS TRAFIC EN DIRECT
                 L.tileLayer('https://{s}.google.com/vt/lyrs=m,traffic&x={x}&y={y}&z={z}', {
                     maxZoom: 20,
                     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
@@ -1147,7 +1192,7 @@
             ` : "En attente...";
             
             busMarker = L.marker([lat, lng], {
-                icon: creerIconeVehiculeLive(v ? v.dernierCap : 0)
+                icon: creerIconeVehiculeYango(v ? v.dernierCap : 0)
             }).addTo(map).bindPopup(popupTxt).openPopup();
             
             if (polylineTrace) map.removeLayer(polylineTrace);
@@ -1671,6 +1716,7 @@
             naviguerVers('app-proprietaire'); 
             
             chargerDernieresPositions().then(() => { 
+                verifierEtReinitialiserAutomatiqueJournee();
                 genererToutesLesVues(); 
                 actualiserCompteAReboursForfait();
                 setInterval(actualiserCompteAReboursForfait, 1000); 
@@ -1689,6 +1735,7 @@
 
         window.addEventListener('DOMContentLoaded', async () => {
             chargerConfigurationsAdmin();
+            verifierEtReinitialiserAutomatiqueJournee();
             actualiserCompteAReboursForfait();
             
             const telSauve = localStorage.getItem('tv_partenaire_tel');
