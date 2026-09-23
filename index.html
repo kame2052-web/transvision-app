@@ -34,7 +34,7 @@
         @keyframes pulseRadar { 0% { transform: scale(0.6); opacity: 0.9; } 100% { transform: scale(1.6); opacity: 0; } }
         .tv-car-body {
             position: relative; width: 32px; height: 32px; transform-origin: center center;
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); filter: drop-shadow(0 4px 8px rgba(0,0,0,0.45));
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45));
         }
 
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(100deg); cursor: pointer; }
@@ -53,7 +53,7 @@
         <div class="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/70 to-slate-950/90"></div>
     </div>
 
-    <!-- BANNIÈRE INSTALLATION PWA -->
+    <!-- BANNIÈRE PWA -->
     <div id="pwa-install-banner" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-slate-900/95 backdrop-blur border border-emerald-500/50 text-slate-100 p-3 rounded-2xl shadow-2xl flex items-center gap-3 z-[100] w-[90%] max-w-sm hidden no-print">
         <div class="w-10 h-10 rounded-xl overflow-hidden shadow-md flex items-center justify-center bg-slate-950 flex-shrink-0">
             <img src="logo%20192x192.png" alt="Logo" class="w-full h-full object-contain scale-[2.05]" onerror="this.style.display='none'">
@@ -68,7 +68,7 @@
 
     <div class="relative z-10 max-w-md mx-auto min-h-screen shadow-2xl overflow-hidden flex flex-col border-x border-slate-800/70 pb-20 bg-slate-900/70 backdrop-blur-xl" id="zone-flotte">
         
-        <!-- 1. ÉCRAN D'ACCÈS / AUTHENTIFICATION -->
+        <!-- 1. AUTHENTIFICATION -->
         <div id="page-auth" class="p-6 space-y-5 flex-1 flex flex-col justify-between no-print overflow-y-auto">
             <div class="space-y-4 mt-1">
                 <div class="text-center">
@@ -119,7 +119,7 @@
                 </div>
             </div>
             <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v22.0 PROD — Données Réelles 4 Places
+                TransVision v24.0 PROD — Places et Recettes Dynamiques
             </div>
         </div>
 
@@ -149,14 +149,11 @@
                     </div>
                     <div class="text-right flex flex-col items-end gap-1.5">
                         <span id="timer-compte-rebours" class="text-xs font-mono font-black text-slate-100 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-lg shadow-inner">--:--:--</span>
-                        <button onclick="remettreCompteurZeroManuel()" class="bg-slate-900 hover:bg-slate-850 text-rose-400 border border-rose-500/30 px-2 py-0.5 rounded text-[8px] font-bold uppercase transition-all flex items-center gap-1">
-                            <i class="fa-solid fa-rotate-left"></i> Remettre à 0
-                        </button>
                     </div>
                 </div>
             </header>
 
-            <!-- ONGLET A : CARTE LIVE HAUTE PRÉCISION -->
+            <!-- ONGLET A : CARTE LIVE -->
             <div id="onglet-flotte" class="p-2 flex-1 flex flex-col blur-transition class-onglet no-print min-h-[calc(100vh-170px)] space-y-2">
                 <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-3 space-y-2 shadow-2xl backdrop-blur">
                     <div class="flex justify-between items-center text-xs">
@@ -189,7 +186,7 @@
                             <span class="font-black text-sky-400 text-xs" id="hud-course-progression">0.0 km</span>
                         </div>
                         <div class="bg-slate-950/80 p-1.5 rounded-xl border border-slate-850">
-                            <span class="text-[8px] text-slate-500 block uppercase font-bold">Recettes (4 places)</span>
+                            <span class="text-[8px] text-slate-500 block uppercase font-bold" id="hud-label-recettes">Recettes</span>
                             <span class="font-black text-emerald-400 text-xs" id="hud-recettes-jour">0 CDF</span>
                         </div>
                     </div>
@@ -211,7 +208,7 @@
                 <div class="bg-slate-950/85 backdrop-blur p-5 rounded-2xl border border-slate-800/80 space-y-4 shadow-xl">
                     <div class="border-b border-slate-800 pb-2">
                         <h3 class="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-square-plus text-indigo-400"></i> Configuration Matériel</h3>
-                        <p class="text-[10px] text-slate-400">Plaque, IMEI et affectation de ligne.</p>
+                        <p class="text-[10px] text-slate-400">Définissez la capacité exacte et l'itinéraire de votre véhicule.</p>
                     </div>
 
                     <div class="space-y-3">
@@ -221,14 +218,20 @@
                                 <input type="text" id="add-plaque" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono focus:border-indigo-500 outline-none" placeholder="Ex: KIN 4082AE">
                             </div>
                             <div>
-                                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Places Assises</label>
-                                <input type="number" id="add-places" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-emerald-400 font-bold focus:border-indigo-500 outline-none" value="4">
+                                <label class="block text-[9px] font-bold text-emerald-400 uppercase mb-1">Places Assises Réelles</label>
+                                <input type="number" id="add-places" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-emerald-400 font-black focus:border-emerald-500 outline-none" placeholder="Ex: 4" min="1">
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">N° IMEI Traceur SinoTrack</label>
-                            <input type="text" id="add-imei" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono focus:border-indigo-500 outline-none" placeholder="Ex: 357445101350102">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Modèle</label>
+                                <input type="text" id="add-type" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:border-indigo-500 outline-none" placeholder="Ex: Toyota IST">
+                            </div>
+                            <div>
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">N° IMEI Traceur</label>
+                                <input type="text" id="add-imei" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono focus:border-indigo-500 outline-none" placeholder="Ex: 357445101350102">
+                            </div>
                         </div>
 
                         <div class="p-3 bg-slate-900/90 border border-indigo-500/30 rounded-2xl space-y-3 shadow-inner">
@@ -273,7 +276,7 @@
                 </div>
 
                 <div class="bg-slate-950/85 backdrop-blur p-4 rounded-2xl border border-slate-800/80 space-y-2 shadow-md">
-                    <h3 class="text-xs font-black uppercase text-emerald-400 flex items-center gap-2"><i class="fa-solid fa-chart-simple"></i> Recettes Journalières Générées (Base 4 places)</h3>
+                    <h3 class="text-xs font-black uppercase text-emerald-400 flex items-center gap-2"><i class="fa-solid fa-chart-simple"></i> Recettes Journalières Générées</h3>
                     <div class="h-40 relative"><canvas id="chart-recettes-partenaire"></canvas></div>
                 </div>
 
@@ -315,7 +318,9 @@
                 </button>
 
                 <div class="bg-slate-950/80 backdrop-blur p-5 rounded-2xl border border-slate-800 space-y-3 shadow-xl">
-                    <h3 class="text-xs font-black uppercase text-indigo-400 flex items-center gap-2 border-b border-slate-800 pb-2"><i class="fa-solid fa-shield-halved"></i> Mes Identifiants</h3>
+                    <h3 class="text-xs font-black uppercase text-indigo-400 flex items-center gap-2 border-b border-slate-800 pb-2">
+                        <i class="fa-solid fa-shield-halved"></i> Mes Identifiants
+                    </h3>
                     <div>
                         <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Téléphone (Login)</label>
                         <input type="tel" id="prof-tel" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-400 font-mono" readonly>
@@ -344,7 +349,7 @@
             <!-- BARRE NAVIGATION -->
             <nav class="fixed bottom-0 max-w-md w-full inset-x-0 mx-auto bg-slate-950/95 backdrop-blur border-t border-slate-800 h-16 flex justify-around items-center z-40 no-print px-1">
                 <button onclick="changerOnglet('onglet-flotte', this)" class="flex flex-col items-center justify-center gap-1 text-emerald-400 btn-nav flex-1"><i class="fa-solid fa-location-crosshairs text-sm"></i><span class="text-[8px] font-bold">GPS Live</span></button>
-                <button onclick="changerOnglet('onglet-ajouter', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-plus-circle text-sm"></i><span class="text-[8px] font-bold">Nouveau</span></button>
+                <button onclick="changerOnglet('onglet-ajouter', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-plus-circle text-sm"></i><span class="text-[8px] font-bold">Véhicule</span></button>
                 <button onclick="changerOnglet('onglet-rapport', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-file-invoice-dollar text-sm"></i><span class="text-[8px] font-bold">Rapport</span></button>
                 <button onclick="changerOnglet('onglet-analyse', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-wrench text-sm"></i><span class="text-[8px] font-bold">Tech.</span></button>
                 <button onclick="changerOnglet('onglet-profil', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-user text-sm"></i><span class="text-[8px] font-bold">Profil</span></button>
@@ -457,7 +462,7 @@
         </div>
     </div>
 
-    <!-- LOGIQUE JAVASCRIPT CONNECTÉE SANS DONNÉES FANTÔMES -->
+    <!-- LOGIQUE JAVASCRIPT CONNECTÉE SANS VALEURS EN DUR -->
     <script>
         function chargerConfigurationsAdmin() {
             const numWhatsApp = localStorage.getItem('tv_whatsapp') || "243810000000";
@@ -640,25 +645,15 @@
             const cleStatsJour = `tv_stats_${dateDuJour}_${v.imei}`;
             let stats = JSON.parse(localStorage.getItem(cleStatsJour) || 'null');
 
-            v.places = 4; // FORCÉ À 4 PLACES STRICTES
+            // Le nombre de places n'est JAMAIS forcé. Il utilise les places saisies.
+            const placesReelles = parseInt(v.places) || 0;
 
             if (stats) {
                 v.kmJour = stats.kmJour || 0;
                 v.kmCourse = stats.kmCourse || 0;
                 v.tronconsValides = stats.tronconsValides || 0;
-                v.recetteBruteReelle = stats.recetteBruteReelle || 0;
+                v.recetteBruteReelle = v.tronconsValides * (v.tarif * placesReelles);
                 v.carburantJour = stats.carburantJour || 0;
-
-                // GARDE-FOU ANTI-DONNÉES FANTÔMES :
-                // Si la voiture n'a fait que 7 km, impossible d'avoir 14 rotations ou 140 000 CDF
-                const seuilMinParRotation = (v.distDirect || 12.0) * 0.55;
-                const maxRotationsPossibles = Math.floor(v.kmJour / seuilMinParRotation);
-                
-                if (v.tronconsValides > maxRotationsPossibles) {
-                    v.tronconsValides = maxRotationsPossibles;
-                    v.recetteBruteReelle = v.tronconsValides * (v.tarif * 4);
-                    sauvegarderStatsJournalieres(v);
-                }
             } else {
                 v.kmJour = 0;
                 v.kmCourse = 0;
@@ -678,11 +673,13 @@
                 tronconsValides: v.tronconsValides || 0,
                 recetteBruteReelle: v.recetteBruteReelle || 0,
                 carburantJour: v.carburantJour || 0,
+                places: v.places,
                 updatedAt: Date.now()
             };
             localStorage.setItem(cleStatsJour, JSON.stringify(donnees));
         }
 
+        // BASCULE MINUIT AUTOMATIQUE (KINSHASA GMT+1)
         function verifierEtReinitialiserAutomatiqueJournee() {
             const dateActuelle = getKinshasaDateStr();
             const derniereDateVerifiee = localStorage.getItem('tv_derniere_date_minuit');
@@ -695,7 +692,6 @@
                         v.tronconsValides = 0;
                         v.recetteBruteReelle = 0;
                         v.carburantJour = 0;
-                        v.places = 4;
                         sauvegarderStatsJournalieres(v);
                     });
                 }
@@ -711,31 +707,8 @@
         }
         setInterval(verifierEtReinitialiserAutomatiqueJournee, 15000);
 
-        function remettreCompteurZeroManuel() {
-            if (confirm("Remettre le compteur de la journée à zéro ? Le calcul se relancera dès que le véhicule roulera.")) {
-                const v = client.vehicules[0];
-                if (v) {
-                    v.kmJour = 0;
-                    v.kmCourse = 0;
-                    v.tronconsValides = 0;
-                    v.recetteBruteReelle = 0;
-                    v.carburantJour = 0;
-                    v.secondesArret = 0;
-                    v.distanceSensInverse = 0;
-                    v.capOrigineCourse = 0;
-                    v.places = 4;
-                    localStorage.setItem('tv_reset_ts_' + v.imei, Date.now());
-                    sauvegarderStatsJournalieres(v);
-                    tracePositions = [[v.lat, v.lng]];
-                    if (polylineTrace) polylineTrace.setLatLngs(tracePositions);
-                    genererToutesLesVues();
-                    alert("✅ Compteurs réinitialisés à 0 (4 places). Prêt pour le départ.");
-                }
-            }
-        }
-
         // ========================================================
-        // CHARGEMENT INITIAL STRICT (SANS RÉCUPÉRATION DU BUFFER)
+        // CHARGEMENT INITIAL (LECTURE STRICTE DES PLACES ENREGISTRÉES)
         // ========================================================
         async function chargerDernieresPositions() {
             try {
@@ -748,134 +721,119 @@
                 debutJournee.setHours(0, 0, 0, 0);
                 const debutJourneeTs = debutJournee.getTime();
 
-                const { data, error } = await supabaseClient
+                // 1. Lire la configuration sauvegardée du véhicule dans Supabase ou LocalStorage
+                const imeiClean = "357445101350102";
+                let savedLigne = JSON.parse(localStorage.getItem('tv_ligne_' + imeiClean) || 'null');
+                let customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
+                let cfg = customConfig[imeiClean] || {};
+
+                // Lecture depuis la table tv_vehicules si disponible
+                let placesDb = null;
+                try {
+                    const { data: dbV } = await supabaseClient.from('tv_vehicules').select('*').eq('imei', imeiClean).maybeSingle();
+                    if (dbV) {
+                        placesDb = dbV.places;
+                        if (dbV.origine) cfg.origine = dbV.origine;
+                        if (dbV.destination) cfg.destination = dbV.destination;
+                    }
+                } catch(e) {}
+
+                // PLACES ASSISES STRICTEMENT DÉFINIES PAR LA CONFIGURATION UTILISATEUR
+                const placesFinales = parseInt(placesDb || cfg.places) || 0;
+
+                let origine = savedLigne?.origine || cfg.origine || "BRIKIN";
+                let destination = savedLigne?.destination || cfg.destination || "GARE CENTRALE";
+                const params = trouverParametresSecrets(origine, destination);
+
+                const { data } = await supabaseClient
                     .from('transvision_positions_gps')
                     .select('*')
                     .order('created_at', { ascending: false })
                     .limit(200);
 
+                const nouveauVehicule = {
+                    plaque: cfg.plaque || "Tracker 0102", 
+                    type: cfg.type || "Toyota IST", 
+                    places: placesFinales, // ZÉRO EN DUR : VALEUR SAISIE PAR L'UTILISATEUR
+                    imei: imeiClean,
+                    lat: -4.3215, 
+                    lng: 15.3115, 
+                    moteurCoupe: cfg.moteurCoupe || false, 
+                    carburantJour: 0, 
+                    kmJour: 0,
+                    distDirect: params.distDirect,
+                    distDeviee: params.distDeviee,
+                    tarif: params.tarif,
+                    kmCourse: 0,
+                    origine: origine,
+                    destination: destination,
+                    dernierCap: 0,
+                    capOrigineCourse: 0,
+                    secondesArret: 0,
+                    distanceSensInverse: 0,
+                    recetteBruteReelle: 0, 
+                    tronconsValides: 0 
+                };
+
+                verifierEtChargerJournalDuJour(nouveauVehicule);
+
                 if (data && data.length > 0) {
-                    const vehiculesTrouves = {};
-                    data.forEach(pos => {
-                        if (pos.imei && pos.latitude && pos.longitude) {
-                            const imeiClean = String(pos.imei).trim();
-                            if (!vehiculesTrouves[imeiClean]) vehiculesTrouves[imeiClean] = pos; 
-                        }
-                    });
+                    const pointsDuJour = data
+                        .filter(p => String(p.imei).trim() === imeiClean && p.created_at && new Date(p.created_at).getTime() >= debutJourneeTs)
+                        .reverse();
 
-                    client.vehicules = [];
+                    let kmCalc = 0;
+                    let kmCourseEnCours = 0;
+                    let rotationsCalculees = 0;
+                    let pointPrec = null;
+                    let dernierCapPoint = 0;
 
-                    Object.keys(vehiculesTrouves).forEach(imeiClean => {
-                        const pos = vehiculesTrouves[imeiClean];
-                        const resetTs = parseInt(localStorage.getItem('tv_reset_ts_' + imeiClean) || '0');
-                        
-                        let savedLigne = JSON.parse(localStorage.getItem('tv_ligne_' + imeiClean) || 'null');
-                        let customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
-                        let cfg = customConfig[imeiClean] || {};
+                    pointsDuJour.forEach(pt => {
+                        const pLat = parseFloat(pt.latitude);
+                        const pLng = parseFloat(pt.longitude);
+                        const vit = parseFloat(pt.speed || pt.vitesse || 0);
 
-                        // Éradication du vieux 14 places dans le localStorage
-                        if (cfg.places !== 4) {
-                            cfg.places = 4;
-                            customConfig[imeiClean] = cfg;
-                            localStorage.setItem('tv_vehicules_custom', JSON.stringify(customConfig));
-                        }
+                        if (pointPrec) {
+                            let d = calculerDistanceGPS(pointPrec.latitude, pointPrec.longitude, pLat, pLng);
+                            if (d > 0.025 || (d > 0.005 && vit > 3)) {
+                                kmCalc += d;
+                                kmCourseEnCours += d;
+                                dernierCapPoint = calculerCap(pointPrec.latitude, pointPrec.longitude, pLat, pLng);
 
-                        let origine = savedLigne?.origine || cfg.origine || "BRIKIN";
-                        let destination = savedLigne?.destination || cfg.destination || "GARE CENTRALE";
-                        const params = trouverParametresSecrets(origine, destination);
-
-                        const nouveauVehicule = {
-                            plaque: cfg.plaque || `Tracker ${imeiClean.slice(-4)}`, 
-                            type: cfg.type || "Toyota IST", 
-                            places: 4, // 4 PLACES STRICTES
-                            imei: imeiClean,
-                            lat: parseFloat(pos.latitude), 
-                            lng: parseFloat(pos.longitude), 
-                            moteurCoupe: cfg.moteurCoupe || false, 
-                            carburantJour: 0, 
-                            kmJour: 0,
-                            distDirect: params.distDirect,
-                            distDeviee: params.distDeviee,
-                            tarif: params.tarif,
-                            kmCourse: 0,
-                            origine: origine,
-                            destination: destination,
-                            dernierCap: 0,
-                            capOrigineCourse: 0,
-                            secondesArret: 0,
-                            distanceSensInverse: 0,
-                            recetteBruteReelle: 0, 
-                            tronconsValides: 0 
-                        };
-
-                        verifierEtChargerJournalDuJour(nouveauVehicule);
-
-                        const filtreDebut = Math.max(debutJourneeTs, resetTs);
-                        const pointsDuJour = data
-                            .filter(p => String(p.imei).trim() === imeiClean && p.created_at && new Date(p.created_at).getTime() >= filtreDebut)
-                            .reverse();
-
-                        let kmCalc = 0;
-                        let kmCourseEnCours = 0;
-                        let rotationsCalculees = 0;
-                        let pointPrec = null;
-                        let dernierCapPoint = 0;
-
-                        pointsDuJour.forEach(pt => {
-                            const pLat = parseFloat(pt.latitude);
-                            const pLng = parseFloat(pt.longitude);
-                            const vit = parseFloat(pt.speed || pt.vitesse || 0);
-
-                            if (pointPrec) {
-                                let d = calculerDistanceGPS(pointPrec.latitude, pointPrec.longitude, pLat, pLng);
-                                if (d > 0.025 || (d > 0.005 && vit > 3)) {
-                                    kmCalc += d;
-                                    kmCourseEnCours += d;
-                                    dernierCapPoint = calculerCap(pointPrec.latitude, pointPrec.longitude, pLat, pLng);
-
-                                    if (kmCourseEnCours >= params.distDirect) {
-                                        rotationsCalculees += 1;
-                                        kmCourseEnCours = 0;
-                                    }
+                                if (kmCourseEnCours >= params.distDirect) {
+                                    rotationsCalculees += 1;
+                                    kmCourseEnCours = 0;
                                 }
                             }
-                            pointPrec = { latitude: pLat, longitude: pLng };
-                            dernierTimestampTraite = Math.max(dernierTimestampTraite, new Date(pt.created_at).getTime());
-                        });
-
-                        // AUCUN Math.max() avec des vieilles valeurs corrompues :
-                        if (resetTs > 0 || nouveauVehicule.kmJour === 0) {
-                            nouveauVehicule.kmJour = kmCalc;
-                            nouveauVehicule.kmCourse = kmCourseEnCours;
-                            nouveauVehicule.tronconsValides = rotationsCalculees;
-                            nouveauVehicule.recetteBruteReelle = rotationsCalculees * (params.tarif * 4);
-                            nouveauVehicule.carburantJour = nouveauVehicule.kmJour * 0.12;
-                            nouveauVehicule.dernierCap = dernierCapPoint;
-                            sauvegarderStatsJournalieres(nouveauVehicule);
                         }
-
-                        client.vehicules.push(nouveauVehicule);
+                        pointPrec = { latitude: pLat, longitude: pLng };
+                        dernierTimestampTraite = Math.max(dernierTimestampTraite, new Date(pt.created_at).getTime());
                     });
-                    
-                    const premierVehicule = client.vehicules[0];
-                    if (premierVehicule) {
-                        const resetTs = parseInt(localStorage.getItem('tv_reset_ts_' + premierVehicule.imei) || '0');
-                        const filtreDebut = Math.max(debutJourneeTs, resetTs);
-                        const tracePts = data
-                            .filter(p => String(p.imei).trim() === premierVehicule.imei && p.created_at && new Date(p.created_at).getTime() >= filtreDebut)
-                            .reverse()
-                            .map(p => [parseFloat(p.latitude), parseFloat(p.longitude)]);
 
-                        tracePositions = tracePts.length > 0 ? tracePts : [[premierVehicule.lat, premierVehicule.lng]];
+                    if (nouveauVehicule.kmJour === 0) {
+                        nouveauVehicule.kmJour = kmCalc;
+                        nouveauVehicule.kmCourse = kmCourseEnCours;
+                        nouveauVehicule.tronconsValides = rotationsCalculees;
+                        nouveauVehicule.recetteBruteReelle = rotationsCalculees * (params.tarif * placesFinales);
+                        nouveauVehicule.carburantJour = nouveauVehicule.kmJour * 0.12;
+                        nouveauVehicule.dernierCap = dernierCapPoint;
+                        sauvegarderStatsJournalieres(nouveauVehicule);
                     }
 
-                    majSelecteurMap();
-                    peuplerSelecteursFiltre();
-                    const sel = document.getElementById('select-vehicule-map');
-                    if (sel && sel.value !== "none") { initMapEtCentrer(parseInt(sel.value)); }
-                    
-                    txtStatut.textContent = `Télématique Live active : ${premierVehicule ? premierVehicule.kmJour.toFixed(1) : 0} km aujourd'hui.`;
+                    const dernierPt = data[0];
+                    nouveauVehicule.lat = parseFloat(dernierPt.latitude);
+                    nouveauVehicule.lng = parseFloat(dernierPt.longitude);
+
+                    const tracePts = pointsDuJour.map(p => [parseFloat(p.latitude), parseFloat(p.longitude)]);
+                    tracePositions = tracePts.length > 0 ? tracePts : [[nouveauVehicule.lat, nouveauVehicule.lng]];
                 }
+
+                client.vehicules = [nouveauVehicule];
+                majSelecteurMap();
+                peuplerSelecteursFiltre();
+                initMapEtCentrer(0);
+                genererToutesLesVues();
+                txtStatut.textContent = `Télématique Live active : ${nouveauVehicule.kmJour.toFixed(1)} km aujourd'hui.`;
             } catch (err) {}
         }
 
@@ -886,7 +844,7 @@
             try {
                 if (!window.supabase) return;
                 supabaseClient
-                    .channel('tv_partner_realtime_stream')
+                    .channel('tv_partner_realtime_stream_v3')
                     .on('postgres_changes', { 
                         event: 'INSERT', 
                         schema: 'public', 
@@ -917,8 +875,6 @@
         // ========================================================
         function traiterNouvellePosition(data) {
             const imeiClean = String(data.imei).trim();
-            const resetTs = parseInt(localStorage.getItem('tv_reset_ts_' + imeiClean) || '0');
-            if (data.timestamp && data.timestamp < resetTs) return;
             if (data.timestamp && data.timestamp < dernierTimestampTraite) return;
             dernierTimestampTraite = data.timestamp || Date.now();
 
@@ -926,165 +882,111 @@
             document.getElementById('last-update-text').textContent = `Signal : ${now.toLocaleTimeString()}`;
             document.getElementById('statut-serveur-voyant').className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping";
 
-            let vehiculeIndex = client.vehicules.findIndex(v => String(v.imei).trim() === imeiClean);
+            let v = client.vehicules.find(item => item.imei === imeiClean);
+            if (!v) return;
+
+            // RECUPÉRATION DYNAMIQUE DES PLACES DE CE VÉHICULE
+            const placesReelles = parseInt(v.places) || 0;
+            const distDelta = calculerDistanceGPS(v.lat, v.lng, data.lat, data.lng);
             
-            if (vehiculeIndex === -1) {
-                let savedLigne = JSON.parse(localStorage.getItem('tv_ligne_' + imeiClean) || 'null');
-                const origine = savedLigne?.origine || "BRIKIN";
-                const destination = savedLigne?.destination || "GARE CENTRALE";
-                const params = trouverParametresSecrets(origine, destination);
+            // Filtrage anti-dérive à l'arrêt
+            if (distDelta > 0.020 || (distDelta > 0.005 && data.vitesse > 3)) {
+                v.kmJour += distDelta;
+                v.kmCourse += distDelta;
+                v.carburantJour = v.kmJour * 0.12;
 
-                const nv = {
-                    plaque: data.plaque || `Tracker ${imeiClean.slice(-4)}`, 
-                    type: "Toyota IST", 
-                    places: 4, // 4 PLACES STRICTES
-                    imei: imeiClean,
-                    lat: data.lat, 
-                    lng: data.lng, 
-                    moteurCoupe: false, 
-                    carburantJour: 0, 
-                    kmJour: 0,
-                    distDirect: params.distDirect,
-                    distDeviee: params.distDeviee,
-                    kmCourse: 0,
-                    tarif: params.tarif,
-                    origine: origine,
-                    destination: destination,
-                    dernierCap: 0,
-                    capOrigineCourse: 0,
-                    secondesArret: 0,
-                    distanceSensInverse: 0,
-                    recetteBruteReelle: 0, 
-                    tronconsValides: 0
-                };
-                verifierEtChargerJournalDuJour(nv);
-                client.vehicules.push(nv);
-                vehiculeIndex = client.vehicules.length - 1;
-                majSelecteurMap();
-                peuplerSelecteursFiltre();
-            } else {
-                let v = client.vehicules[vehiculeIndex];
-                v.places = 4; // FORÇAGE PERMANENT 4 PLACES
+                const nouveauCap = calculerCap(v.lat, v.lng, data.lat, data.lng);
+                const ancienCap = v.dernierCap || 0;
+                v.dernierCap = nouveauCap;
 
-                let distDelta = calculerDistanceGPS(v.lat, v.lng, data.lat, data.lng);
-                
-                // Filtrage anti-dérive à l'arrêt
-                if (distDelta > 0.020 || (distDelta > 0.005 && data.vitesse > 3)) {
-                    v.kmJour += distDelta;
-                    v.kmCourse += distDelta;
-                    v.carburantJour = v.kmJour * 0.12;
+                if (!v.capOrigineCourse || v.kmCourse < 0.4) {
+                    v.capOrigineCourse = nouveauCap;
+                }
 
-                    const nouveauCap = calculerCap(v.lat, v.lng, data.lat, data.lng);
-                    const ancienCap = v.dernierCap || 0;
-                    v.dernierCap = nouveauCap;
+                let diffCap = Math.abs(nouveauCap - v.capOrigineCourse);
+                if (diffCap > 180) diffCap = 360 - diffCap;
 
-                    // Initialiser le cap de départ au début d'une course
-                    if (!v.capOrigineCourse || v.kmCourse < 0.4) {
-                        v.capOrigineCourse = nouveauCap;
-                    }
+                const dDirect = v.distDirect || 12.0;
+                const gainParRotation = (v.tarif || 2500) * placesReelles; // STRICTEMENT DYNAMIQUE
+                let rotationValidee = false;
 
-                    // Différence angulaire par rapport au cap de départ
-                    let diffCap = Math.abs(nouveauCap - v.capOrigineCourse);
-                    if (diffCap > 180) diffCap = 360 - diffCap;
-
-                    const dDirect = v.distDirect || 12.0;
-                    const gainParRotation = (v.tarif || 2500) * 4; // BASE 4 PLACES = 10 000 CDF
-                    let rotationValidee = false;
-
-                    // CRITÈRE 1 : Terminus nominal atteint (100%)
-                    if (v.kmCourse >= dDirect) {
-                        rotationValidee = true;
-                    }
-                    // CRITÈRE 2 : Embouteillage avant terminus (>= 80% du trajet) + arrêt > 30s ou virage
-                    else if (v.kmCourse >= (0.80 * dDirect)) {
-                        if (diffCap >= 110 || data.vitesse < 5) {
-                            v.secondesArret = (v.secondesArret || 0) + 10;
-                            if (v.secondesArret >= 30 || diffCap >= 110) {
-                                rotationValidee = true;
-                            }
-                        } else {
-                            v.secondesArret = 0;
-                        }
-                    }
-                    // CRITÈRE 3 : Demi-tour tactique à mi-parcours (>= 55% du trajet + virage >= 130° confirmé sur 150m)
-                    else if (v.kmCourse >= (0.55 * dDirect) && diffCap >= 130) {
-                        v.distanceSensInverse = (v.distanceSensInverse || 0) + distDelta;
-                        if (v.distanceSensInverse >= 0.15) {
+                // 1. Terminus nominal atteint
+                if (v.kmCourse >= dDirect) {
+                    rotationValidee = true;
+                }
+                // 2. Embouteillage avant terminus (>= 80% du trajet) + arrêt > 30s ou virage
+                else if (v.kmCourse >= (0.80 * dDirect)) {
+                    if (diffCap >= 110 || data.vitesse < 5) {
+                        v.secondesArret = (v.secondesArret || 0) + 10;
+                        if (v.secondesArret >= 30 || diffCap >= 110) {
                             rotationValidee = true;
                         }
                     } else {
-                        v.distanceSensInverse = 0;
-                    }
-
-                    if (rotationValidee) {
-                        v.tronconsValides += 1;
-                        v.recetteBruteReelle = v.tronconsValides * gainParRotation;
-                        v.kmCourse = 0;
                         v.secondesArret = 0;
-                        v.distanceSensInverse = 0;
-                        v.capOrigineCourse = nouveauCap;
                     }
-
-                    const anciennePosition = { lat: v.lat, lng: v.lng };
-                    v.lat = data.lat; 
-                    v.lng = data.lng;
-
-                    sauvegarderStatsJournalieres(v);
-
-                    const selectMap = document.getElementById('select-vehicule-map');
-                    if (selectMap && selectMap.value == vehiculeIndex && map && busMarker) {
-                        animerDeplacementMarker(busMarker, anciennePosition, { lat: data.lat, lng: data.lng }, ancienCap, nouveauCap, 1200);
+                }
+                // 3. Demi-tour tactique à mi-parcours (>= 55% du trajet + virage >= 130° confirmé sur 150m)
+                else if (v.kmCourse >= (0.55 * dDirect) && diffCap >= 130) {
+                    v.distanceSensInverse = (v.distanceSensInverse || 0) + distDelta;
+                    if (v.distanceSensInverse >= 0.15) {
+                        rotationValidee = true;
                     }
                 } else {
-                    v.lat = data.lat; 
-                    v.lng = data.lng;
+                    v.distanceSensInverse = 0;
                 }
+
+                if (rotationValidee) {
+                    v.tronconsValides += 1;
+                    v.recetteBruteReelle = v.tronconsValides * gainParRotation;
+                    v.kmCourse = 0;
+                    v.secondesArret = 0;
+                    v.distanceSensInverse = 0;
+                    v.capOrigineCourse = nouveauCap;
+                }
+
+                const anciennePosition = { lat: v.lat, lng: v.lng };
+                v.lat = data.lat; 
+                v.lng = data.lng;
+
+                sauvegarderStatsJournalieres(v);
+
+                if (map && busMarker) {
+                    animerDeplacementMarker(busMarker, anciennePosition, { lat: data.lat, lng: data.lng }, ancienCap, nouveauCap, 1200);
+                }
+            } else {
+                v.lat = data.lat; 
+                v.lng = data.lng;
             }
 
-            const selectMap = document.getElementById('select-vehicule-map');
-            if (selectMap && selectMap.value == vehiculeIndex) {
-                const targetPoint = [data.lat, data.lng];
-                tracePositions.push(targetPoint);
-                
-                detecterNomAvenue(data.lat, data.lng).then(avenue => {
-                    const elAv = document.getElementById('hud-avenue-live');
-                    if(elAv) elAv.textContent = avenue;
-                });
+            tracePositions.push([data.lat, data.lng]);
+            if (polylineTrace) polylineTrace.setLatLngs(tracePositions);
 
-                const v = client.vehicules[vehiculeIndex];
-                const vitTxt = (data.vitesse || 0) > 0 ? `${Math.round(data.vitesse)} km/h` : 'À l\'arrêt';
-                
-                document.getElementById('hud-vitesse-live').textContent = vitTxt;
-                document.getElementById('hud-km-jour').textContent = `${(v.kmJour || 0).toFixed(1)} km`;
-                document.getElementById('hud-course-progression').textContent = `${(v.kmCourse || 0).toFixed(1)} km`;
-                document.getElementById('hud-recettes-jour').textContent = `${(v.recetteBruteReelle || 0).toLocaleString()} CDF`;
+            detecterNomAvenue(data.lat, data.lng).then(avenue => {
+                const elAv = document.getElementById('hud-avenue-live');
+                if(elAv) elAv.textContent = avenue;
+            });
 
-                if (map) {
-                    if (busMarker) {
-                        busMarker.getPopup().setContent(`
-                            <b>${v.plaque}</b> (4 places)<br>
-                            Ligne : <b>${v.origine} ➔ ${v.destination}</b><br>
-                            Vitesse en direct : <b>${vitTxt}</b><br>
-                            Roulé aujourd'hui : <b>${(v.kmJour || 0).toFixed(1)} km</b><br>
-                            Rotations validées : <b>${v.tronconsValides || 0}</b><br>
-                            Recettes : <b>${(v.recetteBruteReelle || 0).toLocaleString()} CDF</b>
-                        `);
-                    } else {
-                        initMapEtCentrer(vehiculeIndex);
-                    }
-                    
-                    if (polylineTrace) {
-                        polylineTrace.setLatLngs(tracePositions);
-                    } else {
-                        polylineTrace = L.polyline(tracePositions, { 
-                            color: '#1a73e8', 
-                            weight: 6, 
-                            opacity: 0.9, 
-                            lineJoin: 'round' 
-                        }).addTo(map);
-                    }
-                    map.panTo(targetPoint, { animate: true, duration: 1.0 });
+            const vitTxt = (data.vitesse || 0) > 0 ? `${Math.round(data.vitesse)} km/h` : 'À l\'arrêt';
+            
+            document.getElementById('hud-vitesse-live').textContent = vitTxt;
+            document.getElementById('hud-km-jour').textContent = `${(v.kmJour || 0).toFixed(1)} km`;
+            document.getElementById('hud-course-progression').textContent = `${(v.kmCourse || 0).toFixed(1)} km`;
+            document.getElementById('hud-recettes-jour').textContent = `${(v.recetteBruteReelle || 0).toLocaleString()} CDF`;
+
+            if (map) {
+                if (busMarker) {
+                    busMarker.getPopup().setContent(`
+                        <b>${v.plaque}</b> (${placesReelles} places)<br>
+                        Ligne : <b>${v.origine} ➔ ${v.destination}</b><br>
+                        Vitesse : <b>${vitTxt}</b><br>
+                        Distance : <b>${(v.kmJour || 0).toFixed(1)} km</b><br>
+                        Rotations : <b>${v.tronconsValides || 0}</b><br>
+                        Recettes : <b>${(v.recetteBruteReelle || 0).toLocaleString()} CDF</b>
+                    `);
+                } else {
+                    initMapEtCentrer(0);
                 }
+                map.panTo([data.lat, data.lng], { animate: true, duration: 1.0 });
             }
 
             genererRapportFinancier(); 
@@ -1145,7 +1047,7 @@
                 selRecharge.innerHTML = '<option value="none">Aucun véhicule détecté</option>';
             } else {
                 client.vehicules.forEach((v, i) => {
-                    const opt = `<option value="${i}">${v.plaque}</option>`;
+                    const opt = `<option value="${i}">${v.plaque} (${v.places || 0} places)</option>`;
                     if(selFin) selFin.insertAdjacentHTML('beforeend', opt);
                     if(selRecharge) selRecharge.insertAdjacentHTML('beforeend', opt);
                 });
@@ -1182,7 +1084,7 @@
             if(!sel) return;
             sel.innerHTML = "";
             if(client.vehicules.length === 0) { sel.insertAdjacentHTML('beforeend', `<option value="none">Aucun véhicule détecté</option>`); return; }
-            client.vehicules.forEach((v, i) => sel.insertAdjacentHTML('beforeend', `<option value="${i}">${v.plaque} (${v.type})</option>`));
+            client.vehicules.forEach((v, i) => sel.insertAdjacentHTML('beforeend', `<option value="${i}">${v.plaque} (${v.places || 0} places)</option>`));
         }
 
         function initMapEtCentrer(index) {
@@ -1204,6 +1106,7 @@
                 document.getElementById('hud-km-jour').textContent = (v.kmJour || 0).toFixed(1) + ' km';
                 document.getElementById('hud-course-progression').textContent = (v.kmCourse || 0).toFixed(1) + ' km';
                 document.getElementById('hud-recettes-jour').textContent = (v.recetteBruteReelle || 0).toLocaleString() + ' CDF';
+                document.getElementById('hud-label-recettes').textContent = `Recettes (${v.places || 0} pl.)`;
             }
             
             if(!map) {
@@ -1219,7 +1122,7 @@
             if(busMarker) map.removeLayer(busMarker);
             
             const popupTxt = v ? `
-                <b>${v.plaque}</b> (${v.places} places)<br>
+                <b>${v.plaque}</b> (${v.places || 0} places)<br>
                 Ligne : <b>${v.origine} ➔ ${v.destination}</b><br>
                 Roulé aujourd'hui : <b>${(v.kmJour || 0).toFixed(1)} km</b><br>
                 Rotations validées : <b>${v.tronconsValides || 0}</b><br>
@@ -1248,62 +1151,80 @@
             if (indexStr !== "none") initMapEtCentrer(parseInt(indexStr)); 
         }
 
+        // ========================================================
+        // ENREGISTREMENT VÉHICULE : SAISIE STRICTE DES PLACES PAR LE PARTENAIRE
+        // ========================================================
         function enregistrerVehiculeSaisi() {
             const plaque = document.getElementById('add-plaque').value.trim();
             const imei = document.getElementById('add-imei').value.trim();
+            const type = document.getElementById('add-type').value.trim() || "Véhicule Commercial";
             const origine = document.getElementById('add-origine').value.trim() || "BRIKIN";
             const destination = document.getElementById('add-destination').value.trim() || "GARE CENTRALE";
-            const places = parseInt(document.getElementById('add-places').value) || 4;
+            
+            // LECTURE DIRECTE DU NOMBRE DE PLACES SAISI
+            const places = parseInt(document.getElementById('add-places').value);
 
-            if (!plaque || !imei) { alert("Veuillez remplir au moins la Plaque et l'IMEI."); return; }
+            if (!plaque || !imei) { alert("Veuillez renseigner au moins la Plaque et le N° IMEI."); return; }
+            if (isNaN(places) || places <= 0) { alert("Veuillez renseigner un nombre valide de places assises pour ce véhicule."); return; }
             
             const imeiClean = String(imei).trim();
             const params = trouverParametresSecrets(origine, destination);
 
             localStorage.setItem('tv_ligne_' + imeiClean, JSON.stringify({ origine, destination }));
+            
             const customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
             customConfig[imeiClean] = {
                 plaque: plaque,
-                type: document.getElementById('add-type').value || "Toyota IST",
-                places: 4, // 4 PLACES STRICTES
+                type: type,
+                places: places, // SAUVEGARDE DE LA VALEUR SAISIE
                 origine: origine,
                 destination: destination,
                 moteurCoupe: false
             };
             localStorage.setItem('tv_vehicules_custom', JSON.stringify(customConfig));
 
-            const nv = { 
-                plaque: plaque, 
-                type: document.getElementById('add-type').value || "Toyota IST", 
-                places: 4, 
-                imei: imeiClean, 
-                lat: -4.32, 
-                lng: 15.31, 
-                moteurCoupe: false, 
-                carburantJour: 0, 
-                kmJour: 0,
-                distDirect: params.distDirect,
-                distDeviee: params.distDeviee,
-                tarif: params.tarif,
-                kmCourse: 0,
-                origine: origine,
-                destination: destination,
-                dernierCap: 0,
-                capOrigineCourse: 0,
-                secondesArret: 0,
-                distanceSensInverse: 0,
-                recetteBruteReelle: 0, 
-                tronconsValides: 0 
-            };
-            verifierEtChargerJournalDuJour(nv);
-            client.vehicules.push(nv);
+            let vehiculeExistant = client.vehicules.find(v => v.imei === imeiClean);
+            if (vehiculeExistant) {
+                vehiculeExistant.plaque = plaque;
+                vehiculeExistant.type = type;
+                vehiculeExistant.places = places;
+                vehiculeExistant.origine = origine;
+                vehiculeExistant.destination = destination;
+                vehiculeExistant.recetteBruteReelle = vehiculeExistant.tronconsValides * (params.tarif * places);
+            } else {
+                const nv = { 
+                    plaque: plaque, 
+                    type: type, 
+                    places: places, 
+                    imei: imeiClean, 
+                    lat: -4.32, 
+                    lng: 15.31, 
+                    moteurCoupe: false, 
+                    carburantJour: 0, 
+                    kmJour: 0,
+                    distDirect: params.distDirect,
+                    distDeviee: params.distDeviee,
+                    tarif: params.tarif,
+                    kmCourse: 0,
+                    origine: origine,
+                    destination: destination,
+                    dernierCap: 0,
+                    capOrigineCourse: 0,
+                    secondesArret: 0,
+                    distanceSensInverse: 0,
+                    recetteBruteReelle: 0, 
+                    tronconsValides: 0 
+                };
+                client.vehicules.push(nv);
+            }
             
+            // Synchronisation avec la base Supabase tv_vehicules
             try {
                 if(window.supabase) {
                     supabaseClient.from('tv_vehicules').upsert({
                         imei: imeiClean,
                         plaque: plaque,
-                        places: 4,
+                        places: places, // ENREGISTRÉ DANS LA BASE
                         origine: origine,
                         destination: destination,
                         dist_direct: params.distDirect,
@@ -1316,7 +1237,8 @@
 
             document.getElementById('add-plaque').value = ""; 
             document.getElementById('add-imei').value = "";
-            alert(`✅ Véhicule ${plaque} (4 places) enregistré sur la ligne ${origine} ➔ ${destination}.`);
+            document.getElementById('add-places').value = "";
+            alert(`✅ Véhicule ${plaque} configuré avec succès avec ${places} places assises sur la ligne ${origine} ➔ ${destination}.`);
             genererToutesLesVues(); 
             changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]);
         }
@@ -1344,7 +1266,7 @@
                         <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2.5">
                             <div class="flex justify-between items-start">
                                 <div>
-                                    <h4 class="font-black text-slate-200">${v.plaque} <span class="text-[9px] text-emerald-400 font-normal">(${v.places || 4} places)</span></h4>
+                                    <h4 class="font-black text-slate-200">${v.plaque} <span class="text-[9px] text-emerald-400 font-normal">(${v.places || 0} places)</span></h4>
                                     <p class="text-[9px] text-sky-400 font-mono flex items-center gap-1.5 mt-0.5">
                                         <i class="fa-solid fa-route text-indigo-400"></i> ${v.origine} ➔ ${v.destination}
                                     </p>
@@ -1397,7 +1319,7 @@
                 list.insertAdjacentHTML('beforeend', `
                     <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
                         <div class="flex justify-between items-center">
-                            <h4 class="font-black text-slate-200">${v.plaque}</h4>
+                            <h4 class="font-black text-slate-200">${v.plaque} (${v.places || 0} places)</h4>
                             <span class="text-[9px] font-mono text-slate-500">IMEI: ${v.imei}</span>
                         </div>
                         <p class="text-[9px] text-sky-400 font-mono">Itinéraire: ${v.origine} ➔ ${v.destination}</p>
@@ -1477,7 +1399,7 @@
             if (!v) return;
 
             document.getElementById('mod-vehicule-index').value = index;
-            document.getElementById('mod-vehicule-nom').textContent = `${v.plaque}`;
+            document.getElementById('mod-vehicule-nom').textContent = `${v.plaque} (${v.places || 0} places)`;
             document.getElementById('mod-origine').value = v.origine || "BRIKIN";
             document.getElementById('mod-destination').value = v.destination || "GARE CENTRALE";
             document.getElementById('mod-select-ligne-rapide').value = "";
@@ -1528,7 +1450,7 @@
             customConfig[imeiClean] = {
                 plaque: v.plaque,
                 type: v.type,
-                places: 4, // 4 PLACES STRICTES
+                places: v.places,
                 origine: v.origine,
                 destination: v.destination,
                 moteurCoupe: v.moteurCoupe
@@ -1543,7 +1465,8 @@
                 destination: v.destination,
                 distDirect: v.distDirect,
                 distDeviee: v.distDeviee,
-                tarif: v.tarif
+                tarif: v.tarif,
+                places: v.places
             };
 
             const channelSync = supabaseClient.channel('transvision_flotte');
@@ -1558,6 +1481,7 @@
                 supabaseClient.from('tv_vehicules').upsert({
                     imei: imeiClean,
                     plaque: v.plaque,
+                    places: v.places,
                     origine: v.origine,
                     destination: v.destination,
                     dist_direct: v.distDirect,
