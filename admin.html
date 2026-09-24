@@ -77,7 +77,7 @@
     <!-- 2. CORPS APPLICATION ADMIN -->
     <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
         <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
-            <span class="text-xs font-bold text-indigo-400">TransVision Control Panel PROD — Admin Fiable</span>
+            <span class="text-xs font-bold text-indigo-400">TransVision Control Panel v34.0 PROD — Admin Miroir Absolu & Fiable</span>
             <div class="flex gap-2 text-[10px] font-mono">
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 flex items-center gap-1">Push Sync : <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" id="admin-server-dot"></span><span class="text-emerald-400 font-bold" id="admin-server-text">En Direct</span></span>
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Live : <span class="text-emerald-400 font-bold" id="admin-flotte-count">0 Traceur(s)</span></span>
@@ -493,23 +493,6 @@
 
     <!-- LOGIQUE JAVASCRIPT SYNCHRONISÉE -->
     <script>
-        const supabaseUrl = 'https://vbriworyscymnmtzzdny.supabase.co';
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
-        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
-        
-        // DECLARATION DU SOCKET POUR DEBLOQUER L'INTERFACE
-        const SERVEUR_URL = "http://134.209.116.89:3000";
-        const socket = io(SERVEUR_URL, { transports: ['websocket'], reconnection: true });
-
-        let adminCredential = { email: "admin@transvision.cd", pass: "123456" };
-        let ciblePartenaire = null;
-
-        let flotteGlobale = [];
-        let mapAdmin = null;
-        let adminMarkers = {};
-        let adminPolylines = {};
-        let tracesFlotte = {};
-
         function chargerConfigurationsAdmin() {
             const numWhatsApp = localStorage.getItem('tv_whatsapp') || "243810000000";
             const numMpesa = localStorage.getItem('tv_mpesa') || "+243 812 000 000";
@@ -528,6 +511,19 @@
             const optOrange = document.getElementById('opt-orange');
             if(optOrange) optOrange.textContent = `${numOrange} (Orange Money)`;
         }
+
+        const supabaseUrl = 'https://vbriworyscymnmtzzdny.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+        let adminCredential = { email: "admin@transvision.cd", pass: "123456" };
+        let ciblePartenaire = null;
+
+        let flotteGlobale = [];
+        let mapAdmin = null;
+        let adminMarkers = {};
+        let adminPolylines = {};
+        let tracesFlotte = {};
 
         function getKinshasaDateStr() {
             const d = new Date();
@@ -676,18 +672,15 @@
         function activerFluxRealtimeAdmin() {
             if (!window.supabase) return;
 
+            // 1. Écoute des positions GPS pures (Carte)
             supabaseClient
-                .channel('transvision_admin_live_stream_v20')
+                .channel('transvision_admin_live_stream_v9')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transvision_positions_gps' }, (payload) => {
                     const row = payload.new;
                     if (row && row.latitude && row.longitude) {
                         const imeiClean = String(row.imei).trim();
                         let v = flotteGlobale.find(item => item.imei === imeiClean);
                         if (v) {
-                            const resetTs = parseInt(localStorage.getItem('tv_reset_ts_' + imeiClean) || '0');
-                            const rowTs = new Date(row.created_at || Date.now()).getTime();
-                            if (rowTs < resetTs) return;
-
                             const newLat = parseFloat(row.latitude);
                             const newLng = parseFloat(row.longitude);
                             const ancienCap = v.dernierCap || 0;
@@ -706,7 +699,7 @@
                                 animerDeplacementMarkerAdmin(adminMarkers[imeiClean], anciennePos, { lat: newLat, lng: newLng }, ancienCap, nouveauCap, 1200);
                                 
                                 const vitTxt = parseFloat(row.speed || row.vitesse || 0) > 0 ? `${Math.round(row.speed || row.vitesse)} km/h` : 'À l\'arrêt';
-                                adminMarkers[imeiClean].getPopup().setContent(`
+                                adminMarkers[imeiClean].bindPopup(`
                                     <b>${v.plaque}</b> (${v.places} places)<br>
                                     Ligne: <b>${v.origine} ➔ ${v.destination}</b><br>
                                     Vitesse: <b>${vitTxt}</b><br>
@@ -722,10 +715,12 @@
                 })
                 .subscribe();
 
+            // 2. Écoute du Partenaire pour Synchroniser les Chiffres (Miroir)
             supabaseClient.channel('tv_sync_channel')
                 .on('broadcast', { event: 'sync_state' }, ({ payload }) => {
                     let v = flotteGlobale.find(item => item.imei === payload.imei);
                     if (v) {
+                        // Copie stricte, miroir absolu
                         v.kmJour = payload.kmJour;
                         v.tronconsValides = payload.tronconsValides;
                         v.recetteBruteReelle = payload.recetteBruteReelle;
@@ -734,18 +729,6 @@
                         v.origine = payload.origine;
                         v.destination = payload.destination;
                         
-                        sauvegarderStatsJournalieresAdmin(v); 
-                        
-                        if (mapAdmin && adminMarkers[v.imei]) {
-                            adminMarkers[v.imei].getPopup().setContent(`
-                                <b>${v.plaque}</b> (${v.places} places)<br>
-                                Ligne: <b>${v.origine} ➔ ${v.destination}</b><br>
-                                Vitesse: <b>En direct</b><br>
-                                Roulé aujourd'hui: <b>${(v.kmJour || 0).toFixed(1)} km</b><br>
-                                Rotations: <b>${v.tronconsValides}</b> (${(v.recetteBruteReelle || 0).toLocaleString()} CDF)
-                            `);
-                        }
-
                         majTableauFlotteAdmin();
                         initialiserGraphiquesAdmin();
                     }
@@ -822,7 +805,7 @@
         }
 
         // ========================================================
-        // ALIGNEMENT STRICT AVEC LA LOGIQUE PARTENAIRE (200 POINTS)
+        // CHARGEMENT INITIAL ROBUSTE & COMPLET
         // ========================================================
         async function chargerHistoriqueAdmin() {
             try {
@@ -830,7 +813,6 @@
 
                 const debutJournee = new Date();
                 debutJournee.setHours(0, 0, 0, 0);
-                const debutJourneeTs = debutJournee.getTime();
 
                 let lignesConfig = {};
                 try {
@@ -842,12 +824,11 @@
                     }
                 } catch(e) {}
 
-                // On charge EXACTEMENT comme l'application Partenaire (limit 200, sans inventer l'historique lointain)
                 const { data } = await supabaseClient
                     .from('transvision_positions_gps')
                     .select('*')
                     .order('created_at', { ascending: false })
-                    .limit(200);
+                    .limit(500);
 
                 if (data) {
                     const vehiculesUniques = {};
@@ -864,24 +845,16 @@
                         const cfg = lignesConfig[imeiStr] || {};
                         const customLocal = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}')[imeiStr] || {};
 
-                        let dbResetTs = cfg.reset_ts ? new Date(cfg.reset_ts).getTime() : 0;
-                        let localResetTs = parseInt(localStorage.getItem('tv_reset_ts_' + imeiStr) || '0');
-                        const resetTsUnifie = Math.max(dbResetTs, localResetTs);
-                        localStorage.setItem('tv_reset_ts_' + imeiStr, resetTsUnifie);
-
-                        const cleStatsJour = `tv_stats_admin_${debutJournee.toISOString().split('T')[0]}_${imeiStr}`;
-                        let statsLocales = JSON.parse(localStorage.getItem(cleStatsJour) || 'null');
-
                         const vObj = {
                             imei: imeiStr,
                             plaque: cfg.plaque || customLocal.plaque || `TRK-${imeiStr.slice(-4)}`,
-                            places: parseInt(cfg.places) || (statsLocales ? statsLocales.places : 4),
+                            places: parseInt(cfg.places) || parseInt(customLocal.places) || 4,
                             tarif: parseFloat(cfg.tarif) || 2500,
                             origine: cfg.origine || customLocal.origine || "BRIKIN",
                             destination: cfg.destination || customLocal.destination || "GARE CENTRALE",
-                            kmJour: parseFloat(cfg.km_jour) || (statsLocales ? statsLocales.kmJour : 0), 
-                            tronconsValides: parseInt(cfg.troncons_valides) || (statsLocales ? statsLocales.tronconsValides : 0),
-                            recetteBruteReelle: parseFloat(cfg.recette_brute) || (statsLocales ? statsLocales.recetteBruteReelle : 0),
+                            kmJour: parseFloat(cfg.km_jour) || 0, 
+                            tronconsValides: parseInt(cfg.troncons_valides) || 0,
+                            recetteBruteReelle: parseFloat(cfg.recette_brute) || 0,
                             lat: parseFloat(pos.latitude),
                             lng: parseFloat(pos.longitude),
                             moteurCoupe: cfg.moteur_coupe || false,
@@ -890,15 +863,15 @@
                             derniereCo: new Date(pos.created_at || Date.now())
                         };
 
-                        const filtreDebut = Math.max(debutJourneeTs, resetTsUnifie);
+                        tracesFlotte[imeiStr] = [[vObj.lat, vObj.lng]];
                         
-                        // Exactement le même filtrage que le partenaire
                         const pointsDuJour = data
-                            .filter(p => String(p.imei).trim() === imeiStr && p.created_at && new Date(p.created_at).getTime() >= filtreDebut)
+                            .filter(p => String(p.imei).trim() === imeiStr && new Date(p.created_at).getTime() >= debutJournee.getTime())
                             .reverse();
-                            
-                        const tracePts = pointsDuJour.map(p => [parseFloat(p.latitude), parseFloat(p.longitude)]);
-                        tracesFlotte[imeiStr] = tracePts.length > 0 ? tracePts : [[vObj.lat, vObj.lng]];
+                        
+                        pointsDuJour.forEach(pt => {
+                            tracesFlotte[imeiStr].push([parseFloat(pt.latitude), parseFloat(pt.longitude)]);
+                        });
 
                         detecterNomAvenueAdmin(vObj.lat, vObj.lng, vObj.imei).then(av => {
                             vObj.avenueLive = av;
@@ -911,55 +884,11 @@
                     document.getElementById('admin-flotte-count').textContent = `${flotteGlobale.length} Traceur(s)`;
                     majTableauFlotteAdmin();
                     initialiserGraphiquesAdmin();
-                    setTimeout(() => {
-                        if (mapAdmin) { mapAdmin.invalidateSize(); } else { initMapAdmin(); }
-                    }, 300);
+                    if (mapAdmin) { mapAdmin.invalidateSize(); } else { initMapAdmin(); }
                 }
             } catch (err) {
                 console.error(err);
             }
-        }
-
-        // ========================================================
-        // INITIALISATION DE LA CARTE AVEC LES BULLES CORRECTES
-        // ========================================================
-        function initMapAdmin() {
-            const container = document.getElementById('map-admin-suivi');
-            if (!container || container.offsetParent === null) return;
-            
-            if (!mapAdmin) {
-                mapAdmin = L.map('map-admin-suivi').setView([-4.3224, 15.3070], 14);
-                
-                L.tileLayer('https://{s}.google.com/vt/lyrs=m,traffic&x={x}&y={y}&z={z}', {
-                    maxZoom: 20,
-                    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-                    attribution: '&copy; Google Maps & Traffic'
-                }).addTo(mapAdmin);
-
-                flotteGlobale.forEach(v => {
-                    if(!adminMarkers[v.imei]) { 
-                        const popupHTML = `
-                            <b>${v.plaque}</b> (${v.places} places)<br>
-                            Ligne: <b>${v.origine} ➔ ${v.destination}</b><br>
-                            Roulé aujourd'hui: <b>${(v.kmJour || 0).toFixed(1)} km</b><br>
-                            Rotations: <b>${v.tronconsValides}</b> (${(v.recetteBruteReelle || 0).toLocaleString()} CDF)
-                        `;
-                        adminMarkers[v.imei] = L.marker([v.lat, v.lng], {
-                            icon: creerIconeVehiculeDynamiqueAdmin(v.dernierCap)
-                        }).addTo(mapAdmin).bindPopup(popupHTML); 
-                    }
-                    if (tracesFlotte[v.imei] && tracesFlotte[v.imei].length > 1) {
-                        adminPolylines[v.imei] = L.polyline(tracesFlotte[v.imei], {
-                            color: '#1a73e8',
-                            weight: 6,
-                            opacity: 0.9,
-                            lineJoin: 'round'
-                        }).addTo(mapAdmin);
-                    }
-                });
-            }
-            
-            setTimeout(() => { mapAdmin.invalidateSize(); }, 200);
         }
 
         function majTableauFlotteAdmin() {
@@ -969,7 +898,7 @@
             let totalKm = 0; let totalRot = 0; let totalCDF = 0;
             
             if (flotteGlobale.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-slate-500 font-sans italic">Aucun véhicule enregistré.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-slate-500 font-sans italic">En attente des données GPS...</td></tr>`;
                 document.getElementById('stat-total-km').textContent = "0.0";
                 document.getElementById('stat-total-rotations').textContent = "0";
                 document.getElementById('stat-total-cdf').textContent = "0";
@@ -1045,6 +974,39 @@
             if (idPage === 'page-suivi') { setTimeout(initMapAdmin, 50); }
             if (idPage === 'page-itineraires') { chargerMatriceItineraires(); }
             if (idPage === 'page-partenaires') { chargerPartenairesAdmin(); }
+        }
+
+        function initMapAdmin() {
+            const container = document.getElementById('map-admin-suivi');
+            if (!container || container.offsetParent === null) return;
+            
+            if (!mapAdmin) {
+                mapAdmin = L.map('map-admin-suivi').setView([-4.3224, 15.3070], 14);
+                
+                L.tileLayer('https://{s}.google.com/vt/lyrs=m,traffic&x={x}&y={y}&z={z}', {
+                    maxZoom: 20,
+                    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                    attribution: '&copy; Google Maps & Traffic'
+                }).addTo(mapAdmin);
+
+                flotteGlobale.forEach(v => {
+                    if(!adminMarkers[v.imei]) { 
+                        adminMarkers[v.imei] = L.marker([v.lat, v.lng], {
+                            icon: creerIconeVehiculeDynamiqueAdmin(v.dernierCap)
+                        }).addTo(mapAdmin).bindPopup(`<b>${v.plaque}</b><br>IMEI: ${v.imei}`); 
+                    }
+                    if (tracesFlotte[v.imei] && tracesFlotte[v.imei].length > 1) {
+                        adminPolylines[v.imei] = L.polyline(tracesFlotte[v.imei], {
+                            color: '#1a73e8',
+                            weight: 6,
+                            opacity: 0.9,
+                            lineJoin: 'round'
+                        }).addTo(mapAdmin);
+                    }
+                });
+            }
+            
+            setTimeout(() => { mapAdmin.invalidateSize(); }, 200);
         }
 
         function centrerMapAdmin() { 
@@ -1208,7 +1170,7 @@
         }
 
         // ========================================================
-        // GESTION DES PARTENAIRES : MENU D'ACTIONS SÉCURISÉ
+        // GESTION DES PARTENAIRES : MENU D'ACTIONS SÉCURISÉ (MÉMOIRE)
         // ========================================================
         window.annuairePartenaires = {}; 
 
@@ -1225,6 +1187,7 @@
                             const estActif = p.date_expiration && new Date(p.date_expiration) > new Date();
                             const telKey = p.tel || "inconnu_" + Math.random();
                             
+                            // Stockage sécurisé en mémoire
                             window.annuairePartenaires[telKey] = {
                                 nom: p.nom || "Inconnu",
                                 tel: p.tel || "",
@@ -1284,6 +1247,7 @@
             const action = selectElem.value;
             if(!action) return;
 
+            // Récupération sécurisée depuis la mémoire globale
             const part = window.annuairePartenaires[telKey];
             if(!part) return;
 
@@ -1495,7 +1459,7 @@
             const tresoReelle = parseFloat(localStorage.getItem('tv_tresorerie_cumul') || '0');
             document.getElementById('txt-tresor').textContent = tresoReelle.toLocaleString() + " CDF";
 
-            activerFluxRealtimeAdmin(); 
+            activerFluxRealtimeAdmin(); // GPS pur + Chiffres du partenaire
 
             chargerHistoriqueAdmin();
             setTimeout(initialiserGraphiquesAdmin, 100);
