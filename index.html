@@ -488,7 +488,18 @@
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
         const SERVEUR_URL = "http://134.209.116.89:3000";
-        const socket = io(SERVEUR_URL, { transports: ['websocket'], reconnection: true });
+        let socket = null;
+        try {
+            if (typeof io !== 'undefined') {
+                socket = io(SERVEUR_URL, { transports: ['websocket'], reconnection: true });
+                socket.on('connect', () => {
+                    const voyant = document.getElementById('statut-serveur-voyant');
+                    const texte = document.getElementById('statut-serveur-texte');
+                    if(voyant) voyant.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping";
+                    if(texte) texte.textContent = "Suivi Satellite Actif";
+                });
+            }
+        } catch(e) {}
 
         let partenaireProfil = null; 
         let client = { nom: "Dolce", tel: "0965647819", vehicules: [] };
@@ -513,6 +524,34 @@
             { o: "MARCHE SELEMBAO", d: "U.P.N.", t: 1000, d1: 5.5, d2: 6.7 },
             { o: "BANDAL MOULAERT", d: "GARE CENTRALE", t: 500, d1: 6.8, d2: 8.2 }
         ];
+
+        // CANAL PERMANENT PARTAGÉ ABONNÉ DÈS LE DÉMARRAGE
+        const channelSyncClient = supabaseClient.channel('transvision_sync_hub');
+
+        channelSyncClient
+            .on('broadcast', { event: 'maj_ligne_vehicule' }, ({ payload }) => {
+                let v = client.vehicules.find(item => item.imei === payload.imei);
+                if (v) {
+                    v.origine = payload.origine;
+                    v.destination = payload.destination;
+                    if (payload.distDirect) v.distDirect = payload.distDirect;
+                    if (payload.distDeviee) v.distDeviee = payload.distDeviee;
+                    if (payload.tarif) v.tarif = payload.tarif;
+                    if (payload.places !== undefined) v.places = payload.places;
+                    v.kmCourse = 0;
+                    v.recetteBruteReelle = (v.tronconsValides || 0) * (v.tarif * (parseInt(v.places) || 0));
+                    sauvegarderStatsJournalieres(v);
+                    genererToutesLesVues();
+                }
+            })
+            .on('broadcast', { event: 'commande_moteur' }, ({ payload }) => {
+                let v = client.vehicules.find(item => item.imei === payload.imei);
+                if (v) {
+                    v.moteurCoupe = payload.couper;
+                    genererRapportTechnique();
+                }
+            })
+            .subscribe();
 
         function trouverParametresSecrets(origine, destination) {
             const org = (origine || "").trim().toUpperCase();
@@ -865,10 +904,17 @@
             } catch(e) {}
         }
 
-        socket.on('connect', () => {
-            document.getElementById('statut-serveur-voyant').className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping";
-            document.getElementById('statut-serveur-texte').textContent = "Suivi Satellite Actif";
-        });
+        if (socket) {
+            socket.on('nouvelle_position', (data) => {
+                traiterNouvellePosition({
+                    imei: String(data.imei).trim(),
+                    lat: parseFloat(data.lat),
+                    lng: parseFloat(data.lng),
+                    vitesse: parseFloat(data.vitesse || data.speed || 0),
+                    timestamp: data.timestamp ? new Date(data.timestamp).getTime() : Date.now()
+                });
+            });
+        }
 
         // ========================================================
         // RÉCEPTION D'UNE POSITION ET ALGORITHME DE ROTATION TACTIQUE
@@ -992,16 +1038,6 @@
             genererRapportFinancier(); 
             genererRapportTechnique();
         }
-
-        socket.on('nouvelle_position', (data) => {
-            traiterNouvellePosition({
-                imei: String(data.imei).trim(),
-                lat: parseFloat(data.lat),
-                lng: parseFloat(data.lng),
-                vitesse: parseFloat(data.vitesse || data.speed || 0),
-                timestamp: data.timestamp ? new Date(data.timestamp).getTime() : Date.now()
-            });
-        });
 
         // POLLING SUPABASE HAUTE FRÉQUENCE DE SECOURS
         async function sonderPositionsCloudEnContinu() {
@@ -1374,7 +1410,16 @@
                 customConfig[v.imei].moteurCoupe = couper;
                 localStorage.setItem('tv_vehicules_custom', JSON.stringify(customConfig));
 
-                socket.emit('commande_moteur', { imei: v.imei, couper: couper });
+                // Diffusion temps réel vers l'Admin
+                channelSyncClient.send({
+                    type: 'broadcast',
+                    event: 'commande_moteur',
+                    payload: { imei: v.imei, couper: couper }
+                });
+
+                if (socket && socket.connected) {
+                    socket.emit('commande_moteur', { imei: v.imei, couper: couper });
+                }
 
                 try {
                     if (window.supabase) {
@@ -1469,13 +1514,16 @@
                 places: v.places
             };
 
-            const channelSync = supabaseClient.channel('transvision_flotte');
-            channelSync.send({
+            // Émission sur le canal Supabase déjà connecté
+            channelSyncClient.send({
                 type: 'broadcast',
                 event: 'maj_ligne_vehicule',
                 payload: payloadLigne
             });
-            socket.emit('maj_ligne_vehicule', payloadLigne);
+
+            if (socket && socket.connected) {
+                socket.emit('maj_ligne_vehicule', payloadLigne);
+            }
 
             try {
                 supabaseClient.from('tv_vehicules').upsert({
