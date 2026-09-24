@@ -521,9 +521,19 @@
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
+        // 1. INITIALISATION SÉCURISÉE DE SOCKET.IO (AVEC FALLBACK)
+        const SERVEUR_URL = "http://134.209.116.89:3000";
+        let socket = null;
+        try {
+            if (typeof io !== 'undefined') {
+                socket = io(SERVEUR_URL, { transports: ['websocket'], reconnection: true });
+            }
+        } catch(e) {
+            console.warn("Socket.IO indisponible : bascule 100% Supabase Realtime");
+        }
+
         let adminCredential = { email: "admin@transvision.cd", pass: "123456" };
         let ciblePartenaire = null;
-
         let flotteGlobale = [];
         let mapAdmin = null;
         let adminMarkers = {};
@@ -543,11 +553,21 @@
             { origine: "CENTRE VILLE (GARE CENTRALE)", destination: "U.P.N.", prix: 3000, distDirect: 12.5, distDeviee: 15.0 }
         ];
 
-        // CANAL SUPABASE TEMPS RÉEL POUR LES LIGNES
-        const channelSyncAdmin = supabaseClient.channel('transvision_flotte');
-        channelSyncAdmin.on('broadcast', { event: 'maj_ligne_vehicule' }, ({ payload }) => {
-            appliquerMajLigneEnDirect(payload);
-        }).subscribe();
+        // 2. CANAL UNIFIÉ SUPABASE REALTIME (BROADCAST BIDIRECTIONNEL)
+        const channelSyncAdmin = supabaseClient.channel('transvision_sync_hub');
+
+        channelSyncAdmin
+            .on('broadcast', { event: 'maj_ligne_vehicule' }, ({ payload }) => {
+                appliquerMajLigneEnDirect(payload);
+            })
+            .on('broadcast', { event: 'commande_moteur' }, ({ payload }) => {
+                let v = flotteGlobale.find(item => item.imei === payload.imei);
+                if (v) {
+                    v.moteurCoupe = payload.couper;
+                    majTableauFlotteAdmin();
+                }
+            })
+            .subscribe();
 
         function appliquerMajLigneEnDirect(payload) {
             let v = flotteGlobale.find(item => item.imei === payload.imei);
@@ -1073,7 +1093,18 @@
             const actionTxt = couper ? "COUPER LE MOTEUR" : "DÉMARRER / DÉBLOQUER";
             if (confirm(`📡 Action Télématique Super Admin :\nVoulez-vous ${actionTxt} du véhicule ${v.plaque} (${v.imei}) ?`)) {
                 v.moteurCoupe = couper;
-                socket.emit('commande_moteur', { imei: v.imei, couper: couper });
+
+                // Diffusion temps réel via Supabase Broadcast
+                channelSyncAdmin.send({
+                    type: 'broadcast',
+                    event: 'commande_moteur',
+                    payload: { imei: v.imei, couper: couper }
+                });
+
+                if (socket && socket.connected) {
+                    socket.emit('commande_moteur', { imei: v.imei, couper: couper });
+                }
+
                 try {
                     supabaseClient.from('tv_vehicules').upsert({
                         imei: v.imei,
@@ -1081,6 +1112,7 @@
                         updated_at: new Date().toISOString()
                     }, { onConflict: 'imei' }).then();
                 } catch(e) {}
+
                 alert(`✅ Ordre de commande envoyé avec succès au véhicule ${v.plaque}.`);
                 majTableauFlotteAdmin();
             }
