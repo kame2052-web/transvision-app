@@ -77,7 +77,7 @@
     <!-- 2. CORPS APPLICATION ADMIN -->
     <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
         <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
-            <span class="text-xs font-bold text-indigo-400">TransVision Control Panel v29.0 PROD — Admin Miroir Absolu</span>
+            <span class="text-xs font-bold text-indigo-400">TransVision Control Panel v30.0 PROD — Admin Miroir Absolu</span>
             <div class="flex gap-2 text-[10px] font-mono">
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 flex items-center gap-1">Push Sync : <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" id="admin-server-dot"></span><span class="text-emerald-400 font-bold" id="admin-server-text">En Direct</span></span>
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Live : <span class="text-emerald-400 font-bold" id="admin-flotte-count">0 Traceur(s)</span></span>
@@ -187,7 +187,7 @@
                     </div>
                 </div>
 
-                <!-- 3. PARTENAIRES AVEC MENU ACTIONS COMPLET RÉPARÉ -->
+                <!-- 3. PARTENAIRES AVEC MENU ACTIONS 100% FIABLE -->
                 <div id="page-partenaires" class="space-y-4 page-fade class-page-admin hidden print:block">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 no-print">
                         <div>
@@ -491,8 +491,27 @@
         </div>
     </div>
 
-    <!-- LOGIQUE JAVASCRIPT SYNCHRONISÉE -->
+    <!-- LOGIQUE JAVASCRIPT CONNECTÉE SANS VALEURS EN DUR -->
     <script>
+        function chargerConfigurationsAdmin() {
+            const numWhatsApp = localStorage.getItem('tv_whatsapp') || "243810000000";
+            const numMpesa = localStorage.getItem('tv_mpesa') || "+243 812 000 000";
+            const numAirtel = localStorage.getItem('tv_airtel') || "+243 999 000 000";
+            const numOrange = localStorage.getItem('tv_orange') || "+243 890 000 000";
+
+            const lienWa = document.getElementById('lien-whatsapp-support');
+            if(lienWa) lienWa.href = `https://wa.me/${numWhatsApp.replace(/[^0-9]/g, '')}`;
+
+            const optMpesa = document.getElementById('opt-mpesa');
+            if(optMpesa) optMpesa.textContent = `${numMpesa} (M-Pesa)`;
+            
+            const optAirtel = document.getElementById('opt-airtel');
+            if(optAirtel) optAirtel.textContent = `${numAirtel} (Airtel Money)`;
+            
+            const optOrange = document.getElementById('opt-orange');
+            if(optOrange) optOrange.textContent = `${numOrange} (Orange Money)`;
+        }
+
         const supabaseUrl = 'https://vbriworyscymnmtzzdny.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
@@ -586,6 +605,37 @@
             });
         }
 
+        function verifierEtChargerJournalAdmin(v) {
+            const dateDuJour = getKinshasaDateStr();
+            const cleStatsJour = `tv_stats_admin_${dateDuJour}_${v.imei}`;
+            let stats = JSON.parse(localStorage.getItem(cleStatsJour) || 'null');
+            if (stats) {
+                v.kmJour = stats.kmJour || 0;
+                v.kmCourse = stats.kmCourse || 0;
+                v.tronconsValides = stats.tronconsValides || 0;
+                v.recetteBruteReelle = stats.recetteBruteReelle || 0;
+            } else {
+                v.kmJour = 0;
+                v.kmCourse = 0;
+                v.tronconsValides = 0;
+                v.recetteBruteReelle = 0;
+                sauvegarderStatsJournalieresAdmin(v);
+            }
+        }
+
+        function sauvegarderStatsJournalieresAdmin(v) {
+            const dateDuJour = getKinshasaDateStr();
+            const cleStatsJour = `tv_stats_admin_${dateDuJour}_${v.imei}`;
+            localStorage.setItem(cleStatsJour, JSON.stringify({
+                kmJour: v.kmJour || 0,
+                kmCourse: v.kmCourse || 0,
+                tronconsValides: v.tronconsValides || 0,
+                recetteBruteReelle: v.recetteBruteReelle || 0,
+                places: v.places,
+                updatedAt: Date.now()
+            }));
+        }
+
         let dernierGeocodageAdminTs = 0;
         let cacheAdressesAdmin = {};
         async function detecterNomAvenueAdmin(lat, lng, imei) {
@@ -619,6 +669,7 @@
             if (derniereDate && derniereDate !== dateActuelle) {
                 flotteGlobale.forEach(v => {
                     v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0;
+                    sauvegarderStatsJournalieresAdmin(v);
                 });
                 tracesFlotte = {};
                 majTableauFlotteAdmin();
@@ -688,6 +739,8 @@
                         v.dernierCap = payload.dernierCap;
                     }
                     
+                    sauvegarderStatsJournalieresAdmin(v);
+                    
                     detecterNomAvenueAdmin(v.lat, v.lng, v.imei).then(av => {
                         v.avenueLive = av;
                         majTableauFlotteAdmin();
@@ -720,6 +773,8 @@
                 const ts = Date.now();
                 flotteGlobale.forEach(v => {
                     v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0;
+                    localStorage.setItem('tv_reset_ts_' + v.imei, ts);
+                    sauvegarderStatsJournalieresAdmin(v);
                     tracesFlotte[v.imei] = [[v.lat, v.lng]];
                     if (adminPolylines[v.imei]) adminPolylines[v.imei].setLatLngs(tracesFlotte[v.imei]);
                     
@@ -743,6 +798,8 @@
             if (confirm(`Remettre le compteur de ${v.plaque} à zéro pour aujourd'hui ?`)) {
                 const ts = Date.now();
                 v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0;
+                localStorage.setItem('tv_reset_ts_' + v.imei, ts);
+                sauvegarderStatsJournalieresAdmin(v);
                 tracesFlotte[v.imei] = [[v.lat, v.lng]];
                 if (adminPolylines[v.imei]) adminPolylines[v.imei].setLatLngs(tracesFlotte[v.imei]);
                 
@@ -767,7 +824,6 @@
                 flotteGlobale = []; // Initialisation garantie
 
                 if (window.supabase) {
-                    // On ne bloque plus l'interface si Supabase renvoie une erreur
                     const { data: vehiculesConfig } = await supabaseClient.from('tv_vehicules').select('*');
                     const { data: lastPositions } = await supabaseClient.from('transvision_positions_gps')
                         .select('imei, latitude, longitude, created_at')
@@ -814,7 +870,7 @@
             } catch (err) {
                 console.warn("Démarrage en attente des données Partenaires...", err);
             } finally {
-                // Même si la base est vide, on initialise la carte et l'interface
+                // Même si la base est vide, on initialise l'interface
                 document.getElementById('admin-flotte-count').textContent = `${flotteGlobale.length} Traceur(s)`;
                 majTableauFlotteAdmin();
                 initialiserGraphiquesAdmin();
@@ -1100,115 +1156,128 @@
             alert("✅ Ligne ajoutée avec succès !");
         }
 
-// ========================================================
-// GESTION DES PARTENAIRES : MENU D'ACTIONS 100% FIABILISÉ
-// ========================================================
+        // ========================================================
+        // GESTION DES PARTENAIRES : MENU D'ACTIONS SÉCURISÉ (MÉMOIRE)
+        // ========================================================
+        window.annuairePartenaires = {}; 
 
-window.annuairePartenaires = {}; // Dictionnaire global sécurisé en mémoire
-
-async function chargerPartenairesAdmin() {
-    const tbody = document.getElementById('table-partenaires-body');
-    try {
-        if (window.supabase) {
-            const { data } = await supabaseClient.from('tv_partenaires').select('*');
-            if (data && data.length > 0) {
-                tbody.innerHTML = "";
-                window.annuairePartenaires = {}; // Réinitialisation de la mémoire
-
-                data.forEach(p => {
-                    const estActif = p.date_expiration && new Date(p.date_expiration) > new Date();
-                    const telKey = p.tel || "inconnu_" + Math.random();
-                    
-                    // Stockage sécurisé en mémoire (Zéro bug d'apostrophe ou de guillemet)
-                    window.annuairePartenaires[telKey] = {
-                        nom: p.nom || "Inconnu",
-                        tel: p.tel || "",
-                        pin: p.pin || "0000"
-                    };
-                    
-                    tbody.insertAdjacentHTML('beforeend', `
-                        <tr class="item-partenaire-row" data-contrat="${p.type_contrat || 'commercial'}">
-                            <td class="py-3 font-black text-slate-200 partenaire-nom">${p.nom}<br><span class="text-[9px] font-normal text-slate-500 partenaire-tel">${p.tel}</span></td>
-                            <td class="py-3"><span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-black text-[10px] uppercase">${p.type_contrat || 'Commercial'}</span></td>
-                            <td class="py-3 text-center font-bold font-mono text-indigo-400">1 Véh.</td>
-                            <td class="py-3 text-center font-mono">
-                                <span class="${estActif ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border px-2 py-0.5 rounded-lg font-black text-[10px]">
-                                    ${estActif ? 'Actif' : 'Expiré'}
-                                </span>
-                            </td>
-                            <td class="py-3 text-right no-print">
-                                <select id="action_${telKey}" onchange="executerActionPartenaire('${telKey}')" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 outline-none">
-                                    <option value="">-- Actions --</option>
-                                    <option value="recharger" class="text-emerald-400 font-bold">💸 Valider Recharge</option>
-                                    <option value="voir_id" class="text-sky-400 font-bold">👁️ Voir Identifiants</option>
-                                    <option value="activer" class="text-emerald-500 font-bold">🟢 Activer Compte</option>
-                                    <option value="suspendre" class="text-amber-500 font-bold">🟠 Suspendre Compte</option>
-                                    <option value="supprimer" class="text-rose-500 font-bold">🔴 Supprimer Compte</option>
-                                </select>
-                            </td>
-                        </tr>`);
-                });
-                return;
-            }
-        }
-    } catch(e) { console.error(e); }
-
-    tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-500 font-sans italic">Aucun partenaire trouvé.</td></tr>`;
-}
-
-async function executerActionPartenaire(telKey) {
-    const selectElem = document.getElementById('action_' + telKey);
-    if(!selectElem) return;
-    
-    const action = selectElem.value;
-    if(!action) return;
-
-    // Récupération des données parfaites depuis la mémoire
-    const part = window.annuairePartenaires[telKey];
-    if(!part) return;
-
-    if (action === 'recharger') { 
-        ouvrirModalRechargeFlexible(part.nom, part.tel); 
-    } 
-    else if (action === 'voir_id') { 
-        alert(`👁️ IDENTIFIANTS DU PARTENAIRE\n\nNom: ${part.nom}\nTéléphone: ${part.tel}\nCode PIN: ${part.pin}`); 
-    }
-    else if (action === 'activer') { 
-        const futureDate = new Date();
-        futureDate.setDate(futureDate.getDate() + 30);
-        try {
-            if (window.supabase) {
-                await supabaseClient.from('tv_partenaires').update({ date_expiration: futureDate.toISOString() }).eq('tel', part.tel);
-            }
-        } catch(e) {}
-        alert(`🟢 Le compte de ${part.nom} a été réactivé avec succès (30 jours accordés).`); 
-        chargerPartenairesAdmin();
-    }
-    else if (action === 'suspendre') { 
-        if (confirm(`⚠️ Suspendre l'accès de ${part.nom} ?\nLe partenaire ne pourra plus suivre sa flotte.`)) {
-            const pastDate = new Date(0).toISOString();
+        async function chargerPartenairesAdmin() {
+            const tbody = document.getElementById('table-partenaires-body');
             try {
                 if (window.supabase) {
-                    await supabaseClient.from('tv_partenaires').update({ date_expiration: pastDate }).eq('tel', part.tel);
+                    const { data } = await supabaseClient.from('tv_partenaires').select('*');
+                    if (data && data.length > 0) {
+                        tbody.innerHTML = "";
+                        window.annuairePartenaires = {}; 
+
+                        data.forEach(p => {
+                            const estActif = p.date_expiration && new Date(p.date_expiration) > new Date();
+                            const telKey = p.tel || "inconnu_" + Math.random();
+                            
+                            window.annuairePartenaires[telKey] = {
+                                nom: p.nom || "Inconnu",
+                                tel: p.tel || "",
+                                pin: p.pin || "0000"
+                            };
+                            
+                            tbody.insertAdjacentHTML('beforeend', `
+                                <tr class="item-partenaire-row" data-contrat="${p.type_contrat || 'commercial'}">
+                                    <td class="py-3 font-black text-slate-200 partenaire-nom">${p.nom}<br><span class="text-[9px] font-normal text-slate-500 partenaire-tel">${p.tel}</span></td>
+                                    <td class="py-3"><span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-black text-[10px] uppercase">${p.type_contrat || 'Commercial'}</span></td>
+                                    <td class="py-3 text-center font-bold font-mono text-indigo-400">1 Véh.</td>
+                                    <td class="py-3 text-center font-mono">
+                                        <span class="${estActif ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border px-2 py-0.5 rounded-lg font-black text-[10px]">
+                                            ${estActif ? 'Actif' : 'Expiré'}
+                                        </span>
+                                    </td>
+                                    <td class="py-3 text-right no-print">
+                                        <select id="action_${telKey}" onchange="executerActionPartenaire('${telKey}')" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 outline-none">
+                                            <option value="">-- Actions --</option>
+                                            <option value="recharger" class="text-emerald-400 font-bold">💸 Valider Recharge</option>
+                                            <option value="voir_id" class="text-sky-400 font-bold">👁️ Voir Identifiants</option>
+                                            <option value="activer" class="text-emerald-500 font-bold">🟢 Activer Compte</option>
+                                            <option value="suspendre" class="text-amber-500 font-bold">🟠 Suspendre Compte</option>
+                                            <option value="supprimer" class="text-rose-500 font-bold">🔴 Supprimer Compte</option>
+                                        </select>
+                                    </td>
+                                </tr>`);
+                        });
+                        return;
+                    }
                 }
-            } catch(e) {}
-            alert(`🟠 Le compte de ${part.nom} a été suspendu.`); 
-            chargerPartenairesAdmin();
+            } catch(e) { console.error(e); }
+
+            tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-500 font-sans italic">Aucun partenaire trouvé.</td></tr>`;
         }
-    }
-    else if (action === 'supprimer') { 
-        if (confirm(`🔴 ATTENTION : Supprimer définitivement le compte partenaire de ${part.nom} ?`)) { 
-            try {
-                if (window.supabase) {
-                    await supabaseClient.from('tv_partenaires').delete().eq('tel', part.tel);
+
+        function rechercherPartenaire() {
+            const input = document.getElementById('recherche-partenaire').value.toLowerCase();
+            const rows = document.querySelectorAll('.item-partenaire-row');
+            rows.forEach(row => {
+                const nom = row.querySelector('.partenaire-nom')?.textContent.toLowerCase() || "";
+                const tel = row.querySelector('.partenaire-tel')?.textContent.toLowerCase() || "";
+                row.style.display = (nom.includes(input) || tel.includes(input)) ? '' : 'none';
+            });
+        }
+
+        function filtrerPartenairesContrat(type) {
+            document.querySelectorAll('.item-partenaire-row').forEach(row => {
+                if(type === 'tous' || row.getAttribute('data-contrat') === type) { row.classList.remove('hidden'); } else { row.classList.add('hidden'); }
+            });
+        }
+
+        async function executerActionPartenaire(telKey) {
+            const selectElem = document.getElementById('action_' + telKey);
+            if(!selectElem) return;
+            
+            const action = selectElem.value;
+            if(!action) return;
+
+            const part = window.annuairePartenaires[telKey];
+            if(!part) return;
+
+            if (action === 'recharger') { 
+                ouvrirModalRechargeFlexible(part.nom, part.tel); 
+            } 
+            else if (action === 'voir_id') { 
+                alert(`👁️ IDENTIFIANTS DU PARTENAIRE\n\nNom: ${part.nom}\nTéléphone: ${part.tel}\nCode PIN: ${part.pin}`); 
+            }
+            else if (action === 'activer') { 
+                const futureDate = new Date();
+                futureDate.setDate(futureDate.getDate() + 30);
+                try {
+                    if (window.supabase) {
+                        await supabaseClient.from('tv_partenaires').update({ date_expiration: futureDate.toISOString() }).eq('tel', part.tel);
+                    }
+                } catch(e) {}
+                alert(`🟢 Le compte de ${part.nom} a été réactivé avec succès (30 jours accordés).`); 
+                chargerPartenairesAdmin();
+            }
+            else if (action === 'suspendre') { 
+                if (confirm(`⚠️ Suspendre l'accès de ${part.nom} ?\nLe partenaire ne pourra plus suivre sa flotte.`)) {
+                    const pastDate = new Date(0).toISOString();
+                    try {
+                        if (window.supabase) {
+                            await supabaseClient.from('tv_partenaires').update({ date_expiration: pastDate }).eq('tel', part.tel);
+                        }
+                    } catch(e) {}
+                    alert(`🟠 Le compte de ${part.nom} a été suspendu.`); 
+                    chargerPartenairesAdmin();
                 }
-            } catch(e) {}
-            selectElem.closest('tr')?.remove(); 
-            alert(`🗑️ Compte de ${part.nom} supprimé.`); 
-        } 
-    }
-    selectElem.value = ""; 
-}
+            }
+            else if (action === 'supprimer') { 
+                if (confirm(`🔴 ATTENTION : Supprimer définitivement le compte partenaire de ${part.nom} ?`)) { 
+                    try {
+                        if (window.supabase) {
+                            await supabaseClient.from('tv_partenaires').delete().eq('tel', part.tel);
+                        }
+                    } catch(e) {}
+                    selectElem.closest('tr')?.remove(); 
+                    alert(`🗑️ Compte de ${part.nom} supprimé.`); 
+                } 
+            }
+            selectElem.value = ""; 
+        }
 
         function ouvrirModalRechargeFlexible(nom, tel) {
             ciblePartenaire = { nom, tel };
