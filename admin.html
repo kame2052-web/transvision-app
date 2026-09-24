@@ -562,14 +562,6 @@
             return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
         }
 
-        function calculerDistanceGPS(lat1, lon1, lat2, lon2) {
-            const R = 6371; 
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-        }
-
         function animerDeplacementMarkerAdmin(marker, startPos, endPos, startAngle, targetAngle, dureeMs = 1200) {
             const debut = performance.now();
             let diff = (targetAngle - startAngle) % 360;
@@ -682,18 +674,13 @@
 
             // 1. Écoute des positions GPS pures (Carte)
             supabaseClient
-                .channel('transvision_admin_live_stream_v12')
+                .channel('transvision_admin_live_stream_v9')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transvision_positions_gps' }, (payload) => {
                     const row = payload.new;
                     if (row && row.latitude && row.longitude) {
                         const imeiClean = String(row.imei).trim();
                         let v = flotteGlobale.find(item => item.imei === imeiClean);
                         if (v) {
-                            // On ignore les vieux points errants
-                            const resetTs = parseInt(localStorage.getItem('tv_reset_ts_' + imeiClean) || '0');
-                            const rowTs = new Date(row.created_at || Date.now()).getTime();
-                            if (rowTs < resetTs) return;
-
                             const newLat = parseFloat(row.latitude);
                             const newLng = parseFloat(row.longitude);
                             const ancienCap = v.dernierCap || 0;
@@ -711,9 +698,8 @@
                             if (mapAdmin && adminMarkers[imeiClean]) {
                                 animerDeplacementMarkerAdmin(adminMarkers[imeiClean], anciennePos, { lat: newLat, lng: newLng }, ancienCap, nouveauCap, 1200);
                                 
-                                // Mise à jour de la bulle quand le GPS bouge
                                 const vitTxt = parseFloat(row.speed || row.vitesse || 0) > 0 ? `${Math.round(row.speed || row.vitesse)} km/h` : 'À l\'arrêt';
-                                adminMarkers[imeiClean].getPopup().setContent(`
+                                adminMarkers[imeiClean].bindPopup(`
                                     <b>${v.plaque}</b> (${v.places} places)<br>
                                     Ligne: <b>${v.origine} ➔ ${v.destination}</b><br>
                                     Vitesse: <b>${vitTxt}</b><br>
@@ -743,19 +729,6 @@
                         v.origine = payload.origine;
                         v.destination = payload.destination;
                         
-                        sauvegarderStatsJournalieresAdmin(v); 
-                        
-                        // MISE À JOUR DE LA BULLE LORSQUE LE PARTENAIRE SYNCHRONISE SES DONNÉES
-                        if (mapAdmin && adminMarkers[v.imei]) {
-                            adminMarkers[v.imei].getPopup().setContent(`
-                                <b>${v.plaque}</b> (${v.places} places)<br>
-                                Ligne: <b>${v.origine} ➔ ${v.destination}</b><br>
-                                Vitesse: <b>En direct</b><br>
-                                Roulé aujourd'hui: <b>${(v.kmJour || 0).toFixed(1)} km</b><br>
-                                Rotations: <b>${v.tronconsValides}</b> (${(v.recetteBruteReelle || 0).toLocaleString()} CDF)
-                            `);
-                        }
-
                         majTableauFlotteAdmin();
                         initialiserGraphiquesAdmin();
                     }
@@ -832,7 +805,7 @@
         }
 
         // ========================================================
-        // CHARGEMENT INITIAL ROBUSTE & COMPLET (CORRIGÉ)
+        // CHARGEMENT INITIAL ROBUSTE & COMPLET
         // ========================================================
         async function chargerHistoriqueAdmin() {
             try {
@@ -843,7 +816,6 @@
 
                 let lignesConfig = {};
                 try {
-                    // Lecture de tv_vehicules (Source de vérité de l'Admin si le partenaire est hors ligne)
                     const { data: vehiculesConfig } = await supabaseClient.from('tv_vehicules').select('*');
                     if (vehiculesConfig && vehiculesConfig.length > 0) {
                         vehiculesConfig.forEach(cfg => {
@@ -856,7 +828,7 @@
                     .from('transvision_positions_gps')
                     .select('*')
                     .order('created_at', { ascending: false })
-                    .limit(2000);
+                    .limit(500);
 
                 if (data) {
                     const vehiculesUniques = {};
@@ -873,25 +845,16 @@
                         const cfg = lignesConfig[imeiStr] || {};
                         const customLocal = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}')[imeiStr] || {};
 
-                        let dbResetTs = cfg.reset_ts ? new Date(cfg.reset_ts).getTime() : 0;
-                        let localResetTs = parseInt(localStorage.getItem('tv_reset_ts_' + imeiStr) || '0');
-                        const resetTsUnifie = Math.max(dbResetTs, localResetTs, debutJournee.getTime());
-                        localStorage.setItem('tv_reset_ts_' + imeiStr, resetTsUnifie);
-
-                        const cleStatsJour = `tv_stats_admin_${debutJournee.toISOString().split('T')[0]}_${imeiStr}`;
-                        let statsLocales = JSON.parse(localStorage.getItem(cleStatsJour) || 'null');
-
                         const vObj = {
                             imei: imeiStr,
                             plaque: cfg.plaque || customLocal.plaque || `TRK-${imeiStr.slice(-4)}`,
-                            places: parseInt(cfg.places) || (statsLocales ? statsLocales.places : 4),
+                            places: parseInt(cfg.places) || parseInt(customLocal.places) || 4,
                             tarif: parseFloat(cfg.tarif) || 2500,
                             origine: cfg.origine || customLocal.origine || "BRIKIN",
                             destination: cfg.destination || customLocal.destination || "GARE CENTRALE",
-                            // On donne la priorité à la base de données (si elle est lue) sinon au cache local
-                            kmJour: parseFloat(cfg.km_jour) || (statsLocales ? statsLocales.kmJour : 0), 
-                            tronconsValides: parseInt(cfg.troncons_valides) || (statsLocales ? statsLocales.tronconsValides : 0),
-                            recetteBruteReelle: parseFloat(cfg.recette_brute) || (statsLocales ? statsLocales.recetteBruteReelle : 0),
+                            kmJour: parseFloat(cfg.km_jour) || 0, 
+                            tronconsValides: parseInt(cfg.troncons_valides) || 0,
+                            recetteBruteReelle: parseFloat(cfg.recette_brute) || 0,
                             lat: parseFloat(pos.latitude),
                             lng: parseFloat(pos.longitude),
                             moteurCoupe: cfg.moteur_coupe || false,
@@ -900,33 +863,15 @@
                             derniereCo: new Date(pos.created_at || Date.now())
                         };
 
-                        tracesFlotte[imeiStr] = []; 
+                        tracesFlotte[imeiStr] = [[vObj.lat, vObj.lng]];
                         
                         const pointsDuJour = data
-                            .filter(p => String(p.imei).trim() === imeiStr && new Date(p.created_at).getTime() >= resetTsUnifie)
-                            .reverse(); 
+                            .filter(p => String(p.imei).trim() === imeiStr && new Date(p.created_at).getTime() >= debutJournee.getTime())
+                            .reverse();
                         
-                        let pointPrec = null;
                         pointsDuJour.forEach(pt => {
-                            const pLat = parseFloat(pt.latitude);
-                            const pLng = parseFloat(pt.longitude);
-                            if (pLat !== 0 && pLng !== 0 && !isNaN(pLat)) {
-                                if (pointPrec) {
-                                    let d = calculerDistanceGPS(pointPrec.latitude, pointPrec.longitude, pLat, pLng);
-                                    if (d < 15.0) { 
-                                        tracesFlotte[imeiStr].push([pLat, pLng]);
-                                        pointPrec = { latitude: pLat, longitude: pLng };
-                                    }
-                                } else {
-                                    tracesFlotte[imeiStr].push([pLat, pLng]);
-                                    pointPrec = { latitude: pLat, longitude: pLng };
-                                }
-                            }
+                            tracesFlotte[imeiStr].push([parseFloat(pt.latitude), parseFloat(pt.longitude)]);
                         });
-
-                        if(tracesFlotte[imeiStr].length === 0) {
-                            tracesFlotte[imeiStr].push([vObj.lat, vObj.lng]);
-                        }
 
                         detecterNomAvenueAdmin(vObj.lat, vObj.lng, vObj.imei).then(av => {
                             vObj.avenueLive = av;
@@ -939,56 +884,11 @@
                     document.getElementById('admin-flotte-count').textContent = `${flotteGlobale.length} Traceur(s)`;
                     majTableauFlotteAdmin();
                     initialiserGraphiquesAdmin();
-                    // On s'assure que la carte s'affiche même si elle est cachée au départ
-                    setTimeout(() => {
-                        if (mapAdmin) { mapAdmin.invalidateSize(); } else { initMapAdmin(); }
-                    }, 300);
+                    if (mapAdmin) { mapAdmin.invalidateSize(); } else { initMapAdmin(); }
                 }
             } catch (err) {
                 console.error(err);
             }
-        }
-
-        // ========================================================
-        // CORRECTION 3 : BULLE INITIALISÉE AVEC LES BONNES DONNÉES
-        // ========================================================
-        function initMapAdmin() {
-            const container = document.getElementById('map-admin-suivi');
-            if (!container || container.offsetParent === null) return;
-            
-            if (!mapAdmin) {
-                mapAdmin = L.map('map-admin-suivi').setView([-4.3224, 15.3070], 14);
-                
-                L.tileLayer('https://{s}.google.com/vt/lyrs=m,traffic&x={x}&y={y}&z={z}', {
-                    maxZoom: 20,
-                    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-                    attribution: '&copy; Google Maps & Traffic'
-                }).addTo(mapAdmin);
-
-                flotteGlobale.forEach(v => {
-                    if(!adminMarkers[v.imei]) { 
-                        const popupHTML = `
-                            <b>${v.plaque}</b> (${v.places} places)<br>
-                            Ligne: <b>${v.origine} ➔ ${v.destination}</b><br>
-                            Roulé aujourd'hui: <b>${(v.kmJour || 0).toFixed(1)} km</b><br>
-                            Rotations: <b>${v.tronconsValides}</b> (${(v.recetteBruteReelle || 0).toLocaleString()} CDF)
-                        `;
-                        adminMarkers[v.imei] = L.marker([v.lat, v.lng], {
-                            icon: creerIconeVehiculeDynamiqueAdmin(v.dernierCap)
-                        }).addTo(mapAdmin).bindPopup(popupHTML); 
-                    }
-                    if (tracesFlotte[v.imei] && tracesFlotte[v.imei].length > 1) {
-                        adminPolylines[v.imei] = L.polyline(tracesFlotte[v.imei], {
-                            color: '#1a73e8',
-                            weight: 6,
-                            opacity: 0.9,
-                            lineJoin: 'round'
-                        }).addTo(mapAdmin);
-                    }
-                });
-            }
-            
-            setTimeout(() => { mapAdmin.invalidateSize(); }, 200);
         }
 
         function majTableauFlotteAdmin() {
@@ -1074,6 +974,39 @@
             if (idPage === 'page-suivi') { setTimeout(initMapAdmin, 50); }
             if (idPage === 'page-itineraires') { chargerMatriceItineraires(); }
             if (idPage === 'page-partenaires') { chargerPartenairesAdmin(); }
+        }
+
+        function initMapAdmin() {
+            const container = document.getElementById('map-admin-suivi');
+            if (!container || container.offsetParent === null) return;
+            
+            if (!mapAdmin) {
+                mapAdmin = L.map('map-admin-suivi').setView([-4.3224, 15.3070], 14);
+                
+                L.tileLayer('https://{s}.google.com/vt/lyrs=m,traffic&x={x}&y={y}&z={z}', {
+                    maxZoom: 20,
+                    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                    attribution: '&copy; Google Maps & Traffic'
+                }).addTo(mapAdmin);
+
+                flotteGlobale.forEach(v => {
+                    if(!adminMarkers[v.imei]) { 
+                        adminMarkers[v.imei] = L.marker([v.lat, v.lng], {
+                            icon: creerIconeVehiculeDynamiqueAdmin(v.dernierCap)
+                        }).addTo(mapAdmin).bindPopup(`<b>${v.plaque}</b><br>IMEI: ${v.imei}`); 
+                    }
+                    if (tracesFlotte[v.imei] && tracesFlotte[v.imei].length > 1) {
+                        adminPolylines[v.imei] = L.polyline(tracesFlotte[v.imei], {
+                            color: '#1a73e8',
+                            weight: 6,
+                            opacity: 0.9,
+                            lineJoin: 'round'
+                        }).addTo(mapAdmin);
+                    }
+                });
+            }
+            
+            setTimeout(() => { mapAdmin.invalidateSize(); }, 200);
         }
 
         function centrerMapAdmin() { 
