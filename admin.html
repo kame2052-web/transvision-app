@@ -803,8 +803,8 @@
             }
         }
 
-        // ========================================================
-        // CHARGEMENT HISTORIQUE (AVEC NETTOYEUR DE TRACÉ)
+// ========================================================
+        // CHARGEMENT INITIAL ROBUSTE & COMPLET (CORRIGÉ)
         // ========================================================
         async function chargerHistoriqueAdmin() {
             try {
@@ -815,6 +815,7 @@
 
                 let lignesConfig = {};
                 try {
+                    // On lit LES DONNÉES EXACTES DU PARTENAIRE sauvegardées dans tv_vehicules
                     const { data: vehiculesConfig } = await supabaseClient.from('tv_vehicules').select('*');
                     if (vehiculesConfig && vehiculesConfig.length > 0) {
                         vehiculesConfig.forEach(cfg => {
@@ -844,6 +845,7 @@
                         const cfg = lignesConfig[imeiStr] || {};
                         const customLocal = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}')[imeiStr] || {};
 
+                        // RESTAURATION : Lecture des chiffres réels depuis la base (Le Cerveau Partenaire)
                         const vObj = {
                             imei: imeiStr,
                             plaque: cfg.plaque || customLocal.plaque || `TRK-${imeiStr.slice(-4)}`,
@@ -851,6 +853,7 @@
                             tarif: parseFloat(cfg.tarif) || 2500,
                             origine: cfg.origine || customLocal.origine || "BRIKIN",
                             destination: cfg.destination || customLocal.destination || "GARE CENTRALE",
+                            // On prend les valeurs de la DB, pas celles du cache local obsolète
                             kmJour: parseFloat(cfg.km_jour) || 0, 
                             tronconsValides: parseInt(cfg.troncons_valides) || 0,
                             recetteBruteReelle: parseFloat(cfg.recette_brute) || 0,
@@ -862,22 +865,31 @@
                             derniereCo: new Date(pos.created_at || Date.now())
                         };
 
-                        tracesFlotte[imeiStr] = []; // On part d'une ligne vide pour éviter le bug de retour au matin
+                        tracesFlotte[imeiStr] = []; 
                         
                         // NETTOYEUR DE TRACÉ : On ne prend que les points valides et chronologiques d'aujourd'hui
                         const pointsDuJour = data
                             .filter(p => String(p.imei).trim() === imeiStr && new Date(p.created_at).getTime() >= debutJournee.getTime())
                             .reverse(); // Ordre chronologique (du matin au soir)
                         
+                        let pointPrec = null;
                         pointsDuJour.forEach(pt => {
-                            const plat = parseFloat(pt.latitude);
-                            const plng = parseFloat(pt.longitude);
-                            if(plat !== 0 && plng !== 0 && !isNaN(plat)) {
-                                tracesFlotte[imeiStr].push([plat, plng]);
+                            const pLat = parseFloat(pt.latitude);
+                            const pLng = parseFloat(pt.longitude);
+                            if (pLat !== 0 && pLng !== 0 && !isNaN(pLat)) {
+                                if (pointPrec) {
+                                    let d = calculerDistanceGPS(pointPrec.latitude, pointPrec.longitude, pLat, pLng);
+                                    if (d < 15.0) { // On ignore les sauts délirants > 15 km
+                                        tracesFlotte[imeiStr].push([pLat, pLng]);
+                                    }
+                                } else {
+                                     tracesFlotte[imeiStr].push([pLat, pLng]);
+                                }
+                                pointPrec = { latitude: pLat, longitude: pLng };
                             }
                         });
 
-                        // S'il n'y a pas eu de mouvement du tout aujourd'hui, on place au moins le point actuel
+                        // S'il n'y a pas eu de mouvement valide aujourd'hui, on place au moins le point actuel
                         if(tracesFlotte[imeiStr].length === 0) {
                             tracesFlotte[imeiStr].push([vObj.lat, vObj.lng]);
                         }
