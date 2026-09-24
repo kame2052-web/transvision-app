@@ -77,7 +77,7 @@
     <!-- 2. CORPS APPLICATION ADMIN -->
     <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
         <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
-            <span class="text-xs font-bold text-indigo-400">TransVision Control Panel v30.0 PROD — Admin Miroir Absolu</span>
+            <span class="text-xs font-bold text-indigo-400">TransVision Control Panel v29.0 PROD — Admin Miroir Absolu</span>
             <div class="flex gap-2 text-[10px] font-mono">
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 flex items-center gap-1">Push Sync : <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" id="admin-server-dot"></span><span class="text-emerald-400 font-bold" id="admin-server-text">En Direct</span></span>
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Live : <span class="text-emerald-400 font-bold" id="admin-flotte-count">0 Traceur(s)</span></span>
@@ -187,7 +187,7 @@
                     </div>
                 </div>
 
-                <!-- 3. PARTENAIRES AVEC MENU ACTIONS 100% FIABLE -->
+                <!-- 3. PARTENAIRES AVEC MENU ACTIONS COMPLET RÉPARÉ -->
                 <div id="page-partenaires" class="space-y-4 page-fade class-page-admin hidden print:block">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 no-print">
                         <div>
@@ -491,27 +491,8 @@
         </div>
     </div>
 
-    <!-- LOGIQUE JAVASCRIPT CONNECTÉE SANS VALEURS EN DUR -->
+    <!-- LOGIQUE JAVASCRIPT SYNCHRONISÉE -->
     <script>
-        function chargerConfigurationsAdmin() {
-            const numWhatsApp = localStorage.getItem('tv_whatsapp') || "243810000000";
-            const numMpesa = localStorage.getItem('tv_mpesa') || "+243 812 000 000";
-            const numAirtel = localStorage.getItem('tv_airtel') || "+243 999 000 000";
-            const numOrange = localStorage.getItem('tv_orange') || "+243 890 000 000";
-
-            const lienWa = document.getElementById('lien-whatsapp-support');
-            if(lienWa) lienWa.href = `https://wa.me/${numWhatsApp.replace(/[^0-9]/g, '')}`;
-
-            const optMpesa = document.getElementById('opt-mpesa');
-            if(optMpesa) optMpesa.textContent = `${numMpesa} (M-Pesa)`;
-            
-            const optAirtel = document.getElementById('opt-airtel');
-            if(optAirtel) optAirtel.textContent = `${numAirtel} (Airtel Money)`;
-            
-            const optOrange = document.getElementById('opt-orange');
-            if(optOrange) optOrange.textContent = `${numOrange} (Orange Money)`;
-        }
-
         const supabaseUrl = 'https://vbriworyscymnmtzzdny.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
@@ -605,37 +586,6 @@
             });
         }
 
-        function verifierEtChargerJournalAdmin(v) {
-            const dateDuJour = getKinshasaDateStr();
-            const cleStatsJour = `tv_stats_admin_${dateDuJour}_${v.imei}`;
-            let stats = JSON.parse(localStorage.getItem(cleStatsJour) || 'null');
-            if (stats) {
-                v.kmJour = stats.kmJour || 0;
-                v.kmCourse = stats.kmCourse || 0;
-                v.tronconsValides = stats.tronconsValides || 0;
-                v.recetteBruteReelle = stats.recetteBruteReelle || 0;
-            } else {
-                v.kmJour = 0;
-                v.kmCourse = 0;
-                v.tronconsValides = 0;
-                v.recetteBruteReelle = 0;
-                sauvegarderStatsJournalieresAdmin(v);
-            }
-        }
-
-        function sauvegarderStatsJournalieresAdmin(v) {
-            const dateDuJour = getKinshasaDateStr();
-            const cleStatsJour = `tv_stats_admin_${dateDuJour}_${v.imei}`;
-            localStorage.setItem(cleStatsJour, JSON.stringify({
-                kmJour: v.kmJour || 0,
-                kmCourse: v.kmCourse || 0,
-                tronconsValides: v.tronconsValides || 0,
-                recetteBruteReelle: v.recetteBruteReelle || 0,
-                places: v.places,
-                updatedAt: Date.now()
-            }));
-        }
-
         let dernierGeocodageAdminTs = 0;
         let cacheAdressesAdmin = {};
         async function detecterNomAvenueAdmin(lat, lng, imei) {
@@ -669,7 +619,6 @@
             if (derniereDate && derniereDate !== dateActuelle) {
                 flotteGlobale.forEach(v => {
                     v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0;
-                    sauvegarderStatsJournalieresAdmin(v);
                 });
                 tracesFlotte = {};
                 majTableauFlotteAdmin();
@@ -739,8 +688,6 @@
                         v.dernierCap = payload.dernierCap;
                     }
                     
-                    sauvegarderStatsJournalieresAdmin(v);
-                    
                     detecterNomAvenueAdmin(v.lat, v.lng, v.imei).then(av => {
                         v.avenueLive = av;
                         majTableauFlotteAdmin();
@@ -773,8 +720,6 @@
                 const ts = Date.now();
                 flotteGlobale.forEach(v => {
                     v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0;
-                    localStorage.setItem('tv_reset_ts_' + v.imei, ts);
-                    sauvegarderStatsJournalieresAdmin(v);
                     tracesFlotte[v.imei] = [[v.lat, v.lng]];
                     if (adminPolylines[v.imei]) adminPolylines[v.imei].setLatLngs(tracesFlotte[v.imei]);
                     
@@ -798,8 +743,6 @@
             if (confirm(`Remettre le compteur de ${v.plaque} à zéro pour aujourd'hui ?`)) {
                 const ts = Date.now();
                 v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0;
-                localStorage.setItem('tv_reset_ts_' + v.imei, ts);
-                sauvegarderStatsJournalieresAdmin(v);
                 tracesFlotte[v.imei] = [[v.lat, v.lng]];
                 if (adminPolylines[v.imei]) adminPolylines[v.imei].setLatLngs(tracesFlotte[v.imei]);
                 
@@ -824,6 +767,7 @@
                 flotteGlobale = []; // Initialisation garantie
 
                 if (window.supabase) {
+                    // On ne bloque plus l'interface si Supabase renvoie une erreur
                     const { data: vehiculesConfig } = await supabaseClient.from('tv_vehicules').select('*');
                     const { data: lastPositions } = await supabaseClient.from('transvision_positions_gps')
                         .select('imei, latitude, longitude, created_at')
@@ -870,7 +814,7 @@
             } catch (err) {
                 console.warn("Démarrage en attente des données Partenaires...", err);
             } finally {
-                // Même si la base est vide, on initialise l'interface
+                // Même si la base est vide, on initialise la carte et l'interface
                 document.getElementById('admin-flotte-count').textContent = `${flotteGlobale.length} Traceur(s)`;
                 majTableauFlotteAdmin();
                 initialiserGraphiquesAdmin();
@@ -1157,10 +1101,8 @@
         }
 
         // ========================================================
-        // GESTION DES PARTENAIRES : MENU D'ACTIONS SÉCURISÉ (MÉMOIRE)
+        // GESTION DES PARTENAIRES : MENU D'ACTIONS RÉPARÉ
         // ========================================================
-        window.annuairePartenaires = {}; 
-
         async function chargerPartenairesAdmin() {
             const tbody = document.getElementById('table-partenaires-body');
             try {
@@ -1168,17 +1110,12 @@
                     const { data } = await supabaseClient.from('tv_partenaires').select('*');
                     if (data && data.length > 0) {
                         tbody.innerHTML = "";
-                        window.annuairePartenaires = {}; 
-
                         data.forEach(p => {
                             const estActif = p.date_expiration && new Date(p.date_expiration) > new Date();
-                            const telKey = p.tel || "inconnu_" + Math.random();
-                            
-                            window.annuairePartenaires[telKey] = {
-                                nom: p.nom || "Inconnu",
-                                tel: p.tel || "",
-                                pin: p.pin || "0000"
-                            };
+                            // Correction d'encodage robuste pour les attributs data-* du bouton
+                            const nomS = p.nom ? p.nom.replace(/'/g, "\\'") : "Inconnu";
+                            const telS = p.tel || "";
+                            const pinS = p.pin || "0000";
                             
                             tbody.insertAdjacentHTML('beforeend', `
                                 <tr class="item-partenaire-row" data-contrat="${p.type_contrat || 'commercial'}">
@@ -1191,7 +1128,7 @@
                                         </span>
                                     </td>
                                     <td class="py-3 text-right no-print">
-                                        <select id="action_${telKey}" onchange="executerActionPartenaire('${telKey}')" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 outline-none">
+                                        <select onchange="executerActionPartenaire(this)" data-nom="${nomS}" data-tel="${telS}" data-pin="${pinS}" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 outline-none">
                                             <option value="">-- Actions --</option>
                                             <option value="recharger" class="text-emerald-400 font-bold">💸 Valider Recharge</option>
                                             <option value="voir_id" class="text-sky-400 font-bold">👁️ Voir Identifiants</option>
@@ -1205,7 +1142,7 @@
                         return;
                     }
                 }
-            } catch(e) { console.error(e); }
+            } catch(e) {}
 
             tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-500 font-sans italic">Aucun partenaire trouvé.</td></tr>`;
         }
@@ -1226,54 +1163,52 @@
             });
         }
 
-        async function executerActionPartenaire(telKey) {
-            const selectElem = document.getElementById('action_' + telKey);
-            if(!selectElem) return;
-            
+        async function executerActionPartenaire(selectElem) {
             const action = selectElem.value;
             if(!action) return;
 
-            const part = window.annuairePartenaires[telKey];
-            if(!part) return;
+            const nom = selectElem.getAttribute('data-nom');
+            const tel = selectElem.getAttribute('data-tel');
+            const pin = selectElem.getAttribute('data-pin');
 
             if (action === 'recharger') { 
-                ouvrirModalRechargeFlexible(part.nom, part.tel); 
+                ouvrirModalRechargeFlexible(nom, tel); 
             } 
             else if (action === 'voir_id') { 
-                alert(`👁️ IDENTIFIANTS DU PARTENAIRE\n\nNom: ${part.nom}\nTéléphone: ${part.tel}\nCode PIN: ${part.pin}`); 
+                alert(`👁️ IDENTIFIANTS DU PARTENAIRE\n\nNom: ${nom}\nTéléphone: ${tel}\nCode PIN: ${pin}`); 
             }
             else if (action === 'activer') { 
                 const futureDate = new Date();
                 futureDate.setDate(futureDate.getDate() + 30);
                 try {
                     if (window.supabase) {
-                        await supabaseClient.from('tv_partenaires').update({ date_expiration: futureDate.toISOString() }).eq('tel', part.tel);
+                        await supabaseClient.from('tv_partenaires').update({ date_expiration: futureDate.toISOString() }).eq('tel', tel);
                     }
                 } catch(e) {}
-                alert(`🟢 Le compte de ${part.nom} a été réactivé avec succès (30 jours accordés).`); 
+                alert(`🟢 Le compte de ${nom} a été réactivé avec succès (30 jours accordés).`); 
                 chargerPartenairesAdmin();
             }
             else if (action === 'suspendre') { 
-                if (confirm(`⚠️ Suspendre l'accès de ${part.nom} ?\nLe partenaire ne pourra plus suivre sa flotte.`)) {
+                if (confirm(`⚠️ Suspendre l'accès de ${nom} ?\nLe partenaire ne pourra plus suivre sa flotte.`)) {
                     const pastDate = new Date(0).toISOString();
                     try {
                         if (window.supabase) {
-                            await supabaseClient.from('tv_partenaires').update({ date_expiration: pastDate }).eq('tel', part.tel);
+                            await supabaseClient.from('tv_partenaires').update({ date_expiration: pastDate }).eq('tel', tel);
                         }
                     } catch(e) {}
-                    alert(`🟠 Le compte de ${part.nom} a été suspendu.`); 
+                    alert(`🟠 Le compte de ${nom} a été suspendu.`); 
                     chargerPartenairesAdmin();
                 }
             }
             else if (action === 'supprimer') { 
-                if (confirm(`🔴 ATTENTION : Supprimer définitivement le compte partenaire de ${part.nom} ?`)) { 
+                if (confirm(`🔴 ATTENTION : Supprimer définitivement le compte partenaire de ${nom} ?`)) { 
                     try {
                         if (window.supabase) {
-                            await supabaseClient.from('tv_partenaires').delete().eq('tel', part.tel);
+                            await supabaseClient.from('tv_partenaires').delete().eq('tel', tel);
                         }
                     } catch(e) {}
                     selectElem.closest('tr')?.remove(); 
-                    alert(`🗑️ Compte de ${part.nom} supprimé.`); 
+                    alert(`🗑️ Compte de ${nom} supprimé.`); 
                 } 
             }
             selectElem.value = ""; 
