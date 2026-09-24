@@ -491,49 +491,27 @@
         </div>
     </div>
 
-    <!-- LOGIQUE JAVASCRIPT CONNECTÉE SANS VALEURS EN DUR -->
+    <!-- LOGIQUE JAVASCRIPT SYNCHRONISÉE -->
     <script>
-        function chargerConfigurationsAdmin() {
-            const numWhatsApp = localStorage.getItem('tv_whatsapp') || "243810000000";
-            const numMpesa = localStorage.getItem('tv_mpesa') || "+243 812 000 000";
-            const numAirtel = localStorage.getItem('tv_airtel') || "+243 999 000 000";
-            const numOrange = localStorage.getItem('tv_orange') || "+243 890 000 000";
-
-            const lienWa = document.getElementById('lien-whatsapp-support');
-            if(lienWa) lienWa.href = `https://wa.me/${numWhatsApp.replace(/[^0-9]/g, '')}`;
-
-            const optMpesa = document.getElementById('opt-mpesa');
-            if(optMpesa) optMpesa.textContent = `${numMpesa} (M-Pesa)`;
-            
-            const optAirtel = document.getElementById('opt-airtel');
-            if(optAirtel) optAirtel.textContent = `${numAirtel} (Airtel Money)`;
-            
-            const optOrange = document.getElementById('opt-orange');
-            if(optOrange) optOrange.textContent = `${numOrange} (Orange Money)`;
-        }
-
         const supabaseUrl = 'https://vbriworyscymnmtzzdny.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-        const SERVEUR_URL = "http://134.209.116.89:3000";
-        const socket = io(SERVEUR_URL, { transports: ['websocket'], reconnection: true });
+        let adminCredential = { email: "admin@transvision.cd", pass: "123456" };
+        let ciblePartenaire = null;
 
-        let partenaireProfil = null; 
-        let client = { nom: "Dolce", tel: "0965647819", vehicules: [] };
-        let map = null; 
-        let busMarker = null;
-        let polylineTrace = null;
-        let tracePositions = [];
-        let chartPartenaireInstance = null;
-        let dernierPointId = null;
-        let dernierTimestampTraite = 0;
+        let flotteGlobale = [];
+        let mapAdmin = null;
+        let adminMarkers = {};
+        let adminPolylines = {};
+        let tracesFlotte = {};
 
-        let listeItineraires = JSON.parse(localStorage.getItem('tv_matrice_itineraires') || 'null') || [
-            { origine: "BRIKIN", destination: "GARE CENTRALE", prix: 2500, distDirect: 12.0, distDeviee: 14.5 }
-        ];
+        function getKinshasaDateStr() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
 
-        // L'ADMIN SE SYNCHRONISE ET ENRICHIT LA BDD
+        let listeItineraires = [];
         async function chargerMatriceItineraires() {
             try {
                 if(window.supabase) {
@@ -549,6 +527,12 @@
                     }
                 }
             } catch(e) {}
+            
+            if(listeItineraires.length === 0) {
+                listeItineraires = JSON.parse(localStorage.getItem('tv_matrice_itineraires') || 'null') || [
+                    { origine: "BRIKIN", destination: "GARE CENTRALE", prix: 2500, distDirect: 12.0, distDeviee: 14.5 }
+                ];
+            }
             afficherItinerairesAdmin();
         }
 
@@ -602,42 +586,6 @@
             });
         }
 
-        function getKinshasaDateStr() {
-            const d = new Date();
-            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        }
-
-        function verifierEtChargerJournalAdmin(v) {
-            const dateDuJour = getKinshasaDateStr();
-            const cleStatsJour = `tv_stats_admin_${dateDuJour}_${v.imei}`;
-            let stats = JSON.parse(localStorage.getItem(cleStatsJour) || 'null');
-            if (stats) {
-                v.kmJour = stats.kmJour || 0;
-                v.kmCourse = stats.kmCourse || 0;
-                v.tronconsValides = stats.tronconsValides || 0;
-                v.recetteBruteReelle = stats.recetteBruteReelle || 0;
-            } else {
-                v.kmJour = 0;
-                v.kmCourse = 0;
-                v.tronconsValides = 0;
-                v.recetteBruteReelle = 0;
-                sauvegarderStatsJournalieresAdmin(v);
-            }
-        }
-
-        function sauvegarderStatsJournalieresAdmin(v) {
-            const dateDuJour = getKinshasaDateStr();
-            const cleStatsJour = `tv_stats_admin_${dateDuJour}_${v.imei}`;
-            localStorage.setItem(cleStatsJour, JSON.stringify({
-                kmJour: v.kmJour || 0,
-                kmCourse: v.kmCourse || 0,
-                tronconsValides: v.tronconsValides || 0,
-                recetteBruteReelle: v.recetteBruteReelle || 0,
-                places: v.places,
-                updatedAt: Date.now()
-            }));
-        }
-
         let dernierGeocodageAdminTs = 0;
         let cacheAdressesAdmin = {};
         async function detecterNomAvenueAdmin(lat, lng, imei) {
@@ -671,7 +619,6 @@
             if (derniereDate && derniereDate !== dateActuelle) {
                 flotteGlobale.forEach(v => {
                     v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0;
-                    sauvegarderStatsJournalieresAdmin(v);
                 });
                 tracesFlotte = {};
                 majTableauFlotteAdmin();
@@ -688,6 +635,8 @@
             // L'ADMIN NE CALCULE PLUS RIEN : Il écoute les données diffusées par le Partenaire
             supabaseClient.channel('tv_sync_channel')
                 .on('broadcast', { event: 'sync_state' }, ({ payload }) => {
+                    if (!mapAdmin) initMapAdmin(); // S'assurer que la carte existe
+
                     let v = flotteGlobale.find(item => item.imei === payload.imei);
                     if (!v) {
                         v = { 
@@ -704,7 +653,7 @@
                     } else {
                         const anciennePos = { lat: v.lat, lng: v.lng };
                         
-                        // RECUPERATION DES CHIFFRES EXACTS DU PARTENAIRE
+                        // MISE A JOUR DES CHIFFRES EXACTS DU PARTENAIRE (Zéro Invention)
                         v.kmJour = payload.kmJour;
                         v.kmCourse = payload.kmCourse;
                         v.tronconsValides = payload.tronconsValides;
@@ -739,8 +688,6 @@
                         v.dernierCap = payload.dernierCap;
                     }
                     
-                    sauvegarderStatsJournalieresAdmin(v);
-                    
                     detecterNomAvenueAdmin(v.lat, v.lng, v.imei).then(av => {
                         v.avenueLive = av;
                         majTableauFlotteAdmin();
@@ -750,18 +697,14 @@
                     initialiserGraphiquesAdmin();
                 })
                 .on('broadcast', { event: 'nouvelle_ligne' }, ({ payload }) => {
-                    chargerMatriceItineraires(); // Actualisation de la matrice
+                    chargerMatriceItineraires(); // Actualisation de la matrice auto-apprenante
                 })
                 .on('broadcast', { event: 'reset_vehicule' }, ({ payload }) => {
-                    const imei = payload.imei;
-                    const ts = payload.reset_ts;
-                    localStorage.setItem('tv_reset_ts_' + imei, ts);
-                    let v = flotteGlobale.find(item => item.imei === imei);
+                    let v = flotteGlobale.find(item => item.imei === payload.imei);
                     if (v) {
                         v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0;
-                        sauvegarderStatsJournalieresAdmin(v);
-                        tracesFlotte[imei] = [[v.lat, v.lng]];
-                        if (adminPolylines[imei]) adminPolylines[imei].setLatLngs(tracesFlotte[imei]);
+                        tracesFlotte[payload.imei] = [[v.lat, v.lng]];
+                        if (adminPolylines[payload.imei]) adminPolylines[payload.imei].setLatLngs(tracesFlotte[payload.imei]);
                         majTableauFlotteAdmin();
                         initialiserGraphiquesAdmin();
                     }
@@ -777,8 +720,6 @@
                 const ts = Date.now();
                 flotteGlobale.forEach(v => {
                     v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0;
-                    localStorage.setItem('tv_reset_ts_' + v.imei, ts);
-                    sauvegarderStatsJournalieresAdmin(v);
                     tracesFlotte[v.imei] = [[v.lat, v.lng]];
                     if (adminPolylines[v.imei]) adminPolylines[v.imei].setLatLngs(tracesFlotte[v.imei]);
                     
@@ -802,8 +743,6 @@
             if (confirm(`Remettre le compteur de ${v.plaque} à zéro pour aujourd'hui ?`)) {
                 const ts = Date.now();
                 v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0;
-                localStorage.setItem('tv_reset_ts_' + v.imei, ts);
-                sauvegarderStatsJournalieresAdmin(v);
                 tracesFlotte[v.imei] = [[v.lat, v.lng]];
                 if (adminPolylines[v.imei]) adminPolylines[v.imei].setLatLngs(tracesFlotte[v.imei]);
                 
@@ -821,70 +760,66 @@
         }
 
         // ========================================================
-        // CHARGEMENT INITIAL UNIFIÉ DEPUIS LA BDD (SANS RECALCUL)
+        // CHARGEMENT INITIAL ROBUSTE (Ne plante jamais si la DB est vide)
         // ========================================================
         async function chargerHistoriqueAdmin() {
             try {
-                if (!window.supabase) return;
+                flotteGlobale = []; // Initialisation garantie
 
-                const dateDuJour = getKinshasaDateStr();
+                if (window.supabase) {
+                    // On ne bloque plus l'interface si Supabase renvoie une erreur
+                    const { data: vehiculesConfig } = await supabaseClient.from('tv_vehicules').select('*');
+                    const { data: lastPositions } = await supabaseClient.from('transvision_positions_gps')
+                        .select('imei, latitude, longitude, created_at')
+                        .order('created_at', { ascending: false })
+                        .limit(50);
 
-                const { data: vehiculesConfig } = await supabaseClient.from('tv_vehicules').select('*');
-                if (!vehiculesConfig) return;
+                    if (vehiculesConfig && vehiculesConfig.length > 0) {
+                        vehiculesConfig.forEach(cfg => {
+                            const imeiStr = String(cfg.imei).trim();
+                            const lastPos = lastPositions ? lastPositions.find(p => String(p.imei).trim() === imeiStr) : null;
+                            const lat = lastPos ? parseFloat(lastPos.latitude) : -4.3215;
+                            const lng = lastPos ? parseFloat(lastPos.longitude) : 15.3115;
 
-                const { data: lastPositions } = await supabaseClient.from('transvision_positions_gps')
-                    .select('imei, latitude, longitude, created_at')
-                    .order('created_at', { ascending: false })
-                    .limit(50);
+                            const vObj = {
+                                imei: imeiStr,
+                                plaque: cfg.plaque || `TRK-${imeiStr.slice(-4)}`,
+                                places: parseInt(cfg.places) || 0,
+                                tarif: parseFloat(cfg.tarif) || 2500,
+                                origine: cfg.origine || "BRIKIN",
+                                destination: cfg.destination || "GARE CENTRALE",
+                                kmJour: parseFloat(cfg.km_jour) || 0,
+                                kmCourse: parseFloat(cfg.km_course) || 0,
+                                tronconsValides: parseInt(cfg.troncons_valides) || 0,
+                                recetteBruteReelle: parseFloat(cfg.recette_brute) || 0,
+                                moteurCoupe: cfg.moteur_coupe || false,
+                                lat: lat,
+                                lng: lng,
+                                dernierCap: 0,
+                                derniereCo: new Date(cfg.updated_at || Date.now()),
+                                avenueLive: "Recherche..."
+                            };
 
-                flotteGlobale = [];
-                vehiculesConfig.forEach(cfg => {
-                    const imeiStr = String(cfg.imei).trim();
-                    const cleStatsJour = `tv_stats_admin_${dateDuJour}_${imeiStr}`;
-                    let statsLocales = JSON.parse(localStorage.getItem(cleStatsJour) || 'null');
+                            tracesFlotte[imeiStr] = [[vObj.lat, vObj.lng]];
+                            
+                            detecterNomAvenueAdmin(vObj.lat, vObj.lng, vObj.imei).then(av => {
+                                vObj.avenueLive = av;
+                                majTableauFlotteAdmin();
+                            });
 
-                    const resetTs = cfg.reset_ts ? new Date(cfg.reset_ts).getTime() : 0;
-                    localStorage.setItem('tv_reset_ts_' + imeiStr, resetTs);
-
-                    const lastPos = lastPositions ? lastPositions.find(p => String(p.imei).trim() === imeiStr) : null;
-                    const lat = lastPos ? parseFloat(lastPos.latitude) : -4.3215;
-                    const lng = lastPos ? parseFloat(lastPos.longitude) : 15.3115;
-
-                    const vObj = {
-                        imei: imeiStr,
-                        plaque: cfg.plaque || `TRK-${imeiStr.slice(-4)}`,
-                        places: parseInt(cfg.places) || (statsLocales ? statsLocales.places : 0),
-                        tarif: parseFloat(cfg.tarif) || 2500,
-                        origine: cfg.origine || "BRIKIN",
-                        destination: cfg.destination || "GARE CENTRALE",
-                        kmJour: parseFloat(cfg.km_jour) || (statsLocales ? statsLocales.kmJour : 0),
-                        kmCourse: parseFloat(cfg.km_course) || (statsLocales ? statsLocales.kmCourse : 0),
-                        tronconsValides: parseInt(cfg.troncons_valides) || (statsLocales ? statsLocales.tronconsValides : 0),
-                        recetteBruteReelle: parseFloat(cfg.recette_brute) || (statsLocales ? statsLocales.recetteBruteReelle : 0),
-                        moteurCoupe: cfg.moteur_coupe || false,
-                        lat: lat,
-                        lng: lng,
-                        dernierCap: 0,
-                        derniereCo: new Date(cfg.updated_at || Date.now()),
-                        avenueLive: "Recherche..."
-                    };
-
-                    tracesFlotte[imeiStr] = [[vObj.lat, vObj.lng]];
-                    
-                    detecterNomAvenueAdmin(vObj.lat, vObj.lng, vObj.imei).then(av => {
-                        vObj.avenueLive = av;
-                        majTableauFlotteAdmin();
-                    });
-
-                    flotteGlobale.push(vObj);
-                });
-
+                            flotteGlobale.push(vObj);
+                        });
+                    }
+                }
+            } catch (err) {
+                console.warn("Démarrage en attente des données Partenaires...", err);
+            } finally {
+                // Même si la base est vide, on initialise la carte et l'interface
                 document.getElementById('admin-flotte-count').textContent = `${flotteGlobale.length} Traceur(s)`;
                 majTableauFlotteAdmin();
                 initialiserGraphiquesAdmin();
-                if (mapAdmin) initMapAdmin();
-                
-            } catch (err) {}
+                initMapAdmin();
+            }
         }
 
         function majTableauFlotteAdmin() {
@@ -893,6 +828,14 @@
             tbody.innerHTML = "";
             let totalKm = 0; let totalRot = 0; let totalCDF = 0;
             
+            if (flotteGlobale.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-slate-500 font-sans italic">En attente de synchronisation cloud...</td></tr>`;
+                document.getElementById('stat-total-km').textContent = "0.0";
+                document.getElementById('stat-total-rotations').textContent = "0";
+                document.getElementById('stat-total-cdf').textContent = "0";
+                return;
+            }
+
             flotteGlobale.forEach((v, idx) => {
                 totalKm += (v.kmJour || 0); 
                 totalRot += (v.tronconsValides || 0); 
@@ -1169,7 +1112,7 @@
                         tbody.innerHTML = "";
                         data.forEach(p => {
                             const estActif = p.date_expiration && new Date(p.date_expiration) > new Date();
-                            // Correction d'encodage robuste pour HTML data attributes
+                            // Correction d'encodage robuste pour les attributs data-* du bouton
                             const nomS = p.nom ? p.nom.replace(/'/g, "\\'") : "Inconnu";
                             const telS = p.tel || "";
                             const pinS = p.pin || "0000";
