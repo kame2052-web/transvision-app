@@ -1100,119 +1100,115 @@
             alert("✅ Ligne ajoutée avec succès !");
         }
 
-        // ========================================================
-        // GESTION DES PARTENAIRES : MENU D'ACTIONS RÉPARÉ
-        // ========================================================
-        async function chargerPartenairesAdmin() {
-            const tbody = document.getElementById('table-partenaires-body');
+// ========================================================
+// GESTION DES PARTENAIRES : MENU D'ACTIONS 100% FIABILISÉ
+// ========================================================
+
+window.annuairePartenaires = {}; // Dictionnaire global sécurisé en mémoire
+
+async function chargerPartenairesAdmin() {
+    const tbody = document.getElementById('table-partenaires-body');
+    try {
+        if (window.supabase) {
+            const { data } = await supabaseClient.from('tv_partenaires').select('*');
+            if (data && data.length > 0) {
+                tbody.innerHTML = "";
+                window.annuairePartenaires = {}; // Réinitialisation de la mémoire
+
+                data.forEach(p => {
+                    const estActif = p.date_expiration && new Date(p.date_expiration) > new Date();
+                    const telKey = p.tel || "inconnu_" + Math.random();
+                    
+                    // Stockage sécurisé en mémoire (Zéro bug d'apostrophe ou de guillemet)
+                    window.annuairePartenaires[telKey] = {
+                        nom: p.nom || "Inconnu",
+                        tel: p.tel || "",
+                        pin: p.pin || "0000"
+                    };
+                    
+                    tbody.insertAdjacentHTML('beforeend', `
+                        <tr class="item-partenaire-row" data-contrat="${p.type_contrat || 'commercial'}">
+                            <td class="py-3 font-black text-slate-200 partenaire-nom">${p.nom}<br><span class="text-[9px] font-normal text-slate-500 partenaire-tel">${p.tel}</span></td>
+                            <td class="py-3"><span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-black text-[10px] uppercase">${p.type_contrat || 'Commercial'}</span></td>
+                            <td class="py-3 text-center font-bold font-mono text-indigo-400">1 Véh.</td>
+                            <td class="py-3 text-center font-mono">
+                                <span class="${estActif ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border px-2 py-0.5 rounded-lg font-black text-[10px]">
+                                    ${estActif ? 'Actif' : 'Expiré'}
+                                </span>
+                            </td>
+                            <td class="py-3 text-right no-print">
+                                <select id="action_${telKey}" onchange="executerActionPartenaire('${telKey}')" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 outline-none">
+                                    <option value="">-- Actions --</option>
+                                    <option value="recharger" class="text-emerald-400 font-bold">💸 Valider Recharge</option>
+                                    <option value="voir_id" class="text-sky-400 font-bold">👁️ Voir Identifiants</option>
+                                    <option value="activer" class="text-emerald-500 font-bold">🟢 Activer Compte</option>
+                                    <option value="suspendre" class="text-amber-500 font-bold">🟠 Suspendre Compte</option>
+                                    <option value="supprimer" class="text-rose-500 font-bold">🔴 Supprimer Compte</option>
+                                </select>
+                            </td>
+                        </tr>`);
+                });
+                return;
+            }
+        }
+    } catch(e) { console.error(e); }
+
+    tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-500 font-sans italic">Aucun partenaire trouvé.</td></tr>`;
+}
+
+async function executerActionPartenaire(telKey) {
+    const selectElem = document.getElementById('action_' + telKey);
+    if(!selectElem) return;
+    
+    const action = selectElem.value;
+    if(!action) return;
+
+    // Récupération des données parfaites depuis la mémoire
+    const part = window.annuairePartenaires[telKey];
+    if(!part) return;
+
+    if (action === 'recharger') { 
+        ouvrirModalRechargeFlexible(part.nom, part.tel); 
+    } 
+    else if (action === 'voir_id') { 
+        alert(`👁️ IDENTIFIANTS DU PARTENAIRE\n\nNom: ${part.nom}\nTéléphone: ${part.tel}\nCode PIN: ${part.pin}`); 
+    }
+    else if (action === 'activer') { 
+        const futureDate = new Date();
+        futureDate.setDate(futureDate.getDate() + 30);
+        try {
+            if (window.supabase) {
+                await supabaseClient.from('tv_partenaires').update({ date_expiration: futureDate.toISOString() }).eq('tel', part.tel);
+            }
+        } catch(e) {}
+        alert(`🟢 Le compte de ${part.nom} a été réactivé avec succès (30 jours accordés).`); 
+        chargerPartenairesAdmin();
+    }
+    else if (action === 'suspendre') { 
+        if (confirm(`⚠️ Suspendre l'accès de ${part.nom} ?\nLe partenaire ne pourra plus suivre sa flotte.`)) {
+            const pastDate = new Date(0).toISOString();
             try {
                 if (window.supabase) {
-                    const { data } = await supabaseClient.from('tv_partenaires').select('*');
-                    if (data && data.length > 0) {
-                        tbody.innerHTML = "";
-                        data.forEach(p => {
-                            const estActif = p.date_expiration && new Date(p.date_expiration) > new Date();
-                            // Correction d'encodage robuste pour les attributs data-* du bouton
-                            const nomS = p.nom ? p.nom.replace(/'/g, "\\'") : "Inconnu";
-                            const telS = p.tel || "";
-                            const pinS = p.pin || "0000";
-                            
-                            tbody.insertAdjacentHTML('beforeend', `
-                                <tr class="item-partenaire-row" data-contrat="${p.type_contrat || 'commercial'}">
-                                    <td class="py-3 font-black text-slate-200 partenaire-nom">${p.nom}<br><span class="text-[9px] font-normal text-slate-500 partenaire-tel">${p.tel}</span></td>
-                                    <td class="py-3"><span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-black text-[10px] uppercase">${p.type_contrat || 'Commercial'}</span></td>
-                                    <td class="py-3 text-center font-bold font-mono text-indigo-400">1 Véh.</td>
-                                    <td class="py-3 text-center font-mono">
-                                        <span class="${estActif ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border px-2 py-0.5 rounded-lg font-black text-[10px]">
-                                            ${estActif ? 'Actif' : 'Expiré'}
-                                        </span>
-                                    </td>
-                                    <td class="py-3 text-right no-print">
-                                        <select onchange="executerActionPartenaire(this)" data-nom="${nomS}" data-tel="${telS}" data-pin="${pinS}" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 outline-none">
-                                            <option value="">-- Actions --</option>
-                                            <option value="recharger" class="text-emerald-400 font-bold">💸 Valider Recharge</option>
-                                            <option value="voir_id" class="text-sky-400 font-bold">👁️ Voir Identifiants</option>
-                                            <option value="activer" class="text-emerald-500 font-bold">🟢 Activer Compte</option>
-                                            <option value="suspendre" class="text-amber-500 font-bold">🟠 Suspendre Compte</option>
-                                            <option value="supprimer" class="text-rose-500 font-bold">🔴 Supprimer Compte</option>
-                                        </select>
-                                    </td>
-                                </tr>`);
-                        });
-                        return;
-                    }
+                    await supabaseClient.from('tv_partenaires').update({ date_expiration: pastDate }).eq('tel', part.tel);
                 }
             } catch(e) {}
-
-            tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-500 font-sans italic">Aucun partenaire trouvé.</td></tr>`;
+            alert(`🟠 Le compte de ${part.nom} a été suspendu.`); 
+            chargerPartenairesAdmin();
         }
-
-        function rechercherPartenaire() {
-            const input = document.getElementById('recherche-partenaire').value.toLowerCase();
-            const rows = document.querySelectorAll('.item-partenaire-row');
-            rows.forEach(row => {
-                const nom = row.querySelector('.partenaire-nom')?.textContent.toLowerCase() || "";
-                const tel = row.querySelector('.partenaire-tel')?.textContent.toLowerCase() || "";
-                row.style.display = (nom.includes(input) || tel.includes(input)) ? '' : 'none';
-            });
-        }
-
-        function filtrerPartenairesContrat(type) {
-            document.querySelectorAll('.item-partenaire-row').forEach(row => {
-                if(type === 'tous' || row.getAttribute('data-contrat') === type) { row.classList.remove('hidden'); } else { row.classList.add('hidden'); }
-            });
-        }
-
-        async function executerActionPartenaire(selectElem) {
-            const action = selectElem.value;
-            if(!action) return;
-
-            const nom = selectElem.getAttribute('data-nom');
-            const tel = selectElem.getAttribute('data-tel');
-            const pin = selectElem.getAttribute('data-pin');
-
-            if (action === 'recharger') { 
-                ouvrirModalRechargeFlexible(nom, tel); 
-            } 
-            else if (action === 'voir_id') { 
-                alert(`👁️ IDENTIFIANTS DU PARTENAIRE\n\nNom: ${nom}\nTéléphone: ${tel}\nCode PIN: ${pin}`); 
-            }
-            else if (action === 'activer') { 
-                const futureDate = new Date();
-                futureDate.setDate(futureDate.getDate() + 30);
-                try {
-                    if (window.supabase) {
-                        await supabaseClient.from('tv_partenaires').update({ date_expiration: futureDate.toISOString() }).eq('tel', tel);
-                    }
-                } catch(e) {}
-                alert(`🟢 Le compte de ${nom} a été réactivé avec succès (30 jours accordés).`); 
-                chargerPartenairesAdmin();
-            }
-            else if (action === 'suspendre') { 
-                if (confirm(`⚠️ Suspendre l'accès de ${nom} ?\nLe partenaire ne pourra plus suivre sa flotte.`)) {
-                    const pastDate = new Date(0).toISOString();
-                    try {
-                        if (window.supabase) {
-                            await supabaseClient.from('tv_partenaires').update({ date_expiration: pastDate }).eq('tel', tel);
-                        }
-                    } catch(e) {}
-                    alert(`🟠 Le compte de ${nom} a été suspendu.`); 
-                    chargerPartenairesAdmin();
+    }
+    else if (action === 'supprimer') { 
+        if (confirm(`🔴 ATTENTION : Supprimer définitivement le compte partenaire de ${part.nom} ?`)) { 
+            try {
+                if (window.supabase) {
+                    await supabaseClient.from('tv_partenaires').delete().eq('tel', part.tel);
                 }
-            }
-            else if (action === 'supprimer') { 
-                if (confirm(`🔴 ATTENTION : Supprimer définitivement le compte partenaire de ${nom} ?`)) { 
-                    try {
-                        if (window.supabase) {
-                            await supabaseClient.from('tv_partenaires').delete().eq('tel', tel);
-                        }
-                    } catch(e) {}
-                    selectElem.closest('tr')?.remove(); 
-                    alert(`🗑️ Compte de ${nom} supprimé.`); 
-                } 
-            }
-            selectElem.value = ""; 
-        }
+            } catch(e) {}
+            selectElem.closest('tr')?.remove(); 
+            alert(`🗑️ Compte de ${part.nom} supprimé.`); 
+        } 
+    }
+    selectElem.value = ""; 
+}
 
         function ouvrirModalRechargeFlexible(nom, tel) {
             ciblePartenaire = { nom, tel };
