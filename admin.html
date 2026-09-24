@@ -211,23 +211,29 @@
                     </div>
                 </div>
 
-                <!-- 3. PARTENAIRES AVEC MENU ACTIONS COMPLET RÉTABLI -->
+                <!-- 3. PARTENAIRES AVEC MODULE D'INSCRIPTION DIRECTE ADMIN -->
                 <div id="page-partenaires" class="space-y-4 page-fade class-page-admin hidden print:block">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 no-print">
                         <div>
                             <h2 class="text-xl font-black text-slate-100">👤 Base des Partenaires</h2>
-                            <p class="text-xs text-slate-400">Gérez les comptes, vérifiez les identifiants et appliquez les sanctions ou activations.</p>
+                            <p class="text-xs text-slate-400">Gérez les comptes, inscrivez de nouveaux transporteurs et appliquez les sanctions.</p>
                         </div>
                         
-                        <div class="relative w-full sm:w-64">
-                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
-                            <input type="text" id="recherche-partenaire" onkeyup="rechercherPartenaire()" class="w-full bg-slate-900 border border-slate-800 rounded-xl py-2 pl-9 pr-3 text-[10px] text-slate-200 focus:outline-none focus:border-indigo-500 font-bold" placeholder="Rechercher par nom ou numéro...">
-                        </div>
+                        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                            <button onclick="ouvrirModalNouveauPartenaire()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black px-3.5 py-2 rounded-xl text-xs uppercase flex items-center gap-1.5 transition-colors shadow-lg shadow-emerald-500/10">
+                                <i class="fa-solid fa-user-plus"></i> Nouveau Partenaire
+                            </button>
 
-                        <div class="flex bg-slate-950 p-1.5 rounded-xl border border-slate-850 text-[10px] font-bold">
-                            <button onclick="filtrerPartenairesContrat('tous')" class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-200">Tous</button>
-                            <button onclick="filtrerPartenairesContrat('commercial')" class="px-3 py-1.5 rounded-lg text-indigo-400 hover:bg-slate-900"><i class="fa-solid fa-bus mr-1"></i> Commercial</button>
-                            <button onclick="filtrerPartenairesContrat('personnel')" class="px-3 py-1.5 rounded-lg text-rose-400 hover:bg-slate-900"><i class="fa-solid fa-car mr-1"></i> Personnel</button>
+                            <div class="relative flex-1 sm:w-64">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+                                <input type="text" id="recherche-partenaire" onkeyup="rechercherPartenaire()" class="w-full bg-slate-900 border border-slate-800 rounded-xl py-2 pl-9 pr-3 text-[10px] text-slate-200 focus:outline-none focus:border-indigo-500 font-bold" placeholder="Rechercher par nom ou numéro...">
+                            </div>
+
+                            <div class="flex bg-slate-950 p-1.5 rounded-xl border border-slate-850 text-[10px] font-bold">
+                                <button onclick="filtrerPartenairesContrat('tous')" class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-200">Tous</button>
+                                <button onclick="filtrerPartenairesContrat('commercial')" class="px-3 py-1.5 rounded-lg text-indigo-400 hover:bg-slate-900"><i class="fa-solid fa-bus mr-1"></i> Commercial</button>
+                                <button onclick="filtrerPartenairesContrat('personnel')" class="px-3 py-1.5 rounded-lg text-rose-400 hover:bg-slate-900"><i class="fa-solid fa-car mr-1"></i> Personnel</button>
+                            </div>
                         </div>
                     </div>
                     
@@ -426,6 +432,56 @@
         </div>
     </div>
 
+    <!-- MODAL CRÉER UN PARTENAIRE (ADMIN) -->
+    <div id="modal-creer-partenaire" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="font-black text-sm text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus text-emerald-400"></i> Inscrire un Partenaire
+                </h3>
+                <button onclick="fermerModalNouveauPartenaire()" class="text-slate-500 hover:text-slate-300"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <p class="text-[10px] text-slate-400">Enregistrez un nouveau transporteur dans la base et définissez ses accès initiaux.</p>
+
+            <div class="space-y-3 text-xs mt-2">
+                <div>
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Nom Complet</label>
+                    <input type="text" id="new-partenaire-nom" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 font-bold focus:border-emerald-500 outline-none" placeholder="Ex: Joseph Kabila">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Téléphone (Login)</label>
+                        <input type="tel" id="new-partenaire-tel" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 font-mono font-bold focus:border-emerald-500 outline-none" placeholder="Ex: 0812345678">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Code PIN (Accès)</label>
+                        <input type="password" id="new-partenaire-pin" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 font-mono font-bold focus:border-emerald-500 outline-none" placeholder="4 chiffres" value="0000">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Contrat</label>
+                        <select id="new-partenaire-contrat" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 font-bold focus:border-emerald-500 outline-none">
+                            <option value="commercial">Commercial</option>
+                            <option value="personnel">Personnel</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-emerald-400 uppercase mb-1">Forfait Initial (Jours)</label>
+                        <input type="number" id="new-partenaire-jours" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-emerald-400 font-black text-center outline-none focus:border-emerald-500" value="30">
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="enregistrerNouveauPartenaireAdmin()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase text-xs shadow-lg mt-2 transition-colors">
+                Créer et Activer le Compte
+            </button>
+        </div>
+    </div>
+
     <!-- MODAL MODIFIER TARIF ET DISTANCES -->
     <div id="modal-modifier-tarif-admin" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
@@ -521,7 +577,6 @@
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-        // 1. INITIALISATION SÉCURISÉE DE SOCKET.IO (AVEC FALLBACK)
         const SERVEUR_URL = "http://134.209.116.89:3000";
         let socket = null;
         try {
@@ -553,7 +608,7 @@
             { origine: "CENTRE VILLE (GARE CENTRALE)", destination: "U.P.N.", prix: 3000, distDirect: 12.5, distDeviee: 15.0 }
         ];
 
-        // 2. CANAL UNIFIÉ SUPABASE REALTIME (BROADCAST BIDIRECTIONNEL)
+        // CANAL UNIFIÉ TEMPS RÉEL SUPABASE
         const channelSyncAdmin = supabaseClient.channel('transvision_sync_hub');
 
         channelSyncAdmin
@@ -718,7 +773,6 @@
             }));
         }
 
-        // BASCULE STRICTE À 00h00 KINSHASA
         setInterval(() => {
             const dateActuelle = getKinshasaDateStr();
             const derniereDate = localStorage.getItem('tv_derniere_date_admin');
@@ -733,9 +787,6 @@
             localStorage.setItem('tv_derniere_date_admin', dateActuelle);
         }, 15000);
 
-        // ========================================================
-        // CHARGEMENT INITIAL (HISTORIQUE DEPUIS 00h00 AVEC PLACES RÉELLES)
-        // ========================================================
         async function chargerHistoriqueAdmin() {
             try {
                 if (!window.supabase) return;
@@ -774,14 +825,12 @@
                         const imeiStr = String(pos.imei).trim();
                         const cfg = lignesConfig[imeiStr] || {};
                         const customLocal = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}')[imeiStr] || {};
-                        
-                        // LECTURE DYNAMIQUE STRICTE DES PLACES ENREGISTRÉES
                         const placesSaisies = parseInt(cfg.places || customLocal.places) || 0;
 
                         const vObj = {
                             imei: imeiStr,
                             plaque: cfg.plaque || customLocal.plaque || `TRK-${imeiStr.slice(-4)}`,
-                            places: placesSaisies, // AUCUNE PLACE FORCÉE EN DUR
+                            places: placesSaisies,
                             tarif: cfg.tarif || 2500,
                             origine: cfg.origine || customLocal.origine || "BRIKIN",
                             destination: cfg.destination || customLocal.destination || "GARE CENTRALE",
@@ -866,9 +915,6 @@
             } catch (err) {}
         }
 
-        // ========================================================
-        // CANAL REALTIME PUSH DIRECT (LATENCE < 200ms SUR HTTPS)
-        // ========================================================
         function activerFluxRealtimeAdmin() {
             supabaseClient
                 .channel('transvision_admin_live_stream_v6')
@@ -896,7 +942,6 @@
             const now = new Date();
             
             if (!vehiculeExistant) {
-                // Lecture des places configurées
                 const customLocal = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}')[imeiClean] || {};
                 const placesDynamiques = parseInt(customLocal.places) || 0;
 
@@ -955,12 +1000,9 @@
                     const gainParRotation = (vehiculeExistant.tarif || 2500) * placesReelles;
                     let rotationValidee = false;
 
-                    // 1. Terminus direct
                     if (vehiculeExistant.kmCourse >= dDirect) {
                         rotationValidee = true;
-                    } 
-                    // 2. Embouteillage terminus (>= 80%) + arrêt > 30s ou virage
-                    else if (vehiculeExistant.kmCourse >= (0.80 * dDirect)) {
+                    } else if (vehiculeExistant.kmCourse >= (0.80 * dDirect)) {
                         if (diffCap >= 110 || data.vitesse < 5) {
                             vehiculeExistant.secondesArret = (vehiculeExistant.secondesArret || 0) + 10;
                             if (vehiculeExistant.secondesArret >= 30 || diffCap >= 110) {
@@ -969,9 +1011,7 @@
                         } else {
                             vehiculeExistant.secondesArret = 0;
                         }
-                    } 
-                    // 3. Demi-tour tactique à mi-chemin (>= 55%) + virage confirmé sur 150m
-                    else if (vehiculeExistant.kmCourse >= (0.55 * dDirect) && diffCap >= 130) {
+                    } else if (vehiculeExistant.kmCourse >= (0.55 * dDirect) && diffCap >= 130) {
                         vehiculeExistant.distanceSensInverse = (vehiculeExistant.distanceSensInverse || 0) + distDelta;
                         if (vehiculeExistant.distanceSensInverse >= 0.15) {
                             rotationValidee = true;
@@ -1094,7 +1134,6 @@
             if (confirm(`📡 Action Télématique Super Admin :\nVoulez-vous ${actionTxt} du véhicule ${v.plaque} (${v.imei}) ?`)) {
                 v.moteurCoupe = couper;
 
-                // Diffusion temps réel via Supabase Broadcast
                 channelSyncAdmin.send({
                     type: 'broadcast',
                     event: 'commande_moteur',
@@ -1320,13 +1359,63 @@
         }
 
         // ========================================================
-        // GESTION DES PARTENAIRES : ACTIONS COMPLÈTES RESTAURÉES
+        // GESTION DES PARTENAIRES : AJOUT, MODIFICATION & EXPULSION
         // ========================================================
+        function ouvrirModalNouveauPartenaire() {
+            document.getElementById('new-partenaire-nom').value = "";
+            document.getElementById('new-partenaire-tel').value = "";
+            document.getElementById('new-partenaire-pin').value = "0000";
+            document.getElementById('new-partenaire-contrat').value = "commercial";
+            document.getElementById('new-partenaire-jours').value = "30";
+            document.getElementById('modal-creer-partenaire').classList.remove('hidden');
+        }
+
+        function fermerModalNouveauPartenaire() {
+            document.getElementById('modal-creer-partenaire').classList.add('hidden');
+        }
+
+        async function enregistrerNouveauPartenaireAdmin() {
+            const nom = document.getElementById('new-partenaire-nom').value.trim();
+            const tel = document.getElementById('new-partenaire-tel').value.trim();
+            const pin = document.getElementById('new-partenaire-pin').value.trim();
+            const contrat = document.getElementById('new-partenaire-contrat').value;
+            const jours = parseInt(document.getElementById('new-partenaire-jours').value) || 30;
+
+            if (!nom || !tel || !pin) {
+                alert("⚠️ Veuillez remplir le nom, le numéro de téléphone et le code PIN.");
+                return;
+            }
+
+            const dateExp = new Date();
+            dateExp.setDate(dateExp.getDate() + jours);
+            dateExp.setHours(23, 59, 59, 999);
+
+            try {
+                if (window.supabase) {
+                    const { error } = await supabaseClient.from('tv_partenaires').upsert({
+                        nom: nom,
+                        tel: tel,
+                        pin: pin,
+                        type_contrat: contrat,
+                        date_expiration: dateExp.toISOString()
+                    }, { onConflict: 'tel' });
+
+                    if (error) throw error;
+                }
+
+                alert(`✅ Partenaire "${nom}" inscrit avec succès avec ${jours} jours d'accès.`);
+                fermerModalNouveauPartenaire();
+                chargerPartenairesAdmin();
+            } catch(e) {
+                alert("❌ Erreur lors de l'enregistrement du partenaire.");
+            }
+        }
+
         async function chargerPartenairesAdmin() {
             const tbody = document.getElementById('table-partenaires-body');
             try {
                 if (window.supabase) {
-                    const { data } = await supabaseClient.from('tv_partenaires').select('*');
+                    const { data } = await supabaseClient.from('tv_partenaires').select('*').order('nom', { ascending: true });
                     if (data && data.length > 0) {
                         tbody.innerHTML = "";
                         data.forEach(p => {
@@ -1358,23 +1447,7 @@
                 }
             } catch(e) {}
 
-            tbody.innerHTML = `
-                <tr class="item-partenaire-row" data-contrat="commercial">
-                    <td class="py-3 font-black text-slate-200 partenaire-nom">Dolce<br><span class="text-[9px] font-normal text-slate-500 partenaire-tel">0965647819</span></td>
-                    <td class="py-3"><span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-black text-[10px] uppercase">Commercial</span></td>
-                    <td class="py-3 text-center font-bold font-mono text-indigo-400">1 Véh.</td>
-                    <td class="py-3 text-center font-mono"><span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-lg font-black text-[10px]">Actif</span></td>
-                    <td class="py-3 text-right no-print">
-                        <select onchange="executerActionPartenaire('Dolce', '0965647819', '0000', this)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 outline-none">
-                            <option value="">-- Actions --</option>
-                            <option value="recharger" class="text-emerald-400 font-bold">💸 Valider Recharge</option>
-                            <option value="voir_id" class="text-sky-400 font-bold">👁️ Voir Identifiants</option>
-                            <option value="activer" class="text-emerald-500 font-bold">🟢 Activer Compte</option>
-                            <option value="suspendre" class="text-amber-500 font-bold">🟠 Suspendre Compte</option>
-                            <option value="supprimer" class="text-rose-500 font-bold">🔴 Supprimer Compte</option>
-                        </select>
-                    </td>
-                </tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-500 font-sans italic">Aucun partenaire enregistré. Cliquez sur « Nouveau Partenaire » pour en créer un.</td></tr>`;
         }
 
         function rechercherPartenaire() {
@@ -1422,7 +1495,14 @@
                             await supabaseClient.from('tv_partenaires').update({ date_expiration: pastDate }).eq('tel', tel);
                         }
                     } catch(e) {}
-                    alert(`🟠 Le compte de ${nom} a été suspendu.`); 
+
+                    channelSyncAdmin.send({
+                        type: 'broadcast',
+                        event: 'compte_revoque',
+                        payload: { tel: tel, action: 'suspendu' }
+                    });
+
+                    alert(`🟠 Le compte de ${nom} a été suspendu et son accès coupé immédiatement.`); 
                     chargerPartenairesAdmin();
                 }
             }
@@ -1433,8 +1513,15 @@
                             await supabaseClient.from('tv_partenaires').delete().eq('tel', tel);
                         }
                     } catch(e) {}
+
+                    channelSyncAdmin.send({
+                        type: 'broadcast',
+                        event: 'compte_revoque',
+                        payload: { tel: tel, action: 'supprime' }
+                    });
+
                     selectElem.closest('tr')?.remove(); 
-                    alert(`🗑️ Compte de ${nom} supprimé.`); 
+                    alert(`🗑️ Compte de ${nom} supprimé et écran déconnecté à distance.`); 
                 } 
             }
             selectElem.value = ""; 
@@ -1551,7 +1638,7 @@
 
             const canvasClients = document.getElementById('chart-clients-types');
             if (canvasClients && canvasClients.offsetParent !== null) {
-                if (chartClientsTypesInstance) chartClientsTypesInstance.destroy();
+                if (chartClientsClientsInstance) chartClientsTypesInstance.destroy();
                 chartClientsTypesInstance = new Chart(canvasClients.getContext('2d'), {
                     type: 'doughnut', 
                     data: { labels: ['Flotte Active'], datasets: [{ data: [flotteGlobale.length || 1], backgroundColor: ['#6366f1'], borderColor: '#020617', borderWidth: 2 }] },
