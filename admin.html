@@ -77,7 +77,7 @@
     <!-- 2. CORPS APPLICATION ADMIN -->
     <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
         <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
-            <span class="text-xs font-bold text-indigo-400">TransVision Control Panel v27.0 PROD — Admin Miroir Absolu</span>
+            <span class="text-xs font-bold text-indigo-400">TransVision Control Panel v28.0 PROD — Admin Miroir Parfait</span>
             <div class="flex gap-2 text-[10px] font-mono">
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 flex items-center gap-1">Push Sync : <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" id="admin-server-dot"></span><span class="text-emerald-400 font-bold" id="admin-server-text">En Direct</span></span>
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Live : <span class="text-emerald-400 font-bold" id="admin-flotte-count">0 Traceur(s)</span></span>
@@ -85,6 +85,7 @@
         </div>
 
         <div class="flex flex-1 min-h-[calc(100vh-53px)] w-full">
+            <!-- ASIDE NAVIGATION -->
             <aside class="w-64 bg-slate-900 border-r border-slate-800 p-5 flex flex-col justify-between h-[calc(100vh-53px)] sticky top-[53px] no-print">
                 <div class="space-y-5">
                     <div class="flex items-center gap-2.5 px-1">
@@ -515,22 +516,24 @@
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-        let adminCredential = { email: "admin@transvision.cd", pass: "123456" };
-        let ciblePartenaire = null;
+        const SERVEUR_URL = "http://134.209.116.89:3000";
+        const socket = io(SERVEUR_URL, { transports: ['websocket'], reconnection: true });
 
-        let flotteGlobale = [];
-        let mapAdmin = null;
-        let adminMarkers = {};
-        let adminPolylines = {};
-        let tracesFlotte = {};
+        let partenaireProfil = null; 
+        let client = { nom: "Dolce", tel: "0965647819", vehicules: [] };
+        let map = null; 
+        let busMarker = null;
+        let polylineTrace = null;
+        let tracePositions = [];
+        let chartPartenaireInstance = null;
+        let dernierPointId = null;
+        let dernierTimestampTraite = 0;
 
-        function getKinshasaDateStr() {
-            const d = new Date();
-            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        }
+        let listeItineraires = JSON.parse(localStorage.getItem('tv_matrice_itineraires') || 'null') || [
+            { origine: "BRIKIN", destination: "GARE CENTRALE", prix: 2500, distDirect: 12.0, distDeviee: 14.5 }
+        ];
 
-        // L'ADMIN NE CALCULE PLUS RIEN : CHARGEMENT DE LA MATRICE DEPUIS SUPABASE
-        let listeItineraires = [];
+        // L'ADMIN SE SYNCHRONISE ET ENRICHIT LA BDD
         async function chargerMatriceItineraires() {
             try {
                 if(window.supabase) {
@@ -546,15 +549,6 @@
                     }
                 }
             } catch(e) {}
-            
-            // Si vide, on charge le cache local ou la liste par défaut
-            if(listeItineraires.length === 0) {
-                listeItineraires = JSON.parse(localStorage.getItem('tv_matrice_itineraires') || 'null') || [
-                    { origine: "BRIKIN", destination: "GARE CENTRALE", prix: 2500, distDirect: 12.0, distDeviee: 14.5 },
-                    { origine: "KINTAMBO MAGASIN", destination: "DELVAUX", prix: 1000, distDirect: 4.2, distDeviee: 5.0 },
-                    { origine: "KINGASANI PASCAL", destination: "ROUTE MOKALI PONT MANGO", prix: 1500, distDirect: 4.5, distDeviee: 5.3 }
-                ];
-            }
             afficherItinerairesAdmin();
         }
 
@@ -606,6 +600,11 @@
                 iconSize: [44, 44],
                 iconAnchor: [22, 22]
             });
+        }
+
+        function getKinshasaDateStr() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         }
 
         function verifierEtChargerJournalAdmin(v) {
@@ -685,9 +684,10 @@
         // ========================================================
         function activerSynchronisationCloudAdmin() {
             if (!window.supabase) return;
+            
+            // L'ADMIN NE CALCULE PLUS RIEN : Il écoute les données diffusées par le Partenaire
             supabaseClient.channel('tv_sync_channel')
                 .on('broadcast', { event: 'sync_state' }, ({ payload }) => {
-                    // L'ADMIN NE CALCULE PLUS RIEN. IL RECOPIE EXACTEMENT LE PARTENAIRE.
                     let v = flotteGlobale.find(item => item.imei === payload.imei);
                     if (!v) {
                         v = { 
@@ -704,7 +704,7 @@
                     } else {
                         const anciennePos = { lat: v.lat, lng: v.lng };
                         
-                        // MISE A JOUR DES CHIFFRES EXACTS DU PARTENAIRE (Zéro Invention)
+                        // RECUPERATION DES CHIFFRES EXACTS DU PARTENAIRE
                         v.kmJour = payload.kmJour;
                         v.kmCourse = payload.kmCourse;
                         v.tronconsValides = payload.tronconsValides;
@@ -750,8 +750,7 @@
                     initialiserGraphiquesAdmin();
                 })
                 .on('broadcast', { event: 'nouvelle_ligne' }, ({ payload }) => {
-                    // AUTO-APPRENTISSAGE DES LIGNES CRÉÉES PAR LES PARTENAIRES
-                    chargerMatriceItineraires(); // Recharge depuis Supabase pour capter la ligne enrichie
+                    chargerMatriceItineraires(); // Actualisation de la matrice
                 })
                 .on('broadcast', { event: 'reset_vehicule' }, ({ payload }) => {
                     const imei = payload.imei;
@@ -797,18 +796,40 @@
             }
         }
 
+        function reinitialiserVehiculeAdmin(idx) {
+            const v = flotteGlobale[idx];
+            if (!v) return;
+            if (confirm(`Remettre le compteur de ${v.plaque} à zéro pour aujourd'hui ?`)) {
+                const ts = Date.now();
+                v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0;
+                localStorage.setItem('tv_reset_ts_' + v.imei, ts);
+                sauvegarderStatsJournalieresAdmin(v);
+                tracesFlotte[v.imei] = [[v.lat, v.lng]];
+                if (adminPolylines[v.imei]) adminPolylines[v.imei].setLatLngs(tracesFlotte[v.imei]);
+                
+                try {
+                    if (window.supabase) {
+                        supabaseClient.from('tv_vehicules').upsert({ imei: v.imei, reset_ts: new Date(ts).toISOString() }, { onConflict: 'imei' }).then();
+                        supabaseClient.channel('tv_sync_channel').send({ type: 'broadcast', event: 'reset_vehicule', payload: { imei: v.imei, reset_ts: ts } });
+                    }
+                } catch(e) {}
+
+                majTableauFlotteAdmin();
+                initialiserGraphiquesAdmin();
+                alert(`✅ Compteur de ${v.plaque} remis à 0.`);
+            }
+        }
+
         // ========================================================
-        // CHARGEMENT INITIAL UNIFIÉ DEPUIS LA BDD
+        // CHARGEMENT INITIAL (SANS CALCULS)
         // ========================================================
         async function chargerHistoriqueAdmin() {
             try {
                 if (!window.supabase) return;
 
-                // On charge uniquement l'état stocké par le partenaire
                 const { data: vehiculesConfig } = await supabaseClient.from('tv_vehicules').select('*');
                 if (!vehiculesConfig) return;
 
-                // Pour placer le point sur la carte, on récupère juste la dernière position GPS
                 const { data: lastPositions } = await supabaseClient.from('transvision_positions_gps')
                     .select('imei, latitude, longitude, created_at')
                     .order('created_at', { ascending: false })
@@ -998,7 +1019,6 @@
                         const distDirect = parseFloat(row['Distance Approx. (km)'] || row['Distance']) || 0;
                         const distDeviee = parseFloat(row['Distance Réelle Déviée (km)'] || row['Distance Déviée']) || (distDirect * 1.2);
                         if(prix > 0 && origine && destination) {
-                            // Envoi vers Supabase pour enrichissement réel
                             if(window.supabase) {
                                 supabaseClient.from('tv_matrice_itineraires').upsert({
                                     origine: origine.toUpperCase(), destination: destination.toUpperCase(), 
@@ -1143,6 +1163,7 @@
                         tbody.innerHTML = "";
                         data.forEach(p => {
                             const estActif = p.date_expiration && new Date(p.date_expiration) > new Date();
+                            // Correction encodage pour les noms avec apostrophes
                             const nomS = p.nom ? p.nom.replace(/'/g, "\\'") : "Inconnu";
                             const telS = p.tel || "";
                             const pinS = p.pin || "0000";
@@ -1158,7 +1179,7 @@
                                         </span>
                                     </td>
                                     <td class="py-3 text-right no-print">
-                                        <select onchange="executerActionPartenaire(this)" data-nom="${nomS}" data-tel="${telS}" data-pin="${pinS}" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 outline-none">
+                                        <select onchange="executerActionPartenaire('${nomS}', '${telS}', '${pinS}', this)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 outline-none">
                                             <option value="">-- Actions --</option>
                                             <option value="recharger" class="text-emerald-400 font-bold">💸 Valider Recharge</option>
                                             <option value="voir_id" class="text-sky-400 font-bold">👁️ Voir Identifiants</option>
@@ -1193,13 +1214,9 @@
             });
         }
 
-        async function executerActionPartenaire(selectElem) {
+        async function executerActionPartenaire(nom, tel, pin, selectElem) {
             const action = selectElem.value;
             if(!action) return;
-
-            const nom = selectElem.getAttribute('data-nom');
-            const tel = selectElem.getAttribute('data-tel');
-            const pin = selectElem.getAttribute('data-pin');
 
             if (action === 'recharger') { 
                 ouvrirModalRechargeFlexible(nom, tel); 
@@ -1455,7 +1472,7 @@
                 
                 chargerCGUAdmin();
                 chargerNumerosAdmin();
-                chargerMatriceItineraires(); // Remplissage Auto de la Base
+                chargerMatriceItineraires(); // Auto-enrichissement au démarrage
                 chargerPartenairesAdmin();
             } catch (erreur) {
                 console.warn(erreur);
