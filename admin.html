@@ -77,7 +77,7 @@
     <!-- 2. CORPS APPLICATION ADMIN -->
     <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
         <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
-            <span class="text-xs font-bold text-indigo-400">TransVision Control Panel v33.0 PROD — Admin Miroir + Nettoyeur Carte</span>
+            <span class="text-xs font-bold text-indigo-400">TransVision Control Panel v34.0 PROD — Admin Miroir Absolu & Fiable</span>
             <div class="flex gap-2 text-[10px] font-mono">
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 flex items-center gap-1">Push Sync : <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" id="admin-server-dot"></span><span class="text-emerald-400 font-bold" id="admin-server-text">En Direct</span></span>
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Live : <span class="text-emerald-400 font-bold" id="admin-flotte-count">0 Traceur(s)</span></span>
@@ -682,13 +682,18 @@
 
             // 1. Écoute des positions GPS pures (Carte)
             supabaseClient
-                .channel('transvision_admin_live_stream_v11')
+                .channel('transvision_admin_live_stream_v12')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transvision_positions_gps' }, (payload) => {
                     const row = payload.new;
                     if (row && row.latitude && row.longitude) {
                         const imeiClean = String(row.imei).trim();
                         let v = flotteGlobale.find(item => item.imei === imeiClean);
                         if (v) {
+                            // On ignore les vieux points errants
+                            const resetTs = parseInt(localStorage.getItem('tv_reset_ts_' + imeiClean) || '0');
+                            const rowTs = new Date(row.created_at || Date.now()).getTime();
+                            if (rowTs < resetTs) return;
+
                             const newLat = parseFloat(row.latitude);
                             const newLng = parseFloat(row.longitude);
                             const ancienCap = v.dernierCap || 0;
@@ -706,8 +711,9 @@
                             if (mapAdmin && adminMarkers[imeiClean]) {
                                 animerDeplacementMarkerAdmin(adminMarkers[imeiClean], anciennePos, { lat: newLat, lng: newLng }, ancienCap, nouveauCap, 1200);
                                 
+                                // Mise à jour de la bulle quand le GPS bouge
                                 const vitTxt = parseFloat(row.speed || row.vitesse || 0) > 0 ? `${Math.round(row.speed || row.vitesse)} km/h` : 'À l\'arrêt';
-                                adminMarkers[imeiClean].bindPopup(`
+                                adminMarkers[imeiClean].getPopup().setContent(`
                                     <b>${v.plaque}</b> (${v.places} places)<br>
                                     Ligne: <b>${v.origine} ➔ ${v.destination}</b><br>
                                     Vitesse: <b>${vitTxt}</b><br>
@@ -737,8 +743,19 @@
                         v.origine = payload.origine;
                         v.destination = payload.destination;
                         
-                        sauvegarderStatsJournalieresAdmin(v); // Sécurisation en cache local
+                        sauvegarderStatsJournalieresAdmin(v); 
                         
+                        // MISE À JOUR DE LA BULLE LORSQUE LE PARTENAIRE SYNCHRONISE SES DONNÉES
+                        if (mapAdmin && adminMarkers[v.imei]) {
+                            adminMarkers[v.imei].getPopup().setContent(`
+                                <b>${v.plaque}</b> (${v.places} places)<br>
+                                Ligne: <b>${v.origine} ➔ ${v.destination}</b><br>
+                                Vitesse: <b>En direct</b><br>
+                                Roulé aujourd'hui: <b>${(v.kmJour || 0).toFixed(1)} km</b><br>
+                                Rotations: <b>${v.tronconsValides}</b> (${(v.recetteBruteReelle || 0).toLocaleString()} CDF)
+                            `);
+                        }
+
                         majTableauFlotteAdmin();
                         initialiserGraphiquesAdmin();
                     }
@@ -814,8 +831,8 @@
             }
         }
 
-// ========================================================
-        // CORRECTION 1 : L'ADMIN RESPECTE LA COUPURE DU TRACÉ (RESET TS)
+        // ========================================================
+        // CHARGEMENT INITIAL ROBUSTE & COMPLET (CORRIGÉ)
         // ========================================================
         async function chargerHistoriqueAdmin() {
             try {
@@ -826,6 +843,7 @@
 
                 let lignesConfig = {};
                 try {
+                    // Lecture de tv_vehicules (Source de vérité de l'Admin si le partenaire est hors ligne)
                     const { data: vehiculesConfig } = await supabaseClient.from('tv_vehicules').select('*');
                     if (vehiculesConfig && vehiculesConfig.length > 0) {
                         vehiculesConfig.forEach(cfg => {
@@ -855,7 +873,6 @@
                         const cfg = lignesConfig[imeiStr] || {};
                         const customLocal = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}')[imeiStr] || {};
 
-                        // L'Admin lit l'heure de la dernière remise à zéro (comme le partenaire)
                         let dbResetTs = cfg.reset_ts ? new Date(cfg.reset_ts).getTime() : 0;
                         let localResetTs = parseInt(localStorage.getItem('tv_reset_ts_' + imeiStr) || '0');
                         const resetTsUnifie = Math.max(dbResetTs, localResetTs, debutJournee.getTime());
@@ -871,6 +888,7 @@
                             tarif: parseFloat(cfg.tarif) || 2500,
                             origine: cfg.origine || customLocal.origine || "BRIKIN",
                             destination: cfg.destination || customLocal.destination || "GARE CENTRALE",
+                            // On donne la priorité à la base de données (si elle est lue) sinon au cache local
                             kmJour: parseFloat(cfg.km_jour) || (statsLocales ? statsLocales.kmJour : 0), 
                             tronconsValides: parseInt(cfg.troncons_valides) || (statsLocales ? statsLocales.tronconsValides : 0),
                             recetteBruteReelle: parseFloat(cfg.recette_brute) || (statsLocales ? statsLocales.recetteBruteReelle : 0),
@@ -884,16 +902,25 @@
 
                         tracesFlotte[imeiStr] = []; 
                         
-                        // ON NE PREND QUE LES POINTS APRÈS LA DERNIÈRE REMISE À ZÉRO (Fini les toiles d'araignées)
                         const pointsDuJour = data
                             .filter(p => String(p.imei).trim() === imeiStr && new Date(p.created_at).getTime() >= resetTsUnifie)
                             .reverse(); 
                         
+                        let pointPrec = null;
                         pointsDuJour.forEach(pt => {
                             const pLat = parseFloat(pt.latitude);
                             const pLng = parseFloat(pt.longitude);
                             if (pLat !== 0 && pLng !== 0 && !isNaN(pLat)) {
-                                tracesFlotte[imeiStr].push([pLat, pLng]);
+                                if (pointPrec) {
+                                    let d = calculerDistanceGPS(pointPrec.latitude, pointPrec.longitude, pLat, pLng);
+                                    if (d < 15.0) { 
+                                        tracesFlotte[imeiStr].push([pLat, pLng]);
+                                        pointPrec = { latitude: pLat, longitude: pLng };
+                                    }
+                                } else {
+                                    tracesFlotte[imeiStr].push([pLat, pLng]);
+                                    pointPrec = { latitude: pLat, longitude: pLng };
+                                }
                             }
                         });
 
@@ -912,114 +939,14 @@
                     document.getElementById('admin-flotte-count').textContent = `${flotteGlobale.length} Traceur(s)`;
                     majTableauFlotteAdmin();
                     initialiserGraphiquesAdmin();
-                    if (mapAdmin) { mapAdmin.invalidateSize(); } else { initMapAdmin(); }
+                    // On s'assure que la carte s'affiche même si elle est cachée au départ
+                    setTimeout(() => {
+                        if (mapAdmin) { mapAdmin.invalidateSize(); } else { initMapAdmin(); }
+                    }, 300);
                 }
             } catch (err) {
                 console.error(err);
             }
-        }
-
-        // ========================================================
-        // CORRECTION 2 : MISE À JOUR DE LA BULLE SUR LA CARTE ADMIN
-        // ========================================================
-        function activerFluxRealtimeAdmin() {
-            if (!window.supabase) return;
-
-            supabaseClient
-                .channel('transvision_admin_live_stream_v12')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transvision_positions_gps' }, (payload) => {
-                    const row = payload.new;
-                    if (row && row.latitude && row.longitude) {
-                        const imeiClean = String(row.imei).trim();
-                        let v = flotteGlobale.find(item => item.imei === imeiClean);
-                        if (v) {
-                            // On ignore les vieux points errants
-                            const resetTs = parseInt(localStorage.getItem('tv_reset_ts_' + imeiClean) || '0');
-                            const rowTs = new Date(row.created_at || Date.now()).getTime();
-                            if (rowTs < resetTs) return;
-
-                            const newLat = parseFloat(row.latitude);
-                            const newLng = parseFloat(row.longitude);
-                            const ancienCap = v.dernierCap || 0;
-                            const nouveauCap = calculerCap(v.lat, v.lng, newLat, newLng);
-                            v.dernierCap = nouveauCap;
-
-                            const anciennePos = { lat: v.lat, lng: v.lng };
-                            v.lat = newLat;
-                            v.lng = newLng;
-                            v.derniereCo = new Date(row.created_at || Date.now());
-
-                            if (!tracesFlotte[imeiClean]) tracesFlotte[imeiClean] = [];
-                            tracesFlotte[imeiClean].push([newLat, newLng]);
-
-                            if (mapAdmin && adminMarkers[imeiClean]) {
-                                animerDeplacementMarkerAdmin(adminMarkers[imeiClean], anciennePos, { lat: newLat, lng: newLng }, ancienCap, nouveauCap, 1200);
-                                
-                                // Mise à jour de la bulle quand le GPS bouge
-                                const vitTxt = parseFloat(row.speed || row.vitesse || 0) > 0 ? `${Math.round(row.speed || row.vitesse)} km/h` : 'À l\'arrêt';
-                                adminMarkers[imeiClean].getPopup().setContent(`
-                                    <b>${v.plaque}</b> (${v.places} places)<br>
-                                    Ligne: <b>${v.origine} ➔ ${v.destination}</b><br>
-                                    Vitesse: <b>${vitTxt}</b><br>
-                                    Roulé aujourd'hui: <b>${(v.kmJour || 0).toFixed(1)} km</b><br>
-                                    Rotations: <b>${v.tronconsValides}</b> (${(v.recetteBruteReelle || 0).toLocaleString()} CDF)
-                                `);
-                            }
-                            if (adminPolylines[imeiClean]) {
-                                adminPolylines[imeiClean].setLatLngs(tracesFlotte[imeiClean]);
-                            }
-                        }
-                    }
-                })
-                .subscribe();
-
-            supabaseClient.channel('tv_sync_channel')
-                .on('broadcast', { event: 'sync_state' }, ({ payload }) => {
-                    let v = flotteGlobale.find(item => item.imei === payload.imei);
-                    if (v) {
-                        v.kmJour = payload.kmJour;
-                        v.tronconsValides = payload.tronconsValides;
-                        v.recetteBruteReelle = payload.recetteBruteReelle;
-                        v.places = payload.places;
-                        v.plaque = payload.plaque;
-                        v.origine = payload.origine;
-                        v.destination = payload.destination;
-                        
-                        sauvegarderStatsJournalieresAdmin(v); 
-                        
-                        // MISE À JOUR DE LA BULLE LORSQUE LE PARTENAIRE SYNCHRONISE SES DONNÉES
-                        if (mapAdmin && adminMarkers[v.imei]) {
-                            adminMarkers[v.imei].getPopup().setContent(`
-                                <b>${v.plaque}</b> (${v.places} places)<br>
-                                Ligne: <b>${v.origine} ➔ ${v.destination}</b><br>
-                                Vitesse: <b>En direct</b><br>
-                                Roulé aujourd'hui: <b>${(v.kmJour || 0).toFixed(1)} km</b><br>
-                                Rotations: <b>${v.tronconsValides}</b> (${(v.recetteBruteReelle || 0).toLocaleString()} CDF)
-                            `);
-                        }
-
-                        majTableauFlotteAdmin();
-                        initialiserGraphiquesAdmin();
-                    }
-                })
-                .on('broadcast', { event: 'nouvelle_ligne' }, ({ payload }) => {
-                    chargerMatriceItineraires(); 
-                })
-                .on('broadcast', { event: 'reset_vehicule' }, ({ payload }) => {
-                    const imei = payload.imei;
-                    const ts = payload.reset_ts;
-                    localStorage.setItem('tv_reset_ts_' + imei, ts);
-                    let v = flotteGlobale.find(item => item.imei === imei);
-                    if (v) {
-                        v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0;
-                        sauvegarderStatsJournalieresAdmin(v);
-                        tracesFlotte[imei] = [[v.lat, v.lng]];
-                        if (adminPolylines[imei]) adminPolylines[imei].setLatLngs(tracesFlotte[imei]);
-                        majTableauFlotteAdmin();
-                        initialiserGraphiquesAdmin();
-                    }
-                })
-                .subscribe();
         }
 
         // ========================================================
@@ -1062,6 +989,91 @@
             }
             
             setTimeout(() => { mapAdmin.invalidateSize(); }, 200);
+        }
+
+        function majTableauFlotteAdmin() {
+            const tbody = document.getElementById('table-vehicules-body');
+            if (!tbody) return;
+            tbody.innerHTML = "";
+            let totalKm = 0; let totalRot = 0; let totalCDF = 0;
+            
+            if (flotteGlobale.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-slate-500 font-sans italic">En attente des données GPS...</td></tr>`;
+                document.getElementById('stat-total-km').textContent = "0.0";
+                document.getElementById('stat-total-rotations').textContent = "0";
+                document.getElementById('stat-total-cdf').textContent = "0";
+                return;
+            }
+
+            flotteGlobale.forEach((v, idx) => {
+                totalKm += (v.kmJour || 0); 
+                totalRot += (v.tronconsValides || 0); 
+                totalCDF += (v.recetteBruteReelle || 0);
+
+                const btnMoteur = v.moteurCoupe 
+                    ? `<button onclick="actionnerMoteurAdmin(${idx}, false)" class="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded text-[10px] font-bold uppercase"><i class="fa-solid fa-key"></i> Démarrer</button>`
+                    : `<button onclick="actionnerMoteurAdmin(${idx}, true)" class="bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30 px-2.5 py-1 rounded text-[10px] font-bold uppercase"><i class="fa-solid fa-power-off"></i> Couper</button>`;
+                
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td class="py-3 font-bold text-slate-200">${v.plaque} <br><span class="text-[9px] text-slate-500">${v.imei}</span></td>
+                        <td class="py-3 text-sky-400 font-mono text-[10px] font-bold">
+                            <i class="fa-solid fa-location-dot text-rose-500 mr-1"></i>${v.avenueLive || 'Ngaliema, Kinshasa'}
+                        </td>
+                        <td class="py-3 font-bold text-slate-100">${(v.kmJour || 0).toFixed(1)} km</td>
+                        <td class="py-3 text-slate-200 font-bold">
+                            <span class="text-sky-400">${v.origine}</span> ➔ <span class="text-emerald-400">${v.destination}</span>
+                            <span class="block text-[9px] text-slate-400 font-normal">Capacité: <b>${v.places || 0} places</b></span>
+                        </td>
+                        <td class="py-3 font-black text-slate-200">${v.tronconsValides || 0}</td>
+                        <td class="py-3 font-black text-emerald-400">${(v.recetteBruteReelle || 0).toLocaleString()} CDF</td>
+                        <td class="py-3 text-right space-x-1">
+                            ${btnMoteur}
+                            <button onclick="reinitialiserVehiculeAdmin(${idx})" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-2 py-1 rounded text-[10px] font-bold" title="Remise à 0 du jour"><i class="fa-solid fa-rotate-left"></i></button>
+                        </td>
+                    </tr>
+                `);
+            });
+            
+            document.getElementById('stat-total-km').textContent = totalKm.toFixed(1);
+            document.getElementById('stat-total-rotations').textContent = totalRot;
+            document.getElementById('stat-total-cdf').textContent = totalCDF.toLocaleString();
+        }
+
+        function actionnerMoteurAdmin(index, couper) {
+            const v = flotteGlobale[index];
+            if (!v) return;
+
+            const actionTxt = couper ? "COUPER LE MOTEUR" : "DÉMARRER / DÉBLOQUER";
+            if (confirm(`📡 Action Télématique Super Admin :\nVoulez-vous ${actionTxt} du véhicule ${v.plaque} (${v.imei}) ?`)) {
+                v.moteurCoupe = couper;
+                socket.emit('commande_moteur', { imei: v.imei, couper: couper });
+                try {
+                    supabaseClient.from('tv_vehicules').upsert({
+                        imei: v.imei,
+                        moteur_coupe: couper,
+                        updated_at: new Date().toISOString()
+                    }, { onConflict: 'imei' }).then();
+                } catch(e) {}
+                alert(`✅ Ordre de commande envoyé avec succès au véhicule ${v.plaque}.`);
+                majTableauFlotteAdmin();
+            }
+        }
+
+        let chartRecettesDepensesInstance = null;
+        let chartClientsTypesInstance = null;
+        let chartCommunesPartInstance = null;
+
+        function changerPageAdmin(idPage, boutonClique) {
+            document.querySelectorAll('.class-page-admin').forEach(p => p.classList.add('hidden'));
+            document.getElementById(idPage).classList.remove('hidden');
+            document.querySelectorAll('.nav-link-admin').forEach(l => { l.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-850 hover:text-slate-200 transition-all nav-link-admin"; });
+            boutonClique.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/10 nav-link-admin";
+            
+            if (idPage === 'page-stats-croisees') { setTimeout(initialiserGraphiquesAdmin, 100); }
+            if (idPage === 'page-suivi') { setTimeout(initMapAdmin, 50); }
+            if (idPage === 'page-itineraires') { chargerMatriceItineraires(); }
+            if (idPage === 'page-partenaires') { chargerPartenairesAdmin(); }
         }
 
         function centrerMapAdmin() { 
@@ -1225,7 +1237,7 @@
         }
 
         // ========================================================
-        // GESTION DES PARTENAIRES : MENU D'ACTIONS SÉCURISÉ
+        // GESTION DES PARTENAIRES : MENU D'ACTIONS SÉCURISÉ (MÉMOIRE)
         // ========================================================
         window.annuairePartenaires = {}; 
 
@@ -1242,6 +1254,7 @@
                             const estActif = p.date_expiration && new Date(p.date_expiration) > new Date();
                             const telKey = p.tel || "inconnu_" + Math.random();
                             
+                            // Stockage sécurisé en mémoire
                             window.annuairePartenaires[telKey] = {
                                 nom: p.nom || "Inconnu",
                                 tel: p.tel || "",
@@ -1301,6 +1314,7 @@
             const action = selectElem.value;
             if(!action) return;
 
+            // Récupération sécurisée depuis la mémoire globale
             const part = window.annuairePartenaires[telKey];
             if(!part) return;
 
