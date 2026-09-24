@@ -77,7 +77,7 @@
     <!-- 2. CORPS APPLICATION ADMIN -->
     <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
         <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
-            <span class="text-xs font-bold text-indigo-400">TransVision Control Panel v35.0 PROD — Nettoyeur Tracé</span>
+            <span class="text-xs font-bold text-indigo-400">TransVision Control Panel v33.0 PROD — Admin Miroir + Nettoyeur Carte</span>
             <div class="flex gap-2 text-[10px] font-mono">
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 flex items-center gap-1">Push Sync : <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" id="admin-server-dot"></span><span class="text-emerald-400 font-bold" id="admin-server-text">En Direct</span></span>
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Live : <span class="text-emerald-400 font-bold" id="admin-flotte-count">0 Traceur(s)</span></span>
@@ -181,7 +181,7 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-850" id="table-vehicules-body">
-                                <tr><td colspan="7" class="py-4 text-center text-slate-500 font-sans italic">En attente de synchronisation cloud...</td></tr>
+                                <tr><td colspan="7" class="py-4 text-center text-slate-500 font-sans italic">En attente des données GPS...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -562,6 +562,14 @@
             return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
         }
 
+        function calculerDistanceGPS(lat1, lon1, lat2, lon2) {
+            const R = 6371; 
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+        }
+
         function animerDeplacementMarkerAdmin(marker, startPos, endPos, startAngle, targetAngle, dureeMs = 1200) {
             const debut = performance.now();
             let diff = (targetAngle - startAngle) % 360;
@@ -660,7 +668,7 @@
                     v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0;
                     sauvegarderStatsJournalieresAdmin(v);
                 });
-                tracesFlotte = {}; // Réinitialisation de la toile d'araignée
+                tracesFlotte = {};
                 majTableauFlotteAdmin();
             }
             localStorage.setItem('tv_derniere_date_admin', dateActuelle);
@@ -674,7 +682,7 @@
 
             // 1. Écoute des positions GPS pures (Carte)
             supabaseClient
-                .channel('transvision_admin_live_stream_v10')
+                .channel('transvision_admin_live_stream_v11')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transvision_positions_gps' }, (payload) => {
                     const row = payload.new;
                     if (row && row.latitude && row.longitude) {
@@ -720,6 +728,7 @@
                 .on('broadcast', { event: 'sync_state' }, ({ payload }) => {
                     let v = flotteGlobale.find(item => item.imei === payload.imei);
                     if (v) {
+                        // Copie stricte, miroir absolu
                         v.kmJour = payload.kmJour;
                         v.tronconsValides = payload.tronconsValides;
                         v.recetteBruteReelle = payload.recetteBruteReelle;
@@ -727,6 +736,8 @@
                         v.plaque = payload.plaque;
                         v.origine = payload.origine;
                         v.destination = payload.destination;
+                        
+                        sauvegarderStatsJournalieresAdmin(v); // Sécurisation en cache local
                         
                         majTableauFlotteAdmin();
                         initialiserGraphiquesAdmin();
@@ -803,19 +814,19 @@
             }
         }
 
-// ========================================================
-        // CHARGEMENT INITIAL ROBUSTE & COMPLET (CORRIGÉ)
+        // ========================================================
+        // CHARGEMENT INITIAL ROBUSTE & COMPLET (CACHE RESTAURÉ)
         // ========================================================
         async function chargerHistoriqueAdmin() {
             try {
                 if (!window.supabase) return;
 
+                const dateDuJour = getKinshasaDateStr();
                 const debutJournee = new Date();
                 debutJournee.setHours(0, 0, 0, 0);
 
                 let lignesConfig = {};
                 try {
-                    // On lit LES DONNÉES EXACTES DU PARTENAIRE sauvegardées dans tv_vehicules
                     const { data: vehiculesConfig } = await supabaseClient.from('tv_vehicules').select('*');
                     if (vehiculesConfig && vehiculesConfig.length > 0) {
                         vehiculesConfig.forEach(cfg => {
@@ -845,18 +856,21 @@
                         const cfg = lignesConfig[imeiStr] || {};
                         const customLocal = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}')[imeiStr] || {};
 
-                        // RESTAURATION : Lecture des chiffres réels depuis la base (Le Cerveau Partenaire)
+                        // RESTAURATION DU CACHE LOCAL : Sécurise l'affichage si la BD Supabase tarde ou bloque (RLS)
+                        const cleStatsJour = `tv_stats_admin_${dateDuJour}_${imeiStr}`;
+                        let statsLocales = JSON.parse(localStorage.getItem(cleStatsJour) || 'null');
+
                         const vObj = {
                             imei: imeiStr,
                             plaque: cfg.plaque || customLocal.plaque || `TRK-${imeiStr.slice(-4)}`,
-                            places: parseInt(cfg.places) || parseInt(customLocal.places) || 4,
+                            places: parseInt(cfg.places) || (statsLocales ? statsLocales.places : 4),
                             tarif: parseFloat(cfg.tarif) || 2500,
                             origine: cfg.origine || customLocal.origine || "BRIKIN",
                             destination: cfg.destination || customLocal.destination || "GARE CENTRALE",
-                            // On prend les valeurs de la DB, pas celles du cache local obsolète
-                            kmJour: parseFloat(cfg.km_jour) || 0, 
-                            tronconsValides: parseInt(cfg.troncons_valides) || 0,
-                            recetteBruteReelle: parseFloat(cfg.recette_brute) || 0,
+                            // On lit en priorité Supabase, sinon le cache mémorisé (pour éviter le bug de la disparition)
+                            kmJour: parseFloat(cfg.km_jour) || (statsLocales ? statsLocales.kmJour : 0), 
+                            tronconsValides: parseInt(cfg.troncons_valides) || (statsLocales ? statsLocales.tronconsValides : 0),
+                            recetteBruteReelle: parseFloat(cfg.recette_brute) || (statsLocales ? statsLocales.recetteBruteReelle : 0),
                             lat: parseFloat(pos.latitude),
                             lng: parseFloat(pos.longitude),
                             moteurCoupe: cfg.moteur_coupe || false,
@@ -879,17 +893,18 @@
                             if (pLat !== 0 && pLng !== 0 && !isNaN(pLat)) {
                                 if (pointPrec) {
                                     let d = calculerDistanceGPS(pointPrec.latitude, pointPrec.longitude, pLat, pLng);
-                                    if (d < 15.0) { // On ignore les sauts délirants > 15 km
+                                    if (d < 15.0) { // On ignore les sauts aberrants
                                         tracesFlotte[imeiStr].push([pLat, pLng]);
+                                        pointPrec = { latitude: pLat, longitude: pLng };
                                     }
                                 } else {
-                                     tracesFlotte[imeiStr].push([pLat, pLng]);
+                                    tracesFlotte[imeiStr].push([pLat, pLng]);
+                                    pointPrec = { latitude: pLat, longitude: pLng };
                                 }
-                                pointPrec = { latitude: pLat, longitude: pLng };
                             }
                         });
 
-                        // S'il n'y a pas eu de mouvement valide aujourd'hui, on place au moins le point actuel
+                        // S'il n'y a pas eu de mouvement aujourd'hui, on place au moins le point actuel
                         if(tracesFlotte[imeiStr].length === 0) {
                             tracesFlotte[imeiStr].push([vObj.lat, vObj.lng]);
                         }
@@ -1191,7 +1206,7 @@
         }
 
         // ========================================================
-        // GESTION DES PARTENAIRES : MENU D'ACTIONS SÉCURISÉ (MÉMOIRE)
+        // GESTION DES PARTENAIRES : MENU D'ACTIONS SÉCURISÉ
         // ========================================================
         window.annuairePartenaires = {}; 
 
@@ -1208,7 +1223,6 @@
                             const estActif = p.date_expiration && new Date(p.date_expiration) > new Date();
                             const telKey = p.tel || "inconnu_" + Math.random();
                             
-                            // Stockage sécurisé en mémoire
                             window.annuairePartenaires[telKey] = {
                                 nom: p.nom || "Inconnu",
                                 tel: p.tel || "",
@@ -1268,7 +1282,6 @@
             const action = selectElem.value;
             if(!action) return;
 
-            // Récupération sécurisée depuis la mémoire globale
             const part = window.annuairePartenaires[telKey];
             if(!part) return;
 
