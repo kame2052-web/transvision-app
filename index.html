@@ -88,11 +88,11 @@
                 <div id="form-connexion" class="bg-slate-950/85 backdrop-blur p-5 rounded-2xl border border-slate-800/80 space-y-4 shadow-xl">
                     <div>
                         <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Téléphone Enregistré</label>
-                        <input type="tel" id="login-tel" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-mono font-bold" value="0965647819">
+                        <input type="tel" id="login-tel" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-mono font-bold" placeholder="Ex: 0965647819">
                     </div>
                     <div>
                         <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Code PIN Sécurité</label>
-                        <input type="password" id="login-pin" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-mono" placeholder="4 chiffres" value="0000">
+                        <input type="password" id="login-pin" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs text-slate-200 font-mono" placeholder="4 chiffres">
                     </div>
                     <button onclick="executerConnexionPartenaire()" id="btn-login-text" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl text-xs uppercase shadow-lg shadow-emerald-500/10 transition-colors">
                         Ouvrir mon Espace Flotte
@@ -129,7 +129,7 @@
                 <div class="flex justify-between items-center mb-3">
                     <div>
                         <div class="flex items-center gap-2">
-                            <h1 id="lbl-nom-partenaire" class="text-sm font-black text-slate-100">Dolce</h1>
+                            <h1 id="lbl-nom-partenaire" class="text-sm font-black text-slate-100">Partenaire</h1>
                             <span class="text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded font-mono font-bold">ACTIF</span>
                         </div>
                         <p class="text-[8px] text-slate-400 font-mono">TransVision by Global Tech Solutions</p>
@@ -462,7 +462,7 @@
         </div>
     </div>
 
-    <!-- LOGIQUE JAVASCRIPT CONNECTÉE SANS VALEURS EN DUR -->
+    <!-- LOGIQUE JAVASCRIPT CONNECTÉE TEMPS RÉEL -->
     <script>
         function chargerConfigurationsAdmin() {
             const numWhatsApp = localStorage.getItem('tv_whatsapp') || "243810000000";
@@ -502,7 +502,7 @@
         } catch(e) {}
 
         let partenaireProfil = null; 
-        let client = { nom: "Dolce", tel: "0965647819", vehicules: [] };
+        let client = { nom: "Partenaire", tel: "", vehicules: [] };
         let map = null; 
         let busMarker = null;
         let polylineTrace = null;
@@ -525,7 +525,7 @@
             { o: "BANDAL MOULAERT", d: "GARE CENTRALE", t: 500, d1: 6.8, d2: 8.2 }
         ];
 
-        // CANAL PERMANENT PARTAGÉ ABONNÉ DÈS LE DÉMARRAGE
+        // CANAL PERMANENT PARTAGÉ AVEC ÉCOUTE DES RÉVOCATIONS
         const channelSyncClient = supabaseClient.channel('transvision_sync_hub');
 
         channelSyncClient
@@ -549,6 +549,15 @@
                 if (v) {
                     v.moteurCoupe = payload.couper;
                     genererRapportTechnique();
+                }
+            })
+            .on('broadcast', { event: 'compte_revoque' }, ({ payload }) => {
+                const monTel = (partenaireProfil && partenaireProfil.tel) || localStorage.getItem('tv_partenaire_tel');
+                if (payload && payload.tel === monTel) {
+                    alert(payload.action === 'supprime' 
+                        ? "❌ Votre compte partenaire a été supprimé par l'administrateur." 
+                        : "⚠️ Votre compte partenaire a été suspendu par l'administrateur.");
+                    declencherDeconnexion();
                 }
             })
             .subscribe();
@@ -683,8 +692,6 @@
             const dateDuJour = getKinshasaDateStr();
             const cleStatsJour = `tv_stats_${dateDuJour}_${v.imei}`;
             let stats = JSON.parse(localStorage.getItem(cleStatsJour) || 'null');
-
-            // Le nombre de places n'est JAMAIS forcé. Il utilise les places saisies.
             const placesReelles = parseInt(v.places) || 0;
 
             if (stats) {
@@ -718,7 +725,6 @@
             localStorage.setItem(cleStatsJour, JSON.stringify(donnees));
         }
 
-        // BASCULE MINUIT AUTOMATIQUE (KINSHASA GMT+1)
         function verifierEtReinitialiserAutomatiqueJournee() {
             const dateActuelle = getKinshasaDateStr();
             const derniereDateVerifiee = localStorage.getItem('tv_derniere_date_minuit');
@@ -746,9 +752,6 @@
         }
         setInterval(verifierEtReinitialiserAutomatiqueJournee, 15000);
 
-        // ========================================================
-        // CHARGEMENT INITIAL (LECTURE STRICTE DES PLACES ENREGISTRÉES)
-        // ========================================================
         async function chargerDernieresPositions() {
             try {
                 const txtStatut = document.getElementById('last-update-text');
@@ -760,13 +763,11 @@
                 debutJournee.setHours(0, 0, 0, 0);
                 const debutJourneeTs = debutJournee.getTime();
 
-                // 1. Lire la configuration sauvegardée du véhicule dans Supabase ou LocalStorage
                 const imeiClean = "357445101350102";
                 let savedLigne = JSON.parse(localStorage.getItem('tv_ligne_' + imeiClean) || 'null');
                 let customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
                 let cfg = customConfig[imeiClean] || {};
 
-                // Lecture depuis la table tv_vehicules si disponible
                 let placesDb = null;
                 try {
                     const { data: dbV } = await supabaseClient.from('tv_vehicules').select('*').eq('imei', imeiClean).maybeSingle();
@@ -777,7 +778,6 @@
                     }
                 } catch(e) {}
 
-                // PLACES ASSISES STRICTEMENT DÉFINIES PAR LA CONFIGURATION UTILISATEUR
                 const placesFinales = parseInt(placesDb || cfg.places) || 0;
 
                 let origine = savedLigne?.origine || cfg.origine || "BRIKIN";
@@ -793,7 +793,7 @@
                 const nouveauVehicule = {
                     plaque: cfg.plaque || "Tracker 0102", 
                     type: cfg.type || "Toyota IST", 
-                    places: placesFinales, // ZÉRO EN DUR : VALEUR SAISIE PAR L'UTILISATEUR
+                    places: placesFinales,
                     imei: imeiClean,
                     lat: -4.3215, 
                     lng: 15.3115, 
@@ -876,9 +876,6 @@
             } catch (err) {}
         }
 
-        // ========================================================
-        // CANAL REALTIME PUSH DIRECT (< 200 ms)
-        // ========================================================
         function activerFluxRealtimePush() {
             try {
                 if (!window.supabase) return;
@@ -916,9 +913,6 @@
             });
         }
 
-        // ========================================================
-        // RÉCEPTION D'UNE POSITION ET ALGORITHME DE ROTATION TACTIQUE
-        // ========================================================
         function traiterNouvellePosition(data) {
             const imeiClean = String(data.imei).trim();
             if (data.timestamp && data.timestamp < dernierTimestampTraite) return;
@@ -931,11 +925,9 @@
             let v = client.vehicules.find(item => item.imei === imeiClean);
             if (!v) return;
 
-            // RECUPÉRATION DYNAMIQUE DES PLACES DE CE VÉHICULE
             const placesReelles = parseInt(v.places) || 0;
             const distDelta = calculerDistanceGPS(v.lat, v.lng, data.lat, data.lng);
             
-            // Filtrage anti-dérive à l'arrêt
             if (distDelta > 0.020 || (distDelta > 0.005 && data.vitesse > 3)) {
                 v.kmJour += distDelta;
                 v.kmCourse += distDelta;
@@ -953,15 +945,12 @@
                 if (diffCap > 180) diffCap = 360 - diffCap;
 
                 const dDirect = v.distDirect || 12.0;
-                const gainParRotation = (v.tarif || 2500) * placesReelles; // STRICTEMENT DYNAMIQUE
+                const gainParRotation = (v.tarif || 2500) * placesReelles;
                 let rotationValidee = false;
 
-                // 1. Terminus nominal atteint
                 if (v.kmCourse >= dDirect) {
                     rotationValidee = true;
-                }
-                // 2. Embouteillage avant terminus (>= 80% du trajet) + arrêt > 30s ou virage
-                else if (v.kmCourse >= (0.80 * dDirect)) {
+                } else if (v.kmCourse >= (0.80 * dDirect)) {
                     if (diffCap >= 110 || data.vitesse < 5) {
                         v.secondesArret = (v.secondesArret || 0) + 10;
                         if (v.secondesArret >= 30 || diffCap >= 110) {
@@ -970,9 +959,7 @@
                     } else {
                         v.secondesArret = 0;
                     }
-                }
-                // 3. Demi-tour tactique à mi-parcours (>= 55% du trajet + virage >= 130° confirmé sur 150m)
-                else if (v.kmCourse >= (0.55 * dDirect) && diffCap >= 130) {
+                } else if (v.kmCourse >= (0.55 * dDirect) && diffCap >= 130) {
                     v.distanceSensInverse = (v.distanceSensInverse || 0) + distDelta;
                     if (v.distanceSensInverse >= 0.15) {
                         rotationValidee = true;
@@ -1039,7 +1026,6 @@
             genererRapportTechnique();
         }
 
-        // POLLING SUPABASE HAUTE FRÉQUENCE DE SECOURS
         async function sonderPositionsCloudEnContinu() {
             try {
                 if (!window.supabase) return;
@@ -1187,17 +1173,12 @@
             if (indexStr !== "none") initMapEtCentrer(parseInt(indexStr)); 
         }
 
-        // ========================================================
-        // ENREGISTREMENT VÉHICULE : SAISIE STRICTE DES PLACES PAR LE PARTENAIRE
-        // ========================================================
         function enregistrerVehiculeSaisi() {
             const plaque = document.getElementById('add-plaque').value.trim();
             const imei = document.getElementById('add-imei').value.trim();
             const type = document.getElementById('add-type').value.trim() || "Véhicule Commercial";
             const origine = document.getElementById('add-origine').value.trim() || "BRIKIN";
             const destination = document.getElementById('add-destination').value.trim() || "GARE CENTRALE";
-            
-            // LECTURE DIRECTE DU NOMBRE DE PLACES SAISI
             const places = parseInt(document.getElementById('add-places').value);
 
             if (!plaque || !imei) { alert("Veuillez renseigner au moins la Plaque et le N° IMEI."); return; }
@@ -1212,7 +1193,7 @@
             customConfig[imeiClean] = {
                 plaque: plaque,
                 type: type,
-                places: places, // SAUVEGARDE DE LA VALEUR SAISIE
+                places: places,
                 origine: origine,
                 destination: destination,
                 moteurCoupe: false
@@ -1254,13 +1235,12 @@
                 client.vehicules.push(nv);
             }
             
-            // Synchronisation avec la base Supabase tv_vehicules
             try {
                 if(window.supabase) {
                     supabaseClient.from('tv_vehicules').upsert({
                         imei: imeiClean,
                         plaque: plaque,
-                        places: places, // ENREGISTRÉ DANS LA BASE
+                        places: places,
                         origine: origine,
                         destination: destination,
                         dist_direct: params.distDirect,
@@ -1410,7 +1390,6 @@
                 customConfig[v.imei].moteurCoupe = couper;
                 localStorage.setItem('tv_vehicules_custom', JSON.stringify(customConfig));
 
-                // Diffusion temps réel vers l'Admin
                 channelSyncClient.send({
                     type: 'broadcast',
                     event: 'commande_moteur',
@@ -1514,7 +1493,6 @@
                 places: v.places
             };
 
-            // Émission sur le canal Supabase déjà connecté
             channelSyncClient.send({
                 type: 'broadcast',
                 event: 'maj_ligne_vehicule',
@@ -1592,8 +1570,18 @@
         async function synchroniserForfaitCloud() {
             try {
                 if(!window.supabase) return;
-                const tel = (partenaireProfil && partenaireProfil.tel) || localStorage.getItem('tv_partenaire_tel') || "0965647819";
-                const { data } = await supabaseClient.from('tv_partenaires').select('date_expiration').eq('tel', tel).single();
+                const tel = (partenaireProfil && partenaireProfil.tel) || localStorage.getItem('tv_partenaire_tel');
+                if (!tel) return;
+
+                const { data, error } = await supabaseClient.from('tv_partenaires').select('date_expiration').eq('tel', tel).maybeSingle();
+                
+                // Si la ligne n'existe plus en base (suppression Admin) : éjection immédiate
+                if (error || !data) {
+                    alert("❌ Votre session a expiré : ce compte partenaire a été supprimé.");
+                    declencherDeconnexion();
+                    return;
+                }
+
                 if(data && data.date_expiration) {
                     localStorage.setItem('tv_date_expiration', data.date_expiration);
                     if(partenaireProfil) partenaireProfil.date_expiration = data.date_expiration;
@@ -1705,26 +1693,20 @@
                     localStorage.setItem('tv_partenaire_tel', data.tel);
                     lancerEspaceFlotte(data);
                 } else {
-                    declencherFallback(telInput, pinInput, btn);
+                    alert("❌ Téléphone ou Code PIN incorrect."); 
+                    btn.textContent = "Ouvrir mon Espace Flotte"; 
                 }
             } catch (err) { 
-                declencherFallback(telInput, pinInput, btn);
-            }
-        }
-
-        function declencherFallback(telInput, pinInput, btn) {
-            if (telInput === "0965647819" && pinInput === "0000") {
-                const fallbackData = { nom: "Dolce", tel: "0965647819" };
-                localStorage.setItem('tv_partenaire_tel', "0965647819");
-                lancerEspaceFlotte(fallbackData);
-            } else {
-                alert("❌ Téléphone ou Code PIN incorrect."); 
+                alert("❌ Téléphone ou Code PIN incorrect ou compte introuvable."); 
                 btn.textContent = "Ouvrir mon Espace Flotte"; 
             }
         }
 
         function lancerEspaceFlotte(donneesPartenaire) {
             partenaireProfil = donneesPartenaire;
+            client.nom = donneesPartenaire.nom;
+            client.tel = donneesPartenaire.tel;
+
             naviguerVers('app-proprietaire'); 
             
             chargerDernieresPositions().then(() => { 
@@ -1739,7 +1721,12 @@
 
         function declencherDeconnexion() { 
             localStorage.removeItem('tv_partenaire_tel');
+            localStorage.removeItem('tv_date_expiration');
+            partenaireProfil = null;
+            client = { nom: "Partenaire", tel: "", vehicules: [] };
             naviguerVers('page-auth'); 
+            document.getElementById('login-tel').value = "";
+            document.getElementById('login-pin').value = "";
             document.getElementById('btn-login-text').textContent = "Ouvrir mon Espace Flotte";
         }
 
@@ -1765,17 +1752,14 @@
             const telSauve = localStorage.getItem('tv_partenaire_tel');
             if (telSauve) {
                 try {
-                    const { data, error } = await supabaseClient.from('tv_partenaires').select('*').eq('tel', telSauve).single();
+                    const { data, error } = await supabaseClient.from('tv_partenaires').select('*').eq('tel', telSauve).maybeSingle();
                     if (data) { 
                         lancerEspaceFlotte(data); 
-                    } else if (telSauve === "0965647819") {
-                        lancerEspaceFlotte({ nom: "Dolce", tel: "0965647819" });
                     } else { 
                         declencherDeconnexion(); 
                     }
                 } catch (err) { 
-                    if (telSauve === "0965647819") lancerEspaceFlotte({ nom: "Dolce", tel: "0965647819" });
-                    else declencherDeconnexion(); 
+                    declencherDeconnexion(); 
                 }
             } else {
                 naviguerVers('page-auth');
