@@ -497,7 +497,7 @@
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
         
-        // CORRECTION DE L'ERREUR DE CRASH GLOBAL : DÉCLARATION DU SOCKET
+        // DECLARATION DU SOCKET POUR DEBLOQUER L'INTERFACE
         const SERVEUR_URL = "http://134.209.116.89:3000";
         const socket = io(SERVEUR_URL, { transports: ['websocket'], reconnection: true });
 
@@ -564,14 +564,6 @@
             const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
                       Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos((lon2 - lon1) * Math.PI / 180);
             return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-        }
-
-        function calculerDistanceGPS(lat1, lon1, lat2, lon2) {
-            const R = 6371; 
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
         }
 
         function animerDeplacementMarkerAdmin(marker, startPos, endPos, startAngle, targetAngle, dureeMs = 1200) {
@@ -684,9 +676,8 @@
         function activerFluxRealtimeAdmin() {
             if (!window.supabase) return;
 
-            // 1. Écoute des positions GPS pures (Carte)
             supabaseClient
-                .channel('transvision_admin_live_stream_v14')
+                .channel('transvision_admin_live_stream_v20')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transvision_positions_gps' }, (payload) => {
                     const row = payload.new;
                     if (row && row.latitude && row.longitude) {
@@ -731,7 +722,6 @@
                 })
                 .subscribe();
 
-            // 2. Écoute du Partenaire pour Synchroniser les Chiffres (Miroir)
             supabaseClient.channel('tv_sync_channel')
                 .on('broadcast', { event: 'sync_state' }, ({ payload }) => {
                     let v = flotteGlobale.find(item => item.imei === payload.imei);
@@ -832,7 +822,7 @@
         }
 
         // ========================================================
-        // CHARGEMENT INITIAL ROBUSTE & COMPLET
+        // ALIGNEMENT STRICT AVEC LA LOGIQUE PARTENAIRE (200 POINTS)
         // ========================================================
         async function chargerHistoriqueAdmin() {
             try {
@@ -840,10 +830,10 @@
 
                 const debutJournee = new Date();
                 debutJournee.setHours(0, 0, 0, 0);
+                const debutJourneeTs = debutJournee.getTime();
 
                 let lignesConfig = {};
                 try {
-                    // On lit LES DONNÉES EXACTES DU PARTENAIRE sauvegardées dans tv_vehicules
                     const { data: vehiculesConfig } = await supabaseClient.from('tv_vehicules').select('*');
                     if (vehiculesConfig && vehiculesConfig.length > 0) {
                         vehiculesConfig.forEach(cfg => {
@@ -852,11 +842,12 @@
                     }
                 } catch(e) {}
 
+                // On charge EXACTEMENT comme l'application Partenaire (limit 200, sans inventer l'historique lointain)
                 const { data } = await supabaseClient
                     .from('transvision_positions_gps')
                     .select('*')
                     .order('created_at', { ascending: false })
-                    .limit(2000);
+                    .limit(200);
 
                 if (data) {
                     const vehiculesUniques = {};
@@ -875,7 +866,7 @@
 
                         let dbResetTs = cfg.reset_ts ? new Date(cfg.reset_ts).getTime() : 0;
                         let localResetTs = parseInt(localStorage.getItem('tv_reset_ts_' + imeiStr) || '0');
-                        const resetTsUnifie = Math.max(dbResetTs, localResetTs, debutJournee.getTime());
+                        const resetTsUnifie = Math.max(dbResetTs, localResetTs);
                         localStorage.setItem('tv_reset_ts_' + imeiStr, resetTsUnifie);
 
                         const cleStatsJour = `tv_stats_admin_${debutJournee.toISOString().split('T')[0]}_${imeiStr}`;
@@ -884,7 +875,7 @@
                         const vObj = {
                             imei: imeiStr,
                             plaque: cfg.plaque || customLocal.plaque || `TRK-${imeiStr.slice(-4)}`,
-                            places: parseInt(cfg.places) || parseInt(customLocal.places) || 4,
+                            places: parseInt(cfg.places) || (statsLocales ? statsLocales.places : 4),
                             tarif: parseFloat(cfg.tarif) || 2500,
                             origine: cfg.origine || customLocal.origine || "BRIKIN",
                             destination: cfg.destination || customLocal.destination || "GARE CENTRALE",
@@ -899,33 +890,15 @@
                             derniereCo: new Date(pos.created_at || Date.now())
                         };
 
-                        tracesFlotte[imeiStr] = []; 
+                        const filtreDebut = Math.max(debutJourneeTs, resetTsUnifie);
                         
-                        // ON NE PREND QUE LES POINTS APRÈS LA DERNIÈRE REMISE À ZÉRO (Fini les toiles d'araignées)
+                        // Exactement le même filtrage que le partenaire
                         const pointsDuJour = data
-                            .filter(p => String(p.imei).trim() === imeiStr && new Date(p.created_at).getTime() >= resetTsUnifie)
-                            .reverse(); 
-                        
-                        let pointPrec = null;
-                        pointsDuJour.forEach(pt => {
-                            const pLat = parseFloat(pt.latitude);
-                            const pLng = parseFloat(pt.longitude);
-                            if (pLat !== 0 && pLng !== 0 && !isNaN(pLat)) {
-                                if (pointPrec) {
-                                    let d = calculerDistanceGPS(pointPrec.latitude, pointPrec.longitude, pLat, pLng);
-                                    if (d < 15.0) { 
-                                        tracesFlotte[imeiStr].push([pLat, pLng]);
-                                    }
-                                } else {
-                                     tracesFlotte[imeiStr].push([pLat, pLng]);
-                                }
-                                pointPrec = { latitude: pLat, longitude: pLng };
-                            }
-                        });
-
-                        if(tracesFlotte[imeiStr].length === 0) {
-                            tracesFlotte[imeiStr].push([vObj.lat, vObj.lng]);
-                        }
+                            .filter(p => String(p.imei).trim() === imeiStr && p.created_at && new Date(p.created_at).getTime() >= filtreDebut)
+                            .reverse();
+                            
+                        const tracePts = pointsDuJour.map(p => [parseFloat(p.latitude), parseFloat(p.longitude)]);
+                        tracesFlotte[imeiStr] = tracePts.length > 0 ? tracePts : [[vObj.lat, vObj.lng]];
 
                         detecterNomAvenueAdmin(vObj.lat, vObj.lng, vObj.imei).then(av => {
                             vObj.avenueLive = av;
@@ -938,7 +911,9 @@
                     document.getElementById('admin-flotte-count').textContent = `${flotteGlobale.length} Traceur(s)`;
                     majTableauFlotteAdmin();
                     initialiserGraphiquesAdmin();
-                    if (mapAdmin) { mapAdmin.invalidateSize(); } else { initMapAdmin(); }
+                    setTimeout(() => {
+                        if (mapAdmin) { mapAdmin.invalidateSize(); } else { initMapAdmin(); }
+                    }, 300);
                 }
             } catch (err) {
                 console.error(err);
@@ -994,7 +969,7 @@
             let totalKm = 0; let totalRot = 0; let totalCDF = 0;
             
             if (flotteGlobale.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-slate-500 font-sans italic">En attente des données GPS...</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-slate-500 font-sans italic">Aucun véhicule enregistré.</td></tr>`;
                 document.getElementById('stat-total-km').textContent = "0.0";
                 document.getElementById('stat-total-rotations').textContent = "0";
                 document.getElementById('stat-total-cdf').textContent = "0";
@@ -1521,6 +1496,7 @@
             document.getElementById('txt-tresor').textContent = tresoReelle.toLocaleString() + " CDF";
 
             activerFluxRealtimeAdmin(); 
+
             chargerHistoriqueAdmin();
             setTimeout(initialiserGraphiquesAdmin, 100);
         }
