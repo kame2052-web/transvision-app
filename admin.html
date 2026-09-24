@@ -77,7 +77,7 @@
     <!-- 2. CORPS APPLICATION ADMIN -->
     <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
         <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
-            <span class="text-xs font-bold text-indigo-400">TransVision Control Panel v28.0 PROD — Admin Miroir Parfait</span>
+            <span class="text-xs font-bold text-indigo-400">TransVision Control Panel v29.0 PROD — Admin Miroir Absolu</span>
             <div class="flex gap-2 text-[10px] font-mono">
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 flex items-center gap-1">Push Sync : <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" id="admin-server-dot"></span><span class="text-emerald-400 font-bold" id="admin-server-text">En Direct</span></span>
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Live : <span class="text-emerald-400 font-bold" id="admin-flotte-count">0 Traceur(s)</span></span>
@@ -821,11 +821,13 @@
         }
 
         // ========================================================
-        // CHARGEMENT INITIAL (SANS CALCULS)
+        // CHARGEMENT INITIAL UNIFIÉ DEPUIS LA BDD (SANS RECALCUL)
         // ========================================================
         async function chargerHistoriqueAdmin() {
             try {
                 if (!window.supabase) return;
+
+                const dateDuJour = getKinshasaDateStr();
 
                 const { data: vehiculesConfig } = await supabaseClient.from('tv_vehicules').select('*');
                 if (!vehiculesConfig) return;
@@ -838,6 +840,9 @@
                 flotteGlobale = [];
                 vehiculesConfig.forEach(cfg => {
                     const imeiStr = String(cfg.imei).trim();
+                    const cleStatsJour = `tv_stats_admin_${dateDuJour}_${imeiStr}`;
+                    let statsLocales = JSON.parse(localStorage.getItem(cleStatsJour) || 'null');
+
                     const resetTs = cfg.reset_ts ? new Date(cfg.reset_ts).getTime() : 0;
                     localStorage.setItem('tv_reset_ts_' + imeiStr, resetTs);
 
@@ -848,14 +853,14 @@
                     const vObj = {
                         imei: imeiStr,
                         plaque: cfg.plaque || `TRK-${imeiStr.slice(-4)}`,
-                        places: parseInt(cfg.places) || 0,
+                        places: parseInt(cfg.places) || (statsLocales ? statsLocales.places : 0),
                         tarif: parseFloat(cfg.tarif) || 2500,
                         origine: cfg.origine || "BRIKIN",
                         destination: cfg.destination || "GARE CENTRALE",
-                        kmJour: parseFloat(cfg.km_jour) || 0,
-                        kmCourse: parseFloat(cfg.km_course) || 0,
-                        tronconsValides: parseInt(cfg.troncons_valides) || 0,
-                        recetteBruteReelle: parseFloat(cfg.recette_brute) || 0,
+                        kmJour: parseFloat(cfg.km_jour) || (statsLocales ? statsLocales.kmJour : 0),
+                        kmCourse: parseFloat(cfg.km_course) || (statsLocales ? statsLocales.kmCourse : 0),
+                        tronconsValides: parseInt(cfg.troncons_valides) || (statsLocales ? statsLocales.tronconsValides : 0),
+                        recetteBruteReelle: parseFloat(cfg.recette_brute) || (statsLocales ? statsLocales.recetteBruteReelle : 0),
                         moteurCoupe: cfg.moteur_coupe || false,
                         lat: lat,
                         lng: lng,
@@ -912,6 +917,7 @@
                         <td class="py-3 font-black text-emerald-400">${(v.recetteBruteReelle || 0).toLocaleString()} CDF</td>
                         <td class="py-3 text-right space-x-1">
                             ${btnMoteur}
+                            <button onclick="reinitialiserVehiculeAdmin(${idx})" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-2 py-1 rounded text-[10px] font-bold" title="Remise à 0 du jour"><i class="fa-solid fa-rotate-left"></i></button>
                         </td>
                     </tr>
                 `);
@@ -1163,7 +1169,7 @@
                         tbody.innerHTML = "";
                         data.forEach(p => {
                             const estActif = p.date_expiration && new Date(p.date_expiration) > new Date();
-                            // Correction encodage pour les noms avec apostrophes
+                            // Correction d'encodage robuste pour HTML data attributes
                             const nomS = p.nom ? p.nom.replace(/'/g, "\\'") : "Inconnu";
                             const telS = p.tel || "";
                             const pinS = p.pin || "0000";
@@ -1179,7 +1185,7 @@
                                         </span>
                                     </td>
                                     <td class="py-3 text-right no-print">
-                                        <select onchange="executerActionPartenaire('${nomS}', '${telS}', '${pinS}', this)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 outline-none">
+                                        <select onchange="executerActionPartenaire(this)" data-nom="${nomS}" data-tel="${telS}" data-pin="${pinS}" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-300 outline-none">
                                             <option value="">-- Actions --</option>
                                             <option value="recharger" class="text-emerald-400 font-bold">💸 Valider Recharge</option>
                                             <option value="voir_id" class="text-sky-400 font-bold">👁️ Voir Identifiants</option>
@@ -1214,9 +1220,13 @@
             });
         }
 
-        async function executerActionPartenaire(nom, tel, pin, selectElem) {
+        async function executerActionPartenaire(selectElem) {
             const action = selectElem.value;
             if(!action) return;
+
+            const nom = selectElem.getAttribute('data-nom');
+            const tel = selectElem.getAttribute('data-tel');
+            const pin = selectElem.getAttribute('data-pin');
 
             if (action === 'recharger') { 
                 ouvrirModalRechargeFlexible(nom, tel); 
@@ -1472,7 +1482,7 @@
                 
                 chargerCGUAdmin();
                 chargerNumerosAdmin();
-                chargerMatriceItineraires(); // Auto-enrichissement au démarrage
+                chargerMatriceItineraires(); 
                 chargerPartenairesAdmin();
             } catch (erreur) {
                 console.warn(erreur);
