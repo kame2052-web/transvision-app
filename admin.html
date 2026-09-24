@@ -203,7 +203,7 @@
                     </div>
                 </div>
 
-                <!-- 3. PARTENAIRES -->
+                <!-- 3. PARTENAIRES SANS DONNÉES EN DUR -->
                 <div id="page-partenaires" class="space-y-4 page-fade class-page-admin hidden print:block">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 no-print">
                         <div>
@@ -507,7 +507,7 @@
             { origine: "CENTRE VILLE (GARE CENTRALE)", destination: "U.P.N.", prix: 3000, distDirect: 12.5, distDeviee: 15.0 }
         ];
 
-        // CANAL UNIFIÉ SUPABASE REALTIME
+        // CANAL UNIFIÉ TEMPS RÉEL SUPABASE
         const channelSyncAdmin = supabaseClient.channel('transvision_sync_hub');
         channelSyncAdmin
             .on('broadcast', { event: 'maj_ligne_vehicule' }, ({ payload }) => {
