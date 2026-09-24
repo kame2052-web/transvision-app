@@ -119,7 +119,7 @@
                 </div>
             </div>
             <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v28.0 PROD — Moteur Cerveau Principal
+                TransVision v33.0 PROD — Moteur Cerveau Principal QA
             </div>
         </div>
 
@@ -495,6 +495,9 @@
         const SERVEUR_URL = "http://134.209.116.89:3000";
         const socket = io(SERVEUR_URL, { transports: ['websocket'], reconnection: true });
 
+        // CRÉATION GLOBALE DU CANAL DE SYNCHRONISATION
+        const syncChannel = supabaseClient.channel('tv_sync_channel');
+
         let partenaireProfil = null; 
         let client = { nom: "Dolce", tel: "0965647819", vehicules: [] };
         let map = null; 
@@ -653,7 +656,6 @@
             const cleStatsJour = `tv_stats_${dateDuJour}_${v.imei}`;
             let stats = JSON.parse(localStorage.getItem(cleStatsJour) || 'null');
 
-            // Le nombre de places n'est JAMAIS forcé. Il utilise les places saisies. Fallback de sécurité à 4.
             const placesReelles = parseInt(v.places) || 4;
             v.places = placesReelles;
 
@@ -682,41 +684,57 @@
             }
         }
 
+        // ========================================================
+        // DIFFUSION EXACTE À L'ADMIN
+        // ========================================================
         function diffuserEtatAdmin(v) {
             if (!window.supabase) return;
-            supabaseClient.channel('tv_sync_channel').send({
+            syncChannel.send({
                 type: 'broadcast',
                 event: 'sync_state',
                 payload: {
-                    imei: v.imei, plaque: v.plaque, places: v.places,
-                    origine: v.origine, destination: v.destination,
-                    kmJour: v.kmJour, kmCourse: v.kmCourse,
-                    tronconsValides: v.tronconsValides, recetteBruteReelle: v.recetteBruteReelle,
-                    lat: v.lat, lng: v.lng, dernierCap: v.dernierCap, moteurCoupe: v.moteurCoupe
+                    imei: v.imei,
+                    plaque: v.plaque,
+                    places: v.places,
+                    origine: v.origine,
+                    destination: v.destination,
+                    kmJour: v.kmJour,
+                    kmCourse: v.kmCourse,
+                    tronconsValides: v.tronconsValides,
+                    recetteBruteReelle: v.recetteBruteReelle,
+                    lat: v.lat,
+                    lng: v.lng,
+                    dernierCap: v.dernierCap,
+                    moteurCoupe: v.moteurCoupe
                 }
             });
         }
 
-        // L'UPSERT PARFAIT DE LA BASE DE DONNÉES
+        // ========================================================
+        // SAUVEGARDE DB POUR L'ADMIN (Règle le bug "Admin affiche 0")
+        // ========================================================
         function sauvegarderStatsJournalieres(v) {
             const dateDuJour = getKinshasaDateStr();
             const cleStatsJour = `tv_stats_${dateDuJour}_${v.imei}`;
             const donnees = {
-                kmJour: v.kmJour || 0, kmCourse: v.kmCourse || 0,
-                tronconsValides: v.tronconsValides || 0, recetteBruteReelle: v.recetteBruteReelle || 0,
-                carburantJour: v.carburantJour || 0, places: v.places, updatedAt: Date.now()
+                kmJour: v.kmJour || 0,
+                kmCourse: v.kmCourse || 0,
+                tronconsValides: v.tronconsValides || 0,
+                recetteBruteReelle: v.recetteBruteReelle || 0,
+                carburantJour: v.carburantJour || 0,
+                places: v.places,
+                updatedAt: Date.now()
             };
             localStorage.setItem(cleStatsJour, JSON.stringify(donnees));
 
             try {
                 if (window.supabase) {
-                    supabaseClient.from('tv_vehicules').upsert({
-                        imei: v.imei, plaque: v.plaque, places: v.places, origine: v.origine, destination: v.destination,
-                        tarif: v.tarif, dist_direct: v.distDirect, dist_deviee: v.distDeviee,
-                        km_jour: v.kmJour, km_course: v.kmCourse, troncons_valides: v.tronconsValides,
-                        recette_brute: v.recetteBruteReelle, moteur_coupe: v.moteurCoupe,
-                        updated_at: new Date().toISOString()
-                    }, { onConflict: 'imei' }).then();
+                    supabaseClient.from('tv_vehicules').update({
+                        km_jour: v.kmJour,
+                        km_course: v.kmCourse,
+                        troncons_valides: v.tronconsValides,
+                        recette_brute: v.recetteBruteReelle
+                    }).eq('imei', v.imei).then();
                 }
             } catch(e) {}
         }
@@ -728,7 +746,11 @@
             if (derniereDateVerifiee && derniereDateVerifiee !== dateActuelle) {
                 if (client && client.vehicules) {
                     client.vehicules.forEach(v => {
-                        v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0; v.carburantJour = 0;
+                        v.kmJour = 0;
+                        v.kmCourse = 0;
+                        v.tronconsValides = 0;
+                        v.recetteBruteReelle = 0;
+                        v.carburantJour = 0;
                         sauvegarderStatsJournalieres(v);
                         diffuserEtatAdmin(v);
                     });
@@ -747,22 +769,21 @@
 
         function activerSynchronisationCloud() {
             if (!window.supabase) return;
-            supabaseClient.channel('tv_sync_channel')
-                .on('broadcast', { event: 'reset_vehicule' }, ({ payload }) => {
-                    const imei = payload.imei;
-                    const ts = payload.reset_ts;
-                    localStorage.setItem('tv_reset_ts_' + imei, ts);
-                    let v = client.vehicules.find(item => item.imei === imei);
-                    if (v) {
-                        v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0; v.carburantJour = 0;
-                        v.secondesArret = 0; v.distanceSensInverse = 0; v.capOrigineCourse = 0;
-                        sauvegarderStatsJournalieres(v);
-                        tracePositions = [[v.lat, v.lng]];
-                        if (polylineTrace) polylineTrace.setLatLngs(tracePositions);
-                        genererToutesLesVues();
-                    }
-                })
-                .subscribe();
+            syncChannel.on('broadcast', { event: 'reset_vehicule' }, ({ payload }) => {
+                const imei = payload.imei;
+                const ts = payload.reset_ts;
+                localStorage.setItem('tv_reset_ts_' + imei, ts);
+                let v = client.vehicules.find(item => item.imei === imei);
+                if (v) {
+                    v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0; v.carburantJour = 0;
+                    v.secondesArret = 0; v.distanceSensInverse = 0; v.capOrigineCourse = 0;
+                    sauvegarderStatsJournalieres(v);
+                    tracePositions = [[v.lat, v.lng]];
+                    if (polylineTrace) polylineTrace.setLatLngs(tracePositions);
+                    genererToutesLesVues();
+                    alert(`🔄 Admin a réinitialisé les compteurs à zéro.`);
+                }
+            }).subscribe();
         }
 
         function remettreCompteurZeroManuel() {
@@ -771,8 +792,14 @@
                 if (v) {
                     const ts = Date.now();
                     localStorage.setItem('tv_reset_ts_' + v.imei, ts);
-                    v.kmJour = 0; v.kmCourse = 0; v.tronconsValides = 0; v.recetteBruteReelle = 0; v.carburantJour = 0;
-                    v.secondesArret = 0; v.distanceSensInverse = 0; v.capOrigineCourse = 0;
+                    v.kmJour = 0;
+                    v.kmCourse = 0;
+                    v.tronconsValides = 0;
+                    v.recetteBruteReelle = 0;
+                    v.carburantJour = 0;
+                    v.secondesArret = 0;
+                    v.distanceSensInverse = 0;
+                    v.capOrigineCourse = 0;
                     sauvegarderStatsJournalieres(v);
                     
                     tracePositions = [[v.lat, v.lng]];
@@ -782,7 +809,7 @@
                     try {
                         if (window.supabase) {
                             supabaseClient.from('tv_vehicules').upsert({ imei: v.imei, reset_ts: new Date(ts).toISOString() }, { onConflict: 'imei' }).then();
-                            supabaseClient.channel('tv_sync_channel').send({ type: 'broadcast', event: 'reset_vehicule', payload: { imei: v.imei, reset_ts: ts } });
+                            syncChannel.send({ type: 'broadcast', event: 'reset_vehicule', payload: { imei: v.imei, reset_ts: ts } });
                             diffuserEtatAdmin(v);
                         }
                     } catch(e) {}
@@ -921,34 +948,8 @@
                 genererToutesLesVues();
                 txtStatut.textContent = `Télématique Live active : ${nouveauVehicule.kmJour.toFixed(1)} km aujourd'hui.`;
 
-                // Pousser l'état initial à l'Admin
                 diffuserEtatAdmin(nouveauVehicule);
             } catch (err) {}
-        }
-
-        function activerFluxRealtimePush() {
-            try {
-                if (!window.supabase) return;
-                supabaseClient
-                    .channel('tv_partner_realtime_stream_v5')
-                    .on('postgres_changes', { 
-                        event: 'INSERT', 
-                        schema: 'public', 
-                        table: 'transvision_positions_gps' 
-                    }, (payload) => {
-                        const row = payload.new;
-                        if (row && row.latitude && row.longitude) {
-                            traiterNouvellePosition({
-                                imei: String(row.imei).trim(),
-                                lat: parseFloat(row.latitude),
-                                lng: parseFloat(row.longitude),
-                                vitesse: parseFloat(row.speed || row.vitesse || 0),
-                                timestamp: new Date(row.created_at || Date.now()).getTime()
-                            });
-                        }
-                    })
-                    .subscribe();
-            } catch(e) {}
         }
 
         socket.on('connect', () => {
@@ -1029,7 +1030,7 @@
                 v.lng = data.lng;
 
                 sauvegarderStatsJournalieres(v);
-                diffuserEtatAdmin(v); // PARTENAIRE = SOURCE DE DONNÉES EXACTE
+                diffuserEtatAdmin(v); 
 
                 const selectMap = document.getElementById('select-vehicule-map');
                 if (selectMap && selectMap.value == client.vehicules.indexOf(v) && map && busMarker) {
@@ -1286,13 +1287,12 @@
                         updated_at: new Date().toISOString()
                     }, { onConflict: 'imei' }).then();
 
-                    // AUTO-ENRICHISSEMENT BDD : Insère l'itinéraire dans la matrice globale
                     supabaseClient.from('tv_matrice_itineraires').upsert({
                         origine: origine.toUpperCase(), destination: destination.toUpperCase(), 
                         prix: params.tarif, dist_direct: params.distDirect, dist_deviee: params.distDeviee
                     }, { onConflict: 'origine,destination' }).then();
 
-                    supabaseClient.channel('tv_sync_channel').send({
+                    syncChannel.send({
                         type: 'broadcast', event: 'nouvelle_ligne', payload: { origine: origine, destination: destination }
                     });
                 }
@@ -1525,8 +1525,7 @@
                 distDirect: v.distDirect, distDeviee: v.distDeviee, tarif: v.tarif, places: v.places
             };
 
-            const channelSync = supabaseClient.channel('transvision_flotte');
-            channelSync.send({ type: 'broadcast', event: 'maj_ligne_vehicule', payload: payloadLigne });
+            syncChannel.send({ type: 'broadcast', event: 'maj_ligne_vehicule', payload: payloadLigne });
             socket.emit('maj_ligne_vehicule', payloadLigne);
 
             try {
@@ -1535,14 +1534,12 @@
                     dist_direct: v.distDirect, dist_deviee: v.distDeviee, tarif: v.tarif, updated_at: new Date().toISOString()
                 }, { onConflict: 'imei' }).then();
                 
-                // AUTO-ENRICHISSEMENT BDD MATRICE
                 supabaseClient.from('tv_matrice_itineraires').upsert({
                     origine: nouvelleOrigine.toUpperCase(), destination: nouvelleDestination.toUpperCase(), 
                     prix: params.tarif, dist_direct: params.distDirect, dist_deviee: params.distDeviee
                 }, { onConflict: 'origine,destination' }).then();
                 
-                // Diffuser pour affichage dynamique
-                supabaseClient.channel('tv_sync_channel').send({
+                syncChannel.send({
                     type: 'broadcast', event: 'nouvelle_ligne', payload: { origine: nouvelleOrigine, destination: nouvelleDestination }
                 });
                 
