@@ -77,7 +77,7 @@
     <!-- 2. CORPS APPLICATION ADMIN -->
     <div id="corps-application-admin" class="w-full min-h-screen flex flex-col hidden page-fade">
         <div class="bg-slate-900 border-b border-slate-800 p-3 text-center flex flex-wrap gap-2 justify-between items-center px-6 w-full z-50 no-print">
-            <span class="text-xs font-bold text-indigo-400">TransVision Control Panel v32.0 PROD — Admin Miroir Absolu</span>
+            <span class="text-xs font-bold text-indigo-400">TransVision Control Panel v34.0 PROD — Admin Miroir Absolu & Fiable</span>
             <div class="flex gap-2 text-[10px] font-mono">
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 flex items-center gap-1">Push Sync : <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" id="admin-server-dot"></span><span class="text-emerald-400 font-bold" id="admin-server-text">En Direct</span></span>
                 <span class="bg-slate-950 px-2 py-1 rounded border border-slate-800">Flotte Live : <span class="text-emerald-400 font-bold" id="admin-flotte-count">0 Traceur(s)</span></span>
@@ -181,13 +181,13 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-850" id="table-vehicules-body">
-                                <tr><td colspan="7" class="py-4 text-center text-slate-500 font-sans italic">En attente de synchronisation cloud...</td></tr>
+                                <tr><td colspan="7" class="py-4 text-center text-slate-500 font-sans italic">En attente des données GPS...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- 3. PARTENAIRES AVEC MENU ACTIONS COMPLET RÉPARÉ -->
+                <!-- 3. PARTENAIRES AVEC MENU ACTIONS 100% SÉCURISÉ -->
                 <div id="page-partenaires" class="space-y-4 page-fade class-page-admin hidden print:block">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 no-print">
                         <div>
@@ -555,19 +555,11 @@
             afficherItinerairesAdmin();
         }
 
-        function calculerDistanceGPS(lat1, lon1, lat2, lon2) {
-            const R = 6371; 
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-        }
-
         function calculerCap(lat1, lon1, lat2, lon2) {
             const y = Math.sin((lon2 - lon1) * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180);
             const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
                       Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos((lon2 - lon1) * Math.PI / 180);
-            return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360; 
+            return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
         }
 
         function animerDeplacementMarkerAdmin(marker, startPos, endPos, startAngle, targetAngle, dureeMs = 1200) {
@@ -618,24 +610,6 @@
                 iconSize: [44, 44],
                 iconAnchor: [22, 22]
             });
-        }
-
-        function verifierEtChargerJournalAdmin(v) {
-            const dateDuJour = getKinshasaDateStr();
-            const cleStatsJour = `tv_stats_admin_${dateDuJour}_${v.imei}`;
-            let stats = JSON.parse(localStorage.getItem(cleStatsJour) || 'null');
-            if (stats) {
-                v.kmJour = stats.kmJour || 0;
-                v.kmCourse = stats.kmCourse || 0;
-                v.tronconsValides = stats.tronconsValides || 0;
-                v.recetteBruteReelle = stats.recetteBruteReelle || 0;
-            } else {
-                v.kmJour = 0;
-                v.kmCourse = 0;
-                v.tronconsValides = 0;
-                v.recetteBruteReelle = 0;
-                sauvegarderStatsJournalieresAdmin(v);
-            }
         }
 
         function sauvegarderStatsJournalieresAdmin(v) {
@@ -700,7 +674,7 @@
 
             // 1. Écoute des positions GPS pures (Carte)
             supabaseClient
-                .channel('transvision_admin_live_stream_v8')
+                .channel('transvision_admin_live_stream_v9')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transvision_positions_gps' }, (payload) => {
                     const row = payload.new;
                     if (row && row.latitude && row.longitude) {
@@ -760,7 +734,7 @@
                     }
                 })
                 .on('broadcast', { event: 'nouvelle_ligne' }, ({ payload }) => {
-                    chargerMatriceItineraires(); // Actualisation de la matrice auto-apprenante
+                    chargerMatriceItineraires(); 
                 })
                 .on('broadcast', { event: 'reset_vehicule' }, ({ payload }) => {
                     const imei = payload.imei;
@@ -831,13 +805,15 @@
         }
 
         // ========================================================
-        // CHARGEMENT INITIAL ROBUSTE & COMPLET (Phase 1 Validée)
+        // CHARGEMENT INITIAL ROBUSTE & COMPLET
         // ========================================================
         async function chargerHistoriqueAdmin() {
             try {
                 if (!window.supabase) return;
 
-                // 1. Lire la base de données (si vide, c'est normal, c'est le miroir)
+                const debutJournee = new Date();
+                debutJournee.setHours(0, 0, 0, 0);
+
                 let lignesConfig = {};
                 try {
                     const { data: vehiculesConfig } = await supabaseClient.from('tv_vehicules').select('*');
@@ -848,10 +824,6 @@
                     }
                 } catch(e) {}
 
-                const debutJournee = new Date();
-                debutJournee.setHours(0, 0, 0, 0);
-
-                // 2. Lire les positions GPS pour afficher la carte (La balise émet toujours)
                 const { data } = await supabaseClient
                     .from('transvision_positions_gps')
                     .select('*')
@@ -873,7 +845,6 @@
                         const cfg = lignesConfig[imeiStr] || {};
                         const customLocal = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}')[imeiStr] || {};
 
-                        // Admin lit strictement les données, sans inventer
                         const vObj = {
                             imei: imeiStr,
                             plaque: cfg.plaque || customLocal.plaque || `TRK-${imeiStr.slice(-4)}`,
@@ -894,7 +865,6 @@
 
                         tracesFlotte[imeiStr] = [[vObj.lat, vObj.lng]];
                         
-                        // Récupérer le tracé pour la ligne
                         const pointsDuJour = data
                             .filter(p => String(p.imei).trim() === imeiStr && new Date(p.created_at).getTime() >= debutJournee.getTime())
                             .reverse();
@@ -1200,7 +1170,7 @@
         }
 
         // ========================================================
-        // GESTION DES PARTENAIRES : MENU D'ACTIONS SÉCURISÉ (PHASE 3)
+        // GESTION DES PARTENAIRES : MENU D'ACTIONS SÉCURISÉ (MÉMOIRE)
         // ========================================================
         window.annuairePartenaires = {}; 
 
@@ -1217,6 +1187,7 @@
                             const estActif = p.date_expiration && new Date(p.date_expiration) > new Date();
                             const telKey = p.tel || "inconnu_" + Math.random();
                             
+                            // Stockage sécurisé en mémoire
                             window.annuairePartenaires[telKey] = {
                                 nom: p.nom || "Inconnu",
                                 tel: p.tel || "",
@@ -1276,6 +1247,7 @@
             const action = selectElem.value;
             if(!action) return;
 
+            // Récupération sécurisée depuis la mémoire globale
             const part = window.annuairePartenaires[telKey];
             if(!part) return;
 
