@@ -823,51 +823,42 @@
         async function chargerDernieresPositions() {
             try {
                 const txtStatut = document.getElementById('last-update-text');
-                txtStatut.textContent = "Calcul de l'activité en cours...";
+                txtStatut.textContent = "Synchronisation de la flotte...";
                 
                 if (!window.supabase) return;
 
-                const debutJournee = new Date();
-                debutJournee.setHours(0, 0, 0, 0);
-                const debutJourneeTs = debutJournee.getTime();
-
-                const imeiClean = "357445101350102";
-                let savedLigne = JSON.parse(localStorage.getItem('tv_ligne_' + imeiClean) || 'null');
-                let customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
-                let cfg = customConfig[imeiClean] || {};
-
-                let placesDb = null;
-                let dbResetTs = 0;
-                try {
-                    const { data: dbV } = await supabaseClient.from('tv_vehicules').select('*').eq('imei', imeiClean).maybeSingle();
-                    if (dbV) {
-                        placesDb = dbV.places;
-                        if (dbV.origine) cfg.origine = dbV.origine;
-                        if (dbV.destination) cfg.destination = dbV.destination;
-                        if (dbV.reset_ts) dbResetTs = new Date(dbV.reset_ts).getTime();
-                    }
-                } catch(e) {}
-
-                const placesFinales = parseInt(placesDb || cfg.places) || 4;
+                const telPartenaire = (partenaireProfil && partenaireProfil.tel) || localStorage.getItem('tv_partenaire_tel');
+                const customConfig = JSON.parse(localStorage.getItem('tv_vehicules_custom') || '{}');
                 
-                let localResetTs = parseInt(localStorage.getItem('tv_reset_ts_' + imeiClean) || '0');
-                const resetTsUnifie = Math.max(dbResetTs, localResetTs);
-                localStorage.setItem('tv_reset_ts_' + imeiClean, resetTsUnifie);
+                // Recherche des véhicules appartenant à ce compte
+                const clesVehicules = Object.keys(customConfig);
+                
+                if (clesVehicules.length === 0) {
+                    client.vehicules = [];
+                    tracePositions = [];
+                    if (busMarker && map) map.removeLayer(busMarker);
+                    if (polylineTrace && map) map.removeLayer(polylineTrace);
+                    majSelecteurMap();
+                    peuplerSelecteursFiltre();
+                    genererToutesLesVues();
+                    txtStatut.textContent = "Aucun véhicule assigné. Ajoutez-en un dans l'onglet Véhicule.";
+                    document.getElementById('hud-avenue-live').textContent = "Aucun véhicule actif";
+                    return;
+                }
+
+                // Si des véhicules existent pour ce compte, on charge le premier configuré
+                const imeiClean = clesVehicules[0];
+                let cfg = customConfig[imeiClean] || {};
+                let savedLigne = JSON.parse(localStorage.getItem('tv_ligne_' + imeiClean) || 'null');
 
                 let origine = savedLigne?.origine || cfg.origine || "BRIKIN";
                 let destination = savedLigne?.destination || cfg.destination || "GARE CENTRALE";
                 const params = trouverParametresSecrets(origine, destination);
 
-                const { data } = await supabaseClient
-                    .from('transvision_positions_gps')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(2000);
-
                 const nouveauVehicule = {
-                    plaque: cfg.plaque || "Tracker 0102", 
-                    type: cfg.type || "Toyota IST", 
-                    places: placesFinales, 
+                    plaque: cfg.plaque || `TRK-${imeiClean.slice(-4)}`, 
+                    type: cfg.type || "Véhicule", 
+                    places: parseInt(cfg.places) || 4, 
                     imei: imeiClean,
                     lat: -4.3215, 
                     lng: 15.3115, 
@@ -890,65 +881,18 @@
 
                 verifierEtChargerJournalDuJour(nouveauVehicule);
 
+                // Récupération des dernières coordonnées GPS pour cet IMEI précis
+                const { data } = await supabaseClient
+                    .from('transvision_positions_gps')
+                    .select('*')
+                    .eq('imei', imeiClean)
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+
                 if (data && data.length > 0) {
-                    const filtreDebut = Math.max(debutJourneeTs, resetTsUnifie);
-                    const pointsDuJour = data
-                        .filter(p => String(p.imei).trim() === imeiClean && p.created_at && new Date(p.created_at).getTime() >= filtreDebut)
-                        .reverse();
-
-                    let kmCalc = 0;
-                    let kmCourseEnCours = 0;
-                    let rotationsCalculees = 0;
-                    let pointPrec = null;
-                    let dernierCapPoint = 0;
-                    let tracePts = [];
-
-                    pointsDuJour.forEach(pt => {
-                        const pLat = parseFloat(pt.latitude);
-                        const pLng = parseFloat(pt.longitude);
-                        const vit = parseFloat(pt.speed || pt.vitesse || 0);
-
-                        if (pLat !== 0 && pLng !== 0 && !isNaN(pLat)) {
-                            if (pointPrec) {
-                                let d = calculerDistanceGPS(pointPrec.latitude, pointPrec.longitude, pLat, pLng);
-                                if (d < 15.0) { // Filtre anti-aberration LBS
-                                    if (d > 0.025 || (d > 0.005 && vit > 3)) {
-                                        kmCalc += d;
-                                        kmCourseEnCours += d;
-                                        dernierCapPoint = calculerCap(pointPrec.latitude, pointPrec.longitude, pLat, pLng);
-
-                                        if (kmCourseEnCours >= params.distDirect) {
-                                            rotationsCalculees += 1;
-                                            kmCourseEnCours = 0;
-                                        }
-                                    }
-                                    tracePts.push([pLat, pLng]);
-                                    pointPrec = { latitude: pLat, longitude: pLng };
-                                }
-                            } else {
-                                tracePts.push([pLat, pLng]);
-                                pointPrec = { latitude: pLat, longitude: pLng };
-                            }
-                            dernierTimestampTraite = Math.max(dernierTimestampTraite, new Date(pt.created_at).getTime());
-                        }
-                    });
-
-                    if (resetTsUnifie > 0 || nouveauVehicule.kmJour === 0) {
-                        nouveauVehicule.kmJour = kmCalc;
-                        nouveauVehicule.kmCourse = kmCourseEnCours;
-                        nouveauVehicule.tronconsValides = rotationsCalculees;
-                        nouveauVehicule.recetteBruteReelle = rotationsCalculees * (params.tarif * placesFinales);
-                        nouveauVehicule.carburantJour = nouveauVehicule.kmJour * 0.12;
-                        nouveauVehicule.dernierCap = dernierCapPoint;
-                        sauvegarderStatsJournalieres(nouveauVehicule);
-                    }
-
-                    const dernierPt = data[0];
-                    nouveauVehicule.lat = parseFloat(dernierPt.latitude);
-                    nouveauVehicule.lng = parseFloat(dernierPt.longitude);
-
-                    const tracePtsMapped = tracePts.length > 0 ? tracePts : [[nouveauVehicule.lat, nouveauVehicule.lng]];
-                    tracePositions = tracePtsMapped;
+                    nouveauVehicule.lat = parseFloat(data[0].latitude);
+                    nouveauVehicule.lng = parseFloat(data[0].longitude);
+                    tracePositions = [[nouveauVehicule.lat, nouveauVehicule.lng]];
                 }
 
                 client.vehicules = [nouveauVehicule];
@@ -956,10 +900,11 @@
                 peuplerSelecteursFiltre();
                 initMapEtCentrer(0);
                 genererToutesLesVues();
-                txtStatut.textContent = `Télématique Live active : ${nouveauVehicule.kmJour.toFixed(1)} km aujourd'hui.`;
-
+                txtStatut.textContent = `Télématique Live active pour ${nouveauVehicule.plaque}.`;
                 diffuserEtatAdmin(nouveauVehicule);
-            } catch (err) {}
+            } catch (err) {
+                console.error(err);
+            }
         }
 
         socket.on('connect', () => {
@@ -1570,14 +1515,15 @@
             const display = document.getElementById('timer-compte-rebours');
             if(!display) return;
 
-            let expString = (partenaireProfil && partenaireProfil.date_expiration) ? partenaireProfil.date_expiration : localStorage.getItem('tv_date_expiration');
+            let expString = (partenaireProfil && partenaireProfil.date_expiration) 
+                ? partenaireProfil.date_expiration 
+                : localStorage.getItem('tv_date_expiration');
             
             if(!expString) { 
-                const def = new Date();
-                def.setDate(def.getDate() + 5);
-                def.setHours(23, 59, 59, 999);
-                expString = def.toISOString();
-                localStorage.setItem('tv_date_expiration', expString);
+                display.textContent = "EXPIRÉ"; 
+                display.classList.add('text-rose-400');
+                display.classList.remove('text-slate-100');
+                return;
             }
 
             const finForfait = new Date(expString);
@@ -1690,16 +1636,20 @@
             if(!nom || !tel || !pin) { alert("Veuillez remplir tous les champs."); return; }
 
             try {
-                const dateExpiration = new Date();
-                dateExpiration.setDate(dateExpiration.getDate() + 3);
+                // Compte inactif à la création : date passée pour forcer le statut EXPIRÉ
+                const dateExpiration = new Date(0); 
 
                 const { error } = await supabaseClient.from('tv_partenaires').insert([{
-                    nom: nom, tel: tel, pin: pin, type_contrat: 'commercial', date_expiration: dateExpiration.toISOString()
+                    nom: nom, 
+                    tel: tel, 
+                    pin: pin, 
+                    type_contrat: 'commercial', 
+                    date_expiration: dateExpiration.toISOString()
                 }]);
 
                 if(error) throw error;
                 
-                alert("✅ Inscription réussie ! Connectez-vous avec vos nouveaux identifiants.");
+                alert("✅ Inscription enregistrée. Votre compte est en attente d'activation de forfait par l'administrateur.");
                 document.getElementById('login-tel').value = tel;
                 document.getElementById('login-pin').value = pin;
                 basculerVueAuth('login');
@@ -1748,6 +1698,13 @@
 
         function declencherDeconnexion() { 
             localStorage.removeItem('tv_partenaire_tel');
+            localStorage.removeItem('tv_date_expiration');
+            localStorage.removeItem('tv_vehicules_custom');
+            client.vehicules = [];
+            tracePositions = [];
+            partenaireProfil = null;
+            if (busMarker && map) map.removeLayer(busMarker);
+            if (polylineTrace && map) map.removeLayer(polylineTrace);
             naviguerVers('page-auth'); 
             document.getElementById('btn-login-text').textContent = "Ouvrir mon Espace Flotte";
         }
