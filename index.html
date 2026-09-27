@@ -126,7 +126,7 @@
                 </div>
             </div>
             <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v33.5 — Antivol & Flotte Personnelle
+                TransVision v33.6 — Antivol & Flotte Personnelle
             </div>
         </div>
 
@@ -152,7 +152,7 @@
                             <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" id="statut-serveur-voyant"></span>
                             <span class="text-[10px] font-black uppercase text-emerald-400 tracking-wider" id="statut-serveur-texte">Suivi Satellite Actif</span>
                         </div>
-                        <p class="text-[9px] text-slate-400 mt-0.5" id="last-update-text">Liaison GPS en direct...</p>
+                        <p class="text-[9px] text-slate-400 mt-0.5" id="last-update-text">Liaison satellite établie...</p>
                     </div>
                     <div class="text-right flex flex-col items-end">
                         <span id="timer-compte-rebours" class="text-xs font-mono font-black text-emerald-400 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-lg shadow-inner">ACTIF</span>
@@ -301,7 +301,7 @@
                 </div>
             </div>
 
-            <!-- ONGLET 5 : PROFIL & COMPTE (NOM ET NUMÉRO MODIFIABLES) -->
+            <!-- ONGLET 5 : PROFIL & COMPTE -->
             <div id="onglet-profil" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
                 <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Informations du Compte</h2>
 
@@ -310,13 +310,11 @@
                         <i class="fa-solid fa-address-card"></i> Coordonnées & Sécurité
                     </h3>
                     
-                    <!-- NOM DU CLIENT MODIFIABLE -->
                     <div>
                         <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Nom Complet</label>
                         <input type="text" id="prof-nom" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-xs text-slate-200 outline-none focus:border-indigo-500" placeholder="Nom Complet">
                     </div>
 
-                    <!-- NUMÉRO DU CLIENT MODIFIABLE -->
                     <div>
                         <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Téléphone de Contact</label>
                         <input type="tel" id="prof-tel" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-xs text-slate-200 font-mono outline-none focus:border-indigo-500" placeholder="Téléphone">
@@ -375,8 +373,13 @@
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-        const SERVEUR_URL = "http://134.209.116.89:3000";
-        const socket = io(SERVEUR_URL, { transports: ['websocket'], reconnection: true });
+        // Connexion Socket.IO sécurisée évitant le blocage de contenu mixte sur Vercel (HTTPS)
+        let socket = { emit: () => {}, on: () => {} };
+        if (window.location.protocol === 'http:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            try {
+                socket = io("http://134.209.116.89:3000", { transports: ['websocket', 'polling'], reconnection: true });
+            } catch(e) {}
+        }
 
         const syncChannel = supabaseClient.channel('tv_sync_channel');
 
@@ -507,6 +510,13 @@
             return `${year}-${month}-${day}`;
         }
 
+        function marquerServeurEnLigne() {
+            const voyant = document.getElementById('statut-serveur-voyant');
+            const texte = document.getElementById('statut-serveur-texte');
+            if (voyant) voyant.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping";
+            if (texte) texte.textContent = "Suivi Satellite Actif";
+        }
+
         function diffuserEtatAdmin(v) {
             if (!window.supabase) return;
             syncChannel.send({
@@ -543,6 +553,7 @@
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transvision_positions_gps' }, (payload) => {
                     const row = payload.new;
                     if (row) {
+                        marquerServeurEnLigne();
                         traiterNouvellePosition({
                             imei: String(row.imei).trim(),
                             lat: parseFloat(row.latitude),
@@ -570,11 +581,10 @@
             }
         }
 
-        // CHARGEMENT DES DONNÉES 100% RÉELLES DEPUIS SUPABASE
         async function chargerDernieresPositions() {
             try {
                 const txtStatut = document.getElementById('last-update-text');
-                txtStatut.textContent = "Interrogation des coordonnées réelles...";
+                txtStatut.textContent = "Interrogation des coordonnées...";
                 
                 if (!window.supabase) return;
 
@@ -611,7 +621,6 @@
                         dernierCap: 0
                     };
 
-                    // 1. Récupération de la dernière position physique réelle dans Supabase
                     const { data: latestData } = await supabaseClient
                         .from('transvision_positions_gps')
                         .select('*')
@@ -626,7 +635,6 @@
                         v.dateDernierPoint = latestData[0].created_at;
                     }
 
-                    // 2. Calcul réel du kilométrage roulé AUJOURD'HUI depuis 00h00
                     const debutAujourdhui = new Date();
                     debutAujourdhui.setHours(0, 0, 0, 0);
 
@@ -644,14 +652,12 @@
                                 parseFloat(pointsAujourdhui[i-1].latitude), parseFloat(pointsAujourdhui[i-1].longitude),
                                 parseFloat(pointsAujourdhui[i].latitude), parseFloat(pointsAujourdhui[i].longitude)
                             );
-                            // Filtre du bruit stationnaire (< 15 mètres sans vitesse)
                             if (d > 0.015) {
                                 totalRouléAujourdhui += d;
                             }
                         }
                     }
                     
-                    // Si le véhicule n'a pas roulé aujourd'hui, kmJour est strictement 0.0 km
                     v.kmJour = totalRouléAujourdhui;
                     client.vehicules.push(v);
                 }
@@ -662,20 +668,16 @@
                     
                     const timeTxt = premier.dateDernierPoint ? new Date(premier.dateDernierPoint).toLocaleTimeString() : 'En attente';
                     txtStatut.textContent = `Dernier relevé satellite : ${timeTxt}`;
+                    marquerServeurEnLigne();
                 }
 
                 majSelecteursVehicules();
                 initMapEtCentrer(0);
                 genererToutesLesVues();
             } catch (err) {
-                console.error("Erreur chargement données réelles:", err);
+                console.error("Erreur chargement:", err);
             }
         }
-
-        socket.on('connect', () => {
-            document.getElementById('statut-serveur-voyant').className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping";
-            document.getElementById('statut-serveur-texte').textContent = "Suivi Satellite Actif";
-        });
 
         function traiterNouvellePosition(data) {
             const imeiClean = String(data.imei).trim();
@@ -686,14 +688,13 @@
 
             const now = new Date();
             document.getElementById('last-update-text').textContent = `Signal en direct : ${now.toLocaleTimeString()}`;
-            document.getElementById('statut-serveur-voyant').className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping";
+            marquerServeurEnLigne();
 
             let v = client.vehicules.find(item => item.imei === imeiClean);
             if (!v) return;
 
             const distDelta = calculerDistanceGPS(v.lat, v.lng, data.lat, data.lng);
             
-            // Seulement si le véhicule se déplace réellement
             if (distDelta > 0.020 || (distDelta > 0.005 && data.vitesse > 3)) {
                 v.kmJour += distDelta;
                 v.kmOdometre += distDelta;
@@ -755,16 +756,6 @@
             genererVueControleEntretien();
         }
 
-        socket.on('nouvelle_position', (data) => {
-            traiterNouvellePosition({
-                imei: String(data.imei).trim(),
-                lat: parseFloat(data.lat),
-                lng: parseFloat(data.lng),
-                vitesse: parseFloat(data.vitesse || data.speed || 0),
-                timestamp: data.timestamp ? new Date(data.timestamp).getTime() : Date.now()
-            });
-        });
-
         async function sonderPositionsCloudEnContinu() {
             try {
                 if (!window.supabase) return;
@@ -813,15 +804,14 @@
         }
 
         function genererToutesLesVues() {
-            const nomActuel = (partenaireProfil && partenaireProfil.nom) ? partenaireProfil.nom : client.nom;
-            const telActuel = (partenaireProfil && partenaireProfil.tel) ? partenaireProfil.tel : client.tel;
+            const nomActuel = (partenaireProfil && partenaireProfil.nom) ? partenaireProfil.nom : (localStorage.getItem('tv_partenaire_nom') || client.nom);
+            const telActuel = (partenaireProfil && partenaireProfil.tel) ? partenaireProfil.tel : (localStorage.getItem('tv_partenaire_tel') || client.tel);
             const com = (partenaireProfil && partenaireProfil.commune) ? partenaireProfil.commune : (localStorage.getItem('tv_partenaire_commune') || "Kinshasa");
             const qtr = (partenaireProfil && partenaireProfil.quartier) ? partenaireProfil.quartier : (localStorage.getItem('tv_partenaire_quartier') || "RDC");
 
             document.getElementById('lbl-nom-partenaire').textContent = nomActuel;
             document.getElementById('lbl-adresse-partenaire').textContent = `${com} • ${qtr}`;
             
-            // Remplissage des champs modifiables dans l'onglet Compte
             document.getElementById('prof-nom').value = nomActuel;
             document.getElementById('prof-tel').value = telActuel;
             document.getElementById('prof-commune').value = com;
@@ -1024,7 +1014,6 @@
 
             } catch(e) {
                 alert("Erreur lors du chargement de l'historique.");
-                console.error(e);
             } finally {
                 btn.innerHTML = `<i class="fa-solid fa-magnifying-glass"></i> Afficher le Trajet`;
             }
@@ -1173,7 +1162,7 @@
             const v = client.vehicules.find(item => item.imei === imei);
             if (!v) return;
 
-            if (confirm(`Confirmez-vous l'entretien [${type.toUpperCase()}] sur ${v.plaque} ?`)) {
+            if (confirm(`Confirmez-vous l'opération [${type.toUpperCase()}] sur ${v.plaque} ?`)) {
                 let conf = JSON.parse(localStorage.getItem(`tv_maint_${imei}`) || '{}');
                 if (type === 'vidange') conf.kmVidangeDerniere = Math.round(v.kmOdometre);
                 if (type === 'freins') conf.kmFreinsDerniers = Math.round(v.kmOdometre);
@@ -1324,7 +1313,7 @@
             }
         }
 
-        // MISE À JOUR COMPLÈTE DU CLIENT : NOM, NUMÉRO, COMMUNE, QUARTIER, PIN
+        // MISE À JOUR SÉCURISÉE AVEC TOLÉRANCE DE SCHÉMA
         async function majIdentifiantsEtAdresse() {
             const ancienTel = (partenaireProfil && partenaireProfil.tel) || localStorage.getItem('tv_partenaire_tel');
             const newNom = document.getElementById('prof-nom').value.trim();
@@ -1333,40 +1322,63 @@
             const newQuartier = document.getElementById('prof-quartier').value.trim();
             const newPin = document.getElementById('prof-pin-new').value.trim();
 
-            if (!ancienTel) return;
+            if (!ancienTel) {
+                alert("Session expirée. Veuillez vous reconnecter.");
+                return;
+            }
             if (!newNom) { alert("Le nom ne peut pas être vide."); return; }
             if (!newTel) { alert("Le numéro de téléphone ne peut pas être vide."); return; }
 
-            let updates = {};
-            updates.nom = newNom;
-            updates.tel = newTel;
+            const adresseComplete = `${newCommune || 'Kinshasa'} • ${newQuartier || 'RDC'}`;
 
-            if (newCommune) {
-                updates.commune = newCommune;
-                localStorage.setItem('tv_partenaire_commune', newCommune);
-            }
-            if (newQuartier) {
-                updates.quartier = newQuartier;
-                localStorage.setItem('tv_partenaire_quartier', newQuartier);
-            }
+            // 1. Sauvegarde locale immédiate
+            localStorage.setItem('tv_partenaire_nom', newNom);
+            localStorage.setItem('tv_partenaire_tel', newTel);
+            localStorage.setItem('tv_partenaire_commune', newCommune);
+            localStorage.setItem('tv_partenaire_quartier', newQuartier);
+            localStorage.setItem('tv_partenaire_adresse', adresseComplete);
+
+            // 2. Objet complet à envoyer à Supabase
+            let updates = {
+                nom: newNom,
+                tel: newTel,
+                adresse: adresseComplete,
+                commune: newCommune,
+                quartier: newQuartier
+            };
+
             if (newPin && newPin.length >= 4) {
                 updates.pin = newPin;
             }
 
-            const adresseComplete = `${newCommune || 'Kinshasa'} • ${newQuartier || 'RDC'}`;
-            updates.adresse = adresseComplete;
-
             try {
                 if (window.supabase) {
-                    const { error } = await supabaseClient
+                    // Tentative d'écriture complète
+                    let { error } = await supabaseClient
                         .from('tv_partenaires')
                         .update(updates)
                         .eq('tel', ancienTel);
 
-                    if (error) throw error;
+                    // Si les colonnes spécifiques 'commune' ou 'quartier' n'existent pas encore dans Supabase
+                    if (error) {
+                        console.warn("Repli sur colonnes génériques suite à :", error.message);
+                        let fallbackUpdates = {
+                            nom: newNom,
+                            tel: newTel,
+                            adresse: adresseComplete
+                        };
+                        if (newPin && newPin.length >= 4) fallbackUpdates.pin = newPin;
+
+                        const { error: errRepli } = await supabaseClient
+                            .from('tv_partenaires')
+                            .update(fallbackUpdates)
+                            .eq('tel', ancienTel);
+
+                        if (errRepli) throw errRepli;
+                    }
                 }
 
-                // Mise à jour de l'état local
+                // 3. Mise à jour de l'état en mémoire
                 if (!partenaireProfil) partenaireProfil = {};
                 partenaireProfil.nom = newNom;
                 partenaireProfil.tel = newTel;
@@ -1374,16 +1386,15 @@
                 partenaireProfil.quartier = newQuartier;
                 partenaireProfil.adresse = adresseComplete;
 
-                localStorage.setItem('tv_partenaire_tel', newTel);
                 document.getElementById('lbl-nom-partenaire').textContent = newNom;
                 document.getElementById('lbl-adresse-partenaire').textContent = adresseComplete;
 
-                alert("✅ Vos informations (Nom, Téléphone, Adresse) ont été enregistrées avec succès !");
+                alert("✅ Vos informations ont été enregistrées avec succès !");
                 document.getElementById('prof-pin-new').value = "";
                 genererToutesLesVues();
             } catch(e) {
-                console.error(e);
-                alert("❌ Erreur lors de la mise à jour des informations.");
+                console.error("Détail de l'erreur Supabase :", e);
+                alert("❌ Erreur Supabase : " + (e.message || JSON.stringify(e)));
             }
         }
 
@@ -1415,14 +1426,14 @@
             const pin = document.getElementById('ins-pin').value.trim();
 
             if(!nom || !tel || !commune || !quartier || !pin) { 
-                alert("Veuillez renseigner tous les champs, y compris votre commune et votre quartier."); 
+                alert("Veuillez renseigner tous les champs requis."); 
                 return; 
             }
 
             try {
                 const dateExpiration = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
 
-                const { error } = await supabaseClient.from('tv_partenaires').insert([{
+                let { error } = await supabaseClient.from('tv_partenaires').insert([{
                     nom: nom, 
                     tel: tel, 
                     commune: commune,
@@ -1433,8 +1444,19 @@
                     date_expiration: dateExpiration.toISOString()
                 }]);
 
-                if(error) throw error;
+                if (error) {
+                    const resFallback = await supabaseClient.from('tv_partenaires').insert([{
+                        nom: nom, 
+                        tel: tel, 
+                        adresse: `${commune} • ${quartier}`,
+                        pin: pin, 
+                        type_contrat: 'particulier_antivol', 
+                        date_expiration: dateExpiration.toISOString()
+                    }]);
+                    if (resFallback.error) throw resFallback.error;
+                }
                 
+                localStorage.setItem('tv_partenaire_nom', nom);
                 localStorage.setItem('tv_partenaire_commune', commune);
                 localStorage.setItem('tv_partenaire_quartier', quartier);
 
@@ -1443,7 +1465,7 @@
                 document.getElementById('login-pin').value = pin;
                 basculerVueAuth('login');
             } catch (err) {
-                alert("❌ Erreur lors de l'inscription.");
+                alert("❌ Erreur lors de l'inscription : " + (err.message || "vérifiez vos accès."));
             }
         }
 
@@ -1458,7 +1480,14 @@
                 
                 if (data) {
                     localStorage.setItem('tv_partenaire_tel', data.tel);
-                    if(data.commune) localStorage.setItem('tv_partenaire_commune', data.commune);
+                    if(data.nom) localStorage.setItem('tv_partenaire_nom', data.nom);
+                    if(data.commune) {
+                        localStorage.setItem('tv_partenaire_commune', data.commune);
+                    } else if (data.adresse && data.adresse.includes(' • ')) {
+                        const parts = data.adresse.split(' • ');
+                        localStorage.setItem('tv_partenaire_commune', parts[0] || 'Kinshasa');
+                        localStorage.setItem('tv_partenaire_quartier', parts[1] || 'RDC');
+                    }
                     if(data.quartier) localStorage.setItem('tv_partenaire_quartier', data.quartier);
                     lancerEspaceFlotte(data);
                 } else {
