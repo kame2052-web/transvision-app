@@ -75,7 +75,7 @@
                     </div>
                     <h2 class="text-xl font-black tracking-wide">TransVision Protect</h2>
                     <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">by Global Tech Solutions</p>
-                    <p class="text-[9px] text-slate-300 mt-0.5 italic">Suivi Satellite, Antivol & Maintenance Préventive</p>
+                    <p class="text-[9px] text-slate-300 mt-0.5 italic">Suivi Satellite, Antivol & Flotte Personnelle</p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-1 bg-slate-950/80 backdrop-blur p-1 rounded-xl border border-slate-800">
@@ -83,7 +83,7 @@
                     <button id="tab-btn-register" onclick="basculerVueAuth('register')" class="py-2 text-xs font-black rounded-lg transition-all text-slate-400 hover:text-slate-200">Nouveau Compte</button>
                 </div>
 
-                <!-- FORMULAIRE DE CONNEXION -->
+                <!-- FORMULAIRE CONNEXION -->
                 <div id="form-connexion" class="bg-slate-950/85 backdrop-blur p-5 rounded-2xl border border-slate-800/80 space-y-4 shadow-xl">
                     <div>
                         <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Téléphone Enregistré</label>
@@ -98,7 +98,7 @@
                     </button>
                 </div>
 
-                <!-- FORMULAIRE D'INSCRIPTION : COMMUNE ET QUARTIER -->
+                <!-- FORMULAIRE INSCRIPTION -->
                 <div id="form-inscription" class="bg-slate-950/85 backdrop-blur p-4 rounded-2xl border border-slate-800/80 space-y-3 shadow-xl hidden">
                     <div>
                         <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Nom Complet</label>
@@ -126,11 +126,11 @@
                 </div>
             </div>
             <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v33.4 — Antivol & Flotte Personnelle
+                TransVision v33.5 — Antivol & Flotte Personnelle
             </div>
         </div>
 
-        <!-- 2. ESPACE CLIENT CONNECTÉ -->
+        <!-- 2. APPLICATION PRINCIPALE -->
         <div id="app-proprietaire" class="flex-1 flex flex-col hidden relative">
             <header class="p-4 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur sticky top-0 z-30 no-print">
                 <div class="flex justify-between items-center mb-3">
@@ -176,7 +176,7 @@
 
                     <div class="grid grid-cols-2 gap-2 text-center text-[10px] font-mono border-t border-slate-800/80 pt-2">
                         <div class="bg-slate-950/80 p-2 rounded-xl border border-slate-800">
-                            <span class="text-[8px] text-slate-400 block uppercase font-bold">Distance Aujourd'hui</span>
+                            <span class="text-[8px] text-slate-400 block uppercase font-bold">Roulé Aujourd'hui</span>
                             <span class="font-black text-slate-100 text-xs" id="hud-km-jour">0.0 km</span>
                         </div>
                         <div class="bg-slate-950/80 p-2 rounded-xl border border-slate-800">
@@ -202,7 +202,7 @@
                 </div>
             </div>
 
-            <!-- ONGLET 2 : HISTORIQUE DES MOUVEMENTS (REPLAY) -->
+            <!-- ONGLET 2 : HISTORIQUE DES TRAJETS -->
             <div id="onglet-historique" class="p-3 space-y-3 class-onglet hidden no-print pb-32">
                 <div class="bg-slate-950/90 backdrop-blur p-4 rounded-2xl border border-slate-800 space-y-3 shadow-xl">
                     <div class="border-b border-slate-800 pb-2">
@@ -227,7 +227,6 @@
                     </button>
                 </div>
 
-                <!-- STATISTIQUES DU TRAJET -->
                 <div id="hist-stats-card" class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800 grid grid-cols-3 gap-2 text-center text-xs hidden">
                     <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-850">
                         <span class="text-[8px] text-slate-400 block uppercase font-bold">Total Parcouru</span>
@@ -243,13 +242,12 @@
                     </div>
                 </div>
 
-                <!-- CARTE HISTORIQUE -->
                 <div class="bg-slate-950 p-2 rounded-2xl border border-slate-800 flex flex-col space-y-2 shadow-md">
                     <div id="map-history-container" class="shadow-inner w-full border border-slate-800 rounded-xl overflow-hidden min-h-[300px]"></div>
                 </div>
             </div>
 
-            <!-- ONGLET 3 : FUSION ANTIVOL & ENTRETIEN (SÉCURITÉ & MAINTENANCE) -->
+            <!-- ONGLET 3 : FUSION ANTIVOL & ENTRETIEN -->
             <div id="onglet-controle-entretien" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
                 <div class="border-b border-slate-800 pb-2">
                     <h2 class="text-xs font-black text-slate-100 uppercase tracking-widest flex items-center gap-2">
@@ -261,7 +259,7 @@
                 <div id="combo-vehicules-list" class="space-y-4"></div>
             </div>
 
-            <!-- ONGLET 4 : PAGE DÉDIÉE À LA FLOTTE (AJOUT & GESTION VÉHICULES) -->
+            <!-- ONGLET 4 : GESTION DE LA FLOTTE -->
             <div id="onglet-flotte-gestion" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
                 <div class="border-b border-slate-800 pb-2">
                     <h2 class="text-xs font-black text-slate-100 uppercase tracking-widest flex items-center gap-2">
@@ -270,7 +268,6 @@
                     <p class="text-[9px] text-slate-400 mt-0.5">Associez vos traceurs SinoTrack ST-901L et gérez vos véhicules.</p>
                 </div>
 
-                <!-- FORMULAIRE D'AJOUT DE VÉHICULE -->
                 <div class="bg-slate-950/85 backdrop-blur p-4 rounded-2xl border border-slate-800 space-y-3 shadow-xl">
                     <h3 class="text-xs font-black text-indigo-400 uppercase tracking-wider flex items-center gap-2 border-b border-slate-850 pb-2">
                         <i class="fa-solid fa-plus-circle"></i> Ajouter un Véhicule
@@ -298,26 +295,33 @@
                     </button>
                 </div>
 
-                <!-- LISTE DES VÉHICULES ENREGISTRÉS -->
                 <div class="space-y-2">
                     <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Véhicules sous Surveillance</h3>
                     <div id="flotte-cards-container" class="space-y-2"></div>
                 </div>
             </div>
 
-            <!-- ONGLET 5 : PROFIL & COMPTE -->
+            <!-- ONGLET 5 : PROFIL & COMPTE (NOM ET NUMÉRO MODIFIABLES) -->
             <div id="onglet-profil" class="p-4 space-y-4 class-onglet hidden no-print pb-32">
                 <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Informations du Compte</h2>
 
-                <!-- COORDONNÉES CLIENT : COMMUNE ET QUARTIER MODIFIABLES -->
                 <div class="bg-slate-950/80 backdrop-blur p-4 rounded-2xl border border-slate-800 space-y-3 shadow-xl">
                     <h3 class="text-xs font-black uppercase text-indigo-400 flex items-center gap-2 border-b border-slate-800 pb-2">
                         <i class="fa-solid fa-address-card"></i> Coordonnées & Sécurité
                     </h3>
+                    
+                    <!-- NOM DU CLIENT MODIFIABLE -->
+                    <div>
+                        <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Nom Complet</label>
+                        <input type="text" id="prof-nom" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-xs text-slate-200 outline-none focus:border-indigo-500" placeholder="Nom Complet">
+                    </div>
+
+                    <!-- NUMÉRO DU CLIENT MODIFIABLE -->
                     <div>
                         <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Téléphone de Contact</label>
-                        <input type="tel" id="prof-tel" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-xs text-slate-400 font-mono" readonly>
+                        <input type="tel" id="prof-tel" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-xs text-slate-200 font-mono outline-none focus:border-indigo-500" placeholder="Téléphone">
                     </div>
+
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Commune</label>
@@ -328,10 +332,12 @@
                             <input type="text" id="prof-quartier" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-xs text-slate-200 outline-none focus:border-indigo-500" placeholder="Quartier">
                         </div>
                     </div>
+
                     <div>
                         <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Nouveau Code PIN</label>
-                        <input type="password" id="prof-pin-new" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-xs text-slate-200 font-mono outline-none focus:border-indigo-500" placeholder="4 chiffres">
+                        <input type="password" id="prof-pin-new" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-xs text-slate-200 font-mono outline-none focus:border-indigo-500" placeholder="Laisser vide si inchangé">
                     </div>
+
                     <button onclick="majIdentifiantsEtAdresse()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-black py-2.5 rounded-xl text-xs uppercase transition-colors">
                         Mettre à Jour mes Informations
                     </button>
@@ -347,7 +353,7 @@
                 </div>
             </div>
 
-            <!-- BARRE DE NAVIGATION INFÉRIEURE (5 ONGLETS DISTINCTS) -->
+            <!-- BARRE DE NAVIGATION (5 ONGLETS) -->
             <nav class="fixed bottom-0 max-w-md w-full inset-x-0 mx-auto bg-slate-950/95 backdrop-blur border-t border-slate-800 h-16 flex justify-around items-center z-40 no-print px-1">
                 <button onclick="changerOnglet('onglet-flotte', this)" class="flex flex-col items-center justify-center gap-1 text-emerald-400 btn-nav flex-1"><i class="fa-solid fa-location-crosshairs text-sm"></i><span class="text-[8px] font-bold">Live</span></button>
                 <button onclick="changerOnglet('onglet-historique', this)" class="flex flex-col items-center justify-center gap-1 text-slate-500 btn-nav flex-1"><i class="fa-solid fa-clock-rotate-left text-sm"></i><span class="text-[8px] font-bold">Trajets</span></button>
@@ -358,7 +364,6 @@
         </div>
     </div>
 
-    <!-- LOGIQUE JAVASCRIPT CONNECTÉE SANS DONNÉES EN DUR -->
     <script>
         function chargerConfigurationsAdmin() {
             const numWhatsApp = localStorage.getItem('tv_whatsapp') || "243810000000";
@@ -384,7 +389,6 @@
         let dernierPointId = null;
         let dernierTimestampTraite = 0;
 
-        // Variables pour la carte de replay d'historique
         let mapHistory = null;
         let polylineHistory = null;
         let markersHistory = [];
@@ -503,32 +507,6 @@
             return `${year}-${month}-${day}`;
         }
 
-        function verifierEtChargerJournalDuJour(v) {
-            const dateDuJour = getKinshasaDateStr();
-            const cleStatsJour = `tv_stats_${dateDuJour}_${v.imei}`;
-            let stats = JSON.parse(localStorage.getItem(cleStatsJour) || 'null');
-
-            if (stats) {
-                v.kmJour = stats.kmJour || 0;
-            } else {
-                v.kmJour = 0;
-                sauvegarderStatsJournalieres(v);
-            }
-        }
-
-        function sauvegarderStatsJournalieres(v) {
-            const dateDuJour = getKinshasaDateStr();
-            const cleStatsJour = `tv_stats_${dateDuJour}_${v.imei}`;
-            const donnees = { kmJour: v.kmJour || 0, updatedAt: Date.now() };
-            localStorage.setItem(cleStatsJour, JSON.stringify(donnees));
-
-            try {
-                if (window.supabase) {
-                    supabaseClient.from('tv_vehicules').update({ km_jour: v.kmJour }).eq('imei', v.imei).then();
-                }
-            } catch(e) {}
-        }
-
         function diffuserEtatAdmin(v) {
             if (!window.supabase) return;
             syncChannel.send({
@@ -546,47 +524,9 @@
             });
         }
 
-        function verifierEtReinitialiserAutomatiqueJournee() {
-            const dateActuelle = getKinshasaDateStr();
-            const derniereDateVerifiee = localStorage.getItem('tv_derniere_date_minuit');
-            
-            if (derniereDateVerifiee && derniereDateVerifiee !== dateActuelle) {
-                if (client && client.vehicules) {
-                    client.vehicules.forEach(v => {
-                        v.kmJour = 0;
-                        sauvegarderStatsJournalieres(v);
-                        diffuserEtatAdmin(v);
-                    });
-                }
-                tracePositions = [];
-                if (busMarker) {
-                    const pos = busMarker.getLatLng();
-                    tracePositions = [[pos.lat, pos.lng]];
-                    if (polylineTrace) polylineTrace.setLatLngs(tracePositions);
-                }
-                genererToutesLesVues();
-            }
-            localStorage.setItem('tv_derniere_date_minuit', dateActuelle);
-        }
-        setInterval(verifierEtReinitialiserAutomatiqueJournee, 15000);
-
         function activerSynchronisationCloud() {
             if (!window.supabase) return;
-            syncChannel.on('broadcast', { event: 'reset_vehicule' }, ({ payload }) => {
-                const imei = payload.imei;
-                const ts = payload.reset_ts;
-                localStorage.setItem('tv_reset_ts_' + imei, ts);
-                let v = client.vehicules.find(item => item.imei === imei);
-                if (v) {
-                    v.kmJour = 0;
-                    sauvegarderStatsJournalieres(v);
-                    tracePositions = [[v.lat, v.lng]];
-                    if (polylineTrace) polylineTrace.setLatLngs(tracePositions);
-                    genererToutesLesVues();
-                    alert(`🔄 Compteur kilométrique réinitialisé.`);
-                }
-            })
-            .on('broadcast', { event: 'compte_supprime' }, ({ payload }) => {
+            syncChannel.on('broadcast', { event: 'compte_supprime' }, ({ payload }) => {
                 const telSauve = localStorage.getItem('tv_partenaire_tel');
                 if (payload.tel === telSauve) {
                     alert("⚠️ Votre compte a été suspendu par l'Administrateur.");
@@ -622,20 +562,19 @@
                     const ts = Date.now();
                     localStorage.setItem('tv_reset_ts_' + v.imei, ts);
                     v.kmJour = 0;
-                    sauvegarderStatsJournalieres(v);
-                    
                     tracePositions = [[v.lat, v.lng]];
                     if (polylineTrace) polylineTrace.setLatLngs(tracePositions);
                     genererToutesLesVues();
-                    alert("✅ Compteur remis à 0 km.");
+                    alert("✅ Compteur remis à 0.0 km.");
                 }
             }
         }
 
+        // CHARGEMENT DES DONNÉES 100% RÉELLES DEPUIS SUPABASE
         async function chargerDernieresPositions() {
             try {
                 const txtStatut = document.getElementById('last-update-text');
-                txtStatut.textContent = "Synchronisation de la flotte...";
+                txtStatut.textContent = "Interrogation des coordonnées réelles...";
                 
                 if (!window.supabase) return;
 
@@ -649,8 +588,8 @@
                     if (polylineTrace && map) map.removeLayer(polylineTrace);
                     majSelecteursVehicules();
                     genererToutesLesVues();
-                    txtStatut.textContent = "Aucun véhicule assigné. Rendez-vous dans l'onglet Flotte.";
-                    document.getElementById('hud-avenue-live').textContent = "Aucun véhicule actif";
+                    txtStatut.textContent = "Aucun véhicule assigné. Rendez-vous dans Flotte.";
+                    document.getElementById('hud-avenue-live').textContent = "Aucun véhicule";
                     return;
                 }
 
@@ -664,37 +603,72 @@
                         imei: imeiClean,
                         lat: -4.3215, 
                         lng: 15.3115, 
+                        vitesse: 0,
+                        dateDernierPoint: null,
                         moteurCoupe: cfg.moteurCoupe || false, 
                         kmJour: 0,
                         kmOdometre: parseInt(cfg.kmOdometre) || 120000,
                         dernierCap: 0
                     };
-                    verifierEtChargerJournalDuJour(v);
 
-                    const { data } = await supabaseClient
+                    // 1. Récupération de la dernière position physique réelle dans Supabase
+                    const { data: latestData } = await supabaseClient
                         .from('transvision_positions_gps')
                         .select('*')
                         .eq('imei', imeiClean)
                         .order('created_at', { ascending: false })
                         .limit(1);
 
-                    if (data && data.length > 0) {
-                        v.lat = parseFloat(data[0].latitude);
-                        v.lng = parseFloat(data[0].longitude);
+                    if (latestData && latestData.length > 0) {
+                        v.lat = parseFloat(latestData[0].latitude);
+                        v.lng = parseFloat(latestData[0].longitude);
+                        v.vitesse = parseFloat(latestData[0].speed || latestData[0].vitesse || 0);
+                        v.dateDernierPoint = latestData[0].created_at;
                     }
+
+                    // 2. Calcul réel du kilométrage roulé AUJOURD'HUI depuis 00h00
+                    const debutAujourdhui = new Date();
+                    debutAujourdhui.setHours(0, 0, 0, 0);
+
+                    const { data: pointsAujourdhui } = await supabaseClient
+                        .from('transvision_positions_gps')
+                        .select('latitude, longitude, speed, created_at')
+                        .eq('imei', imeiClean)
+                        .gte('created_at', debutAujourdhui.toISOString())
+                        .order('created_at', { ascending: true });
+
+                    let totalRouléAujourdhui = 0;
+                    if (pointsAujourdhui && pointsAujourdhui.length > 1) {
+                        for (let i = 1; i < pointsAujourdhui.length; i++) {
+                            const d = calculerDistanceGPS(
+                                parseFloat(pointsAujourdhui[i-1].latitude), parseFloat(pointsAujourdhui[i-1].longitude),
+                                parseFloat(pointsAujourdhui[i].latitude), parseFloat(pointsAujourdhui[i].longitude)
+                            );
+                            // Filtre du bruit stationnaire (< 15 mètres sans vitesse)
+                            if (d > 0.015) {
+                                totalRouléAujourdhui += d;
+                            }
+                        }
+                    }
+                    
+                    // Si le véhicule n'a pas roulé aujourd'hui, kmJour est strictement 0.0 km
+                    v.kmJour = totalRouléAujourdhui;
                     client.vehicules.push(v);
                 }
 
                 if (client.vehicules.length > 0) {
-                    tracePositions = [[client.vehicules[0].lat, client.vehicules[0].lng]];
+                    const premier = client.vehicules[0];
+                    tracePositions = [[premier.lat, premier.lng]];
+                    
+                    const timeTxt = premier.dateDernierPoint ? new Date(premier.dateDernierPoint).toLocaleTimeString() : 'En attente';
+                    txtStatut.textContent = `Dernier relevé satellite : ${timeTxt}`;
                 }
 
                 majSelecteursVehicules();
                 initMapEtCentrer(0);
                 genererToutesLesVues();
-                txtStatut.textContent = `Télématique Live active.`;
             } catch (err) {
-                console.error(err);
+                console.error("Erreur chargement données réelles:", err);
             }
         }
 
@@ -711,7 +685,7 @@
             dernierTimestampTraite = data.timestamp || Date.now();
 
             const now = new Date();
-            document.getElementById('last-update-text').textContent = `Signal : ${now.toLocaleTimeString()}`;
+            document.getElementById('last-update-text').textContent = `Signal en direct : ${now.toLocaleTimeString()}`;
             document.getElementById('statut-serveur-voyant').className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping";
 
             let v = client.vehicules.find(item => item.imei === imeiClean);
@@ -719,6 +693,7 @@
 
             const distDelta = calculerDistanceGPS(v.lat, v.lng, data.lat, data.lng);
             
+            // Seulement si le véhicule se déplace réellement
             if (distDelta > 0.020 || (distDelta > 0.005 && data.vitesse > 3)) {
                 v.kmJour += distDelta;
                 v.kmOdometre += distDelta;
@@ -730,8 +705,8 @@
                 const anciennePosition = { lat: v.lat, lng: v.lng };
                 v.lat = data.lat; 
                 v.lng = data.lng;
+                v.vitesse = data.vitesse || 0;
 
-                sauvegarderStatsJournalieres(v);
                 diffuserEtatAdmin(v); 
 
                 const selectMap = document.getElementById('select-vehicule-map');
@@ -741,6 +716,7 @@
             } else {
                 v.lat = data.lat; 
                 v.lng = data.lng;
+                v.vitesse = data.vitesse || 0;
             }
 
             const vehiculeIndex = client.vehicules.indexOf(v);
@@ -754,10 +730,10 @@
                     if(elAv) elAv.textContent = avenue;
                 });
 
-                const vitTxt = (data.vitesse || 0) > 0 ? `${Math.round(data.vitesse)} km/h` : 'À l\'arrêt';
+                const vitTxt = (v.vitesse > 0) ? `${Math.round(v.vitesse)} km/h` : 'À l\'arrêt (Stationné)';
                 
                 document.getElementById('hud-vitesse-live').textContent = vitTxt;
-                document.getElementById('hud-km-jour').textContent = `${(v.kmJour || 0).toFixed(1)} km`;
+                document.getElementById('hud-km-jour').textContent = `${v.kmJour.toFixed(1)} km`;
                 document.getElementById('hud-moteur-statut').textContent = v.moteurCoupe ? "🔴 Moteur Coupé" : "🟢 Autorisé";
                 document.getElementById('hud-moteur-statut').className = v.moteurCoupe ? "font-black text-rose-400 text-xs" : "font-black text-emerald-400 text-xs";
 
@@ -765,8 +741,8 @@
                     if (busMarker) {
                         busMarker.getPopup().setContent(`
                             <b>${v.plaque}</b> (${v.type})<br>
-                            Vitesse : <b>${vitTxt}</b><br>
-                            Distance du jour : <b>${(v.kmJour || 0).toFixed(1)} km</b><br>
+                            Statut : <b>${vitTxt}</b><br>
+                            Roulé aujourd'hui : <b>${v.kmJour.toFixed(1)} km</b><br>
                             Relais : <b>${v.moteurCoupe ? '<span style="color:#f43f5e;">Coupé</span>' : '<span style="color:#10b981;">Autorisé</span>'}</b>
                         `);
                     } else {
@@ -837,13 +813,17 @@
         }
 
         function genererToutesLesVues() {
-            document.getElementById('lbl-nom-partenaire').textContent = partenaireProfil ? partenaireProfil.nom : client.nom;
-            
+            const nomActuel = (partenaireProfil && partenaireProfil.nom) ? partenaireProfil.nom : client.nom;
+            const telActuel = (partenaireProfil && partenaireProfil.tel) ? partenaireProfil.tel : client.tel;
             const com = (partenaireProfil && partenaireProfil.commune) ? partenaireProfil.commune : (localStorage.getItem('tv_partenaire_commune') || "Kinshasa");
             const qtr = (partenaireProfil && partenaireProfil.quartier) ? partenaireProfil.quartier : (localStorage.getItem('tv_partenaire_quartier') || "RDC");
-            
+
+            document.getElementById('lbl-nom-partenaire').textContent = nomActuel;
             document.getElementById('lbl-adresse-partenaire').textContent = `${com} • ${qtr}`;
-            document.getElementById('prof-tel').value = partenaireProfil ? partenaireProfil.tel : client.tel;
+            
+            // Remplissage des champs modifiables dans l'onglet Compte
+            document.getElementById('prof-nom').value = nomActuel;
+            document.getElementById('prof-tel').value = telActuel;
             document.getElementById('prof-commune').value = com;
             document.getElementById('prof-quartier').value = qtr;
             
@@ -890,7 +870,10 @@
                     if(elAv) elAv.textContent = avenue;
                 });
                 
-                document.getElementById('hud-km-jour').textContent = (v.kmJour || 0).toFixed(1) + ' km';
+                const vitTxt = (v.vitesse > 0) ? `${Math.round(v.vitesse)} km/h` : 'À l\'arrêt (Stationné)';
+                
+                document.getElementById('hud-vitesse-live').textContent = vitTxt;
+                document.getElementById('hud-km-jour').textContent = `${v.kmJour.toFixed(1)} km`;
                 document.getElementById('hud-moteur-statut').textContent = v.moteurCoupe ? "🔴 Moteur Coupé" : "🟢 Autorisé";
                 document.getElementById('hud-moteur-statut').className = v.moteurCoupe ? "font-black text-rose-400 text-xs" : "font-black text-emerald-400 text-xs";
             }
@@ -909,7 +892,8 @@
             
             const popupTxt = v ? `
                 <b>${v.plaque}</b> (${v.type})<br>
-                Distance aujourd'hui : <b>${(v.kmJour || 0).toFixed(1)} km</b><br>
+                Statut : <b>${(v.vitesse > 0) ? Math.round(v.vitesse) + ' km/h' : "À l'arrêt"}</b><br>
+                Roulé aujourd'hui : <b>${v.kmJour.toFixed(1)} km</b><br>
                 Relais : <b>${v.moteurCoupe ? 'Coupé' : 'Autorisé'}</b>
             ` : "En attente...";
             
@@ -935,9 +919,7 @@
             if (indexStr !== "none") initMapEtCentrer(parseInt(indexStr)); 
         }
 
-        // ==========================================
-        // GESTION DU REPLAY D'HISTORIQUE
-        // ==========================================
+        // HISTORIQUE / REPLAY
         function initMapHistorique() {
             const histContainer = document.getElementById('map-history-container');
             if (!histContainer || histContainer.offsetParent === null) return;
@@ -986,7 +968,7 @@
                 if (error) throw error;
 
                 if (!data || data.length === 0) {
-                    alert(`Aucun trajet enregistré le ${dateInput} pour ${vehicule.plaque}.`);
+                    alert(`Aucun déplacement enregistré le ${dateInput} pour ${vehicule.plaque}.`);
                     document.getElementById('hist-stats-card').classList.add('hidden');
                     btn.innerHTML = `<i class="fa-solid fa-magnifying-glass"></i> Afficher le Trajet`;
                     return;
@@ -1048,9 +1030,7 @@
             }
         }
 
-        // ==========================================
-        // ONGLET FUSIONNÉ : ANTIVOL & ENTRETIEN
-        // ==========================================
+        // FUSION ANTIVOL & ENTRETIEN
         function genererVueControleEntretien() {
             const container = document.getElementById('combo-vehicules-list');
             if (!container) return;
@@ -1098,7 +1078,7 @@
                             </span>
                         </div>
 
-                        <!-- 1. BLOC ANTIVOL / COUPE-CIRCUIT -->
+                        <!-- BLOC ANTIVOL / COUPE-CIRCUIT -->
                         <div class="bg-slate-900/90 p-3 rounded-xl border border-slate-850 space-y-2.5">
                             <div class="flex justify-between items-center text-[10px] font-mono">
                                 <span class="text-slate-400 uppercase font-bold flex items-center gap-1.5">
@@ -1120,13 +1100,13 @@
                             </div>
                         </div>
 
-                        <!-- 2. BLOC ENTRETIEN PRÉVENTIF -->
+                        <!-- BLOC ENTRETIEN -->
                         <div class="space-y-2">
                             <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                                 <i class="fa-solid fa-wrench text-amber-400"></i> Échéances d'Entretien
                             </span>
 
-                            <!-- VIDANGE HUILE -->
+                            <!-- VIDANGE -->
                             <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-850 space-y-1">
                                 <div class="flex justify-between text-xs font-bold">
                                     <span class="flex items-center gap-1.5 text-slate-200">
@@ -1145,7 +1125,7 @@
                                 </div>
                             </div>
 
-                            <!-- PLAQUETTES DE FREIN -->
+                            <!-- FREINS -->
                             <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-850 space-y-1">
                                 <div class="flex justify-between text-xs font-bold">
                                     <span class="flex items-center gap-1.5 text-slate-200">
@@ -1243,9 +1223,7 @@
             }
         }
 
-        // ==========================================
-        // PAGE DÉDIÉE : GESTION DE LA FLOTTE
-        // ==========================================
+        // GESTION FLOTTE
         function genererVueFlotte() {
             const container = document.getElementById('flotte-cards-container');
             if (!container) return;
@@ -1256,7 +1234,7 @@
                 return;
             }
 
-            client.vehicules.forEach((v, idx) => {
+            client.vehicules.forEach((v) => {
                 container.insertAdjacentHTML('beforeend', `
                     <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex justify-between items-center shadow-md">
                         <div>
@@ -1308,7 +1286,7 @@
             } else {
                 const nv = { 
                     plaque: plaque, type: type, imei: imeiClean, 
-                    lat: -4.32, lng: 15.31, moteurCoupe: false, kmJour: 0, kmOdometre: odo, dernierCap: 0
+                    lat: -4.32, lng: 15.31, vitesse: 0, moteurCoupe: false, kmJour: 0, kmOdometre: odo, dernierCap: 0
                 };
                 client.vehicules.push(nv);
             }
@@ -1346,18 +1324,23 @@
             }
         }
 
-        // ==========================================
-        // COMPTE & ADRESSE (COMMUNE / QUARTIER)
-        // ==========================================
+        // MISE À JOUR COMPLÈTE DU CLIENT : NOM, NUMÉRO, COMMUNE, QUARTIER, PIN
         async function majIdentifiantsEtAdresse() {
-            const newPin = document.getElementById('prof-pin-new').value.trim();
+            const ancienTel = (partenaireProfil && partenaireProfil.tel) || localStorage.getItem('tv_partenaire_tel');
+            const newNom = document.getElementById('prof-nom').value.trim();
+            const newTel = document.getElementById('prof-tel').value.trim();
             const newCommune = document.getElementById('prof-commune').value.trim();
             const newQuartier = document.getElementById('prof-quartier').value.trim();
-            const tel = (partenaireProfil && partenaireProfil.tel) || localStorage.getItem('tv_partenaire_tel');
+            const newPin = document.getElementById('prof-pin-new').value.trim();
 
-            if (!tel) return;
+            if (!ancienTel) return;
+            if (!newNom) { alert("Le nom ne peut pas être vide."); return; }
+            if (!newTel) { alert("Le numéro de téléphone ne peut pas être vide."); return; }
 
             let updates = {};
+            updates.nom = newNom;
+            updates.tel = newTel;
+
             if (newCommune) {
                 updates.commune = newCommune;
                 localStorage.setItem('tv_partenaire_commune', newCommune);
@@ -1372,16 +1355,35 @@
 
             const adresseComplete = `${newCommune || 'Kinshasa'} • ${newQuartier || 'RDC'}`;
             updates.adresse = adresseComplete;
-            document.getElementById('lbl-adresse-partenaire').textContent = adresseComplete;
 
             try {
-                if (window.supabase && Object.keys(updates).length > 0) {
-                    await supabaseClient.from('tv_partenaires').update(updates).eq('tel', tel);
+                if (window.supabase) {
+                    const { error } = await supabaseClient
+                        .from('tv_partenaires')
+                        .update(updates)
+                        .eq('tel', ancienTel);
+
+                    if (error) throw error;
                 }
-                alert("✅ Commune, Quartier et paramètres mis à jour.");
+
+                // Mise à jour de l'état local
+                if (!partenaireProfil) partenaireProfil = {};
+                partenaireProfil.nom = newNom;
+                partenaireProfil.tel = newTel;
+                partenaireProfil.commune = newCommune;
+                partenaireProfil.quartier = newQuartier;
+                partenaireProfil.adresse = adresseComplete;
+
+                localStorage.setItem('tv_partenaire_tel', newTel);
+                document.getElementById('lbl-nom-partenaire').textContent = newNom;
+                document.getElementById('lbl-adresse-partenaire').textContent = adresseComplete;
+
+                alert("✅ Vos informations (Nom, Téléphone, Adresse) ont été enregistrées avec succès !");
                 document.getElementById('prof-pin-new').value = "";
+                genererToutesLesVues();
             } catch(e) {
-                alert("Erreur lors de la mise à jour.");
+                console.error(e);
+                alert("❌ Erreur lors de la mise à jour des informations.");
             }
         }
 
@@ -1405,7 +1407,6 @@
             document.getElementById(id).classList.remove('hidden'); 
         }
 
-        // INSCRIPTION AVEC COMMUNE ET QUARTIER SÉPARÉS
         async function inscrireNouveauPartenaire() {
             const nom = document.getElementById('ins-nom').value.trim();
             const tel = document.getElementById('ins-tel').value.trim();
@@ -1478,7 +1479,6 @@
             document.getElementById('hist-date-picker').value = getKinshasaDateStr();
 
             chargerDernieresPositions().then(() => { 
-                verifierEtReinitialiserAutomatiqueJournee();
                 genererToutesLesVues(); 
                 changerOnglet('onglet-flotte', document.querySelectorAll('.btn-nav')[0]); 
                 activerFluxRealtimePush();
@@ -1499,7 +1499,6 @@
 
         window.addEventListener('DOMContentLoaded', async () => {
             chargerConfigurationsAdmin();
-            verifierEtReinitialiserAutomatiqueJournee();
             
             document.getElementById('login-tel').value = "";
             document.getElementById('login-pin').value = "";
