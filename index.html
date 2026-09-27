@@ -126,7 +126,7 @@
                 </div>
             </div>
             <div class="text-center py-2 text-[9px] font-mono text-slate-400 border-t border-slate-800/80">
-                TransVision v33.6 — Antivol & Flotte Personnelle
+                TransVision v33.7 — Antivol & Flotte Personnelle
             </div>
         </div>
 
@@ -336,7 +336,10 @@
                         <input type="password" id="prof-pin-new" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-xs text-slate-200 font-mono outline-none focus:border-indigo-500" placeholder="Laisser vide si inchangé">
                     </div>
 
-                    <button onclick="majIdentifiantsEtAdresse()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-black py-2.5 rounded-xl text-xs uppercase transition-colors">
+                    <!-- BANNIÈRE DE RETOUR VISUEL DIRECT -->
+                    <div id="prof-msg-feedback" class="hidden p-3 rounded-xl text-center text-xs font-bold transition-all"></div>
+
+                    <button id="btn-maj-profil" onclick="majIdentifiantsEtAdresse()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-black py-2.5 rounded-xl text-xs uppercase transition-colors">
                         Mettre à Jour mes Informations
                     </button>
                 </div>
@@ -373,7 +376,7 @@
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZicml3b3J5c2N5bW5tdHp6ZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzQwNTEsImV4cCI6MjEwMzk1MDA1MX0.VBZupVKj0srae0NT5BNZ0OeaIv9pAl2bl5L-Rd8ocJk';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-        // Connexion Socket.IO sécurisée évitant le blocage de contenu mixte sur Vercel (HTTPS)
+        // Connexion Socket.IO sécurisée évitant le blocage de contenu mixte sur Vercel
         let socket = { emit: () => {}, on: () => {} };
         if (window.location.protocol === 'http:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
             try {
@@ -581,6 +584,7 @@
             }
         }
 
+        // CHARGEMENT DES COORDONNÉES RÉELLES DEPUIS SUPABASE
         async function chargerDernieresPositions() {
             try {
                 const txtStatut = document.getElementById('last-update-text');
@@ -1313,8 +1317,27 @@
             }
         }
 
-        // MISE À JOUR SÉCURISÉE AVEC TOLÉRANCE DE SCHÉMA
+        // AFFICHAGE DU RETOUR VISUEL SUR LA PAGE
+        function afficherFeedbackCompte(type, message) {
+            const fb = document.getElementById('prof-msg-feedback');
+            if (!fb) return;
+            fb.classList.remove('hidden', 'bg-emerald-500/20', 'text-emerald-400', 'border-emerald-500/30', 'bg-rose-500/20', 'text-rose-400', 'border-rose-500/30');
+            
+            if (type === 'success') {
+                fb.className = "p-3 rounded-xl text-center text-xs font-bold transition-all bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+            } else {
+                fb.className = "p-3 rounded-xl text-center text-xs font-bold transition-all bg-rose-500/20 text-rose-400 border border-rose-500/30";
+            }
+            fb.innerHTML = message;
+            
+            setTimeout(() => {
+                if (type === 'success') fb.classList.add('hidden');
+            }, 6000);
+        }
+
+        // MISE À JOUR SÉCURISÉE DU PROFIL
         async function majIdentifiantsEtAdresse() {
+            const btn = document.getElementById('btn-maj-profil');
             const ancienTel = (partenaireProfil && partenaireProfil.tel) || localStorage.getItem('tv_partenaire_tel');
             const newNom = document.getElementById('prof-nom').value.trim();
             const newTel = document.getElementById('prof-tel').value.trim();
@@ -1323,11 +1346,15 @@
             const newPin = document.getElementById('prof-pin-new').value.trim();
 
             if (!ancienTel) {
-                alert("Session expirée. Veuillez vous reconnecter.");
+                afficherFeedbackCompte('error', "❌ Session expirée. Veuillez vous reconnecter.");
                 return;
             }
-            if (!newNom) { alert("Le nom ne peut pas être vide."); return; }
-            if (!newTel) { alert("Le numéro de téléphone ne peut pas être vide."); return; }
+            if (!newNom) { afficherFeedbackCompte('error', "❌ Le nom ne peut pas être vide."); return; }
+            if (!newTel) { afficherFeedbackCompte('error', "❌ Le téléphone ne peut pas être vide."); return; }
+
+            // Animation du bouton
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Enregistrement en cours...`;
+            btn.disabled = true;
 
             const adresseComplete = `${newCommune || 'Kinshasa'} • ${newQuartier || 'RDC'}`;
 
@@ -1338,7 +1365,7 @@
             localStorage.setItem('tv_partenaire_quartier', newQuartier);
             localStorage.setItem('tv_partenaire_adresse', adresseComplete);
 
-            // 2. Objet complet à envoyer à Supabase
+            // 2. Objet pour Supabase
             let updates = {
                 nom: newNom,
                 tel: newTel,
@@ -1353,15 +1380,14 @@
 
             try {
                 if (window.supabase) {
-                    // Tentative d'écriture complète
                     let { error } = await supabaseClient
                         .from('tv_partenaires')
                         .update(updates)
                         .eq('tel', ancienTel);
 
-                    // Si les colonnes spécifiques 'commune' ou 'quartier' n'existent pas encore dans Supabase
+                    // Si les colonnes spécifiques n'existent pas encore dans Supabase
                     if (error) {
-                        console.warn("Repli sur colonnes génériques suite à :", error.message);
+                        console.warn("Repli de sauvegarde :", error.message);
                         let fallbackUpdates = {
                             nom: newNom,
                             tel: newTel,
@@ -1389,12 +1415,15 @@
                 document.getElementById('lbl-nom-partenaire').textContent = newNom;
                 document.getElementById('lbl-adresse-partenaire').textContent = adresseComplete;
 
-                alert("✅ Vos informations ont été enregistrées avec succès !");
+                afficherFeedbackCompte('success', "✅ Informations mises à jour avec succès !");
                 document.getElementById('prof-pin-new').value = "";
                 genererToutesLesVues();
             } catch(e) {
-                console.error("Détail de l'erreur Supabase :", e);
-                alert("❌ Erreur Supabase : " + (e.message || JSON.stringify(e)));
+                console.error("Détail de l'erreur :", e);
+                afficherFeedbackCompte('error', "❌ Erreur base de données : " + (e.message || "Vérifiez vos permissions."));
+            } finally {
+                btn.innerHTML = `Mettre à Jour mes Informations`;
+                btn.disabled = false;
             }
         }
 
